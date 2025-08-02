@@ -1,0 +1,79 @@
+{
+  "name": "onestopcentre-uganda",
+  "version": "1.0.0",
+  "description": "A modern, fully responsive React application for OneStopCentre Uganda, providing streamlined access to government business services, ATMS sector investments, and tax calculations.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext js,jsx,ts,tsx",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "keywords": [
+    "react",
+    "vite",
+    "tailwindcss",
+    "uganda",
+    "government-services",
+    "business-registration",
+    "tax-calculator",
+    "responsive-design",
+    "pwa"
+  ],
+  "author": "OneStopCentre Uganda <support@onestopcentre.ug>",
+  "contributors": [
+    {
+      "name": "OneStopCentre Uganda Team",
+      "email": "support@onestopcentre.ug"
+    }
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.0.0"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.6",
+    "@heroicons/react": "^2.2.0",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@vitejs/plugin-react": "^4.7.0",
+    "browserslist": "^4.25.1",
+    "caniuse-lite": "^1.0.30001727",
+    "electron-to-chromium": "^1.5.191",
+    "escalade": "^3.2.0",
+    "fraction.js": "^4.3.7",
+    "framer-motion": "^12.23.11",
+    "lucide-react": "^0.532.0",
+    "nanoid": "^3.3.11",
+    "node-releases": "^2.0.19",
+    "normalize-range": "^0.1.2",
+    "picocolors": "^1.1.1",
+    "postcss-value-parser": "^4.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "source-map-js": "^1.2.1",
+    "update-browserslist-db": "^1.1.3",
+    "vite": "^7.0.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ptr234/treat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Ptr234/treat/issues"
+  },
+  "homepage": "https://github.com/Ptr234/treat#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}
