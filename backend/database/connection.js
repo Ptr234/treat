@@ -4,7 +4,16 @@ dotenv.config();
 
 // Secure database connection with proper fallback handling
 async function createDatabaseConnection() {
+  // Debug environment variables
+  console.log('🔍 Environment Debug:');
+  console.log('  NODE_ENV:', process.env.NODE_ENV);
+  console.log('  USE_MOCK_DB:', process.env.USE_MOCK_DB);
+  console.log('  DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  console.log('  DATABASE_URL preview:', process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 20) + '...' : 'undefined');
+  
   const USE_MOCK = process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'development';
+  
+  console.log('🔧 Database decision: USE_MOCK =', USE_MOCK);
   
   if (USE_MOCK) {
     try {
