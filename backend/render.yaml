@@ -17,9 +17,9 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: FRONTEND_URL
-        value: https://oscdigitaltool.com
+        value: https://ptr234.github.io/treat
       - key: ALLOWED_ORIGINS
-        value: https://oscdigitaltool.com,https://onestopcentre-backend.onrender.com
+        value: https://ptr234.github.io,https://oscdigitaltool.com,https://onestopcentre-backend.onrender.com
       - key: RATE_LIMIT_WINDOW_MS
         value: 900000
       - key: RATE_LIMIT_MAX_REQUESTS
