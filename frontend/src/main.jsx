@@ -16,7 +16,7 @@ import { monitoringManager } from './utils/monitoring.js'
 // Initialize production-ready backend
 console.log('🚀 OSC Uganda - Production-Ready Investment Portal v3.1')
 console.log('🛡️ Initializing comprehensive backend systems...')
-console.log('🔗 Backend API:', import.meta.env.VITE_API_URL || 'https://treat-eu1e.onrender.com/api')
+console.log('🔗 Backend API:', import.meta.env.VITE_API_URL || 'https://treat.onrender.com/api')
 
 // Set up error handling first
 errorManager.setUserContext({
