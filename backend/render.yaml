@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: onestopcentre-backend
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: USE_MOCK_DB
+        value: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        value: https://oscdigitaltool.com
+      - key: ALLOWED_ORIGINS
+        value: https://oscdigitaltool.com,https://onestopcentre-backend.onrender.com
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+
+  - type: pserv
+    name: onestopcentre-postgres
+    plan: starter
+    region: ohio
+    databaseName: onestopcentre_db
+    databaseUser: postgres
