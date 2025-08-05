@@ -50,10 +50,26 @@ async function createDatabaseConnection() {
 
     // Test connection immediately
     try {
-      await pool.query('SELECT 1');
-      console.log('📊 PostgreSQL database connection verified');
+      const result = await pool.query('SELECT 1 as test');
+      console.log('✅ PostgreSQL database connection verified successfully');
+      console.log('📊 Test query result:', result.rows[0]);
     } catch (testError) {
-      console.warn('⚠️ PostgreSQL connection test failed, falling back to mock database');
+      console.error('❌ PostgreSQL connection test failed with detailed error:');
+      console.error('  Error code:', testError.code);
+      console.error('  Error message:', testError.message);
+      console.error('  Connection details:', {
+        host: testError.hostname || 'unknown',
+        port: testError.port || 'unknown',
+        database: testError.database || 'unknown'
+      });
+      
+      // In production, we require PostgreSQL - don't fall back to mock
+      if (process.env.NODE_ENV === 'production') {
+        console.error('🚨 Production requires PostgreSQL - refusing to start with mock database');
+        throw new Error(`PostgreSQL connection failed: ${testError.message}`);
+      }
+      
+      console.warn('⚠️ Development mode: falling back to mock database');
       const mockDb = await import('./mock-connection.js');
       return mockDb.default;
     }
