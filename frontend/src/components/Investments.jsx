@@ -1,9 +1,24 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { 
+  FunnelIcon, 
+  MagnifyingGlassIcon, 
+  Squares2X2Icon, 
+  ListBulletIcon,
+  BeakerIcon,
+  CameraIcon,
+  CubeIcon,
+  ComputerDesktopIcon,
+  CogIcon,
+  BoltIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon,
+  StarIcon
+} from '@heroicons/react/24/outline'
 import { getAllInvestmentsWithContacts, INVESTMENT_CATEGORIES } from '../data/optimizedInvestments'
 import { useNotification } from '../contexts/NotificationContext'
 import LazyImage from './LazyImage'
-// Performance optimized with lazy loading and memoization - World-class animations
+// Performance optimized with lazy loading and memoization - Professional 2024 design
 
 const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory)
@@ -201,15 +216,21 @@ const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
         return sum + (match ? parseInt(match[1].replace(/,/g, '')) : 0)
       }, 0)
     
+    // Get professional icon component based on category
+    const getIconComponent = (category) => {
+      if (category.includes('Agriculture')) return BeakerIcon
+      if (category.includes('Tourism')) return CameraIcon
+      if (category.includes('Mining')) return CubeIcon
+      if (category.includes('ICT')) return ComputerDesktopIcon
+      if (category.includes('Manufacturing')) return CogIcon
+      return CurrencyDollarIcon // Default for other sectors
+    }
+    
     return {
       sector: category,
       opportunities: count,
       value: `$${(totalValue / 1000000).toFixed(1)}M+`,
-      icon: category.includes('Agriculture') ? '🌾' : 
-            category.includes('Tourism') ? '🏖️' : 
-            category.includes('Mining') ? '⛏️' : 
-            category.includes('ICT') ? '💻' : 
-            category.includes('Manufacturing') ? '🏭' : '💼'
+      IconComponent: getIconComponent(category)
     }
   })
 
@@ -337,9 +358,10 @@ const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 bg-green-500/20 text-green-300 rounded-full text-sm font-medium mb-4">
-            💎 Premium Investment Opportunities - High Returns Guaranteed
-          </span>
+          <div className="inline-flex items-center px-6 py-3 bg-green-500/20 text-green-300 rounded-full text-sm font-medium mb-4 border border-green-500/30 backdrop-blur-sm">
+            <StarIcon className="w-5 h-5 mr-2" />
+            <span>Premium Investment Opportunities - High Returns Guaranteed</span>
+          </div>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Uganda's Most Profitable
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">
@@ -391,7 +413,9 @@ const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
                     />
                   </div>
                 )}
-                <div className="text-3xl mb-3">{stat.icon}</div>
+                <div className="mb-3 flex items-center justify-center">
+                  <stat.IconComponent className="w-8 h-8 text-white" />
+                </div>
                 <div className="text-2xl font-bold mb-1">{stat.opportunities}</div>
                 <div className="text-sm opacity-80 mb-1">Opportunities</div>
                 <div className="text-lg font-semibold">{stat.value}</div>
@@ -416,17 +440,13 @@ const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-orange-100 text-orange-600' : 'text-gray-400'}`}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
+                  <Squares2X2Icon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-orange-100 text-orange-600' : 'text-gray-400'}`}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
+                  <ListBulletIcon className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -446,9 +466,7 @@ const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-gray-50"
               />
-              <svg className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <MagnifyingGlassIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
             </div>
 
             <select
@@ -686,11 +704,34 @@ const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
         </div>
 
         {filteredInvestments.length === 0 && (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No opportunities found</h3>
-            <p className="text-gray-600">Try adjusting your filters or search terms</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20"
+          >
+            <div className="mb-6 flex justify-center">
+              <MagnifyingGlassIcon className="w-16 h-16 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No opportunities found</h3>
+            <p className="text-gray-300">Try adjusting your filters or search terms</p>
+            <button
+              onClick={() => {
+                setSelectedCategory('All')
+                setSelectedPriority('All')
+                setSearchTerm('')
+                addNotification({
+                  type: 'info',
+                  title: 'Filters Reset',
+                  message: 'All filters have been cleared',
+                  duration: 3000
+                })
+              }}
+              className="mt-4 inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
+            >
+              <FunnelIcon className="w-4 h-4 mr-2" />
+              Reset Filters
+            </button>
+          </motion.div>
         )}
 
         {/* CTA Section */}

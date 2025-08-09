@@ -2,14 +2,14 @@ import { query } from '../database/connection.js';
 import bcrypt from 'bcryptjs';
 
 export class User {
-  static async create({ email, password, firstName, lastName, phone, role = 'user' }) {
+  static async create({ email, password, firstName, lastName, phone, role = 'user', is_verified = false }) {
     const passwordHash = await bcrypt.hash(password, 12);
     
     const result = await query(
-      `INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO users (email, password_hash, first_name, last_name, phone, role, is_verified)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, email, first_name, last_name, phone, role, is_verified, created_at`,
-      [email, passwordHash, firstName, lastName, phone, role]
+      [email, passwordHash, firstName, lastName, phone, role, is_verified]
     );
     
     return result.rows[0];
@@ -76,5 +76,25 @@ export class User {
     );
     
     return result.rows;
+  }
+
+  static async deleteById(id) {
+    const result = await query(
+      'DELETE FROM users WHERE id = $1 RETURNING id',
+      [id]
+    );
+    
+    return result.rows[0];
+  }
+
+  static async markAsVerified(id) {
+    const result = await query(
+      `UPDATE users SET is_verified = true, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $1
+       RETURNING id, email, first_name, last_name, phone, role, is_verified`,
+      [id]
+    );
+    
+    return result.rows[0];
   }
 }

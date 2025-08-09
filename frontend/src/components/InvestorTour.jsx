@@ -231,8 +231,85 @@ const InvestorTour = ({ isOpen, onClose }) => {
           className="bg-white rounded-3xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-8 rounded-t-3xl relative overflow-hidden">
+        {showResults ? (
+          <div>
+            {/* Results Header */}
+            <div className="bg-gradient-to-r from-green-600 to-emerald-700 text-white p-8 rounded-t-3xl relative overflow-hidden">
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-3xl">
+                      🎉
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold">Investment Plan Complete!</h2>
+                      <p className="text-lg opacity-90">Your personalized investment roadmap</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Results Content */}
+            <div className="p-8">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  Congratulations! You're ready to invest in Uganda
+                </h3>
+                <p className="text-gray-600 text-lg">
+                  Based on your profile ({userProfile?.tier || 'Investor'}), here's your next steps:
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-blue-50 rounded-2xl p-6">
+                  <h4 className="text-lg font-bold text-blue-900 mb-3">💰 Your Investment Profile</h4>
+                  <div className="space-y-2 text-blue-700">
+                    <p><strong>Tier:</strong> {userProfile?.tier || 'Standard Investor'}</p>
+                    <p><strong>Minimum Investment:</strong> {userProfile?.minInvestment || '$50K'}</p>
+                    <p><strong>Success Rate:</strong> {userProfile?.successRate || '85%'}</p>
+                  </div>
+                </div>
+                
+                <div className="bg-green-50 rounded-2xl p-6">
+                  <h4 className="text-lg font-bold text-green-900 mb-3">🎯 Recommended Actions</h4>
+                  <div className="space-y-2 text-green-700">
+                    <p>✓ Schedule UIA consultation</p>
+                    <p>✓ Review investment opportunities</p>
+                    <p>✓ Prepare documentation</p>
+                    <p>✓ Connect with local partners</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <button
+                  onClick={handleViewOpportunities}
+                  className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors"
+                >
+                  🔍 Explore Investment Opportunities
+                </button>
+                <button
+                  onClick={handleStartInvestment}
+                  className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all shadow-lg"
+                >
+                  🚀 Start Investment Process
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div>
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white p-8 rounded-t-3xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
             
@@ -446,6 +523,8 @@ const InvestorTour = ({ isOpen, onClose }) => {
               </div>
             </div>
           </div>
+          </div>
+        )}
         </motion.div>
       </motion.div>
     </AnimatePresence>

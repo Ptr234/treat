@@ -95,6 +95,19 @@ CREATE TABLE IF NOT EXISTS support_tickets (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Email verifications for secure authentication
+CREATE TABLE IF NOT EXISTS email_verifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) NOT NULL,
+    verification_code VARCHAR(6) NOT NULL,
+    type VARCHAR(20) DEFAULT 'registration' CHECK (type IN ('registration', 'login', 'password_reset')),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    verified_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Activity logs for audit trail
 CREATE TABLE IF NOT EXISTS activity_logs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -110,6 +123,8 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_email_verifications_email_code ON email_verifications(email, verification_code);
+CREATE INDEX IF NOT EXISTS idx_email_verifications_expires_at ON email_verifications(expires_at);
 CREATE INDEX IF NOT EXISTS idx_business_registrations_user_id ON business_registrations(user_id);
 CREATE INDEX IF NOT EXISTS idx_business_registrations_status ON business_registrations(status);
 CREATE INDEX IF NOT EXISTS idx_investments_sector ON investments(sector);
@@ -131,6 +146,7 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_email_verifications_updated_at BEFORE UPDATE ON email_verifications FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_business_registrations_updated_at BEFORE UPDATE ON business_registrations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_investments_updated_at BEFORE UPDATE ON investments FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_government_services_updated_at BEFORE UPDATE ON government_services FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

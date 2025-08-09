@@ -1,6 +1,27 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
+import {
+  FolderIcon,
+  DocumentTextIcon,
+  CloudArrowDownIcon,
+  ChevronRightIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+  CalendarIcon,
+  UserIcon,
+  EyeIcon,
+  ArrowDownTrayIcon,
+  InformationCircleIcon,
+  CheckCircleIcon,
+  BookOpenIcon,
+  ScaleIcon,
+  CurrencyDollarIcon,
+  ChartBarIcon,
+  DocumentArrowDownIcon,
+  PhoneIcon,
+  EnvelopeIcon
+} from '@heroicons/react/24/outline'
 import { PageBackground } from '../utils/backgroundSystem.jsx'
 import Breadcrumb from '../components/Breadcrumb'
 import PageTransition from '../components/PageTransition'
@@ -477,10 +498,15 @@ const DownloadsPage = () => {
     }
   ]
 
+  // Filter documents by selected category
+  const filteredDocuments = selectedCategory === 'All' 
+    ? documents 
+    : documents.filter(doc => doc.category === selectedCategory);
+
   const categories = [
     {
       name: 'Business Registration',
-      docs: documents.filter(doc => 
+      docs: filteredDocuments.filter(doc => 
         doc.title.toLowerCase().includes('company') || 
         doc.title.toLowerCase().includes('business') || 
         doc.title.toLowerCase().includes('partnership') ||
@@ -560,9 +586,10 @@ const DownloadsPage = () => {
                 alt="Uganda flag" 
                 className="w-8 h-6 object-cover mr-3 rounded shadow-md"
               />
-              <span className="inline-block px-4 py-2 bg-blue-500/20 text-blue-700 rounded-full text-sm font-medium backdrop-blur-sm border border-blue-400/30">
-                📁 Official Government Forms & Documents
-              </span>
+              <div className="inline-flex items-center px-6 py-3 bg-blue-500/20 text-blue-700 rounded-full text-sm font-medium backdrop-blur-sm border border-blue-400/30">
+                <FolderIcon className="w-5 h-5 mr-2" />
+                <span>Official Government Forms & Documents</span>
+              </div>
               <img 
                 src="/images/uganda-coat-of-arms.png" 
                 alt="Uganda Coat of Arms" 
@@ -576,6 +603,28 @@ const DownloadsPage = () => {
               Complete collection of government forms, applications, guides, and documentation for business registration, 
               investment, taxation, licensing, and compliance in Uganda. All official documents in one place.
             </p>
+          </motion.div>
+
+          {/* Category Filter Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="flex flex-wrap justify-center gap-2 mb-8"
+          >
+            {['All', 'Investment', 'Tax', 'Legal'].map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  selectedCategory === category
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
           </motion.div>
 
           <div className="space-y-12">
@@ -604,8 +653,8 @@ const DownloadsPage = () => {
                     >
                       <div className="flex items-start space-x-4">
                         <div className="flex-shrink-0">
-                          <div className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center text-white text-xl`}>
-                            {doc.icon}
+                          <div className={`w-12 h-12 bg-gradient-to-r ${category.color} rounded-lg flex items-center justify-center text-white`}>
+                            {doc.IconComponent ? <doc.IconComponent className="w-6 h-6" /> : <DocumentTextIcon className="w-6 h-6" />}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -636,9 +685,7 @@ const DownloadsPage = () => {
                               onClick={() => handleDownload(doc)}
                               className={`inline-flex items-center px-4 py-2 bg-gradient-to-r ${category.color} text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                             >
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
+                              <CloudArrowDownIcon className="w-4 h-4 mr-2" />
                               Download
                             </button>
                           </div>
@@ -669,18 +716,14 @@ const DownloadsPage = () => {
                   href="tel:+256775692335"
                   className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
+                  <PhoneIcon className="w-5 h-5 mr-2" />
                   Call Support
                 </a>
                 <a
                   href="mailto:support@onestopcentre.ug"
                   className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 7.89a2 2 0 002.83 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+                  <EnvelopeIcon className="w-5 h-5 mr-2" />
                   Email Us
                 </a>
               </div>

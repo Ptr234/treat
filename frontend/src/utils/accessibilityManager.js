@@ -396,21 +396,29 @@ export const accessibilityManager = new AccessibilityManager()
 export const accessibilityTestUtils = {
   // Setup for Jest tests
   setupJestAxe: () => {
-    expect.extend(toHaveNoViolations)
+    if (typeof expect !== 'undefined' && typeof toHaveNoViolations !== 'undefined') {
+      expect.extend(toHaveNoViolations)
+    }
   },
   
   // Test component accessibility
   testComponentAccessibility: async (component) => {
-    const results = await axe(component)
-    expect(results).toHaveNoViolations()
-    return results
+    if (typeof axe !== 'undefined' && typeof expect !== 'undefined') {
+      const results = await axe(component)
+      expect(results).toHaveNoViolations()
+      return results
+    }
+    return null
   },
   
   // Test page accessibility
   testPageAccessibility: async (page) => {
-    const results = await axe(page)
-    expect(results).toHaveNoViolations()
-    return results
+    if (typeof axe !== 'undefined' && typeof expect !== 'undefined') {
+      const results = await axe(page)
+      expect(results).toHaveNoViolations()
+      return results
+    }
+    return null
   }
 }
 

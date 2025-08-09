@@ -122,7 +122,7 @@ export default defineConfig({
     open: true,
     hmr: {
       overlay: true,
-      port: 3001
+      port: 24678  // Changed from 3001 to avoid conflict with backend
     },
     watch: {
       usePolling: process.env.NODE_ENV === 'development',

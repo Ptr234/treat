@@ -1,35 +1,44 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import {
+  HandRaisedIcon,
+  ChatBubbleLeftRightIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  VideoCameraIcon,
+  QuestionMarkCircleIcon
+} from '@heroicons/react/24/outline'
 import { PageBackground } from '../utils/backgroundSystem.jsx'
 import Support from '../components/Support'
+import Breadcrumb from '../components/Breadcrumb'
 
 const SupportPage = () => {
   const supportOptions = [
     {
       title: 'Live Chat Support',
       description: 'Get instant help with our AI-powered chat assistant',
-      icon: '💬',
+      IconComponent: ChatBubbleLeftRightIcon,
       availability: '24/7',
       response: 'Instant'
     },
     {
       title: 'Phone Support',
       description: 'Speak directly with our expert consultants',
-      icon: '📞',
+      IconComponent: PhoneIcon,
       availability: 'Mon-Fri 8AM-6PM',
       response: 'Immediate'
     },
     {
       title: 'Email Support',
       description: 'Detailed responses to complex inquiries',
-      icon: '✉️',
+      IconComponent: EnvelopeIcon,
       availability: '24/7',
       response: 'Within 2 hours'
     },
     {
       title: 'Video Consultation',
       description: 'One-on-one guidance for investment planning',
-      icon: '🎥',
+      IconComponent: VideoCameraIcon,
       availability: 'By Appointment',
       response: 'Scheduled'
     }
@@ -58,6 +67,10 @@ const SupportPage = () => {
     <PageBackground page="support">
       <div className="min-h-screen pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <div className="mb-8">
+            <Breadcrumb />
+          </div>
           {/* Hero Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -66,7 +79,7 @@ const SupportPage = () => {
             className="text-center mb-16"
           >
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-white/20">
-              <span className="text-3xl mr-3">🤝</span>
+              <HandRaisedIcon className="w-6 h-6 mr-3 text-blue-400" />
               <span className="text-white font-semibold">Expert Support</span>
             </div>
             <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
@@ -93,7 +106,9 @@ const SupportPage = () => {
                 key={index}
                 className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300"
               >
-                <div className="text-4xl mb-4">{option.icon}</div>
+                <div className="mb-4">
+                  <option.IconComponent className="w-12 h-12 text-blue-400" />
+                </div>
                 <h3 className="text-xl font-bold text-white mb-2">{option.title}</h3>
                 <p className="text-gray-300 mb-4 text-sm">{option.description}</p>
                 <div className="space-y-2">
@@ -118,7 +133,10 @@ const SupportPage = () => {
             className="mb-16"
           >
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+              <div className="inline-flex items-center mb-6">
+                <QuestionMarkCircleIcon className="w-8 h-8 text-yellow-400 mr-3" />
+                <h2 className="text-4xl font-bold text-white">Frequently Asked Questions</h2>
+              </div>
               <p className="text-xl text-gray-300">
                 Quick answers to common investment and business questions
               </p>

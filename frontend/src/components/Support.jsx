@@ -190,39 +190,41 @@ const Support = () => {
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Query Submission Form */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="bg-white rounded-2xl shadow-lg p-8"
-          >
-            <h3 className="text-2xl font-semibold text-gray-900 mb-6">
-              Submit Query
-            </h3>
+          {showQueryForm ? (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="bg-white rounded-2xl shadow-lg p-8"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  Submit Query
+                </h3>
+                <button
+                  onClick={() => setShowQueryForm(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
             
             <form onSubmit={(e) => {
               e.preventDefault()
               const formData = new FormData(e.target)
               const queryData = Object.fromEntries(formData.entries())
               
-              const newQuery = {
-                id: Date.now(),
+              handleSubmitQuery({
                 ...queryData,
-                status: 'Submitted',
-                submittedAt: new Date().toISOString(),
-                assignedTo: queryData.agency || 'General Support'
-              }
-              
-              setQueries(prev => [...prev, newQuery])
-              
-              addNotification({
-                type: 'success',
-                title: 'Query Submitted',
-                message: `Your query has been submitted with ID: ${newQuery.id}`,
-                duration: 5000
+                queryType: selectedQueryType,
+                agency: selectedAgency
               })
               
+              // Reset form and state
               e.target.reset()
+              setSelectedQueryType('')
+              setSelectedAgency('')
+              setShowQueryForm(false)
             }}>
               <div className="space-y-4">
                 <div>
@@ -258,6 +260,8 @@ const Support = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Query Type *</label>
                   <select
                     name="queryType"
+                    value={selectedQueryType}
+                    onChange={(e) => setSelectedQueryType(e.target.value)}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -269,9 +273,11 @@ const Support = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Related Agency</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Preferred Agency</label>
                   <select
                     name="agency"
+                    value={selectedAgency}
+                    onChange={(e) => setSelectedAgency(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="">Select agency (optional)</option>
@@ -301,6 +307,24 @@ const Support = () => {
               </div>
             </form>
           </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8 text-center border-2 border-dashed border-blue-200"
+            >
+              <div className="text-4xl mb-4">📝</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Ready to Submit a Query?</h3>
+              <p className="text-gray-600 mb-6">Get help with your business registration, investments, or any other services.</p>
+              <button
+                onClick={() => setShowQueryForm(true)}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
+              >
+                Submit Query
+              </button>
+            </motion.div>
+          )}
 
           {/* Query Tracking */}
           <motion.div

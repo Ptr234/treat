@@ -1,16 +1,47 @@
+import secureTokenStorage from '../utils/secureTokenStorage.js';
+
 // Professional API client for OneStopCentre Uganda backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const getApiBaseUrl = () => {
+  // Try environment variable first
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Auto-detect based on current location
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  
+  // Production detection
+  if (hostname === 'petergra38.github.io' || hostname.includes('onrender.com')) {
+    return 'https://treat.onrender.com/api';
+  }
+  
+  // Development fallback
+  return `${protocol}//localhost:3001/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiClient {
   constructor() {
     this.baseURL = API_BASE_URL;
-    this.token = localStorage.getItem('authToken');
+    this.token = null;
+    this.initializeToken();
+  }
+
+  async initializeToken() {
+    this.token = await secureTokenStorage.getToken();
   }
 
   async request(endpoint, options = {}) {
     // Validate and sanitize endpoint
     if (!this.isValidEndpoint(endpoint)) {
       throw new Error('Invalid API endpoint');
+    }
+
+    // Ensure we have the latest token
+    if (!this.token) {
+      this.token = await secureTokenStorage.getToken();
     }
 
     const url = `${this.baseURL}${endpoint}`;
@@ -37,13 +68,34 @@ class ApiClient {
 
       clearTimeout(timeoutId);
 
-      // Validate response content type
+      // Handle different response types
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Invalid response format');
-      }
+      let data;
 
-      const data = await response.json();
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        // Handle non-JSON responses (like HTML error pages)
+        const text = await response.text();
+        
+        // Better error messages based on status
+        let message;
+        if (response.status === 404) {
+          message = 'API endpoint not found. Please check your connection.';
+        } else if (response.status === 500) {
+          message = 'Server error. Please try again later.';
+        } else if (response.status === 0 || !response.status) {
+          message = 'Unable to connect to server. Please check your internet connection.';
+        } else {
+          message = `Server error: ${response.status} ${response.statusText}`;
+        }
+        
+        data = { 
+          success: false, 
+          message,
+          apiUrl: this.baseURL // For debugging
+        };
+      }
 
       if (!response.ok) {
         throw new Error(data.message || `HTTP error! status: ${response.status}`);
@@ -57,7 +109,10 @@ class ApiClient {
         throw new Error('Request timeout');
       }
       
-      console.error('API request failed:', error);
+      // Only log errors in development
+      if (import.meta.env.DEV) {
+        console.error('API request failed:', error);
+      }
       throw error;
     }
   }
@@ -66,7 +121,7 @@ class ApiClient {
   isValidEndpoint(endpoint) {
     if (typeof endpoint !== 'string') return false;
     if (endpoint.length > 200) return false; // Prevent DOS
-    if (!/^\/[a-zA-Z0-9\/\-_?&=]*$/.test(endpoint)) return false; // Only allow safe characters
+    if (!/^\/[a-zA-Z0-9/\-_?&=]*$/.test(endpoint)) return false; // Only allow safe characters
     return true;
   }
 
@@ -93,11 +148,7 @@ class ApiClient {
       body: JSON.stringify(credentials),
     });
     
-    if (data.success && data.data.token) {
-      this.token = data.data.token;
-      localStorage.setItem('authToken', this.token);
-    }
-    
+    // Note: New auth flow doesn't immediately return token, requires verification
     return data;
   }
 
@@ -107,11 +158,7 @@ class ApiClient {
       body: JSON.stringify(userData),
     });
     
-    if (data.success && data.data.token) {
-      this.token = data.data.token;
-      localStorage.setItem('authToken', this.token);
-    }
-    
+    // Note: New auth flow doesn't immediately return token, requires verification
     return data;
   }
 
@@ -123,9 +170,40 @@ class ApiClient {
     return this.request('/auth/verify');
   }
 
-  logout() {
+  async verifyEmail(email, code, type = 'registration') {
+    const data = await this.request('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ email, code, type }),
+    });
+    
+    if (data.success && data.data.token) {
+      this.token = data.data.token;
+      await secureTokenStorage.setToken(this.token);
+    }
+    
+    return data;
+  }
+
+  async googleSignIn(idToken) {
+    const data = await this.request('/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ idToken }),
+    });
+    
+    // Note: Google auth also requires email verification
+    return data;
+  }
+
+  async resendVerificationCode(email, type = 'registration') {
+    return this.request('/auth/resend-code', {
+      method: 'POST',
+      body: JSON.stringify({ email, type }),
+    });
+  }
+
+  async logout() {
     this.token = null;
-    localStorage.removeItem('authToken');
+    await secureTokenStorage.removeToken();
   }
 
   // User methods

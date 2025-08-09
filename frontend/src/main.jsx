@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
+import './utils/consoleManager.js' // Initialize console management
 
 // Production-ready backend systems
 import { enhancedCacheManager } from './utils/enhancedCacheManager.js'

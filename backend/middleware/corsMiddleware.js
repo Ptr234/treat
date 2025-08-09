@@ -2,8 +2,8 @@
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
   : [
-      'https://oscdigitaltool.com',
-      'https://ptr234.github.io',
+      'https://petergra38.github.io',
+      'https://treat.onrender.com',
       'http://localhost:5173', 
       'http://localhost:3000'
     ];
@@ -43,7 +43,8 @@ export const corsOptions = {
     'Accept',
     'Authorization',
     'Cache-Control',
-    'Pragma'
+    'Pragma',
+    'X-CSRF-Token'
   ],
   exposedHeaders: ['X-Total-Count'],
   maxAge: 86400, // 24 hours

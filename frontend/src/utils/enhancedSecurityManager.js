@@ -217,7 +217,6 @@ export class EnhancedSecurityManager {
         this.reportSecurityEvent({
           type: 'rate_limit_violation',
           key,
-          type: type,
           requestCount: recentRequests.length,
           limit: limit.requests,
           timestamp: new Date().toISOString()

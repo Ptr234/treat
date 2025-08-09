@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { BuildingLibraryIcon } from '@heroicons/react/24/outline'
 // Professional footer with world-class animations
 
 const Footer = () => {
@@ -154,9 +155,12 @@ const Footer = () => {
             transition={{ duration: 0.6 }}
             className="mb-8"
           >
-            <h4 className="text-lg font-semibold mb-4 text-center text-red-400">
-              🏛️ Official Government Portals
-            </h4>
+            <div className="flex items-center justify-center mb-4">
+              <BuildingLibraryIcon className="w-6 h-6 text-red-400 mr-2" />
+              <h4 className="text-lg font-semibold text-red-400">
+                Official Government Portals
+              </h4>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <motion.div
                 whileHover={{ scale: 1.02, y: -2 }}

@@ -1,13 +1,25 @@
 import React from 'react'
 import { motion } from 'framer-motion'
+import { 
+  BuildingLibraryIcon,
+  BuildingOfficeIcon,
+  ClipboardDocumentListIcon,
+  BoltIcon,
+  GlobeAltIcon
+} from '@heroicons/react/24/outline'
 import { PageBackground } from '../utils/backgroundSystem.jsx'
 import AgencyDirectory from '../components/AgencyDirectory'
+import Breadcrumb from '../components/Breadcrumb'
 
 const AgenciesPage = () => {
   return (
     <PageBackground page="agencies">
       <div className="min-h-screen pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Breadcrumb */}
+          <div className="mb-8">
+            <Breadcrumb />
+          </div>
           {/* Hero Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -16,7 +28,7 @@ const AgenciesPage = () => {
             className="text-center mb-16"
           >
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-white/20">
-              <span className="text-3xl mr-3">🏛️</span>
+              <BuildingLibraryIcon className="w-6 h-6 mr-3 text-blue-400" />
               <span className="text-white font-semibold">Government Agencies</span>
             </div>
             <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
@@ -38,23 +50,23 @@ const AgenciesPage = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
           >
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-              <div className="text-3xl mb-2">🏢</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center hover:bg-white/20 transition-colors">
+              <BuildingOfficeIcon className="w-8 h-8 text-blue-400 mx-auto mb-3" />
               <div className="text-2xl font-bold text-white">25+</div>
               <div className="text-sm text-gray-300">Key Agencies</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-              <div className="text-3xl mb-2">📋</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center hover:bg-white/20 transition-colors">
+              <ClipboardDocumentListIcon className="w-8 h-8 text-green-400 mx-auto mb-3" />
               <div className="text-2xl font-bold text-white">150+</div>
               <div className="text-sm text-gray-300">Services Available</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-              <div className="text-3xl mb-2">⚡</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center hover:bg-white/20 transition-colors">
+              <BoltIcon className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
               <div className="text-2xl font-bold text-white">24/7</div>
               <div className="text-sm text-gray-300">Online Access</div>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center">
-              <div className="text-3xl mb-2">🌍</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 text-center hover:bg-white/20 transition-colors">
+              <GlobeAltIcon className="w-8 h-8 text-purple-400 mx-auto mb-3" />
               <div className="text-2xl font-bold text-white">15</div>
               <div className="text-sm text-gray-300">Languages Supported</div>
             </div>

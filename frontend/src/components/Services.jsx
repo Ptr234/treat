@@ -1,5 +1,16 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  BriefcaseIcon,
+  BuildingLibraryIcon,
+  BoltIcon,
+  MagnifyingGlassIcon,
+  Squares2X2Icon,
+  ListBulletIcon,
+  TrophyIcon,
+  BuildingOffice2Icon,
+  CheckCircleIcon
+} from '@heroicons/react/24/outline'
 import { getAllServicesWithContacts, SERVICE_CATEGORIES } from '../data/optimizedServices'
 import { useNotification } from '../contexts/NotificationContext'
 import LazyImage from './LazyImage'
@@ -25,12 +36,12 @@ import LazyImage from './LazyImage'
 // ✅ User Experience: Persistent preferences and search history
 //
 // SERVICE CATEGORIES:
-// 🏆 Investment Support (8 premium services)
-// 🏢 Business Registration & Licensing (12 services)
-// 💰 Tax & Revenue Services (8 services)
-// 🗺️ Immigration & Work Permits (6 services)
-// 🏠 Land & Property Services (5 services)
-// 🚢 Export & Import Services (4 services)
+// Investment Support (8 premium services)
+// Business Registration & Licensing (12 services)
+// Tax & Revenue Services (8 services)
+// Immigration & Work Permits (6 services)
+// Land & Property Services (5 services)
+// Export & Import Services (4 services)
 // ==================================================================="
 
 const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
@@ -519,9 +530,10 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <span className="inline-block px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium mb-4">
-            💼 Premium Investment Services - UIA & Government Partners
-          </span>
+          <div className="inline-flex items-center px-6 py-3 bg-blue-500/20 text-blue-300 rounded-full text-sm font-medium mb-4 border border-blue-500/30 backdrop-blur-sm">
+            <BriefcaseIcon className="w-5 h-5 mr-2" />
+            <span>Premium Investment Services - UIA & Government Partners</span>
+          </div>
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
             Investment Services 
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
@@ -552,9 +564,9 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
               animate="visible"
             >
               {[
-                { icon: '🏆', title: 'Investment Support', desc: '8 Premium Services', color: 'from-green-500 to-emerald-600' },
-                { icon: '🏛️', title: 'Government Services', desc: '50+ Official Services', color: 'from-blue-500 to-indigo-600' },
-                { icon: '⚡', title: 'Fast-Track Processing', desc: '15-30 Day Approvals', color: 'from-orange-500 to-red-600' }
+                { IconComponent: TrophyIcon, title: 'Investment Support', desc: '8 Premium Services', color: 'from-green-500 to-emerald-600' },
+                { IconComponent: BuildingLibraryIcon, title: 'Government Services', desc: '50+ Official Services', color: 'from-blue-500 to-indigo-600' },
+                { IconComponent: BoltIcon, title: 'Fast-Track Processing', desc: '15-30 Day Approvals', color: 'from-orange-500 to-red-600' }
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -577,7 +589,9 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
                     transition: { duration: 0.2 }
                   }}
                 >
-                  <div className="text-3xl mb-2">{item.icon}</div>
+                  <div className="mb-2">
+                    <item.IconComponent className="w-8 h-8 text-white mx-auto" />
+                  </div>
                   <div className="text-lg font-bold mb-1">{item.title}</div>
                   <div className="text-sm opacity-90">{item.desc}</div>
                 </motion.div>
@@ -594,10 +608,10 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
           className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
         >
           {[
-            { icon: '🏛️', value: 'URSB', label: 'Business Registration', color: 'bg-gradient-to-br from-black to-gray-800 text-white border-gray-600' },
-            { icon: '💰', value: 'URA', label: 'Tax Services', color: 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-black border-yellow-300' },
-            { icon: '📜', value: '50,893', label: 'New Businesses 2023', color: 'bg-gradient-to-br from-red-500 to-red-600 text-white border-red-400' },
-            { icon: '⚡', value: '7 Days', label: 'Registration Timeline', color: 'bg-gradient-to-br from-green-600 to-green-700 text-white border-green-400' }
+            { IconComponent: BuildingLibraryIcon, value: 'URSB', label: 'Business Registration', color: 'bg-gradient-to-br from-black to-gray-800 text-white border-gray-600' },
+            { IconComponent: BriefcaseIcon, value: 'URA', label: 'Tax Services', color: 'bg-gradient-to-br from-yellow-400 to-yellow-500 text-black border-yellow-300' },
+            { IconComponent: BuildingOffice2Icon, value: '50,893', label: 'New Businesses 2023', color: 'bg-gradient-to-br from-red-500 to-red-600 text-white border-red-400' },
+            { IconComponent: BoltIcon, value: '7 Days', label: 'Registration Timeline', color: 'bg-gradient-to-br from-green-600 to-green-700 text-white border-green-400' }
           ].map((stat, index) => (
             <div key={index} className={`${stat.color} rounded-2xl p-6 shadow-lg border-2 text-center relative overflow-hidden`}>
               {index === 0 && (
@@ -618,7 +632,9 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
                   />
                 </div>
               )}
-              <div className="text-3xl mb-3">{stat.icon}</div>
+              <div className="mb-3 flex justify-center">
+                <stat.IconComponent className="w-8 h-8" />
+              </div>
               <div className="text-2xl font-bold mb-1">{stat.value}</div>
               <div className="text-sm opacity-80">{stat.label}</div>
             </div>
@@ -640,17 +656,13 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-yellow-100 text-yellow-600' : 'text-gray-400'}`}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
+                  <Squares2X2Icon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-yellow-100 text-yellow-600' : 'text-gray-400'}`}
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
+                  <ListBulletIcon className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -694,9 +706,7 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
                 className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-gray-50 transition-all"
                 autoComplete="off"
               />
-              <svg className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+              <MagnifyingGlassIcon className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
               {searchTerm && (
                 <button
                   onClick={() => {
@@ -816,13 +826,15 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
                   {service.category === 'Investment Support' && (
                     <div className="flex flex-wrap gap-1 mb-3">
                       {service.successRate && (
-                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full">
-                          ✅ {service.successRate}
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full flex items-center">
+                          <CheckCircleIcon className="w-3 h-3 mr-1" />
+                          {service.successRate}
                         </span>
                       )}
                       {service.minInvestment && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">
-                          💰 {service.minInvestment}
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-full flex items-center">
+                          <BriefcaseIcon className="w-3 h-3 mr-1" />
+                          {service.minInvestment}
                         </span>
                       )}
                       {service.investorType && (
@@ -840,7 +852,10 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
                   {/* Investment benefits for Investment Support services */}
                   {service.category === 'Investment Support' && service.benefits && (
                     <div className="mb-4 p-3 bg-green-50 rounded-lg">
-                      <h4 className="text-xs font-semibold text-green-800 mb-2">🎯 Key Benefits:</h4>
+                      <h4 className="text-xs font-semibold text-green-800 mb-2 flex items-center">
+                        <TrophyIcon className="w-3 h-3 mr-1" />
+                        Key Benefits:
+                      </h4>
                       <div className="space-y-1">
                         {service.benefits.slice(0, 2).map((benefit, idx) => (
                           <div key={idx} className="flex items-start text-xs text-green-700">
@@ -1000,10 +1015,16 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
         </div>
 
         {filteredServices.length === 0 && (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No services found</h3>
-            <p className="text-gray-600 mb-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20"
+          >
+            <div className="mb-6 flex justify-center">
+              <MagnifyingGlassIcon className="w-16 h-16 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No services found</h3>
+            <p className="text-gray-300 mb-6">
               {searchTerm 
                 ? `No results for "${searchTerm}" in ${selectedCategory === 'All' ? 'all categories' : selectedCategory}`
                 : 'Try adjusting your search terms or category filter'
@@ -1031,14 +1052,21 @@ const Services = ({ initialCategory = 'All', initialSearch = '' }) => {
                   onClick={() => {
                     setSearchTerm('')
                     setSelectedCategory('All')
+                    addNotification({
+                      type: 'info',
+                      title: 'Filters Cleared',
+                      message: 'All search filters have been reset',
+                      duration: 3000
+                    })
                   }}
-                  className="mt-4 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                  className="mt-4 inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black rounded-lg text-sm font-medium transition-colors"
                 >
+                  <MagnifyingGlassIcon className="w-4 h-4 mr-2" />
                   Clear all filters
                 </button>
               </div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* Application Modal */}

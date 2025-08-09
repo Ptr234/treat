@@ -36,12 +36,28 @@ export const errorHandler = (err, req, res, next) => {
     message = 'Token expired';
   }
 
-  const response = {
-    message,
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  // Sanitize error messages for production
+  const sanitizeMessage = (msg) => {
+    if (process.env.NODE_ENV === 'production') {
+      // Remove potential sensitive information
+      return msg
+        .replace(/password|token|secret|key|database|sql/gi, '[REDACTED]')
+        .replace(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g, '[IP]'); // Remove IP addresses
+    }
+    return msg;
   };
 
-  console.error(`Error ${statusCode}: ${message}`);
+  const response = {
+    success: false,
+    message: sanitizeMessage(message),
+    ...(process.env.NODE_ENV === 'development' && { 
+      stack: err.stack,
+      originalMessage: err.message 
+    })
+  };
+
+  // Log errors securely
+  console.error(`Error ${statusCode}: ${sanitizeMessage(message)}`);
   if (process.env.NODE_ENV === 'development') {
     console.error(err.stack);
   }

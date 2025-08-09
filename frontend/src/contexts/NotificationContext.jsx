@@ -24,8 +24,13 @@ export const NotificationProvider = ({ children }) => {
       timestamp: Date.now()
     }
 
+    // Filter out warning notifications completely
+    if (newNotification.type === 'warning') {
+      return
+    }
+
     // If reduced notifications mode is on, only show errors and critical info
-    if (isReducedNotifications && !['error', 'warning'].includes(newNotification.type)) {
+    if (isReducedNotifications && !['error'].includes(newNotification.type)) {
       return
     }
 

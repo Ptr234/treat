@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import apiClient from '../api/client.js';
+import secureTokenStorage from '../utils/secureTokenStorage.js';
 
 // Custom hook for API calls with loading and error states
 export function useApi(endpoint, options = {}) {
@@ -45,7 +46,7 @@ export function useAuthenticatedApi(endpoint, options = {}) {
       setError(null);
       
       // Check if user is authenticated
-      const token = localStorage.getItem('authToken');
+      const token = await secureTokenStorage.getToken();
       if (!token) {
         throw new Error('Authentication required');
       }
@@ -158,12 +159,16 @@ export function useAuth() {
 
   useEffect(() => {
     // Check if user is already logged in
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      verifyToken();
-    } else {
-      setLoading(false);
-    }
+    const checkToken = async () => {
+      const token = await secureTokenStorage.getToken();
+      if (token) {
+        verifyToken();
+      } else {
+        setLoading(false);
+      }
+    };
+    
+    checkToken();
   }, []);
 
   return {

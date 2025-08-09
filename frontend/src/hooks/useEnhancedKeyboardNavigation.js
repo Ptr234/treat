@@ -152,7 +152,7 @@ export const useEnhancedKeyboardNavigation = (options = {}) => {
     const ariaLabel = element.getAttribute('aria-label')
     const ariaLabelledBy = element.getAttribute('aria-labelledby')
     
-    let label = ariaLabel || 
+    const label = ariaLabel || 
                 (ariaLabelledBy && document.getElementById(ariaLabelledBy)?.textContent) ||
                 element.textContent?.trim() ||
                 element.value ||

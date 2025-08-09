@@ -1,6 +1,20 @@
 import React, { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import {
+  WrenchScrewdriverIcon,
+  CalculatorIcon,
+  ChartBarIcon,
+  BuildingOffice2Icon,
+  DocumentTextIcon,
+  CheckCircleIcon,
+  CubeIcon,
+  CurrencyDollarIcon,
+  ChatBubbleLeftRightIcon,
+  BriefcaseIcon,
+  PresentationChartLineIcon,
+  FlagIcon
+} from '@heroicons/react/24/outline'
 import { PageBackground } from '../utils/backgroundSystem.jsx'
 import UgandaToolsIntegration from '../components/UgandaToolsIntegration'
 import Breadcrumb from '../components/Breadcrumb'
@@ -48,7 +62,7 @@ const ToolsPage = () => {
     {
       title: 'Tax Calculator',
       description: 'Calculate VAT, PAYE, and corporate tax obligations with real-time rates',
-      icon: '🧮',
+      IconComponent: CalculatorIcon,
       link: '/calculator',
       features: ['VAT Calculator', 'PAYE Calculator', 'Corporate Tax', 'Withholding Tax'],
       color: 'from-blue-500 to-purple-600'
@@ -56,7 +70,7 @@ const ToolsPage = () => {
     {
       title: 'Investment ROI Calculator',
       description: 'Analyze potential returns on ATMS sector investments',
-      icon: '📊',
+      IconComponent: ChartBarIcon,
       link: '/roi-calculator',
       features: ['ROI Analysis', 'Risk Assessment', 'Market Projections', 'Profitability Metrics'],
       color: 'from-green-500 to-teal-600'
@@ -64,7 +78,7 @@ const ToolsPage = () => {
     {
       title: 'Business Registration Wizard',
       description: 'Step-by-step guide for company registration with URSB',
-      icon: '🏢',
+      IconComponent: BuildingOffice2Icon,
       link: '/registration-wizard',
       features: ['Name Reservation', 'Documentation Guide', 'Fee Calculator', 'Timeline Tracker'],
       color: 'from-orange-500 to-red-600'
@@ -72,7 +86,7 @@ const ToolsPage = () => {
     {
       title: 'Invoice Generator',
       description: 'Create professional invoices compliant with URA requirements',
-      icon: '📄',
+      IconComponent: DocumentTextIcon,
       link: '/invoice',
       features: ['URA Compliant', 'Multiple Currencies', 'Tax Calculations', 'PDF Export'],
       color: 'from-purple-500 to-pink-600'
@@ -80,7 +94,7 @@ const ToolsPage = () => {
     {
       title: 'Document Checklist',
       description: 'Interactive checklist for business registration and licensing',
-      icon: '✅',
+      IconComponent: CheckCircleIcon,
       link: '/document-checklist',
       features: ['Process Tracking', 'Document Verification', 'Deadline Reminders', 'Progress Reports'],
       color: 'from-indigo-500 to-blue-600'
@@ -88,7 +102,7 @@ const ToolsPage = () => {
     {
       title: 'Uganda Minerals License Tool',
       description: 'Explore mineral licensing opportunities and requirements',
-      icon: '💎',
+      IconComponent: CubeIcon,
       link: '/uganda_minerals_license_tool.html',
       external: true,
       features: ['License Types', 'Application Process', 'Fee Structure', 'Requirements Guide'],
@@ -97,7 +111,7 @@ const ToolsPage = () => {
     {
       title: 'Uganda Investment Tool',
       description: 'Comprehensive investment planning and analysis platform',
-      icon: '💰',
+      IconComponent: CurrencyDollarIcon,
       link: '/uganda_investment_tool.html',
       external: true,
       features: ['Sector Analysis', 'Investment Planning', 'Risk Evaluation', 'Market Intelligence'],
@@ -106,7 +120,7 @@ const ToolsPage = () => {
     {
       title: 'Feedback System',
       description: 'Share your experience and get support from our team',
-      icon: '💬',
+      IconComponent: ChatBubbleLeftRightIcon,
       link: '#',
       action: 'openFeedbackForm',
       features: ['Quick Feedback', 'Issue Reporting', 'Feature Requests', 'Support Tickets'],
@@ -132,7 +146,7 @@ const ToolsPage = () => {
             className="text-center mb-16"
           >
             <div className="inline-flex items-center bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 mb-6 border border-white/20">
-              <span className="text-3xl mr-3">🛠️</span>
+              <WrenchScrewdriverIcon className="w-6 h-6 mr-3 text-orange-400" />
               <span className="text-white font-semibold">Business Tools</span>
             </div>
             <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
@@ -164,7 +178,9 @@ const ToolsPage = () => {
               >
                 <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 h-full flex flex-col">
                   <div className="flex items-center mb-4">
-                    <div className="text-4xl mr-4">{tool.icon}</div>
+                    <div className="mr-4">
+                      <tool.IconComponent className="w-12 h-12 text-blue-400" />
+                    </div>
                     <div className="flex-1">
                       <h3 className="text-xl font-bold text-white mb-1">{tool.title}</h3>
                       <div className={`h-1 w-16 bg-gradient-to-r ${tool.color} rounded-full`}></div>
@@ -237,22 +253,22 @@ const ToolsPage = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <div className="text-4xl mb-4">💼</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+              <BriefcaseIcon className="w-12 h-12 text-blue-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-3">Business Tools</h3>
               <p className="text-gray-300 text-sm">
                 Essential tools for business registration, compliance, and daily operations
               </p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <div className="text-4xl mb-4">📈</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+              <PresentationChartLineIcon className="w-12 h-12 text-green-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-3">Financial Tools</h3>
               <p className="text-gray-300 text-sm">
                 Advanced calculators and analysis tools for financial planning and compliance
               </p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <div className="text-4xl mb-4">🎯</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-colors">
+              <FlagIcon className="w-12 h-12 text-purple-400 mb-4" />
               <h3 className="text-xl font-bold text-white mb-3">Sector-Specific</h3>
               <p className="text-gray-300 text-sm">
                 Specialized tools for agriculture, mining, tourism, and ICT sectors

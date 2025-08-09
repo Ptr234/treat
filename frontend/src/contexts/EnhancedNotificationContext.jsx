@@ -60,6 +60,11 @@ export const NotificationProvider = ({ children }) => {
       read: false
     }
 
+    // Filter out warning notifications completely
+    if (newNotification.type === 'warning') {
+      return id
+    }
+
     // If reduced notifications mode is on, only show critical notifications
     if (isReducedNotifications && newNotification.priority !== 'critical') {
       return id

@@ -11,33 +11,70 @@ import InvoiceGeneratorButton from './components/InvoiceGeneratorButton'
 import ScrollToTop from './components/ScrollToTop'
 import ErrorBoundary from './components/ErrorBoundary'
 import NavigationErrorHandler from './components/NavigationErrorHandler'
+import NavigationGuide from './components/NavigationGuide'
+import QuickActions from './components/QuickActions'
+import ContextualHelp from './components/ContextualHelp'
 import backgroundCacheManager from './utils/backgroundCacheManager'
 import { NotificationProvider } from './contexts/NotificationContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { MobileProvider } from './contexts/MobileContext'
+import { AuthProvider } from './contexts/AuthContext'
 import './App.css'
 
-// Lazy load pages for better performance
-const HomePage = lazy(() => import('./pages/HomePage'))
-const AboutPage = lazy(() => import('./pages/AboutPage'))
-const InvestmentsPage = lazy(() => import('./pages/InvestmentsPage'))
-const ServicesPage = lazy(() => import('./pages/ServicesPage'))
-const AgenciesPage = lazy(() => import('./pages/AgenciesPage'))
-const ToolsPage = lazy(() => import('./pages/ToolsPage'))
-const TaxCalculatorPage = lazy(() => import('./pages/TaxCalculatorPage'))
-const ROICalculatorPage = lazy(() => import('./pages/ROICalculatorPage'))
-const DownloadsPage = lazy(() => import('./pages/DownloadsPage'))
-const SupportPage = lazy(() => import('./pages/SupportPage'))
-const InvoicePage = lazy(() => import('./pages/InvoicePage'))
-const DocumentChecklistPage = lazy(() => import('./pages/DocumentChecklistPage'))
-const BusinessRegistrationPage = lazy(() => import('./pages/BusinessRegistrationPage'))
-const InvestmentOnboardingPage = lazy(() => import('./pages/InvestmentOnboardingPage'))
-const SearchPage = lazy(() => import('./pages/SearchPage'))
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
+// Robust lazy loading with retry logic and chunk error handling
+const lazyWithRetry = (importFunc, retries = 3) => {
+  return lazy(() => {
+    return new Promise((resolve, reject) => {
+      const attemptImport = (attempt) => {
+        importFunc()
+          .then(resolve)
+          .catch((error) => {
+            const isChunkError = error?.name === 'ChunkLoadError' || 
+                                error?.message?.includes('Loading chunk') ||
+                                error?.message?.includes('dynamically imported module') ||
+                                error?.message?.includes('Failed to fetch');
+            
+            if (attempt < retries && isChunkError) {
+              console.warn(`Import attempt ${attempt} failed (${error.name}), retrying in ${1000 * attempt}ms...`, error.message);
+              setTimeout(() => attemptImport(attempt + 1), 1000 * attempt);
+            } else if (isChunkError) {
+              // Final fallback for chunk errors - reload the page
+              console.error('All import attempts failed, forcing page reload...', error);
+              setTimeout(() => window.location.reload(), 1000);
+              reject(error);
+            } else {
+              reject(error);
+            }
+          });
+      };
+      attemptImport(1);
+    });
+  });
+};
 
-// Lazy load modals
-const ChecklistModal = lazy(() => import('./components/ChecklistModal'))
-const FeedbackForm = lazy(() => import('./components/FeedbackForm'))
+// Lazy load pages with retry logic
+const HomePage = lazyWithRetry(() => import('./pages/HomePage'))
+const AboutPage = lazyWithRetry(() => import('./pages/AboutPage'))
+const InvestmentsPage = lazyWithRetry(() => import('./pages/InvestmentsPage'))
+const ServicesPage = lazyWithRetry(() => import('./pages/ServicesPage'))
+const AgenciesPage = lazyWithRetry(() => import('./pages/AgenciesPage'))
+const ToolsPage = lazyWithRetry(() => import('./pages/ToolsPage'))
+const TaxCalculatorPage = lazyWithRetry(() => import('./pages/TaxCalculatorPage'))
+const ROICalculatorPage = lazyWithRetry(() => import('./pages/ROICalculatorPage'))
+const DownloadsPage = lazyWithRetry(() => import('./pages/DownloadsPage'))
+const SupportPage = lazyWithRetry(() => import('./pages/SupportPage'))
+const InvoicePage = lazyWithRetry(() => import('./pages/InvoicePage'))
+const DocumentChecklistPage = lazyWithRetry(() => import('./pages/DocumentChecklistPage'))
+const BusinessRegistrationPage = lazyWithRetry(() => import('./pages/BusinessRegistrationPage'))
+const InvestmentOnboardingPage = lazyWithRetry(() => import('./pages/InvestmentOnboardingPage'))
+const SearchPage = lazyWithRetry(() => import('./pages/SearchPage'))
+const NotFoundPage = lazyWithRetry(() => import('./pages/NotFoundPage'))
+const ProfilePage = lazyWithRetry(() => import('./pages/ProfilePage'))
+const AdminPage = lazyWithRetry(() => import('./pages/AdminPage'))
+
+// Lazy load modals with retry logic
+const ChecklistModal = lazyWithRetry(() => import('./components/ChecklistModal'))
+const FeedbackForm = lazyWithRetry(() => import('./components/FeedbackForm'))
 
 
 const App = () => {
@@ -47,6 +84,24 @@ const App = () => {
   useEffect(() => {
     // Initialize background cache manager
     backgroundCacheManager.init?.() // Safe call in case init is already called
+    
+    // Preload critical pages to prevent import failures
+    const preloadCriticalPages = async () => {
+      try {
+        // Preload most commonly accessed pages
+        await Promise.allSettled([
+          import('./pages/HomePage'),
+          import('./pages/SupportPage'),
+          import('./pages/AboutPage'),
+          import('./pages/ServicesPage'),
+        ]);
+      } catch (error) {
+        console.warn('Preload failed, pages will load on demand:', error);
+      }
+    };
+    
+    // Preload after a short delay to not block initial render
+    setTimeout(preloadCriticalPages, 2000);
   }, [])
 
   // Secure modal handlers using custom events instead of global window pollution
@@ -76,7 +131,8 @@ const App = () => {
       <NotificationProvider>
         <ThemeProvider>
           <MobileProvider>
-            <Router>
+            <AuthProvider>
+              <Router>
               <NavigationErrorHandler>
                 <div className="min-h-screen relative overflow-x-hidden">
                 <AnimatePresence>
@@ -107,6 +163,8 @@ const App = () => {
                             <Route path="/registration-wizard" element={<BusinessRegistrationPage />} />
                             <Route path="/investment-onboarding" element={<InvestmentOnboardingPage />} />
                             <Route path="/search" element={<SearchPage />} />
+                            <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/admin" element={<AdminPage />} />
                             <Route path="*" element={<NotFoundPage />} />
                           </Routes>
                         </Suspense>
@@ -134,9 +192,13 @@ const App = () => {
                 <ScrollToTop />
                 <FloatingActionButtons />
                 <InvoiceGeneratorButton />
+                <NavigationGuide />
+                <QuickActions />
+                <ContextualHelp />
                 </div>
               </NavigationErrorHandler>
-            </Router>
+              </Router>
+            </AuthProvider>
           </MobileProvider>
         </ThemeProvider>
       </NotificationProvider>

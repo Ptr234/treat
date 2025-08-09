@@ -315,7 +315,7 @@ export class MonitoringManager {
   setupErrorRateMonitoring() {
     let errorCount = 0
     let totalRequests = 0
-    let startTime = Date.now()
+    const startTime = Date.now()
 
     // Track JavaScript errors
     window.addEventListener('error', (event) => {

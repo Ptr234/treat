@@ -45,7 +45,7 @@ const VirtualizedAgencyDirectory = ({
 
   // Filter and sort agencies
   const filteredAgencies = useMemo(() => {
-    let filtered = agencies.filter(agency => {
+    const filtered = agencies.filter(agency => {
       const matchesSearch = agency.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            agency.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            agency.services?.some(service => 
