@@ -15,9 +15,7 @@ import { dataValidator } from './utils/dataValidation.js'
 import { monitoringManager } from './utils/monitoring.js'
 
 // Initialize production-ready backend
-console.log('🚀 OSC Uganda - Production-Ready Investment Portal v3.1')
-console.log('🛡️ Initializing comprehensive backend systems...')
-console.log('🔗 Backend API:', import.meta.env.VITE_API_URL || 'https://treat.onrender.com/api')
+// App initialization logging removed for production
 
 // Set up error handling first
 errorManager.setUserContext({
@@ -28,7 +26,7 @@ errorManager.setUserContext({
 
 // Initialize security manager
 const securityCheck = securityManager.performSecurityCheck()
-console.log(`🔒 Security Status: ${securityCheck.status} (Score: ${securityCheck.score}/100)`)
+// Security status logging removed for production
 
 // Initialize analytics with comprehensive tracking
 analyticsManager.initialize({
@@ -38,15 +36,15 @@ analyticsManager.initialize({
 })
 
 // Start enhanced cache management
-console.log('🚀 Starting enhanced cache management...')
+// Cache management logging removed for production
 enhancedCacheManager.init().then(() => {
-  console.log('📊 Background cache monitoring active')
+  // Cache monitoring logging removed for production
 }).catch(error => {
-  console.error('Cache manager initialization failed:', error)
+  // Cache error logging removed for production
 })
 
 // Start monitoring system
-console.log('📊 Starting comprehensive monitoring...')
+// Monitoring initialization logging removed for production
 
 // Set up periodic health checks
 setInterval(async () => {
@@ -55,7 +53,7 @@ setInterval(async () => {
   if (cacheStatus.metrics && cacheStatus.metrics.totalRequests > 100) {
     const hitRate = (cacheStatus.metrics.hits / cacheStatus.metrics.totalRequests) * 100
     if (hitRate < 70) {
-      console.warn('⚠️ Cache hit rate below optimal:', `${hitRate.toFixed(2)  }%`)
+      // Cache performance warning removed for production
     }
   }
 
@@ -63,7 +61,7 @@ setInterval(async () => {
   if (Math.random() < 0.1) { // 10% chance every minute
     const secStatus = securityManager.performSecurityCheck()
     if (secStatus.score < 75) {
-      console.warn('⚠️ Security score below threshold:', secStatus.score)
+      // Security warning removed for production
     }
   }
 }, 60000) // Check every minute
@@ -105,7 +103,7 @@ const removeLoadingScreen = () => {
   const loadingFallback = document.getElementById('loading-fallback')
   if (loadingFallback) {
     loadingFallback.style.display = 'none'
-    console.log('✅ React app mounted and loading screen removed')
+    // App mount logging removed for production
     // Add a marker to indicate React has taken over
     document.body.setAttribute('data-react-loaded', 'true')
   }

@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from './AuthModal'
-import SmartSearch from './SmartSearch'
 import {
   HomeIcon,
   CurrencyDollarIcon,
@@ -226,7 +225,7 @@ const Header = () => {
         setIsSearchOpen(false)
         setSearchTerm('')
       } catch (error) {
-        console.error('Navigation error:', error)
+        // Navigation error handling removed for production
         // Fallback navigation
         window.location.href = `#/search?q=${encodeURIComponent(trimmedSearch)}`
       }
@@ -258,7 +257,7 @@ const Header = () => {
             : '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
         }}
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <div className="flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
             
             {/* Logo Section */}
@@ -288,6 +287,9 @@ const Header = () => {
                   </div>
                   <div className="text-sm font-semibold leading-tight transition-colors duration-300 text-blue-600 -mt-0.5">
                     Uganda
+                  </div>
+                  <div className="text-xs font-medium text-gray-600 italic -mt-0.5">
+                    Investing in Uganda simplified
                   </div>
                 </div>
               </Link>

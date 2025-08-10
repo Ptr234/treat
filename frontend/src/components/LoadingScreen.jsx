@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { SparklesIcon, ChartBarIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline'
 
 const LoadingScreen = () => {
   const [loadingText, setLoadingText] = useState('Initializing')
 
-  const loadingSteps = [
+  const loadingSteps = useMemo(() => [
     'Initializing investment platform',
     'Loading market data',
     'Connecting to investment services',
     'Preparing dashboard',
     'Ready to invest'
-  ]
+  ], [])
 
   useEffect(() => {
     let currentStep = 0
@@ -23,7 +23,7 @@ const LoadingScreen = () => {
     }, 800)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [loadingSteps])
 
   return (
     <motion.div

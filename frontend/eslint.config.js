@@ -30,7 +30,7 @@ export default [
         sourceType: 'module',
       },
     },
-    settings: { react: { version: '18.3' } },
+    settings: { react: { version: '19.1' } },
     plugins: {
       react,
       'react-hooks': reactHooks,
@@ -95,6 +95,6 @@ export default [
       }],
       'no-unused-vars': 'off', // Use TypeScript version instead
     },
-    settings: { react: { version: '18.3' } },
+    settings: { react: { version: '19.1' } },
   },
 ]

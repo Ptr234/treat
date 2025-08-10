@@ -31,7 +31,7 @@ const CacheStatusIndicator = ({ showDetails = false }) => {
         
         setCacheStatus(status)
       } catch (error) {
-        console.error('Error getting cache status:', error)
+        // Cache status error handling removed for production
         setCacheStatus({ error: error.message })
       }
     }

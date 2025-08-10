@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { 
   ChartBarIcon, 
@@ -44,9 +44,9 @@ const PerformanceDashboard = () => {
       window.removeEventListener('offline', handleOffline)
       clearInterval(interval)
     }
-  }, [])
+  }, [collectPerformanceMetrics])
 
-  const collectPerformanceMetrics = () => {
+  const collectPerformanceMetrics = useCallback(() => {
     if (!window.performance) return
 
     const navigation = performance.getEntriesByType('navigation')[0]
@@ -93,15 +93,15 @@ const PerformanceDashboard = () => {
         })
         fidObserver.observe({ entryTypes: ['first-input'] })
       } catch (error) {
-        console.warn('Performance Observer not fully supported:', error)
+        // Performance Observer support warning removed for production
       }
     }
 
     setMetrics(newMetrics)
     analyzeMetrics(newMetrics)
-  }
+  }, [analyzeMetrics])
 
-  const analyzeMetrics = (metrics) => {
+  const analyzeMetrics = useCallback((metrics) => {
     const newVitals = []
     const newWarnings = []
 
@@ -146,7 +146,7 @@ const PerformanceDashboard = () => {
 
     setVitals(newVitals)
     setWarnings(newWarnings)
-  }
+  }, [])
 
   const getStatusColor = (status) => {
     switch (status) {

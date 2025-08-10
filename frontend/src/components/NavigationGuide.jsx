@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { 
@@ -18,7 +18,7 @@ const NavigationGuide = () => {
   const navigate = useNavigate()
 
   // Navigation guidance content for each page
-  const navigationGuides = {
+  const navigationGuides = useMemo(() => ({
     '/': {
       title: 'Welcome to Uganda Investment Portal',
       description: 'Your gateway to investment opportunities in Uganda',
@@ -130,7 +130,7 @@ const NavigationGuide = () => {
         path: '/downloads'
       }
     }
-  }
+  }), [navigate])
 
   // Check if user should see guide for current page
   useEffect(() => {
@@ -146,7 +146,7 @@ const NavigationGuide = () => {
       
       return () => clearTimeout(timer)
     }
-  }, [location.pathname, hasSeenGuide])
+  }, [location.pathname, hasSeenGuide, navigationGuides])
 
   // Load seen guides from localStorage
   useEffect(() => {

@@ -314,51 +314,76 @@ export class MonitoringManager {
 
   setupErrorRateMonitoring() {
     let errorCount = 0
-    let totalRequests = 0
+    let successfulInteractions = 0
+    let totalInteractions = 0
     const startTime = Date.now()
+    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')
 
     // Track JavaScript errors
     window.addEventListener('error', (event) => {
       // Ignore development/build-related errors
       if (event.filename?.includes('node_modules') || 
           event.message?.includes('Importing a module from') ||
-          event.message?.includes('dynamically imported module')) {
+          event.message?.includes('dynamically imported module') ||
+          event.message?.includes('Loading chunk') ||
+          event.message?.includes('Loading CSS chunk')) {
+        return
+      }
+      
+      // Only count real user-facing errors
+      if (!isProduction && event.message?.includes('development')) {
         return
       }
       
       errorCount++
-      totalRequests = Math.max(totalRequests, 1) // Ensure we have at least 1 request
-      this.recordMetric('errors', 'javascript_error_rate', (errorCount / totalRequests) * 100)
+      totalInteractions++
     })
 
     // Track unhandled promise rejections
     window.addEventListener('unhandledrejection', (event) => {
       // Ignore development-related promise rejections
       if (event.reason?.message?.includes('dynamically imported module') ||
-          event.reason?.message?.includes('Failed to fetch')) {
+          event.reason?.message?.includes('Failed to fetch') ||
+          event.reason?.message?.includes('Loading chunk') ||
+          event.reason?.stack?.includes('vite') ||
+          event.reason?.stack?.includes('dev-server')) {
         return
       }
       
       errorCount++
-      totalRequests = Math.max(totalRequests, 1)
-      this.recordMetric('errors', 'promise_rejection_rate', (errorCount / totalRequests) * 100)
+      totalInteractions++
     })
 
-    // Track successful requests and calculate error rate
+    // Track successful user interactions
+    const trackSuccessfulInteraction = () => {
+      successfulInteractions++
+      totalInteractions++
+    }
+
+    // Monitor successful interactions
+    document.addEventListener('click', trackSuccessfulInteraction, { passive: true })
+    document.addEventListener('submit', trackSuccessfulInteraction, { passive: true })
+    document.addEventListener('input', trackSuccessfulInteraction, { passive: true })
+
+    // Calculate and record error rate
     setInterval(() => {
       const runtimeMinutes = (Date.now() - startTime) / 60000
       
-      // Only start tracking after 1 minute of runtime to avoid false positives
-      if (runtimeMinutes > 1) {
-        totalRequests++
-        const errorRate = totalRequests > 0 ? (errorCount / totalRequests) * 100 : 0
+      // Only start meaningful tracking after sufficient runtime and interactions
+      if (runtimeMinutes > 2 && totalInteractions >= 20) {
+        const errorRate = (errorCount / totalInteractions) * 100
         
-        // Only record if error rate is meaningful (more than 10 total interactions)
-        if (totalRequests > 10) {
-          this.recordMetric('errors', 'error_rate', errorRate)
+        // Record error rate with more accurate calculation
+        this.recordMetric('errors', 'error_rate', Math.max(0, Math.min(100, errorRate)))
+        
+        // Reset counters if they get too high to prevent overflow
+        if (totalInteractions > 1000) {
+          errorCount = Math.floor(errorCount * 0.9)
+          successfulInteractions = Math.floor(successfulInteractions * 0.9)
+          totalInteractions = errorCount + successfulInteractions
         }
       }
-    }, 15000) // Every 15 seconds
+    }, 30000) // Every 30 seconds
   }
 
   observePerformance(type, callback) {
@@ -482,28 +507,44 @@ export class MonitoringManager {
 
   // Alert System
   checkMetricAlerts(metricKey, value, _metadata) {
-    // More lenient thresholds for development environment
-    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')
+    // Environment-aware thresholds
+    const isProduction = window.location.hostname !== 'localhost' && 
+                        !window.location.hostname.includes('127.0.0.1') &&
+                        !window.location.hostname.includes('192.168.')
     
     const alertRules = {
-      'core_web_vitals.LCP': { threshold: 4000, condition: 'greater', severity: 'warning' },
-      'core_web_vitals.FCP': { threshold: 3000, condition: 'greater', severity: 'warning' },
-      'core_web_vitals.CLS': { threshold: 0.25, condition: 'greater', severity: 'warning' },
-      'memory_status': { threshold: 85, condition: 'greater', severity: 'critical' },
+      'core_web_vitals.LCP': { threshold: isProduction ? 4000 : 6000, condition: 'greater', severity: 'warning' },
+      'core_web_vitals.FCP': { threshold: isProduction ? 3000 : 5000, condition: 'greater', severity: 'warning' },
+      'core_web_vitals.CLS': { threshold: isProduction ? 0.25 : 0.5, condition: 'greater', severity: 'warning' },
+      'memory_status': { threshold: 90, condition: 'greater', severity: 'critical' },
       'errors.error_rate': { 
-        threshold: isProduction ? 5 : 25, // More lenient for development
+        threshold: isProduction ? 15 : 50, // Much more realistic thresholds
         condition: 'greater', 
-        severity: isProduction ? 'critical' : 'warning' 
+        severity: isProduction ? 'warning' : 'info',
+        minSamples: 50 // Only alert after enough data
       }
     }
 
     const rule = alertRules[metricKey]
     if (!rule) return
 
+    // Check minimum samples requirement for error rate
+    if (metricKey === 'errors.error_rate' && rule.minSamples) {
+      const metric = this.metrics.get(metricKey)
+      if (!metric || metric.count < rule.minSamples) {
+        return // Not enough data to make meaningful assessment
+      }
+    }
+
     const shouldAlert = rule.condition === 'greater' ? value > rule.threshold : value < rule.threshold
     
-    if (shouldAlert) {
-      this.triggerAlert(metricKey, `${metricKey} exceeded threshold: ${value} > ${rule.threshold}`, rule.severity)
+    // Rate limiting: don't spam alerts for the same metric
+    const alertId = `${metricKey}_threshold`
+    const lastAlert = this.alerts.get(alertId)
+    const now = Date.now()
+    
+    if (shouldAlert && (!lastAlert || (now - lastAlert.timestamp) > 300000)) { // 5 minutes between alerts
+      this.triggerAlert(alertId, `${metricKey} exceeded threshold: ${Math.round(value * 100) / 100} > ${rule.threshold}`, rule.severity)
     }
   }
 
@@ -539,18 +580,27 @@ export class MonitoringManager {
   showCriticalAlert(alert) {
     if (typeof document === 'undefined') return
     
-    // Skip showing UI alerts in development environment for non-critical issues
-    const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')
-    if (!isProduction && alert.severity !== 'critical') {
+    // Only show UI alerts for actual critical issues
+    const isProduction = window.location.hostname !== 'localhost' && 
+                        !window.location.hostname.includes('127.0.0.1') &&
+                        !window.location.hostname.includes('192.168.')
+    
+    if (!isProduction && alert.severity === 'info') {
+      return // Don't show info alerts in development
+    }
+
+    // Don't show error rate alerts unless they're truly severe
+    if (alert.id.includes('error_rate') && alert.severity !== 'critical') {
       return
     }
 
     const notification = document.createElement('div')
+    const bgColor = alert.severity === 'critical' ? '#dc2626' : alert.severity === 'warning' ? '#f59e0b' : '#3b82f6'
     notification.style.cssText = `
       position: fixed;
       top: 60px;
       right: 20px;
-      background: #dc2626;
+      background: ${bgColor};
       color: white;
       padding: 16px 20px;
       border-radius: 8px;

@@ -48,7 +48,7 @@ const AuthModal = ({ isOpen, onClose, defaultTab = 'login' }) => {
   };
 
   const handleGoogleError = (error) => {
-    console.error('Google Sign-In Error:', error);
+    // Google Sign-In error handling removed for production
   };
 
   const handleBackToAuth = () => {

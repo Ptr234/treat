@@ -84,7 +84,7 @@ const InvestmentOnboardingWizard = () => {
   const submitApplication = async () => {
     try {
       // In a real application, this would send data to a backend service
-      console.log('Investment Application Data:', investmentData)
+      // Investment data logging removed for production
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000))
@@ -126,7 +126,7 @@ ${investmentData.name}`)
       // Open email client
       window.location.href = `mailto:invest@onestopcentre.ug?subject=${subject}&body=${body}`
       
-    } catch (error) {
+    } catch (_error) {
       showNotification('Failed to submit application. Please try again.', 'error')
     }
   }

@@ -257,7 +257,7 @@ export const useEnhancedKeyboardNavigation = (options = {}) => {
         lastFocusedElement.focus()
         announceElementFocus(lastFocusedElement)
       } catch (error) {
-        console.warn('Could not restore focus:', error)
+        // Focus restoration error removed for production
       }
     }
   }, [announceElementFocus])

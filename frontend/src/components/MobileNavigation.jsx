@@ -33,7 +33,7 @@ const MobileNavigation = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } catch (error) {
-      console.error('Mobile navigation error:', error)
+      // Mobile navigation error handling removed for production
       // Fallback navigation
       window.location.href = `#${route}`
     }

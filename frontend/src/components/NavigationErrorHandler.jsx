@@ -8,7 +8,7 @@ const NavigationErrorHandler = ({ children }) => {
   useEffect(() => {
     // Handle navigation errors globally
     const handleNavigationError = (event) => {
-      console.error('Navigation processing error:', event.error)
+      // Navigation error logging removed for production
       
       // Attempt to recover from navigation errors
       if (event.error?.message?.includes('navigation') || 
@@ -17,8 +17,8 @@ const NavigationErrorHandler = ({ children }) => {
         // Try to navigate to home page as fallback
         try {
           navigate('/', { replace: true })
-        } catch (fallbackError) {
-          console.error('Fallback navigation failed:', fallbackError)
+        } catch (_fallbackError) {
+          // Fallback navigation error logging removed for production
           // Last resort: direct window navigation
           window.location.href = '/'
         }
@@ -28,7 +28,7 @@ const NavigationErrorHandler = ({ children }) => {
     // Handle route not found errors
     const handleRouteError = () => {
       const currentPath = location.pathname
-      console.warn(`Route processing error for path: ${currentPath}`)
+      // Route processing warning removed for production
       
       // Check if current route exists in our defined routes
       const validRoutes = [
@@ -39,7 +39,7 @@ const NavigationErrorHandler = ({ children }) => {
       ]
       
       if (!validRoutes.includes(currentPath)) {
-        console.warn(`Invalid route detected: ${currentPath}, redirecting to not found`)
+        // Invalid route warning removed for production
         navigate('/*', { replace: true })
       }
     }

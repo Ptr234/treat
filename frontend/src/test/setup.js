@@ -3,6 +3,37 @@ import { cleanup } from '@testing-library/react'
 import * as matchers from '@testing-library/jest-dom/matchers'
 import { accessibilityTestUtils } from '../utils/accessibilityManager'
 
+// CRITICAL: DOM mocks MUST be setup BEFORE extending expect and other imports
+// to ensure they're available when components/hooks are loaded
+
+// Setup window.matchMedia FIRST - this is critical for framer-motion and useAccessibility
+const matchMediaMock = vi.fn().mockImplementation(query => ({
+  matches: query === '(prefers-reduced-motion: reduce)' ? false : false,
+  media: query,
+  onchange: null,
+  addListener: vi.fn(),
+  removeListener: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  dispatchEvent: vi.fn(),
+}))
+
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: matchMediaMock,
+})
+
+// Setup other essential window methods
+Object.defineProperty(window, 'addEventListener', {
+  writable: true,
+  value: vi.fn(),
+})
+
+Object.defineProperty(window, 'removeEventListener', {
+  writable: true,
+  value: vi.fn(),
+})
+
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers)
 
@@ -28,20 +59,6 @@ global.ResizeObserver = vi.fn(() => ({
   unobserve: vi.fn(),
 }))
 
-// Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(),
-    removeListener: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
-})
 
 // Mock scrollTo
 Object.defineProperty(window, 'scrollTo', {
@@ -93,3 +110,36 @@ Object.defineProperty(window, 'getComputedStyle', {
 HTMLElement.prototype.scrollIntoView = vi.fn()
 HTMLElement.prototype.focus = vi.fn()
 HTMLElement.prototype.blur = vi.fn()
+
+
+// Mock requestAnimationFrame for framer-motion
+Object.defineProperty(window, 'requestAnimationFrame', {
+  writable: true,
+  value: vi.fn(callback => setTimeout(callback, 16)),
+})
+
+Object.defineProperty(window, 'cancelAnimationFrame', {
+  writable: true,
+  value: vi.fn(),
+})
+
+// Additional DOM properties that framer-motion might access
+Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
+  get: vi.fn().mockReturnValue(null),
+})
+
+Object.defineProperty(HTMLElement.prototype, 'offsetTop', {
+  get: vi.fn().mockReturnValue(0),
+})
+
+Object.defineProperty(HTMLElement.prototype, 'offsetLeft', {
+  get: vi.fn().mockReturnValue(0),
+})
+
+Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+  get: vi.fn().mockReturnValue(100),
+})
+
+Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+  get: vi.fn().mockReturnValue(100),
+})

@@ -7,14 +7,14 @@ export const usePerformanceMonitor = (componentName) => {
       const observer = new PerformanceObserver((list) => {
         list.getEntries().forEach((entry) => {
           if (entry.entryType === 'largest-contentful-paint') {
-            console.log(`LCP for ${componentName}:`, entry.startTime)
+            // LCP monitoring removed for production
           }
           if (entry.entryType === 'first-input') {
-            console.log(`FID for ${componentName}:`, entry.processingStart - entry.startTime)
+            // FID monitoring removed for production
           }
           if (entry.entryType === 'layout-shift') {
             if (!entry.hadRecentInput) {
-              console.log(`CLS for ${componentName}:`, entry.value)
+              // CLS monitoring removed for production
             }
           }
         })

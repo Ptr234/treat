@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import apiClient from '../api/client.js';
 import secureTokenStorage from '../utils/secureTokenStorage.js';
 
@@ -137,14 +137,14 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   };
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await apiClient.logout();
     setUser(null);
     setError(null);
     setPendingVerification(null);
-  };
+  }, []);
 
-  const verifyToken = async () => {
+  const verifyToken = useCallback(async () => {
     try {
       setLoading(true);
       const result = await apiClient.verifyToken();
@@ -156,7 +156,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [logout]);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -181,7 +181,7 @@ export const AuthProvider = ({ children }) => {
     return () => {
       window.removeEventListener('tokenExpired', handleTokenExpiration);
     };
-  }, []);
+  }, [verifyToken]);
 
   const value = {
     user,

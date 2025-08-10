@@ -233,21 +233,24 @@
   backdrop-filter: blur(8px) !important;
 }
 
-/* Mobile optimizations for floating buttons */
+/* Enhanced mobile optimizations for floating buttons */
 @media (max-width: 768px) {
   .floating-action-buttons {
     bottom: 1rem !important;
     right: 1rem !important;
     gap: 0.75rem !important;
+    flex-direction: column-reverse !important;
   }
   
   .floating-action-buttons button {
-    min-width: 52px !important;
-    min-height: 52px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
     font-size: 14px !important;
     touch-action: manipulation !important;
     -webkit-tap-highlight-color: transparent !important;
     user-select: none !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
   }
   
   /* Enhanced mobile touch feedback */
@@ -256,36 +259,58 @@
     transition: transform 0.1s ease !important;
   }
   
-  /* Mobile input optimizations */
+  /* Enhanced mobile input optimizations */
   input, select, textarea {
     font-size: 16px !important; /* Prevents zoom on iOS */
     min-height: 48px !important;
-    padding: 12px 16px !important;
-    border-radius: 8px !important;
+    padding: 14px 16px !important;
+    border-radius: 12px !important;
     transition: all 0.15s ease !important;
     -webkit-appearance: none !important;
     touch-action: manipulation !important;
     color: #1f2937 !important; /* Ensure dark text for readability */
     background-color: #ffffff !important; /* Solid white background */
+    border: 2px solid #e5e7eb !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
   }
   
   input:focus, select:focus, textarea:focus {
     transform: scale(1.02) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    border-color: #3b82f6 !important;
   }
   
-  /* Improve all buttons on mobile */
+  /* Enhanced mobile buttons */
   .btn-primary, .btn-secondary, .btn-ghost {
     font-size: 16px !important;
-    padding: 14px 20px !important;
+    padding: 16px 24px !important;
     border-radius: 12px !important;
     font-weight: 600 !important;
     transition: all 0.15s ease !important;
+    min-height: 48px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
   }
   
   .btn-primary:active, .btn-secondary:active, .btn-ghost:active {
-    transform: scale(0.96) !important;
+    transform: scale(0.95) !important;
     transition-duration: 0.1s !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* Enhanced card interactions */
+  .card {
+    border-radius: 16px !important;
+    padding: 20px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .card:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
   }
 }
 

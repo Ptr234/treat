@@ -30,8 +30,8 @@ export const NotificationProvider = ({ children }) => {
     if (savedSettings) {
       try {
         setSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }))
-      } catch (error) {
-        console.warn('Failed to load notification settings:', error)
+      } catch (_error) {
+        // Notification settings loading error removed for production
       }
     }
   }, [])
@@ -132,7 +132,7 @@ export const NotificationProvider = ({ children }) => {
       oscillator.stop(audioContext.currentTime + duration)
     } catch (error) {
       // Fallback: no sound if audio context fails
-      console.warn('Notification sound failed:', error)
+      // Notification sound error removed for production
     }
   }, [settings.soundEnabled])
 

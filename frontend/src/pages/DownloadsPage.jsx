@@ -98,7 +98,7 @@ const DownloadsPage = () => {
         })
       }
     } catch (error) {
-      console.error('Download failed:', error)
+      // Download error logging removed for production
       addNotification({
         type: 'error',
         title: 'Download Failed',

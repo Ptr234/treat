@@ -10,6 +10,11 @@
     "deploy": "npm run build && gh-pages -d dist",
     "lint": "eslint . --ext js,jsx,ts,tsx",
     "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
     "clean": "rm -rf dist coverage .tsbuildinfo",
     "deps:check": "npm outdated",
     "deps:update": "npm update"

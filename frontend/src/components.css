@@ -484,7 +484,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(135deg, #ffd700, #ffa500);
+    background: linear-gradient(135deg, #ffd700, #dc2626, #000000);
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -554,7 +554,7 @@ body {
 .contact-info svg {
     width: 18px;
     height: 18px;
-    color: #3b82f6;
+    color: #dc2626;
     flex-shrink: 0;
 }
 
@@ -592,27 +592,28 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #ffd700, #ffa500);
-    color: black;
+    background: linear-gradient(135deg, #ffd700, #dc2626);
+    color: white;
     box-shadow: 0 4px 16px rgba(255,215,0,0.3);
 }
 
 .btn-primary:hover {
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(255,215,0,0.4);
-    background: linear-gradient(135deg, #ffed4e, #ffb84d);
+    box-shadow: 0 12px 32px rgba(220,38,38,0.4);
+    background: linear-gradient(135deg, #dc2626, #000000);
 }
 
 .btn-black {
-    background: linear-gradient(135deg, #1f2937, #374151);
-    color: white;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    background: linear-gradient(135deg, #000000, #1f2937);
+    color: #ffd700;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
 
 .btn-black:hover {
-    background: linear-gradient(135deg, #374151, #4b5563);
+    background: linear-gradient(135deg, #dc2626, #000000);
     transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    box-shadow: 0 12px 32px rgba(220,38,38,0.4);
+    color: white;
 }
 
 .btn-red {
@@ -662,7 +663,7 @@ body {
 .section-title {
     font-size: 3rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #ffd700, #ffed4e, #ffffff);
+    background: linear-gradient(135deg, #ffd700, #dc2626, #000000);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -681,7 +682,7 @@ body {
     transform: translateX(-50%);
     width: 100px;
     height: 4px;
-    background: linear-gradient(135deg, #ffd700, #ffa500);
+    background: linear-gradient(135deg, #ffd700, #dc2626);
     border-radius: 2px;
 }
 
@@ -936,7 +937,7 @@ body {
     width: 20px;
     height: 20px;
     margin-right: 12px;
-    color: #ffd700;
+    color: #dc2626;
     flex-shrink: 0;
 }
 

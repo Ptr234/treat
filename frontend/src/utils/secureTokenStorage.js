@@ -20,7 +20,7 @@ class SecureTokenStorage {
         sessionStorage.setItem('_tk', exportedKey);
       }
     } catch (error) {
-      console.warn('Encryption initialization failed, using fallback method');
+      // Encryption initialization warning removed for production
       this.encryptionKey = null;
     }
   }
@@ -83,7 +83,7 @@ class SecureTokenStorage {
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
     } catch (error) {
-      console.warn('Encryption failed, using fallback');
+      // Encryption fallback warning removed for production
       return btoa(plaintext);
     }
   }
@@ -116,7 +116,7 @@ class SecureTokenStorage {
       const decoder = new TextDecoder();
       return decoder.decode(decrypted);
     } catch (error) {
-      console.warn('Decryption failed, trying fallback');
+      // Decryption fallback warning removed for production
       try {
         return atob(ciphertext);
       } catch {
@@ -148,7 +148,7 @@ class SecureTokenStorage {
       this.setTokenExpiration();
       
     } catch (error) {
-      console.error('Failed to store token securely:', error);
+      // Token storage error logging removed for production
       throw new Error('Token storage failed');
     }
   }
@@ -178,7 +178,7 @@ class SecureTokenStorage {
       this.removeToken();
       return null;
     } catch (error) {
-      console.warn('Token retrieval failed:', error);
+      // Token retrieval warning removed for production
       this.removeToken();
       return null;
     }

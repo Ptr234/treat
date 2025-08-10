@@ -10,8 +10,6 @@ import {
   CubeIcon,
   ComputerDesktopIcon,
   CogIcon,
-  BoltIcon,
-  ChartBarIcon,
   CurrencyDollarIcon,
   StarIcon
 } from '@heroicons/react/24/outline'
@@ -242,69 +240,6 @@ const Investments = ({ initialCategory = 'All', initialSearch = '' }) => {
         duration: 0.8,
         staggerChildren: 0.1,
         ease: [0.25, 0.46, 0.45, 0.94]
-      }
-    }
-  }
-
-  const cardVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 50,
-      scale: 0.95,
-      rotateX: 15
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      rotateX: 0,
-      transition: {
-        duration: 0.7,
-        ease: [0.25, 0.46, 0.45, 0.94],
-        type: "spring",
-        stiffness: 120,
-        damping: 20
-      }
-    },
-    hover: {
-      y: -12,
-      scale: 1.02,
-      rotateY: 2,
-      transition: {
-        duration: 0.3,
-        ease: "easeOut"
-      }
-    }
-  }
-
-  const buttonVariants = {
-    hover: {
-      scale: 1.05,
-      boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
-      transition: {
-        duration: 0.2,
-        ease: "easeOut"
-      }
-    },
-    tap: {
-      scale: 0.98,
-      transition: {
-        duration: 0.1
-      }
-    }
-  }
-
-  const glowVariants = {
-    animate: {
-      boxShadow: [
-        "0 0 20px rgba(34, 197, 94, 0.3)",
-        "0 0 40px rgba(34, 197, 94, 0.6)",
-        "0 0 20px rgba(34, 197, 94, 0.3)"
-      ],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut"
       }
     }
   }

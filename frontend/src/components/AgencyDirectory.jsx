@@ -7,10 +7,7 @@ import {
   ListBulletIcon,
   PhoneIcon,
   EnvelopeIcon,
-  GlobeAltIcon,
-  MapPinIcon,
-  CalendarDaysIcon,
-  ExclamationTriangleIcon
+  GlobeAltIcon
 } from '@heroicons/react/24/outline'
 import { useNotification } from '../contexts/NotificationContext'
 import LazyImage from './LazyImage'
@@ -21,7 +18,7 @@ const AgencyDirectory = () => {
   const [viewMode, setViewMode] = useState('grid')
   const { addNotification } = useNotification()
 
-  const agencies = [
+  const agencies = useMemo(() => [
     {
       id: 'uia',
       name: 'Uganda Investment Authority',
@@ -158,7 +155,7 @@ const AgencyDirectory = () => {
       established: '1995',
       priority: 'medium'
     }
-  ]
+  ], [])
 
   const categories = ['All', ...new Set(agencies.map(agency => agency.category))]
 

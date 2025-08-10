@@ -27,16 +27,9 @@ class ErrorBoundary extends React.Component {
       userId: localStorage.getItem('userId') || 'anonymous'
     }
     
-    console.error('Error caught by boundary:', errorDetails)
+    // Error logging removed for production build
     
-    // Show error details in development
-    if (process.env.NODE_ENV === 'development') {
-      console.group('🚨 React Error Boundary - Component Error Details')
-      console.error('Error:', error)
-      console.error('Component Stack:', errorInfo.componentStack)
-      console.error('Error Stack:', error.stack)
-      console.groupEnd()
-    }
+    // Development error details removed for production build
     
     // In production, send to error tracking service
     if (process.env.NODE_ENV === 'production') {
@@ -57,9 +50,9 @@ class ErrorBoundary extends React.Component {
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify(errorDetails)
       // })
-      console.log('Error reported:', errorDetails)
+      // Error reporting log removed for production
     } catch (e) {
-      console.error('Failed to report error:', e)
+      // Error reporting failure log removed for production
     }
   }
 

@@ -397,6 +397,7 @@ export const accessibilityTestUtils = {
   // Setup for Jest tests
   setupJestAxe: () => {
     if (typeof expect !== 'undefined' && typeof toHaveNoViolations !== 'undefined') {
+      // eslint-disable-next-line no-undef
       expect.extend(toHaveNoViolations)
     }
   },
@@ -405,6 +406,7 @@ export const accessibilityTestUtils = {
   testComponentAccessibility: async (component) => {
     if (typeof axe !== 'undefined' && typeof expect !== 'undefined') {
       const results = await axe(component)
+      // eslint-disable-next-line no-undef
       expect(results).toHaveNoViolations()
       return results
     }
@@ -415,6 +417,7 @@ export const accessibilityTestUtils = {
   testPageAccessibility: async (page) => {
     if (typeof axe !== 'undefined' && typeof expect !== 'undefined') {
       const results = await axe(page)
+      // eslint-disable-next-line no-undef
       expect(results).toHaveNoViolations()
       return results
     }

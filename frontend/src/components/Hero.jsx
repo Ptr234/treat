@@ -102,7 +102,7 @@ const Hero = () => {
       desc: 'High-return opportunities', 
       icon: '💰', 
       action: () => {
-        console.log('Navigating to investments')
+        // Navigation logging removed for production
         navigate('/investments')
       }
     },
@@ -111,7 +111,7 @@ const Hero = () => {
       desc: 'Calculate investment returns', 
       icon: '📊', 
       action: () => {
-        console.log('Navigating to ROI calculator')
+        // Navigation logging removed for production
         navigate('/roi-calculator')
       }
     },
@@ -120,7 +120,7 @@ const Hero = () => {
       desc: 'Business registration & setup', 
       icon: '🚀', 
       action: () => {
-        console.log('Navigating to registration')
+        // Navigation logging removed for production
         navigate('/registration-wizard')
       }
     },
@@ -129,7 +129,7 @@ const Hero = () => {
       desc: 'Expert guidance available', 
       icon: '💬', 
       action: () => {
-        console.log('Navigating to support')
+        // Navigation logging removed for production
         navigate('/support')
       }
     }
@@ -189,6 +189,31 @@ const Hero = () => {
             src="/images/Tourism.webp" 
             alt="Beautiful tourism landscapes of Uganda - Pearl of Africa" 
             className="w-24 h-20 object-cover rounded-lg shadow-xl border border-red-400/30"
+          />
+        </div>
+        
+        {/* Additional Live Uganda Images */}
+        <div className="absolute bottom-32 right-16 opacity-40">
+          <img 
+            src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=150&h=100&fit=crop&auto=format" 
+            alt="Uganda business district and modern cityscape" 
+            className="w-28 h-20 object-cover rounded-lg shadow-xl border border-yellow-400/40"
+          />
+        </div>
+        
+        <div className="absolute top-32 right-32 opacity-35">
+          <img 
+            src="https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=120&h=90&fit=crop&auto=format" 
+            alt="Uganda agricultural investment opportunities" 
+            className="w-24 h-18 object-cover rounded-lg shadow-xl border border-green-400/40"
+          />
+        </div>
+        
+        <div className="absolute bottom-40 left-20 opacity-25">
+          <img 
+            src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=80&fit=crop&auto=format" 
+            alt="Uganda infrastructure development" 
+            className="w-20 h-16 object-cover rounded-lg shadow-xl border border-blue-400/40"
           />
         </div>
       </div>
@@ -263,7 +288,7 @@ const Hero = () => {
                     <path d="M50 35 Q55 30 60 35 Q65 40 60 45 Q55 50 50 45 Q45 40 50 35 Z" />
                   </svg>
                 </div>
-                <p className="text-xl md:text-2xl text-gray-100 max-w-4xl mx-auto leading-relaxed drop-shadow-lg backdrop-blur-sm bg-black/20 rounded-lg p-6 border border-red-400/20">
+                <p className="text-xl md:text-2xl text-gray-100 max-w-4xl mx-auto leading-relaxed drop-shadow-lg backdrop-blur-sm bg-black/20 rounded-lg p-6 border border-red-400/20"
                   Official Uganda Investment Authority portal offering high-return investment opportunities with tax incentives, 
                   streamlined business registration through URSB, and comprehensive investment support across Agriculture, Tourism, Mining & ICT sectors.
                   <span className="block mt-2 text-lg text-red-200 font-medium">"Unlock Africa's Best Investment Opportunities" - $2.9B+ FDI Growth</span>
@@ -370,7 +395,7 @@ const Hero = () => {
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  console.log(`Clicked on ${action.title}`)
+                  // Click logging removed for production
                   action.action()
                 }}
                 role="button"
@@ -611,6 +636,50 @@ const Hero = () => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Scroll Down Indicator */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 1.5 }}
+      >
+        <motion.div
+          className="flex flex-col items-center text-white cursor-pointer"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          onClick={() => {
+            const nextSection = document.querySelector('#about, main > div:nth-child(2), section:nth-child(2)')
+            if (nextSection) {
+              nextSection.scrollIntoView({ behavior: 'smooth' })
+            } else {
+              window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })
+            }
+          }}
+        >
+          <span className="text-sm font-medium mb-2 text-white/90">Scroll Down</span>
+          <motion.div
+            className="w-6 h-10 border-2 border-white/60 rounded-full flex justify-center"
+            whileHover={{ scale: 1.1, borderColor: "rgba(255, 215, 0, 0.8)" }}
+          >
+            <motion.div
+              className="w-1 h-3 bg-white/80 rounded-full mt-2"
+              animate={{ y: [0, 12, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.div>
+          <div className="flex flex-col items-center mt-2">
+            <svg 
+              className="w-4 h-4 text-white/70" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        </motion.div>
+      </motion.div>
 
       {/* Investor Tour Modal */}
       <InvestorTour 

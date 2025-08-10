@@ -35,11 +35,11 @@ const lazyWithRetry = (importFunc, retries = 3) => {
                                 error?.message?.includes('Failed to fetch');
             
             if (attempt < retries && isChunkError) {
-              console.warn(`Import attempt ${attempt} failed (${error.name}), retrying in ${1000 * attempt}ms...`, error.message);
+              // Retry import attempt after delay
               setTimeout(() => attemptImport(attempt + 1), 1000 * attempt);
             } else if (isChunkError) {
               // Final fallback for chunk errors - reload the page
-              console.error('All import attempts failed, forcing page reload...', error);
+              // Force page reload as final fallback
               setTimeout(() => window.location.reload(), 1000);
               reject(error);
             } else {
@@ -96,7 +96,7 @@ const App = () => {
           import('./pages/ServicesPage'),
         ]);
       } catch (error) {
-        console.warn('Preload failed, pages will load on demand:', error);
+        // Preload failed, pages will load on demand
       }
     };
     

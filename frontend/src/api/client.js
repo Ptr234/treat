@@ -76,7 +76,7 @@ class ApiClient {
         data = await response.json();
       } else {
         // Handle non-JSON responses (like HTML error pages)
-        const text = await response.text();
+        await response.text();
         
         // Better error messages based on status
         let message;
@@ -109,10 +109,7 @@ class ApiClient {
         throw new Error('Request timeout');
       }
       
-      // Only log errors in development
-      if (import.meta.env.DEV) {
-        console.error('API request failed:', error);
-      }
+      // Error logging removed for production build
       throw error;
     }
   }

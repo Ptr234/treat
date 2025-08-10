@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useNotification } from '../contexts/NotificationContext'
 
@@ -9,20 +9,20 @@ const DocumentUpload = ({ onUpload, allowedTypes = [], maxSize = 10, multiple = 
   const { addNotification } = useNotification()
   const fileInputRef = useRef(null)
 
-  const allowedTypesMap = {
+  const allowedTypesMap = useMemo(() => ({
     'pdf': { ext: '.pdf', mime: 'application/pdf', icon: '📄' },
     'doc': { ext: '.doc,.docx', mime: 'application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document', icon: '📝' },
     'image': { ext: '.jpg,.jpeg,.png,.gif', mime: 'image/*', icon: '🖼️' },
     'excel': { ext: '.xls,.xlsx', mime: 'application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', icon: '📊' },
     'zip': { ext: '.zip,.rar', mime: 'application/zip,application/x-rar-compressed', icon: '🗜️' }
-  }
+  }), [])
 
   const getAcceptedFormats = () => {
     if (allowedTypes.length === 0) return '*'
     return allowedTypes.map(type => allowedTypesMap[type]?.ext || type).join(',')
   }
 
-  const validateFile = (file) => {
+  const validateFile = useCallback((file) => {
     // Check file size (maxSize in MB)
     if (file.size > maxSize * 1024 * 1024) {
       return `File size must be less than ${maxSize}MB`
@@ -42,7 +42,7 @@ const DocumentUpload = ({ onUpload, allowedTypes = [], maxSize = 10, multiple = 
     }
 
     return null
-  }
+  }, [allowedTypes, maxSize, allowedTypesMap])
 
   const processFiles = useCallback((files) => {
     const fileArray = Array.from(files)
@@ -88,9 +88,9 @@ const DocumentUpload = ({ onUpload, allowedTypes = [], maxSize = 10, multiple = 
       // Simulate upload process
       simulateUpload(validFiles)
     }
-  }, [multiple, allowedTypes, maxSize, addNotification])
+  }, [multiple, addNotification, simulateUpload, validateFile])
 
-  const simulateUpload = async (files) => {
+  const simulateUpload = useCallback(async (files) => {
     setIsUploading(true)
 
     for (const fileData of files) {
@@ -126,7 +126,7 @@ const DocumentUpload = ({ onUpload, allowedTypes = [], maxSize = 10, multiple = 
       message: `${files.length} file(s) uploaded successfully`,
       duration: 3000
     })
-  }
+  }, [onUpload, addNotification])
 
   const handleDragEnter = useCallback((e) => {
     e.preventDefault()

@@ -579,7 +579,7 @@ export class EnhancedCacheManager {
   // Security helper methods
   sanitizeHtml(str) {
     if (typeof str !== 'string') return ''
-    return str.replace(/[<>\"']/g, (match) => {
+    return str.replace(/[<>"']/g, (match) => {
       const replacements = {
         '<': '&lt;',
         '>': '&gt;',
@@ -606,7 +606,7 @@ export class EnhancedCacheManager {
     // Ensure cache keys are safe and don't contain dangerous patterns
     if (typeof key !== 'string') return false
     if (key.length > 200) return false // Prevent DOS
-    if (/[<>\"'`]/.test(key)) return false // Prevent XSS
+    if (/[<>"'`]/.test(key)) return false // Prevent XSS
     return true
   }
 }

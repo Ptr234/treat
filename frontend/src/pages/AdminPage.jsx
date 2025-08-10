@@ -43,9 +43,7 @@ const AdminPage = () => {
         }
       }
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to load data:', error);
-      }
+      // Data loading error handling removed for production
     } finally {
       setLoading(false);
     }
@@ -58,9 +56,7 @@ const AdminPage = () => {
         loadData(); // Reload data
       }
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('Failed to update status:', error);
-      }
+      // Status update error handling removed for production
     }
   };
 

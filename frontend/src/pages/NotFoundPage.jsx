@@ -31,7 +31,7 @@ const NotFoundPage = () => {
         navigate('/')
       }
     } catch (error) {
-      console.error('Navigation failed:', error)
+      // Navigation error handling removed for production
       window.location.href = '/'
     }
   }

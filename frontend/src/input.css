@@ -14,7 +14,7 @@
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
     overflow-x: hidden;
-    color: #1f2937; /* Ensure readable text color by default */
+    color: #1f2937;
   }
 
   * {
@@ -35,7 +35,7 @@
 
   /* Enhanced focus states for WCAG 2.1 AA compliance */
   *:focus {
-    outline: 3px solid #f59e0b;
+    outline: 3px solid #ffd700;
     outline-offset: 2px;
   }
 
@@ -44,35 +44,42 @@
   textarea:focus,
   select:focus,
   a:focus {
-    outline: 3px solid #f59e0b;
+    outline: 3px solid #ffd700;
     outline-offset: 2px;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
   }
 
   /* High contrast focus for interactive elements */
   .focus\:ring-accessible:focus {
-    outline: 3px solid #f59e0b;
+    outline: 3px solid #ffd700;
     outline-offset: 2px;
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.15);
+    box-shadow: 0 0 0 6px rgba(255, 215, 0, 0.15);
   }
 }
 
 /* Custom component styles */
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-2.5 px-5 md:py-3 md:px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 text-sm md:text-base;
+    @apply inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-red-600 hover:from-red-600 hover:to-black text-white font-semibold py-2.5 px-5 md:py-3 md:px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 text-sm md:text-base;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-red-600 border-2 border-red-600 hover:border-red-700 font-medium py-2.5 px-5 md:py-3 md:px-6 rounded-xl shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 text-sm md:text-base;
+    @apply inline-flex items-center justify-center gap-2 bg-white hover:bg-yellow-50 text-red-600 border-2 border-yellow-500 hover:border-red-600 font-medium py-2.5 px-5 md:py-3 md:px-6 rounded-xl shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 text-sm md:text-base;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 text-red-600 hover:text-red-800 hover:bg-red-50 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm md:text-base;
+    @apply inline-flex items-center justify-center gap-2 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm md:text-base;
+    color: var(--color-black-700);
+    background: transparent;
+  }
+
+  .btn-ghost:hover {
+    background: var(--color-yellow-100);
+    color: var(--color-black-800);
   }
 
   .btn-black {
-    @apply inline-flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-white font-medium py-2 px-3 md:py-2.5 md:px-4 rounded-lg shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 text-xs md:text-sm;
+    @apply inline-flex items-center justify-center gap-2 bg-black hover:bg-gray-800 text-yellow-400 hover:text-white font-medium py-2 px-3 md:py-2.5 md:px-4 rounded-lg shadow-sm hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-300 text-xs md:text-sm;
   }
 
   .btn-red {
@@ -80,11 +87,19 @@
   }
   
   .card {
-    @apply bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-4 md:p-6;
+    @apply bg-white/95 backdrop-blur-sm rounded-2xl p-4 md:p-6;
+    border: 2px solid var(--color-yellow-200);
+    box-shadow: var(--shadow-black), 0 0 0 1px var(--color-yellow-100);
+    transition: all 0.3s ease;
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02];
+    @apply transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02];
+  }
+
+  .card-hover:hover {
+    border-color: var(--color-yellow-400);
+    box-shadow: var(--shadow-yellow-lg), 0 0 0 2px var(--color-yellow-300);
   }
 
   .card-interactive {
@@ -92,11 +107,11 @@
   }
   
   .gradient-text {
-    @apply bg-gradient-to-r from-red-600 via-red-500 to-yellow-400 bg-clip-text text-transparent font-bold;
+    @apply bg-gradient-to-r from-yellow-500 via-red-500 to-black bg-clip-text text-transparent font-bold;
   }
 
   .hero-bg {
-    background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #000000 100%);
+    background: linear-gradient(135deg, #000000 0%, #dc2626 50%, #ffd700 100%);
   }
 
   .service-logo {
@@ -142,8 +157,29 @@
     border: 0;
   }
 
+  .tag {
+    background: var(--color-yellow-100);
+    color: var(--color-black-800);
+    border: 1px solid var(--color-yellow-300);
+    @apply inline-block px-3 py-1 text-xs rounded-full font-medium;
+    transition: all 0.2s ease;
+  }
+
+  .tag:hover {
+    background: var(--color-yellow-200);
+    border-color: var(--color-yellow-400);
+  }
+
   .tag-mandatory {
-    @apply bg-red-100 text-red-700 font-medium;
+    background: var(--color-red-100);
+    color: var(--color-red-800);
+    border: 1px solid var(--color-red-300);
+    @apply font-medium;
+  }
+
+  .tag-mandatory:hover {
+    background: var(--color-red-200);
+    border-color: var(--color-red-400);
   }
 
   .info-grid {
@@ -179,11 +215,24 @@
   }
 
   .notification.error {
-    @apply border-red-500 bg-red-50;
+    border-left: 4px solid var(--color-red-600);
+    background: var(--color-red-50);
+    color: var(--color-red-800);
+    box-shadow: var(--shadow-red);
   }
 
   .notification.warning {
-    @apply border-yellow-500 bg-yellow-50;
+    border-left: 4px solid var(--color-yellow-600);
+    background: var(--color-yellow-50);
+    color: var(--color-black-800);
+    box-shadow: var(--shadow-yellow);
+  }
+
+  .notification.success {
+    border-left: 4px solid var(--color-yellow-600);
+    background: linear-gradient(135deg, var(--color-yellow-50) 0%, var(--color-yellow-100) 100%);
+    color: var(--color-black-800);
+    box-shadow: var(--shadow-yellow);
   }
 
   .notification.info {
@@ -196,11 +245,23 @@
   }
 
   .mobile-button {
-    @apply inline-flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium py-3 px-4 rounded-lg shadow-md active:scale-95 transition-all duration-200 text-sm min-h-[44px];
+    background: var(--gradient-secondary);
+    @apply inline-flex items-center justify-center gap-2 text-white font-medium py-3 px-4 rounded-lg active:scale-95 transition-all duration-200 text-sm min-h-[44px];
+    box-shadow: var(--shadow-yellow);
+    border: 1px solid var(--color-yellow-400);
   }
 
   .mobile-input {
-    @apply w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-gray-900 text-base shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-200 min-h-[44px];
+    @apply w-full px-4 py-3 bg-white rounded-lg text-base transition-all duration-200 min-h-[44px];
+    color: var(--color-black-800);
+    border: 2px solid var(--color-black-200);
+    box-shadow: var(--shadow-black);
+  }
+
+  .mobile-input:focus {
+    border-color: var(--color-yellow-500);
+    box-shadow: var(--shadow-yellow);
+    outline: none;
   }
 
   /* Search components */
@@ -217,7 +278,9 @@
   }
 
   .suggestion-item.selected {
-    @apply bg-red-50 text-red-900;
+    background: var(--color-yellow-100);
+    color: var(--color-black-800);
+    border-left: 3px solid var(--color-red-600);
   }
 
   /* Animation utilities */
@@ -307,7 +370,7 @@
   }
 }
 
-/* Mobile-specific optimizations */
+/* Enhanced Mobile-specific optimizations */
 @media (max-width: 768px) {
   /* Fix background attachment issues on mobile */
   .hero-bg,
@@ -322,19 +385,58 @@
     backdrop-filter: none;
   }
   
-  /* Improve touch targets */
-  button {
+  /* Enhanced touch targets for all interactive elements */
+  button, a, input, select, textarea, [role="button"], [tabindex="0"] {
     min-height: 44px;
     min-width: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   }
   
   /* Better text readability */
   .text-xs {
     font-size: 0.875rem; /* 14px minimum */
   }
+  
+  /* Enhanced mobile layout */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Mobile-first viewport optimization */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  /* Smooth mobile scrolling */
+  body {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+  }
+  
+  /* Enhanced mobile form elements */
+  input, select, textarea {
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 16px !important;
+    line-height: 1.5;
+  }
+  
+  /* Mobile-optimized buttons */
+  .btn-primary, .btn-secondary, .btn-ghost {
+    padding: 16px 24px;
+    font-size: 16px;
+    border-radius: 12px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
-/* Tablet-specific optimizations */
+/* Enhanced Tablet-specific optimizations */
 @media (min-width: 768px) and (max-width: 1023px) {
   .tablet-optimized {
     padding: 1.5rem;
@@ -344,14 +446,177 @@
   .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  
+  /* Tablet touch targets */
+  button, a, [role="button"] {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 12px 20px;
+  }
+  
+  /* Tablet form optimization */
+  input, select, textarea {
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 10px;
+  }
 }
 
-/* Reduced motion support */
+/* Enhanced Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  
+  .card-hover,
+  .card-interactive {
+    transform: none !important;
+  }
+  
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-in-right {
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn-primary, .btn-secondary, .btn-ghost {
+    border: 2px solid currentColor;
+  }
+  
+  .card {
+    border: 1px solid currentColor;
+  }
+  
+  .text-gray-600, .text-gray-700, .text-gray-800 {
+    color: #000000;
+  }
+}
+
+
+/* Enhanced ultra-small screen support */
+@media (max-width: 320px) {
+  .text-responsive-2xl {
+    font-size: 1.5rem;
+  }
+  
+  .text-responsive-xl {
+    font-size: 1.25rem;
+  }
+  
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  button, .btn-primary, .btn-secondary {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Desktop and large screen optimizations */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1200px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  
+  /* Enhanced desktop interactions */
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-primary:hover, .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Desktop typography */
+  .text-responsive-2xl {
+    font-size: 3rem;
+  }
+  
+  .text-responsive-xl {
+    font-size: 2.5rem;
+  }
+  
+  /* Desktop grid layouts */
+  .responsive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+}
+
+/* Large desktop optimizations */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1400px;
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+  
+  .responsive-grid {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2.5rem;
+  }
+  
+  /* Large screen typography */
+  .text-responsive-2xl {
+    font-size: 3.5rem;
+  }
+}
+
+/* Ultra-wide screen support */
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1600px;
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+  
+  .responsive-grid {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 3rem;
+  }
+}
+
+/* Enhanced cross-device compatibility */
+@media (min-width: 769px) and (max-width: 1023px) {
+  /* Better tablet landscape */
+  .grid-responsive {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .btn-primary, .btn-secondary {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero-section {
+    min-height: auto;
+    padding: 2rem 0;
+  }
+  
+  .modal-content {
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  
+  .sticky-header {
+    position: relative;
   }
 }

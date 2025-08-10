@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRightIcon, ArrowLeftIcon } from '@heroicons/react/24/outline'
@@ -8,7 +8,7 @@ const ServiceWizard = ({ isOpen, onClose }) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [answers, setAnswers] = useState({})
 
-  const steps = [
+  const steps = useMemo(() => [
     {
       id: 'purpose',
       title: 'What brings you to Uganda\'s investment platform?',
@@ -83,25 +83,7 @@ const ServiceWizard = ({ isOpen, onClose }) => {
         { id: 'infrastructure', title: 'Infrastructure & Construction', icon: '🏗️', description: 'Roads, buildings, and development' }
       ]
     }
-  ]
-
-  const handleAnswer = useCallback((stepId, answerId) => {
-    setAnswers(prev => ({ ...prev, [stepId]: answerId }))
-    
-    // Find next relevant step
-    const nextStep = currentStep + 1
-    if (nextStep < steps.length) {
-      const nextStepData = steps[nextStep]
-      if (!nextStepData.condition || nextStepData.condition(answers)) {
-        setCurrentStep(nextStep)
-      } else {
-        // Skip to next relevant step or finish
-        completeWizard()
-      }
-    } else {
-      completeWizard()
-    }
-  }, [currentStep, answers, steps])
+  ], [])
 
   const completeWizard = useCallback(() => {
     // Generate recommendations based on answers
@@ -121,6 +103,24 @@ const ServiceWizard = ({ isOpen, onClose }) => {
     onClose()
     navigate(route)
   }, [answers, navigate, onClose])
+
+  const handleAnswer = useCallback((stepId, answerId) => {
+    setAnswers(prev => ({ ...prev, [stepId]: answerId }))
+    
+    // Find next relevant step
+    const nextStep = currentStep + 1
+    if (nextStep < steps.length) {
+      const nextStepData = steps[nextStep]
+      if (!nextStepData.condition || nextStepData.condition(answers)) {
+        setCurrentStep(nextStep)
+      } else {
+        // Skip to next relevant step or finish
+        completeWizard()
+      }
+    } else {
+      completeWizard()
+    }
+  }, [currentStep, answers, steps, completeWizard])
 
   const goBack = useCallback(() => {
     if (currentStep > 0) {

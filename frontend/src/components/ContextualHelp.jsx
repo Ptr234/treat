@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 import {
@@ -17,7 +17,7 @@ const ContextualHelp = () => {
   const location = useLocation()
 
   // Help content for different pages and situations
-  const helpDatabase = {
+  const helpDatabase = useMemo(() => ({
     '/investments': {
       page: {
         title: 'Investment Opportunities Help',
@@ -74,7 +74,7 @@ const ContextualHelp = () => {
         ]
       }
     }
-  }
+  }), [])
 
   // Track user actions for contextual help
   const trackUserAction = useCallback((action, data = {}) => {
@@ -98,7 +98,7 @@ const ContextualHelp = () => {
       
       return () => clearTimeout(timer)
     }
-  }, [location.pathname])
+  }, [location.pathname, helpDatabase])
 
   // Detect specific scenarios that need help
   useEffect(() => {
@@ -123,7 +123,7 @@ const ContextualHelp = () => {
       setHelpContent(helpDatabase[currentPath].businessRegistration)
       setIsVisible(true)
     }
-  }, [userActions, location.pathname])
+  }, [userActions, location.pathname, helpDatabase])
 
   // Global help trigger for complex forms or errors
   useEffect(() => {
