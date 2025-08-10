@@ -547,17 +547,7 @@ const Header = () => {
                   </motion.button>
                 </div>
               ) : (
-                <div className="flex items-center space-x-2">
-                  {/* Sign In Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowAuthModal(true)}
-                    className="px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-xl font-medium transition-all duration-300"
-                  >
-                    Sign In
-                  </motion.button>
-
+                <div className="flex items-center">
                   {/* Get Started Button */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -608,7 +598,7 @@ const Header = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-20 left-0 right-0 z-40 lg:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-xl"
+            className="fixed top-20 left-0 right-0 z-40 lg:hidden bg-red-600/95 backdrop-blur-xl border-b border-red-700 shadow-xl"
           >
             <div className="max-w-7xl mx-auto px-4 py-6">
               <nav className="space-y-2">
@@ -632,8 +622,8 @@ const Header = () => {
                       }}
                       className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
                         isActiveRoute(item.href)
-                          ? 'text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg'
-                          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                          ? 'text-white bg-gradient-to-r from-yellow-500 to-yellow-600 shadow-lg'
+                          : 'text-white hover:text-yellow-200 hover:bg-red-700/50'
                       }`}
                     >
                       <span className="flex items-center space-x-3">
