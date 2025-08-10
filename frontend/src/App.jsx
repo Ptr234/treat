@@ -6,6 +6,7 @@ import Footer from './components/Footer'
 import ProfessionalNotificationSystem from './components/ProfessionalNotificationSystem'
 import MobileNavigation from './components/MobileNavigation'
 import LoadingScreen from './components/LoadingScreen'
+import TimedLoadingScreen from './components/TimedLoadingScreen'
 import FloatingActionButtons from './components/FloatingActionButtons'
 import InvoiceGeneratorButton from './components/InvoiceGeneratorButton'
 import ScrollToTop from './components/ScrollToTop'
@@ -136,14 +137,15 @@ const App = () => {
   }, [openChecklistModal, openFeedbackForm])
 
   return (
-    <GlobalErrorCatcher>
-      <ErrorBoundary>
-        <NotificationProvider>
-          <ThemeProvider>
-            <MobileProvider>
-              <AuthProvider>
-                <Router>
-                <NavigationErrorHandler>
+    <TimedLoadingScreen minLoadTime={4000}>
+      <GlobalErrorCatcher>
+        <ErrorBoundary>
+          <NotificationProvider>
+            <ThemeProvider>
+              <MobileProvider>
+                <AuthProvider>
+                  <Router>
+                  <NavigationErrorHandler>
                 <div className="min-h-screen relative overflow-x-hidden">
                 <AnimatePresence>
                   <motion.div
@@ -214,6 +216,7 @@ const App = () => {
         </NotificationProvider>
       </ErrorBoundary>
     </GlobalErrorCatcher>
+    </TimedLoadingScreen>
   )
 }
 

@@ -109,12 +109,16 @@ const removeLoadingScreen = () => {
   }
 }
 
-// Try multiple approaches to ensure loading screen is removed
-setTimeout(removeLoadingScreen, 100)
-setTimeout(removeLoadingScreen, 500) // Backup timeout
-setTimeout(removeLoadingScreen, 1000) // Final backup
+// Enforce 4-second minimum loading screen display
+const startTime = Date.now()
+const minLoadingTime = 4000 // 4 seconds
 
-// Also remove on first React component render
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(removeLoadingScreen, 50)
-})
+const removeLoadingScreenAfterDelay = () => {
+  const elapsed = Date.now() - startTime
+  const remainingTime = Math.max(0, minLoadingTime - elapsed)
+  
+  setTimeout(removeLoadingScreen, remainingTime)
+}
+
+// Remove loading screen only after 4 seconds minimum
+setTimeout(removeLoadingScreenAfterDelay, 100)
