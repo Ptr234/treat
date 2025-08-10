@@ -254,7 +254,7 @@ const Header = () => {
         }}
       >
         <div className="w-full">
-          <div className="flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20 px-3 sm:px-6 lg:px-8">
             
             {/* Logo Section */}
             <motion.div 
@@ -263,7 +263,7 @@ const Header = () => {
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <Link to="/" className="flex items-center group">
-                <div className="relative w-12 h-12 rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl bg-gradient-to-br from-red-600 to-red-800">
+                <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl bg-gradient-to-br from-red-600 to-red-800">
                   <img 
                     src="/images/oneStopCenter-logo.jpeg" 
                     alt="OneStopCentre Uganda" 
@@ -273,18 +273,19 @@ const Header = () => {
                       e.target.nextSibling.style.display = 'flex'
                     }}
                   />
-                  <div className="hidden w-full h-full bg-gradient-to-br from-red-600 to-red-800 items-center justify-center text-white font-bold text-base">
+                  <div className="hidden w-full h-full bg-gradient-to-br from-red-600 to-red-800 items-center justify-center text-white font-bold text-sm md:text-base">
                     OSC
                   </div>
                 </div>
-                <div className="ml-4 flex flex-col justify-center">
-                  <div className="font-bold text-xl leading-tight transition-colors duration-300 text-white">
-                    OneStopCentre
+                <div className="ml-2 md:ml-4 flex flex-col justify-center">
+                  <div className="font-bold text-base md:text-xl leading-tight transition-colors duration-300 text-white">
+                    <span className="hidden sm:inline">OneStopCentre</span>
+                    <span className="sm:hidden">OSC</span>
                   </div>
-                  <div className="text-sm font-semibold leading-tight transition-colors duration-300 text-yellow-300 -mt-0.5">
+                  <div className="text-xs md:text-sm font-semibold leading-tight transition-colors duration-300 text-yellow-300 -mt-0.5">
                     Uganda
                   </div>
-                  <div className="text-xs font-medium text-white/90 italic -mt-0.5">
+                  <div className="hidden md:block text-xs font-medium text-white/90 italic -mt-0.5">
                     Investing in Uganda simplified
                   </div>
                 </div>
@@ -389,7 +390,7 @@ const Header = () => {
             </nav>
 
             {/* Search & Auth Section */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-3">
               {/* Search */}
               <div className="relative" ref={searchRef}>
                 <AnimatePresence>
@@ -445,9 +446,9 @@ const Header = () => {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       onClick={() => setIsSearchOpen(true)}
-                      className="p-2 rounded-xl transition-all duration-300 text-white hover:text-yellow-200 hover:bg-red-700/50"
+                      className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all duration-300 text-white hover:text-yellow-200 hover:bg-red-700/50"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </motion.button>
@@ -457,21 +458,21 @@ const Header = () => {
 
               {/* Authentication Section */}
               {isAuthenticated ? (
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-1 sm:space-x-3">
                   {/* User Menu */}
                   <div className="relative">
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       onClick={() => setActiveDropdown(activeDropdown === 'user' ? null : 'user')}
-                      className="flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-300"
+                      className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-100 hover:bg-gray-200 rounded-lg sm:rounded-xl transition-all duration-300"
                     >
-                      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-semibold text-xs sm:text-sm">
                         {user?.firstName?.charAt(0) || user?.email?.charAt(0) || 'U'}
                       </div>
                       <span className="hidden md:block font-medium text-gray-700">
                         {user?.firstName || 'User'}
                       </span>
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </motion.button>
@@ -539,28 +540,28 @@ const Header = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => navigate('/investment-onboarding')}
-                    className="hidden sm:flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="hidden sm:flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-semibold text-xs sm:text-sm rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                     style={{
                       boxShadow: '0 8px 16px rgba(220, 38, 38, 0.2), 0 4px 8px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
                     }}
                   >
-                    {renderIcon('CurrencyDollarIcon', 'w-4 h-4 mr-2')}
+                    {renderIcon('CurrencyDollarIcon', 'w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2')}
                     Invest Now
                   </motion.button>
                 </div>
               ) : (
-                <div className="flex items-center">
+                <div className="flex items-center space-x-1">
                   {/* Get Started Button */}
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setShowAuthModal(true)}
-                    className="hidden sm:flex items-center px-6 py-2.5 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="hidden sm:flex items-center px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-semibold text-xs sm:text-sm rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                     style={{
                       boxShadow: '0 8px 16px rgba(220, 38, 38, 0.2), 0 4px 8px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
                     }}
                   >
-                    {renderIcon('RocketLaunchIcon', 'w-4 h-4 mr-2')}
+                    {renderIcon('RocketLaunchIcon', 'w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2')}
                     Get Started
                   </motion.button>
                   
@@ -568,9 +569,9 @@ const Header = () => {
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setShowAuthModal(true)}
-                    className="sm:hidden p-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition-colors"
+                    className="sm:hidden p-1 bg-white/10 rounded-md text-white hover:bg-white/20 transition-colors"
                   >
-                    {renderIcon('RocketLaunchIcon', 'w-5 h-5')}
+                    {renderIcon('RocketLaunchIcon', 'w-3.5 h-3.5')}
                   </motion.button>
                 </div>
               )}
@@ -579,18 +580,18 @@ const Header = () => {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="lg:hidden p-2 rounded-xl transition-colors duration-300 text-white hover:text-yellow-200 hover:bg-red-700/50"
+                className="lg:hidden p-1.5 rounded-lg transition-colors duration-300 text-white hover:text-yellow-200 hover:bg-red-700/50"
               >
                 <motion.div
                   animate={{ rotate: isMenuOpen ? 180 : 0 }}
                   transition={{ duration: 0.3 }}
                 >
                   {isMenuOpen ? (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   ) : (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                   )}
