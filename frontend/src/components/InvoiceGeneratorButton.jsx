@@ -11,13 +11,19 @@ const InvoiceGeneratorButton = () => {
     <>
       {/* Floating Action Button */}
       <motion.div
-        className="fixed bottom-6 right-6 z-40"
+        className="fixed top-1/2 right-6 -translate-y-1/2 z-40"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.5, type: "spring", stiffness: 260, damping: 20 }}
       >
         <motion.button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            try {
+              setIsOpen(true)
+            } catch (error) {
+              console.error('Failed to open invoice generator:', error)
+            }
+          }}
           onHoverStart={() => setIsHovered(true)}
           onHoverEnd={() => setIsHovered(false)}
           className="group relative bg-gradient-to-r from-yellow-500 to-red-500 text-black p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-yellow-300"
@@ -81,7 +87,13 @@ const InvoiceGeneratorButton = () => {
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
                 transition={{ delay: 0.1 }}
-                onClick={() => setIsOpen(true)}
+                onClick={() => {
+                  try {
+                    setIsOpen(true)
+                  } catch (error) {
+                    console.error('Failed to open quick invoice:', error)
+                  }
+                }}
                 className="bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition-colors group/quick"
                 title="Quick Invoice"
               >
@@ -96,7 +108,13 @@ const InvoiceGeneratorButton = () => {
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
                 transition={{ delay: 0.2 }}
-                onClick={() => setIsOpen(true)}
+                onClick={() => {
+                  try {
+                    setIsOpen(true)
+                  } catch (error) {
+                    console.error('Failed to open invoice templates:', error)
+                  }
+                }}
                 className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors group/template"
                 title="Invoice Templates"
               >
@@ -124,7 +142,13 @@ const InvoiceGeneratorButton = () => {
       {/* Professional Invoice Generator Modal */}
       <ProfessionalInvoiceGenerator
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          try {
+            setIsOpen(false)
+          } catch (error) {
+            console.error('Failed to close invoice generator:', error)
+          }
+        }}
       />
     </>
   )

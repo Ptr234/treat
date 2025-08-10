@@ -188,7 +188,29 @@ const ProfessionalInvoiceGenerator = ({ isOpen = true, onClose = () => {} }) => 
 
   // Generate and download invoice
   const generateInvoice = useCallback(() => {
-    const invoiceHTML = `
+    try {
+      // Validate required fields
+      if (!invoiceData.clientName.trim()) {
+        addNotification({
+          type: 'error',
+          title: 'Validation Error',
+          message: 'Client name is required',
+          duration: 5000
+        })
+        return
+      }
+
+      if (invoiceData.items.length === 0) {
+        addNotification({
+          type: 'error',
+          title: 'Validation Error', 
+          message: 'At least one item is required',
+          duration: 5000
+        })
+        return
+      }
+
+      const invoiceHTML = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -342,23 +364,32 @@ const ProfessionalInvoiceGenerator = ({ isOpen = true, onClose = () => {} }) => 
 </body>
 </html>`
 
-    // Create and download
-    const blob = new Blob([invoiceHTML], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `Invoice_${invoiceData.invoiceNumber}_${currentAgency.agency.replace(/\s+/g, '_')}.html`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+      // Create and download
+      const blob = new Blob([invoiceHTML], { type: 'text/html' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `Invoice_${invoiceData.invoiceNumber}_${currentAgency.agency.replace(/\s+/g, '_')}.html`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
 
-    addNotification({
-      type: 'success',
-      title: 'Invoice Generated Successfully',
-      message: `Professional invoice ${invoiceData.invoiceNumber} downloaded`,
-      duration: 5000
-    })
+      addNotification({
+        type: 'success',
+        title: 'Invoice Generated Successfully',
+        message: `Professional invoice ${invoiceData.invoiceNumber} downloaded`,
+        duration: 5000
+      })
+    } catch (error) {
+      console.error('Invoice generation error:', error)
+      addNotification({
+        type: 'error',
+        title: 'Generation Failed',
+        message: 'Failed to generate invoice. Please try again.',
+        duration: 5000
+      })
+    }
   }, [invoiceData, currentAgency, totals, addNotification])
 
   if (!isOpen) return null
