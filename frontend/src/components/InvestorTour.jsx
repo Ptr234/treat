@@ -203,7 +203,7 @@ const InvestorTour = ({ isOpen, onClose }) => {
 
   const handleStartInvestment = useCallback(() => {
     onClose()
-    navigate('/services?category=Investment Support')
+    navigate('/services#investment-support')
   }, [onClose, navigate])
 
   const handleViewOpportunities = useCallback(() => {

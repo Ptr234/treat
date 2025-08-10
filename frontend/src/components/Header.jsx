@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
+import { navigateToSection } from '../utils/preciseNavigation'
 import AuthModal from './AuthModal'
 import {
   HomeIcon,
@@ -149,11 +150,11 @@ const Header = () => {
       icon: 'CurrencyDollarIcon',
       dropdown: [
         { name: 'All Investment Sectors', href: '/investments', icon: 'BriefcaseIcon' },
-        { name: 'Agriculture Investments', href: '/investments?sector=agriculture', icon: 'BeakerIcon' },
-        { name: 'Tourism Investments', href: '/investments?sector=tourism', icon: 'GlobeAltIcon' },
-        { name: 'Mining Investments', href: '/investments?sector=mining', icon: 'CubeIcon' },
-        { name: 'ICT Investments', href: '/investments?sector=ict', icon: 'ComputerDesktopIcon' },
-        { name: 'Manufacturing Investments', href: '/investments?sector=manufacturing', icon: 'CogIcon' },
+        { name: 'Agriculture Investments', href: '/investments#agriculture', icon: 'BeakerIcon' },
+        { name: 'Tourism Investments', href: '/investments#tourism', icon: 'GlobeAltIcon' },
+        { name: 'Mining Investments', href: '/investments#mining', icon: 'CubeIcon' },
+        { name: 'ICT Investments', href: '/investments#ict', icon: 'ComputerDesktopIcon' },
+        { name: 'Manufacturing Investments', href: '/investments#manufacturing', icon: 'CogIcon' },
         { name: 'Investment ROI Calculator', href: '/roi-calculator', icon: 'ChartBarIcon' },
         { name: 'Investment Onboarding', href: '/investment-onboarding', icon: 'RocketLaunchIcon' }
       ]
@@ -163,11 +164,11 @@ const Header = () => {
       href: '/services', 
       icon: 'BuildingOfficeIcon',
       dropdown: [
-        { name: 'Investment Support Services', href: '/services?category=Investment Support', icon: 'TargetIcon' },
+        { name: 'Investment Support Services', href: '/services#investment-support', icon: 'TargetIcon' },
         { name: 'Business Registration & Licensing', href: '/registration-wizard', icon: 'BuildingOffice2Icon' },
-        { name: 'Tax & Revenue Services', href: '/services?category=Tax & Revenue Services', icon: 'CalculatorIcon' },
-        { name: 'Immigration & Work Permits', href: '/services?category=Immigration & Work Permits', icon: 'ClipboardDocumentListIcon' },
-        { name: 'Export & Import Services', href: '/services?category=Export & Import Services', icon: 'ArchiveBoxIcon' },
+        { name: 'Tax & Revenue Services', href: '/services#tax-revenue', icon: 'CalculatorIcon' },
+        { name: 'Immigration & Work Permits', href: '/services#immigration-permits', icon: 'ClipboardDocumentListIcon' },
+        { name: 'Export & Import Services', href: '/services#export-import', icon: 'ArchiveBoxIcon' },
         { name: 'All Government Services', href: '/services', icon: 'BuildingOfficeIcon' }
       ]
     },
@@ -180,7 +181,7 @@ const Header = () => {
         { name: 'Tax Calculator', href: '/calculator', icon: 'CalculatorIcon' },
         { name: 'Business Invoice Generator', href: '/invoice', icon: 'DocumentTextIcon' },
         { name: 'Document Checklist', href: '/document-checklist', icon: 'CheckCircleIcon' },
-        { name: 'Investment Status Tracker', href: '/tools?tool=status-tracker', icon: 'MapPinIcon' },
+        { name: 'Investment Status Tracker', href: '/tools#status-tracker', icon: 'MapPinIcon' },
         { name: 'All Investment Tools', href: '/tools', icon: 'WrenchScrewdriverIcon' }
       ]
     },
@@ -189,10 +190,10 @@ const Header = () => {
       href: '/downloads', 
       icon: 'FolderIcon',
       dropdown: [
-        { name: 'Investment Guides', href: '/downloads?category=investment-guides', icon: 'BookOpenIcon' },
-        { name: 'Legal Documents', href: '/downloads?category=legal', icon: 'ScaleIcon' },
-        { name: 'Tax Information', href: '/downloads?category=tax', icon: 'CurrencyDollarIcon' },
-        { name: 'Sector Reports', href: '/downloads?category=reports', icon: 'ChartBarIcon' },
+        { name: 'Investment Guides', href: '/downloads#investment-guides', icon: 'BookOpenIcon' },
+        { name: 'Legal Documents', href: '/downloads#legal-documents', icon: 'ScaleIcon' },
+        { name: 'Tax Information', href: '/downloads#tax-information', icon: 'CurrencyDollarIcon' },
+        { name: 'Sector Reports', href: '/downloads#sector-reports', icon: 'ChartBarIcon' },
         { name: 'All Resources', href: '/downloads', icon: 'FolderIcon' }
       ]
     },
@@ -201,10 +202,10 @@ const Header = () => {
       href: '/support', 
       icon: 'HandRaisedIcon',
       dropdown: [
-        { name: 'Investment Consultation', href: '/support?type=investment', icon: 'BriefcaseIcon' },
+        { name: 'Investment Consultation', href: '/support#investment-consultation', icon: 'BriefcaseIcon' },
         { name: 'Agency Directory', href: '/agencies', icon: 'BuildingOffice2Icon' },
-        { name: 'Emergency Support', href: '/support?section=emergency', icon: 'ExclamationTriangleIcon' },
-        { name: 'Investor FAQ', href: '/support?section=investor-faq', icon: 'QuestionMarkCircleIcon' }
+        { name: 'Emergency Support', href: '/support#emergency', icon: 'ExclamationTriangleIcon' },
+        { name: 'Investor FAQ', href: '/support#faq', icon: 'QuestionMarkCircleIcon' }
       ]
     }
   ], [])
@@ -368,7 +369,13 @@ const Header = () => {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: dropdownIndex * 0.05 }}
                             onClick={() => {
-                              navigate(dropdownItem.href)
+                              // Parse href for precise navigation
+                              const [path, hash] = dropdownItem.href.split('#')
+                              if (hash) {
+                                navigateToSection(navigate, path, hash)
+                              } else {
+                                navigate(dropdownItem.href)
+                              }
                               setActiveDropdown(null)
                             }}
                             className="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 group"
@@ -661,7 +668,13 @@ const Header = () => {
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: dropdownIndex * 0.05 }}
                               onClick={() => {
-                                navigate(dropdownItem.href)
+                                // Parse href for precise navigation
+                                const [path, hash] = dropdownItem.href.split('#')
+                                if (hash) {
+                                  navigateToSection(navigate, path, hash)
+                                } else {
+                                  navigate(dropdownItem.href)
+                                }
                                 setIsMenuOpen(false)
                                 setActiveDropdown(null)
                               }}

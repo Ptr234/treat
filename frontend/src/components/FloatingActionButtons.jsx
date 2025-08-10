@@ -33,8 +33,8 @@ const FloatingActionButtons = () => {
       icon: '📝',
       action: () => {
         setIsOpen(false)
-        // Show feedback form
-        window.openFeedbackForm?.()
+        // Show feedback form using custom event
+        document.dispatchEvent(new CustomEvent('openFeedbackForm'))
       }
     }
   ]
