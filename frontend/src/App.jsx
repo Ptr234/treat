@@ -10,11 +10,14 @@ import FloatingActionButtons from './components/FloatingActionButtons'
 import InvoiceGeneratorButton from './components/InvoiceGeneratorButton'
 import ScrollToTop from './components/ScrollToTop'
 import ErrorBoundary from './components/ErrorBoundary'
+import GlobalErrorCatcher from './components/GlobalErrorCatcher'
 import NavigationErrorHandler from './components/NavigationErrorHandler'
 import NavigationGuide from './components/NavigationGuide'
 import QuickActions from './components/QuickActions'
 import ContextualHelp from './components/ContextualHelp'
 import backgroundCacheManager from './utils/backgroundCacheManager'
+import { networkErrorHandler } from './utils/networkErrorHandler'
+import { errorManager } from './utils/errorHandling'
 import { NotificationProvider } from './contexts/NotificationContext'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { MobileProvider } from './contexts/MobileContext'
@@ -82,12 +85,16 @@ const App = () => {
   const [isFeedbackFormOpen, setIsFeedbackFormOpen] = useState(false)
 
   useEffect(() => {
+    // Initialize error handling systems
+    networkErrorHandler.preventNetworkErrors()
+    errorManager.setUserContext({ app: 'Uganda Investment Portal' })
+    
     // Initialize background cache manager
     backgroundCacheManager.init?.() // Safe call in case init is already called
     
     // Preload critical pages to prevent import failures
     const preloadCriticalPages = async () => {
-      try {
+      const result = await networkErrorHandler.safeExecute(async () => {
         // Preload most commonly accessed pages
         await Promise.allSettled([
           import('./pages/HomePage'),
@@ -95,8 +102,10 @@ const App = () => {
           import('./pages/AboutPage'),
           import('./pages/ServicesPage'),
         ]);
-      } catch (error) {
-        // Preload failed, pages will load on demand
+      }, null, 'preloading pages')
+      
+      if (!result.success) {
+        console.warn('Page preloading failed, pages will load on demand')
       }
     };
     
@@ -105,13 +114,13 @@ const App = () => {
   }, [])
 
   // Secure modal handlers using custom events instead of global window pollution
-  const openChecklistModal = useCallback(() => {
+  const openChecklistModal = useCallback(networkErrorHandler.wrapEventHandler(() => {
     setIsChecklistModalOpen(true)
-  }, [])
+  }, 'opening checklist modal'), [])
   
-  const openFeedbackForm = useCallback(() => {
+  const openFeedbackForm = useCallback(networkErrorHandler.wrapEventHandler(() => {
     setIsFeedbackFormOpen(true)
-  }, [])
+  }, 'opening feedback form'), [])
 
   useEffect(() => {
     const handleOpenChecklist = () => openChecklistModal()
@@ -127,13 +136,14 @@ const App = () => {
   }, [openChecklistModal, openFeedbackForm])
 
   return (
-    <ErrorBoundary>
-      <NotificationProvider>
-        <ThemeProvider>
-          <MobileProvider>
-            <AuthProvider>
-              <Router>
-              <NavigationErrorHandler>
+    <GlobalErrorCatcher>
+      <ErrorBoundary>
+        <NotificationProvider>
+          <ThemeProvider>
+            <MobileProvider>
+              <AuthProvider>
+                <Router>
+                <NavigationErrorHandler>
                 <div className="min-h-screen relative overflow-x-hidden">
                 <AnimatePresence>
                   <motion.div
@@ -196,13 +206,14 @@ const App = () => {
                 <QuickActions />
                 <ContextualHelp />
                 </div>
-              </NavigationErrorHandler>
-              </Router>
-            </AuthProvider>
-          </MobileProvider>
-        </ThemeProvider>
-      </NotificationProvider>
-    </ErrorBoundary>
+                </NavigationErrorHandler>
+                </Router>
+              </AuthProvider>
+            </MobileProvider>
+          </ThemeProvider>
+        </NotificationProvider>
+      </ErrorBoundary>
+    </GlobalErrorCatcher>
   )
 }
 

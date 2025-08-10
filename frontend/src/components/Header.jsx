@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
 import { navigateToSection } from '../utils/preciseNavigation'
+import { networkErrorHandler } from '../utils/networkErrorHandler'
 import AuthModal from './AuthModal'
 import {
   HomeIcon,
@@ -217,21 +218,15 @@ const Header = () => {
     return location.pathname.startsWith(href)
   }, [location.pathname])
 
-  const handleSearch = useCallback((e) => {
+  const handleSearch = useCallback(networkErrorHandler.wrapEventHandler((e) => {
     e.preventDefault()
     const trimmedSearch = searchTerm.trim()
     if (trimmedSearch) {
-      try {
-        navigate(`/search?q=${encodeURIComponent(trimmedSearch)}`)
-        setIsSearchOpen(false)
-        setSearchTerm('')
-      } catch (error) {
-        // Navigation error handling removed for production
-        // Fallback navigation
-        window.location.href = `#/search?q=${encodeURIComponent(trimmedSearch)}`
-      }
+      navigate(`/search?q=${encodeURIComponent(trimmedSearch)}`)
+      setIsSearchOpen(false)
+      setSearchTerm('')
     }
-  }, [searchTerm, navigate])
+  }, 'handling search'), [searchTerm, navigate])
 
   // Enhanced search suggestions based on popular investment queries
   const searchSuggestions = useMemo(() => [
@@ -368,7 +363,7 @@ const Header = () => {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: dropdownIndex * 0.05 }}
-                            onClick={() => {
+                            onClick={networkErrorHandler.wrapEventHandler(() => {
                               // Parse href for precise navigation
                               const [path, hash] = dropdownItem.href.split('#')
                               if (hash) {
@@ -377,7 +372,7 @@ const Header = () => {
                                 navigate(dropdownItem.href)
                               }
                               setActiveDropdown(null)
-                            }}
+                            }, 'navigation dropdown click')}
                             className="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 group"
                           >
                             <span className="mr-3 group-hover:scale-110 transition-transform duration-200">
@@ -676,7 +671,7 @@ const Header = () => {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: dropdownIndex * 0.05 }}
-                              onClick={() => {
+                              onClick={networkErrorHandler.wrapEventHandler(() => {
                                 // Parse href for precise navigation
                                 const [path, hash] = dropdownItem.href.split('#')
                                 if (hash) {
@@ -686,7 +681,7 @@ const Header = () => {
                                 }
                                 setIsMenuOpen(false)
                                 setActiveDropdown(null)
-                              }}
+                              }, 'mobile dropdown navigation')}
                               className="w-full flex items-center px-3 py-2 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
                             >
                               <span className="mr-2">{renderIcon(dropdownItem.icon, "w-3 h-3")}</span>

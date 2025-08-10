@@ -3,6 +3,7 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNotification } from '../contexts/NotificationContext'
 import { getContactInfo } from '../data/contactDatabase'
+import { networkErrorHandler } from '../utils/networkErrorHandler'
 import LazyImage from './LazyImage'
 
 const ProfessionalInvoiceGenerator = ({ isOpen = true, onClose = () => {} }) => {
@@ -187,8 +188,8 @@ const ProfessionalInvoiceGenerator = ({ isOpen = true, onClose = () => {} }) => 
   }, [addNotification])
 
   // Generate and download invoice
-  const generateInvoice = useCallback(() => {
-    try {
+  const generateInvoice = useCallback(async () => {
+    const operation = async () => {
       // Validate required fields
       if (!invoiceData.clientName.trim()) {
         addNotification({
@@ -381,12 +382,16 @@ const ProfessionalInvoiceGenerator = ({ isOpen = true, onClose = () => {} }) => 
         message: `Professional invoice ${invoiceData.invoiceNumber} downloaded`,
         duration: 5000
       })
-    } catch (error) {
-      console.error('Invoice generation error:', error)
+    }
+
+    // Use network error handler for comprehensive error handling
+    const result = await networkErrorHandler.safeExecute(operation, null, 'generating invoice')
+    
+    if (!result.success) {
       addNotification({
         type: 'error',
         title: 'Generation Failed',
-        message: 'Failed to generate invoice. Please try again.',
+        message: result.error || 'Failed to generate invoice. Please try again.',
         duration: 5000
       })
     }
