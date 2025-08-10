@@ -248,8 +248,8 @@ const Header = () => {
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
           isScrolled 
-            ? 'bg-white/95 backdrop-blur-xl shadow-2xl shadow-black/10 border-b border-gray-200/50' 
-            : 'bg-white/90 backdrop-blur-md shadow-xl shadow-black/5'
+            ? 'bg-red-600/95 backdrop-blur-xl shadow-2xl shadow-black/10 border-b border-red-700/50' 
+            : 'bg-red-600/90 backdrop-blur-md shadow-xl shadow-black/5'
         }`}
         style={{
           boxShadow: isScrolled 
@@ -282,13 +282,13 @@ const Header = () => {
                   </div>
                 </div>
                 <div className="ml-4 flex flex-col justify-center">
-                  <div className="font-bold text-xl leading-tight transition-colors duration-300 text-gray-900">
+                  <div className="font-bold text-xl leading-tight transition-colors duration-300 text-white">
                     OneStopCentre
                   </div>
-                  <div className="text-sm font-semibold leading-tight transition-colors duration-300 text-blue-600 -mt-0.5">
+                  <div className="text-sm font-semibold leading-tight transition-colors duration-300 text-yellow-300 -mt-0.5">
                     Uganda
                   </div>
-                  <div className="text-xs font-medium text-gray-600 italic -mt-0.5">
+                  <div className="text-xs font-medium text-white/90 italic -mt-0.5">
                     Investing in Uganda simplified
                   </div>
                 </div>
@@ -315,8 +315,8 @@ const Header = () => {
                     }}
                     className={`relative px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 group ${
                       isActiveRoute(item.href)
-                        ? `text-white bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg shadow-blue-500/25` 
-                        : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100/80 hover:shadow-md hover:shadow-gray-900/5'
+                        ? `text-white bg-gradient-to-r from-yellow-500 to-yellow-600 shadow-lg shadow-yellow-500/25` 
+                        : 'text-white hover:text-yellow-200 hover:bg-red-700/50 hover:shadow-md'
                     }`}
                     style={{
                       ...(isActiveRoute(item.href) && {
@@ -443,7 +443,7 @@ const Header = () => {
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       onClick={() => setIsSearchOpen(true)}
-                      className="p-2 rounded-xl transition-all duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                      className="p-2 rounded-xl transition-all duration-300 text-white hover:text-yellow-200 hover:bg-red-700/50"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -578,7 +578,7 @@ const Header = () => {
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="lg:hidden p-2 rounded-xl transition-colors duration-300 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                className="lg:hidden p-2 rounded-xl transition-colors duration-300 text-white hover:text-yellow-200 hover:bg-red-700/50"
               >
                 <motion.div
                   animate={{ rotate: isMenuOpen ? 180 : 0 }}
