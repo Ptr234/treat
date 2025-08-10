@@ -1,4 +1,5 @@
 /* App-specific styles */
+@import './styles/mobile-optimizations.css';
 
 /* Line clamp utility for text truncation */
 .line-clamp-2 {

@@ -11,7 +11,7 @@ const InvoiceGeneratorButton = () => {
     <>
       {/* Floating Action Button */}
       <motion.div
-        className="fixed top-1/2 right-6 -translate-y-1/2 z-40"
+        className="fixed top-1/2 right-4 -translate-y-1/2 z-40"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.5, type: "spring", stiffness: 260, damping: 20 }}
@@ -26,7 +26,7 @@ const InvoiceGeneratorButton = () => {
           }}
           onHoverStart={() => setIsHovered(true)}
           onHoverEnd={() => setIsHovered(false)}
-          className="group relative bg-gradient-to-r from-yellow-500 to-red-500 text-black p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-yellow-300"
+          className="group relative bg-gradient-to-r from-yellow-500 to-red-500 text-black p-3 md:p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-300"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -35,7 +35,7 @@ const InvoiceGeneratorButton = () => {
             animate={{ rotate: isHovered ? 180 : 0 }}
             transition={{ duration: 0.3 }}
           >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-6 h-6 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
             </svg>
           </motion.div>

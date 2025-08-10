@@ -271,12 +271,12 @@ const Hero = () => {
                   className="w-8 h-8 object-contain ml-3 opacity-80"
                 />
               </div>
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
+              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 drop-shadow-xl">
                 <span className="bg-gradient-to-r from-red-300 to-yellow-300 bg-clip-text text-transparent drop-shadow-lg">
                   Invest Uganda
                 </span>
-                <span className="block text-white text-3xl md:text-4xl lg:text-5xl font-medium">
-                  Pearl of Africa Investment Portal
+                <span className="block text-white text-xl md:text-3xl lg:text-4xl font-medium">
+                  Investment Portal
                 </span>
               </h1>
               <div className="relative mb-8">
@@ -376,8 +376,8 @@ const Hero = () => {
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
               <div className="w-8 h-1 bg-gradient-to-r from-black via-red-500 via-yellow-400 to-black rounded-full mr-4"></div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white">
-                Start Your Investment Journey
+              <h2 className="text-xl md:text-2xl font-bold text-white">
+                Start Investment Journey
               </h2>
               <div className="w-8 h-1 bg-gradient-to-r from-black via-red-500 via-yellow-400 to-black rounded-full ml-4"></div>
             </div>
@@ -408,7 +408,7 @@ const Hero = () => {
                 }}
               >
                 <div className="text-3xl mb-4">{action.icon}</div>
-                <h3 className="text-lg font-semibold text-white mb-2">{action.title}</h3>
+                <h3 className="text-base md:text-lg font-semibold text-white mb-2">{action.title}</h3>
                 <p className="text-gray-300 text-sm">{action.desc}</p>
               </motion.div>
             ))}

@@ -560,13 +560,22 @@ const Header = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setShowAuthModal(true)}
-                    className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="hidden sm:flex items-center px-6 py-2.5 bg-gradient-to-r from-red-600 to-yellow-500 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                     style={{
                       boxShadow: '0 8px 16px rgba(220, 38, 38, 0.2), 0 4px 8px rgba(245, 158, 11, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
                     }}
                   >
                     {renderIcon('RocketLaunchIcon', 'w-4 h-4 mr-2')}
                     Get Started
+                  </motion.button>
+                  
+                  {/* Mobile CTA */}
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowAuthModal(true)}
+                    className="sm:hidden p-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition-colors"
+                  >
+                    {renderIcon('RocketLaunchIcon', 'w-5 h-5')}
                   </motion.button>
                 </div>
               )}
@@ -605,9 +614,9 @@ const Header = () => {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-20 left-0 right-0 z-40 lg:hidden bg-red-600/95 backdrop-blur-xl border-b border-red-700 shadow-xl"
+            className="fixed top-16 left-0 right-0 z-40 lg:hidden bg-white border-b border-gray-200 shadow-lg"
           >
-            <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="max-w-7xl mx-auto px-4 py-4">
               <nav className="space-y-2">
                 {navigationItems.map((item, index) => (
                   <motion.div
@@ -627,19 +636,19 @@ const Header = () => {
                           setActiveDropdown(null)
                         }
                       }}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ${
                         isActiveRoute(item.href)
-                          ? 'text-white bg-gradient-to-r from-yellow-500 to-yellow-600 shadow-lg'
-                          : 'text-white hover:text-yellow-200 hover:bg-red-700/50'
+                          ? 'text-red-600 bg-red-50'
+                          : 'text-gray-700 hover:text-red-600 hover:bg-gray-50'
                       }`}
                     >
-                      <span className="flex items-center space-x-3">
-                        {renderIcon(item.icon, "w-5 h-5")}
+                      <span className="flex items-center space-x-2">
+                        {renderIcon(item.icon, "w-4 h-4")}
                         <span>{item.name}</span>
                       </span>
                       {item.dropdown && (
                         <motion.svg
-                          className="w-5 h-5"
+                          className="w-4 h-4"
                           animate={{ rotate: activeDropdown === item.name ? 180 : 0 }}
                           transition={{ duration: 0.2 }}
                           fill="none"
@@ -659,7 +668,7 @@ const Header = () => {
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
                           transition={{ duration: 0.2 }}
-                          className="ml-4 mt-2 space-y-1"
+                          className="ml-6 mt-1 space-y-1"
                         >
                           {item.dropdown.map((dropdownItem, dropdownIndex) => (
                             <motion.button
@@ -678,9 +687,9 @@ const Header = () => {
                                 setIsMenuOpen(false)
                                 setActiveDropdown(null)
                               }}
-                              className="w-full flex items-center px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                              className="w-full flex items-center px-3 py-2 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
                             >
-                              <span className="mr-3">{renderIcon(dropdownItem.icon, "w-4 h-4")}</span>
+                              <span className="mr-2">{renderIcon(dropdownItem.icon, "w-3 h-3")}</span>
                               <span>{dropdownItem.name}</span>
                             </motion.button>
                           ))}

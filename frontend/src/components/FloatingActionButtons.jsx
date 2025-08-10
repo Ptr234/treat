@@ -47,7 +47,7 @@ const FloatingActionButtons = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="mb-4 space-y-2"
+            className="mb-3 space-y-2"
           >
             {actions.map((action, index) => (
               <motion.button
@@ -60,10 +60,10 @@ const FloatingActionButtons = () => {
                   action.action()
                   setIsOpen(false)
                 }}
-                className="flex items-center bg-white text-gray-700 px-4 py-2 rounded-full shadow-lg hover:bg-gray-50 transition-colors group"
+                className="flex items-center bg-white text-gray-700 px-3 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors group text-sm"
               >
-                <span className="mr-2 text-lg">{action.icon}</span>
-                <span className="text-sm font-medium whitespace-nowrap">
+                <span className="mr-2 text-base">{action.icon}</span>
+                <span className="font-medium whitespace-nowrap">
                   {action.label}
                 </span>
               </motion.button>
@@ -75,7 +75,7 @@ const FloatingActionButtons = () => {
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors ${
+        className={`bg-blue-600 text-white p-3 rounded-full shadow-md hover:bg-blue-700 transition-colors ${
           isOpen ? 'rotate-45' : ''
         }`}
         style={{ transition: 'transform 0.2s ease' }}
