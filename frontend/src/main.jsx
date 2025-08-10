@@ -102,23 +102,29 @@ root.render(
 const removeLoadingScreen = () => {
   const loadingFallback = document.getElementById('loading-fallback')
   if (loadingFallback) {
-    loadingFallback.style.display = 'none'
-    // App mount logging removed for production
+    loadingFallback.style.opacity = '0'
+    loadingFallback.style.transition = 'opacity 0.5s ease-out'
+    setTimeout(() => {
+      if (loadingFallback.parentElement) {
+        loadingFallback.style.display = 'none'
+      }
+    }, 500)
     // Add a marker to indicate React has taken over
     document.body.setAttribute('data-react-loaded', 'true')
   }
 }
 
-// Enforce 4-second minimum loading screen display
-const startTime = Date.now()
-const minLoadingTime = 4000 // 4 seconds
-
-const removeLoadingScreenAfterDelay = () => {
-  const elapsed = Date.now() - startTime
-  const remainingTime = Math.max(0, minLoadingTime - elapsed)
-  
-  setTimeout(removeLoadingScreen, remainingTime)
+// Wait for app initialization signal
+const waitForAppReady = () => {
+  const checkReady = () => {
+    if (document.body.hasAttribute('data-app-initialized')) {
+      removeLoadingScreen()
+    } else {
+      setTimeout(checkReady, 100) // Check every 100ms
+    }
+  }
+  checkReady()
 }
 
-// Remove loading screen only after 4 seconds minimum
-setTimeout(removeLoadingScreenAfterDelay, 100)
+// Start checking for app readiness after React mounts
+setTimeout(waitForAppReady, 500)

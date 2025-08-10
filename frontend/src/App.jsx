@@ -6,7 +6,6 @@ import Footer from './components/Footer'
 import ProfessionalNotificationSystem from './components/ProfessionalNotificationSystem'
 import MobileNavigation from './components/MobileNavigation'
 import LoadingScreen from './components/LoadingScreen'
-import TimedLoadingScreen from './components/TimedLoadingScreen'
 import FloatingActionButtons from './components/FloatingActionButtons'
 import InvoiceGeneratorButton from './components/InvoiceGeneratorButton'
 import ScrollToTop from './components/ScrollToTop'
@@ -84,34 +83,45 @@ const FeedbackForm = lazyWithRetry(() => import('./components/FeedbackForm'))
 const App = () => {
   const [isChecklistModalOpen, setIsChecklistModalOpen] = useState(false)
   const [isFeedbackFormOpen, setIsFeedbackFormOpen] = useState(false)
+  const [isAppReady, setIsAppReady] = useState(false)
 
   useEffect(() => {
-    // Initialize error handling systems
-    networkErrorHandler.preventNetworkErrors()
-    errorManager.setUserContext({ app: 'Uganda Investment Portal' })
-    
-    // Initialize background cache manager
-    backgroundCacheManager.init?.() // Safe call in case init is already called
-    
-    // Preload critical pages to prevent import failures
-    const preloadCriticalPages = async () => {
-      const result = await networkErrorHandler.safeExecute(async () => {
-        // Preload most commonly accessed pages
-        await Promise.allSettled([
-          import('./pages/HomePage'),
-          import('./pages/SupportPage'),
-          import('./pages/AboutPage'),
-          import('./pages/ServicesPage'),
-        ]);
-      }, null, 'preloading pages')
-      
-      if (!result.success) {
-        console.warn('Page preloading failed, pages will load on demand')
+    const initializeApp = async () => {
+      try {
+        // Initialize error handling systems
+        networkErrorHandler.preventNetworkErrors()
+        errorManager.setUserContext({ app: 'Uganda Investment Portal' })
+        
+        // Initialize background cache manager
+        backgroundCacheManager.init?.() // Safe call in case init is already called
+        
+        // Preload critical pages
+        const result = await networkErrorHandler.safeExecute(async () => {
+          await Promise.allSettled([
+            import('./pages/HomePage'),
+            import('./pages/SupportPage'),
+            import('./pages/AboutPage'),
+            import('./pages/ServicesPage'),
+          ]);
+        }, null, 'preloading pages')
+        
+        if (!result.success) {
+          console.warn('Page preloading failed, pages will load on demand')
+        }
+
+        // Mark app as ready
+        setIsAppReady(true)
+        
+        // Signal to main.jsx that app is initialized
+        document.body.setAttribute('data-app-initialized', 'true')
+        
+      } catch (error) {
+        console.warn('App initialization encountered issues, continuing anyway')
+        setIsAppReady(true)
       }
-    };
-    
-    // Preload after a short delay to not block initial render
-    setTimeout(preloadCriticalPages, 2000);
+    }
+
+    initializeApp()
   }, [])
 
   // Secure modal handlers using custom events instead of global window pollution
@@ -137,15 +147,14 @@ const App = () => {
   }, [openChecklistModal, openFeedbackForm])
 
   return (
-    <TimedLoadingScreen minLoadTime={4000}>
-      <GlobalErrorCatcher>
-        <ErrorBoundary>
-          <NotificationProvider>
-            <ThemeProvider>
-              <MobileProvider>
-                <AuthProvider>
-                  <Router>
-                  <NavigationErrorHandler>
+    <GlobalErrorCatcher>
+      <ErrorBoundary>
+        <NotificationProvider>
+          <ThemeProvider>
+            <MobileProvider>
+              <AuthProvider>
+                <Router>
+                <NavigationErrorHandler>
                 <div className="min-h-screen relative overflow-x-hidden">
                 <AnimatePresence>
                   <motion.div
@@ -159,7 +168,7 @@ const App = () => {
                       
                       <main className="relative overflow-hidden">
                         <Suspense fallback={<LoadingScreen />}>
-                          <Routes>
+                          {isAppReady && <Routes>
                             <Route path="/" element={<HomePage />} />
                             <Route path="/about" element={<AboutPage />} />
                             <Route path="/investments" element={<InvestmentsPage />} />
@@ -178,7 +187,8 @@ const App = () => {
                             <Route path="/profile" element={<ProfilePage />} />
                             <Route path="/admin" element={<AdminPage />} />
                             <Route path="*" element={<NotFoundPage />} />
-                          </Routes>
+                          </Routes>}
+                          {!isAppReady && <LoadingScreen />}
                         </Suspense>
                       </main>
                       
@@ -216,7 +226,6 @@ const App = () => {
         </NotificationProvider>
       </ErrorBoundary>
     </GlobalErrorCatcher>
-    </TimedLoadingScreen>
   )
 }
 
