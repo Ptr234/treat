@@ -117,23 +117,22 @@ const Header = () => {
   }, [])
 
   useEffect(() => {
-    let ticking = false
-    const throttledScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          handleScroll()
-          ticking = false
-        })
-        ticking = true
-      }
+    // Optimized scroll handler - less frequent updates
+    let timeoutId
+    const debouncedScroll = () => {
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        handleScroll()
+      }, 16) // ~60fps max
     }
     
-    window.addEventListener('scroll', throttledScroll, { passive: true })
-    document.addEventListener('mousedown', handleClickOutside)
+    window.addEventListener('scroll', debouncedScroll, { passive: true })
+    document.addEventListener('mousedown', handleClickOutside, { passive: true })
     
     // Cleanup function to prevent memory leaks
     return () => {
-      window.removeEventListener('scroll', throttledScroll)
+      clearTimeout(timeoutId)
+      window.removeEventListener('scroll', debouncedScroll)
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [handleScroll, handleClickOutside])
@@ -218,15 +217,15 @@ const Header = () => {
     return location.pathname.startsWith(href)
   }, [location.pathname])
 
-  const handleSearch = useCallback(networkErrorHandler.wrapEventHandler((e) => {
+  const handleSearch = useCallback((e) => {
     e.preventDefault()
     const trimmedSearch = searchTerm.trim()
     if (trimmedSearch) {
-      navigate(`/search?q=${encodeURIComponent(trimmedSearch)}`)
       setIsSearchOpen(false)
       setSearchTerm('')
+      navigate(`/search?q=${encodeURIComponent(trimmedSearch)}`)
     }
-  }, 'handling search'), [searchTerm, navigate])
+  }, [searchTerm, navigate])
 
   // Enhanced search suggestions based on popular investment queries
   const searchSuggestions = useMemo(() => [
@@ -305,9 +304,9 @@ const Header = () => {
                       if (item.dropdown) {
                         setActiveDropdown(activeDropdown === item.name ? null : item.name)
                       } else {
-                        // Use immediate navigation for better performance
+                        // Immediate navigation without delays
+                        setActiveDropdown(null) // Close dropdowns first
                         navigate(item.href, { replace: false })
-                        setActiveDropdown(null) // Close any open dropdowns
                       }
                     }}
                     className={`relative px-4 py-2 rounded-xl font-medium text-sm transition-all duration-300 group ${
@@ -364,16 +363,16 @@ const Header = () => {
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: dropdownIndex * 0.05 }}
-                            onClick={networkErrorHandler.wrapEventHandler(() => {
-                              // Parse href for precise navigation
+                            onClick={() => {
+                              // Immediate navigation without wrapper delays
+                              setActiveDropdown(null)
                               const [path, hash] = dropdownItem.href.split('#')
                               if (hash) {
                                 navigateToSection(navigate, path, hash)
                               } else {
                                 navigate(dropdownItem.href)
                               }
-                              setActiveDropdown(null)
-                            }, 'navigation dropdown click')}
+                            }}
                             className="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 group"
                           >
                             <span className="mr-3 group-hover:scale-110 transition-transform duration-200">
@@ -672,17 +671,17 @@ const Header = () => {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: dropdownIndex * 0.05 }}
-                              onClick={networkErrorHandler.wrapEventHandler(() => {
-                                // Parse href for precise navigation
+                              onClick={() => {
+                                // Immediate mobile navigation
+                                setIsMenuOpen(false)
+                                setActiveDropdown(null)
                                 const [path, hash] = dropdownItem.href.split('#')
                                 if (hash) {
                                   navigateToSection(navigate, path, hash)
                                 } else {
                                   navigate(dropdownItem.href)
                                 }
-                                setIsMenuOpen(false)
-                                setActiveDropdown(null)
-                              }, 'mobile dropdown navigation')}
+                              }}
                               className="w-full flex items-center px-3 py-2 text-xs text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors duration-200"
                             >
                               <span className="mr-2">{renderIcon(dropdownItem.icon, "w-3 h-3")}</span>
