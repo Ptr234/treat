@@ -1,13 +1,13 @@
 # Cache Management for OSC Uganda
-# Generated at: 2025-08-11T07:48:40.104Z
+# Generated at: 2025-08-11T11:56:38.499Z
 
 # Never cache HTML files
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
   Expires: 0
-  X-Build-Timestamp: 1754898515501
-  X-Build-Version: v1754898515501
+  X-Build-Timestamp: 1754913393854
+  X-Build-Version: v1754913393854
 
 # Never cache service worker
 /sw.js
