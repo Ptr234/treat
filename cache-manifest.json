@@ -1,0 +1,42 @@
+{
+  "buildTime": 1754898515501,
+  "version": "v1754898515501",
+  "lastModified": "2025-08-11T07:48:40.104Z",
+  "assets": [
+    "assets/index-B9o8ua3w.css",
+    "assets/components-common-B_-fNfOl.js",
+    "assets/components-forms-CuHC8AW_.js",
+    "assets/components-heavy-BLieJuhX.js",
+    "assets/components-ui-DhOcqZA6.js",
+    "assets/page-aboutpage-DQJWJXtI.js",
+    "assets/page-adminpage-ppcxq8aP.js",
+    "assets/page-agenciespage-DyO7WIfp.js",
+    "assets/page-downloadspage-CbLCqNw5.js",
+    "assets/page-homepage-BcckAWKm.js",
+    "assets/page-investmentspage-CS5Ru4UO.js",
+    "assets/page-notfoundpage-DAp4Tyja.js",
+    "assets/page-profilepage-sPgDLZ0Z.js",
+    "assets/page-searchpage-CFt1VE_K.js",
+    "assets/page-servicespage-DBf-5pJA.js",
+    "assets/page-supportpage-Cytnym8u.js",
+    "assets/page-toolspage-DrNuYvJK.js",
+    "assets/pages-forms-BqIyi3z5.js",
+    "assets/utils-core-Dh4FrfGx.js",
+    "assets/utils-performance-BMd3gd_J.js",
+    "assets/utils-system-DYl7h-0K.js",
+    "assets/vendor-animation-Bk3MpbEf.js",
+    "assets/vendor-misc-DLWoUI1x.js",
+    "assets/vendor-react-DKSiDIWS.js",
+    "assets/index-udEx9obS.js",
+    "manifest.webmanifest",
+    "registerSW.js"
+  ],
+  "staticFiles": [
+    "manifest.json",
+    "offline.html",
+    "sw.js",
+    "images/oneStopCenter-logo.jpeg",
+    "images/uganda-flag.png",
+    "images/uganda-coat-of-arms.png"
+  ]
+}
