@@ -77,20 +77,11 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', async () => {
           try {
-            // Unregister all existing service workers first
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(registrations.map(registration => {
-              console.log('🗑️ Unregistering old service worker');
-              return registration.unregister();
-            }));
-            
-            // Clear all caches before registering new service worker
-            if ('caches' in window) {
-              const cacheNames = await caches.keys();
-              await Promise.all(cacheNames.map(name => {
-                console.log('🗑️ Clearing cache:', name);
-                return caches.delete(name);
-              }));
+            // Check for existing service workers and update if needed
+            const existingRegistration = await navigator.serviceWorker.getRegistration();
+            if (existingRegistration) {
+              // Only update if new version available
+              existingRegistration.update();
             }
             
             // Register new service worker
@@ -99,20 +90,28 @@
               updateViaCache: 'none' // Never cache the service worker
             });
             
-            console.log('✅ Service worker registered:', registration);
+            if (window.location.hostname === 'localhost') {
+              console.log('✅ Service worker registered:', registration);
+            }
             
             // Listen for service worker updates
             registration.addEventListener('updatefound', () => {
               const newWorker = registration.installing;
-              console.log('🔄 New service worker installing');
+              if (window.location.hostname === 'localhost') {
+                console.log('🔄 New service worker installing');
+              }
               
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed') {
                   if (navigator.serviceWorker.controller) {
-                    console.log('🔄 New service worker available, reloading page');
+                    if (window.location.hostname === 'localhost') {
+                      console.log('🔄 New service worker available, reloading page');
+                    }
                     window.location.reload(true);
                   } else {
-                    console.log('✅ Service worker installed for first time');
+                    if (window.location.hostname === 'localhost') {
+                      console.log('✅ Service worker installed for first time');
+                    }
                   }
                 }
               });
@@ -121,22 +120,25 @@
             // Listen for messages from service worker
             navigator.serviceWorker.addEventListener('message', (event) => {
               const { data } = event;
-              console.log('📨 Message from service worker:', data);
+              if (window.location.hostname === 'localhost') {
+                console.log('📨 Message from service worker:', data);
+              }
               
               if (data.type === 'SW_UPDATED') {
-                console.log('🔄 Service worker updated, version:', data.version);
+                if (window.location.hostname === 'localhost') {
+                  console.log('🔄 Service worker updated, version:', data.version);
+                }
                 // Optionally show notification to user
                 showUpdateNotification();
               }
             });
             
-            // Force update check every 30 seconds
-            setInterval(() => {
-              registration.update();
-            }, 30000);
-            
-            // Check for updates immediately
-            registration.update();
+            // Check for updates on focus (when user returns to tab)
+            window.addEventListener('focus', () => {
+              if (registration) {
+                registration.update();
+              }
+            });
             
           } catch (error) {
             console.error('❌ Service worker registration failed:', error);
@@ -200,43 +202,55 @@
         }, 15000);
       }
       
-      // Global cache management utilities
+      // Global cache management utilities (development only)
       window.clearAllCaches = async () => {
-        console.log('🗑️ Clearing all caches...');
+        if (window.location.hostname === 'localhost') {
+          console.log('🗑️ Clearing all caches...');
+        }
         
         if ('caches' in window) {
           const cacheNames = await caches.keys();
           await Promise.all(cacheNames.map(name => caches.delete(name)));
-          console.log('✅ All caches cleared');
+          if (window.location.hostname === 'localhost') {
+            console.log('✅ All caches cleared');
+          }
         }
         
         localStorage.clear();
         sessionStorage.clear();
-        console.log('✅ Storage cleared');
+        if (window.location.hostname === 'localhost') {
+          console.log('✅ Storage cleared');
+        }
         
         window.location.reload(true);
       };
       
       // Hard refresh utility
       window.hardRefresh = () => {
-        console.log('🔄 Performing hard refresh...');
+        if (window.location.hostname === 'localhost') {
+          console.log('🔄 Performing hard refresh...');
+        }
         window.clearAllCaches();
       };
       
       // Build info
       window.BUILD_TIMESTAMP = Date.now();
       window.BUILD_VERSION = 'CACHE_MANAGED_BUILD';
-      console.log('🚀 Build Info:', {
-        timestamp: window.BUILD_TIMESTAMP,
-        version: window.BUILD_VERSION,
-        time: new Date().toLocaleString()
-      });
+      if (window.location.hostname === 'localhost') {
+        console.log('🚀 Build Info:', {
+          timestamp: window.BUILD_TIMESTAMP,
+          version: window.BUILD_VERSION,
+          time: new Date().toLocaleString()
+        });
+      }
       
       // Add keyboard shortcut for cache clearing (Ctrl+Shift+R)
       document.addEventListener('keydown', (event) => {
         if (event.ctrlKey && event.shiftKey && event.key === 'R') {
           event.preventDefault();
-          console.log('🔄 Hard refresh triggered by keyboard shortcut');
+          if (window.location.hostname === 'localhost') {
+            console.log('🔄 Hard refresh triggered by keyboard shortcut');
+          }
           window.hardRefresh();
         }
       });

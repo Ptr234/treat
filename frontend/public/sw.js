@@ -1,6 +1,6 @@
-// Advanced Cache Management Service Worker for OSC Uganda
-// Security hardened and performance optimized
-const CACHE_VERSION = `v${Date.now()}`
+// Optimized Service Worker for OSC Uganda
+// Performance optimized with stable cache versions
+const CACHE_VERSION = 'v1.1.0-stable'
 const APP_CACHE = `osc-uganda-app-${CACHE_VERSION}`
 const STATIC_CACHE = `osc-uganda-static-${CACHE_VERSION}`
 const RUNTIME_CACHE = `osc-uganda-runtime-${CACHE_VERSION}`
@@ -61,7 +61,10 @@ const CACHE_STRATEGIES = {
 
 // Utility functions
 const log = (message, data = '') => {
-  console.log(`[SW ${CACHE_VERSION}] ${message}`, data)
+  // Only log in development
+  if (self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1') {
+    console.log(`[SW ${CACHE_VERSION}] ${message}`, data)
+  }
 }
 
 // Security validation for URLs

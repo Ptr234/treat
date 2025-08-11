@@ -133,7 +133,7 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: process.env.NODE_ENV === 'development',
     assetsDir: 'assets',
-    target: 'esnext',
+    target: 'es2020',
     minify: 'esbuild',
     cssMinify: 'esbuild',
     reportCompressedSize: true,
@@ -158,32 +158,48 @@ export default defineConfig({
             if (id.includes('@headlessui')) {
               return 'vendor-ui'
             }
-            // Group other vendor dependencies
+            // Group other vendor dependencies by size
+            if (id.includes('i18next') || id.includes('react-helmet') || id.includes('workbox')) {
+              return 'vendor-features'
+            }
             return 'vendor-misc'
           }
           
           // Feature-based chunking with size optimization
           if (id.includes('/pages/')) {
             const pageName = id.split('/pages/')[1].split('/')[0].replace('.jsx', '').replace('.tsx', '')
+            // Group smaller pages together
+            if (['DocumentChecklistPage', 'InvestmentOnboardingPage', 'InvoicePage', 'TaxCalculatorPage', 'ROICalculatorPage', 'BusinessRegistrationPage'].includes(pageName)) {
+              return 'pages-forms'
+            }
             return `page-${pageName.toLowerCase()}`
           }
           
-          // Split large components bundle
+          // Split components more efficiently
           if (id.includes('/components/')) {
-            // Split heavy components separately
-            if (id.includes('PerformanceDashboard') || id.includes('InvoiceGenerator')) {
+            // Heavy interactive components
+            if (id.includes('PerformanceDashboard') || id.includes('ProfessionalInvoiceGenerator') || id.includes('InvestmentROICalculator')) {
               return 'components-heavy'
             }
-            if (id.includes('Calculator') || id.includes('BusinessRegistration')) {
+            // Form and calculator components
+            if (id.includes('Calculator') || id.includes('BusinessRegistration') || id.includes('ServiceWizard') || id.includes('InvestmentOnboardingWizard')) {
               return 'components-forms'
+            }
+            // UI components
+            if (id.includes('Modal') || id.includes('Button') || id.includes('Header') || id.includes('Footer') || id.includes('Navigation')) {
+              return 'components-ui'
             }
             return 'components-common'
           }
           
           if (id.includes('/utils/')) {
-            // Split utils by functionality
-            if (id.includes('security') || id.includes('errorHandling') || id.includes('monitoring')) {
+            // Security and system utilities
+            if (id.includes('security') || id.includes('errorHandling') || id.includes('monitoring') || id.includes('backgroundSyncManager')) {
               return 'utils-system'
+            }
+            // Cache and performance utilities
+            if (id.includes('cache') || id.includes('performance') || id.includes('analytics')) {
+              return 'utils-performance'
             }
             return 'utils-core'
           }
@@ -212,7 +228,7 @@ export default defineConfig({
       }
     },
     // Advanced optimization
-    assetsInlineLimit: 4096, // 4kb
+    assetsInlineLimit: 2048, // 2kb - smaller inline limit for faster loading
     cssCodeSplit: true,
     emptyOutDir: true
   },
@@ -240,7 +256,6 @@ export default defineConfig({
       'react-dom',
       'react-dom/client',
       'react-router-dom',
-      'framer-motion',
       '@heroicons/react/24/outline',
       '@heroicons/react/24/solid', 
       'lucide-react',
@@ -249,6 +264,8 @@ export default defineConfig({
     exclude: [
       'vite', 
       '@vitejs/plugin-react',
+      // Exclude heavy libraries for lazy loading
+      'framer-motion',
       // Exclude your custom utilities to prevent scan errors
       './utils/cacheManager.js',
       './utils/security.js',
