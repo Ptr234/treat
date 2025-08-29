@@ -1,29 +1,30 @@
 {
   "name": "onestopcentre-uganda-monorepo",
   "version": "1.1.0",
-  "description": "OneStopCentre Uganda - Complete full-stack application with React frontend and Node.js backend",
+  "description": "OneStopCentre Uganda - Complete full-stack application with Angular frontend and Node.js backend",
   "private": true,
   "scripts": {
-    "install:all": "npm install && npm install --prefix frontend --legacy-peer-deps && npm install --prefix backend",
+    "install:all": "npm install && npm install --prefix angular-frontend && npm install --prefix backend",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:frontend": "npm start --prefix angular-frontend",
     "dev:backend": "npm run dev --prefix backend",
-    "build": "npm run build --prefix frontend",
-    "build:frontend": "npm run build --prefix frontend",
+    "build": "npm run build --prefix angular-frontend",
+    "build:frontend": "npm run build --prefix angular-frontend",
     "start:backend": "npm start --prefix backend",
     "migrate": "npm run migrate --prefix backend",
     "seed": "npm run seed --prefix backend",
-    "lint": "npm run lint --prefix frontend",
-    "lint:fix": "npm run lint:fix --prefix frontend",
-    "test": "npm test --prefix frontend",
-    "clean": "rm -rf frontend/dist frontend/node_modules backend/node_modules node_modules",
-    "deploy:frontend": "npm run build:frontend && npm run deploy --prefix frontend"
+    "lint": "npm run lint --prefix angular-frontend",
+    "lint:fix": "npm run lint:fix --prefix angular-frontend",
+    "test": "npm test --prefix angular-frontend",
+    "test:ci": "npm run test:ci --prefix angular-frontend", 
+    "clean": "rm -rf angular-frontend/dist angular-frontend/node_modules backend/node_modules node_modules",
+    "deploy:frontend": "npm run build:frontend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
   "keywords": [
-    "react",
+    "angular",
     "nodejs",
     "express",
     "postgresql",
