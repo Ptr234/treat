@@ -27,21 +27,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
+          cache-dependency-path: 'angular-frontend/package-lock.json'
 
       - name: Install dependencies
         run: |
-          cd frontend
-          npm ci --legacy-peer-deps
+          cd angular-frontend
+          npm ci
 
       - name: Build
         run: |
-          cd frontend
+          cd angular-frontend
           npm run build
-        env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL || 'https://treat.onrender.com/api' }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -49,7 +47,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./frontend/dist
+          path: ./angular-frontend/dist/angular-frontend
 
       - name: Deploy to GitHub Pages
         id: deployment
