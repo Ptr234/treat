@@ -36,16 +36,16 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "Uganda Investment One Stop Center",
-      url: "https://oscdigitaltool.com",
+      url: "https://oscdigitaltools.com",
     },
   ],
   creator: "Uganda Investment One Stop Center",
   publisher: "Uganda Investment One Stop Center",
-  metadataBase: new URL("https://oscdigitaltool.com"),
+  metadataBase: new URL("https://oscdigitaltools.com"),
   openGraph: {
     type: "website",
     locale: "en_UG",
-    url: "https://oscdigitaltool.com",
+    url: "https://oscdigitaltools.com",
     title: "OneStopCentre Uganda - InvestUganda Simplified",
     description: "Streamlined access to government business services, investment opportunities, and professional support in Uganda.",
     siteName: "OneStopCentre Uganda",

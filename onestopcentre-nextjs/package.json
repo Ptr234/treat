@@ -1,7 +1,7 @@
 {
-  "name": "onestopcentre-uganda-nextjs",
+  "name": "uganda-onestopcentre-nextjs",
   "version": "1.1.0",
-  "description": "OneStopCentre Uganda - Next.js TypeScript application providing streamlined access to government business services, investment opportunities, and professional support.",
+  "description": "Uganda One Stop Centre - Next.js TypeScript application providing streamlined access to government business services, investment opportunities, and professional support.",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -62,7 +62,7 @@
   "bugs": {
     "url": "https://github.com/Ptr234/treat/issues"
   },
-  "homepage": "https://oscdigitaltool.com",
+  "homepage": "https://oscdigitaltools.com",
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
