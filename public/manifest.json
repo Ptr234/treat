@@ -1,0 +1,63 @@
+{
+  "name": "OneStopCentre Uganda",
+  "short_name": "OSC Uganda",
+  "description": "Your gateway to streamlined government services, business registration, and investment opportunities in Uganda.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/images/oneStopCenter-logo.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/oneStopCenter-logo.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ],
+  "categories": ["business", "finance", "government"],
+  "shortcuts": [
+    {
+      "name": "Business Registration",
+      "short_name": "Register",
+      "description": "Start your business registration process",
+      "url": "/business/registration",
+      "icons": [
+        {
+          "src": "/images/oneStopCenter-logo.jpeg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Investment Opportunities",
+      "short_name": "Invest",
+      "description": "Explore investment opportunities",
+      "url": "/investments",
+      "icons": [
+        {
+          "src": "/images/oneStopCenter-logo.jpeg",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Government Services",
+      "short_name": "Services",
+      "description": "Access government services",
+      "url": "/services",
+      "icons": [
+        {
+          "src": "/images/oneStopCenter-logo.jpeg",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}
