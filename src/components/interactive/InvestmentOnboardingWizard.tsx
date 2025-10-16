@@ -2,39 +2,12 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface InvestmentData {
-  // Step 1: Investment Profile
-  investorType: string; // individual, institutional, foreign
-  experience: string; // beginner, intermediate, advanced
-  investmentGoal: string; // growth, income, diversification, strategic
-  
-  // Step 2: Investment Capacity
-  investmentAmount: string;
-  timeHorizon: string; // short-term, medium-term, long-term
-  riskTolerance: string; // conservative, moderate, aggressive
-  
-  // Step 3: Sector Interest
-  primarySector: string; // agriculture, tourism, minerals, ict, manufacturing, energy
-  secondarySectors: string[];
-  specificInterests: string;
-  
-  // Step 4: Personal/Entity Details
-  name: string;
-  email: string;
-  phone: string;
-  nationality: string;
-  companyName: string;
-  position: string;
-  
-  // Step 5: Investment Readiness
-  capitalSource: string; // savings, loan, partnership, grant
-  timeframe: string; // immediate, 3-months, 6-months, 1-year
-  supportNeeded: string[]; // legal, financial, technical, marketing
-}
+import { InvestmentData } from '../../types';
+import { useNotification } from '../../contexts/NotificationContext';
 
 export default function InvestmentOnboardingWizard() {
   const [currentStep, setCurrentStep] = useState(1);
+  const { addNotification } = useNotification();
   const [investmentData, setInvestmentData] = useState<InvestmentData>({
     // Step 1: Investment Profile
     investorType: '', 
@@ -114,9 +87,54 @@ export default function InvestmentOnboardingWizard() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Investment application submitted successfully! Our team will contact you within 24 hours.');
+      
+      addNotification({
+        type: 'success',
+        title: 'Application Submitted Successfully!',
+        message: 'Our investment team will contact you within 24 hours.'
+      });
+      
+      // Generate consultation email
+      const subject = encodeURIComponent('Investment Consultation Request - OneStopCentre Uganda');
+      const body = encodeURIComponent(`Dear OneStopCentre Uganda Investment Team,
+
+I have completed the investment onboarding wizard and would like to schedule a consultation.
+
+Investment Profile:
+- Investor Type: ${investmentData.investorType}
+- Experience Level: ${investmentData.experience}
+- Investment Goal: ${investmentData.investmentGoal}
+- Investment Amount: USD ${investmentData.investmentAmount}
+- Time Horizon: ${investmentData.timeHorizon}
+- Risk Tolerance: ${investmentData.riskTolerance}
+- Primary Sector Interest: ${investmentData.primarySector}
+
+Contact Information:
+- Name: ${investmentData.name}
+- Email: ${investmentData.email}
+- Phone: ${investmentData.phone}
+- Nationality: ${investmentData.nationality}
+${investmentData.companyName ? `- Company: ${investmentData.companyName}` : ''}
+
+Investment Readiness:
+- Capital Source: ${investmentData.capitalSource}
+- Investment Timeframe: ${investmentData.timeframe}
+- Support Needed: ${investmentData.supportNeeded.join(', ')}
+
+Please contact me to discuss investment opportunities in Uganda.
+
+Best regards,
+${investmentData.name}`);
+
+      // Open email client
+      window.location.href = `mailto:invest@onestopcentre.ug?subject=${subject}&body=${body}`;
+      
     } catch {
-      alert('Error submitting application. Please try again.');
+      addNotification({
+        type: 'error',
+        title: 'Submission Failed',
+        message: 'Failed to submit application. Please try again.'
+      });
     }
   };
 

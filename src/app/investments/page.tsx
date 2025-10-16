@@ -1,122 +1,260 @@
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Investment Opportunities',
-  description: 'Discover profitable investment opportunities across various sectors in Uganda.',
-};
+import React, { useState, useMemo, useEffect } from 'react';
+import Link from 'next/link';
+import { InvestmentOpportunity } from '../../types';
+import { InvestmentGrid } from '../../components/investments/InvestmentGrid';
+import { InvestmentFiltersComponent, InvestmentFilters } from '../../components/investments/InvestmentFilters';
+import { getAllInvestmentsWithContacts } from '../../data/investments/optimized';
+import { getInvestmentStats } from '../../data/investments/comprehensive';
+import { INVESTMENT_CATEGORIES } from '../../data/investments/categories';
+import { TrendingUp, DollarSign, Clock, Building, Target, Users } from 'lucide-react';
 
 export default function InvestmentsPage() {
+  const [investments, setInvestments] = useState<InvestmentOpportunity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [filters, setFilters] = useState<InvestmentFilters>({
+    category: 'all',
+    sector: 'all sectors',
+    priority: 'all',
+    investmentRange: 'all',
+    roiRange: 'all',
+    timelineRange: 'all',
+    searchQuery: ''
+  });
+
+  const [sortBy, setSortBy] = useState<'title' | 'priority' | 'roi' | 'timeline' | 'investmentRange'>('priority');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Load investments data
+  useEffect(() => {
+    const loadInvestments = async () => {
+      try {
+        // Simulate loading delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const investmentData = getAllInvestmentsWithContacts();
+        setInvestments(investmentData);
+      } catch (error) {
+        console.error('Error loading investments:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadInvestments();
+  }, []);
+
+  // Filter investments based on current filters
+  const filteredInvestments = useMemo(() => {
+    let filtered = [...investments];
+
+    // Apply category filter
+    if (filters.category !== 'all') {
+      filtered = filtered.filter(inv => inv.category === filters.category);
+    }
+
+    // Apply sector filter
+    if (filters.sector !== 'all sectors') {
+      filtered = filtered.filter(inv => 
+        inv.sector.toLowerCase().includes(filters.sector.toLowerCase()) ||
+        inv.category.toLowerCase().includes(filters.sector.toLowerCase())
+      );
+    }
+
+    // Apply priority filter
+    if (filters.priority !== 'all') {
+      filtered = filtered.filter(inv => inv.priority === filters.priority);
+    }
+
+    // Apply investment range filter
+    if (filters.investmentRange !== 'all') {
+      // This would need more complex logic based on actual ranges
+      // For now, we'll skip this filter
+    }
+
+    // Apply search query
+    if (filters.searchQuery.trim()) {
+      const query = filters.searchQuery.toLowerCase();
+      filtered = filtered.filter(inv =>
+        inv.title.toLowerCase().includes(query) ||
+        inv.description.toLowerCase().includes(query) ||
+        inv.category.toLowerCase().includes(query) ||
+        inv.sector.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [investments, filters]);
+
+  const handleInvestmentSelect = (investment: InvestmentOpportunity) => {
+    // Could navigate to detailed view or open modal
+    console.log('Selected investment:', investment);
+  };
+
+  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy as 'title' | 'priority' | 'roi' | 'timeline' | 'investmentRange');
+    setSortOrder(newSortOrder);
+  };
+
+  const stats = getInvestmentStats();
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">
-          Investment Opportunities
-        </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Discover profitable investment opportunities across various sectors in Uganda.
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Agriculture
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Modern farming, agro-processing, and agricultural technology investments.
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-green-600 to-blue-600 text-white">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              Investment Opportunities in Uganda
+            </h1>
+            <p className="text-xl md:text-2xl text-green-100 mb-8">
+              Discover profitable investment opportunities across high-growth sectors with government support and incentives
             </p>
-            <button className="text-primary-600 hover:text-primary-700 font-medium">
-              Explore →
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/investments/onboarding"
+                className="bg-white text-green-600 hover:bg-green-50 px-8 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Start Investment Journey
+              </Link>
+              <Link
+                href="/tools/roi-calculator"
+                className="border border-white text-white hover:bg-white hover:text-green-600 px-8 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Calculate ROI
+              </Link>
+            </div>
           </div>
-          
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-              </svg>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <div className="text-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mx-auto mb-2">
+                <Target className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalInvestments}</div>
+              <div className="text-sm text-gray-600">Total Opportunities</div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Tourism
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Hotels, resorts, eco-tourism, and hospitality sector investments.
-            </p>
-            <button className="text-primary-600 hover:text-primary-700 font-medium">
-              Explore →
-            </button>
+            <div className="text-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-red-100 rounded-lg mx-auto mb-2">
+                <TrendingUp className="w-6 h-6 text-red-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{stats.highPriorityCount}</div>
+              <div className="text-sm text-gray-600">High Priority</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-2">
+                <Building className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{stats.sectors}</div>
+              <div className="text-sm text-gray-600">Sectors</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-lg mx-auto mb-2">
+                <DollarSign className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{stats.totalMarketValue}</div>
+              <div className="text-sm text-gray-600">Market Value</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mx-auto mb-2">
+                <Clock className="w-6 h-6 text-purple-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{stats.averageTimeline}</div>
+              <div className="text-sm text-gray-600">Avg Timeline</div>
+            </div>
+            <div className="text-center">
+              <div className="flex items-center justify-center w-12 h-12 bg-indigo-100 rounded-lg mx-auto mb-2">
+                <Users className="w-6 h-6 text-indigo-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900">{stats.categories}</div>
+              <div className="text-sm text-gray-600">Categories</div>
+            </div>
           </div>
-          
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Filters Sidebar */}
+          <div className="lg:w-80 flex-shrink-0">
+            <InvestmentFiltersComponent
+              filters={filters}
+              onFiltersChange={setFilters}
+              isOpen={true}
+            />
+
+            {/* Quick Categories */}
+            <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+              <h3 className="font-semibold text-gray-900 mb-4">Quick Categories</h3>
+              <div className="space-y-2">
+                {INVESTMENT_CATEGORIES.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setFilters(prev => ({ ...prev, category: category.name }))}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                      filters.category === category.name
+                        ? 'bg-green-100 text-green-800'
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    <span className="mr-2">{category.icon}</span>
+                    {category.name}
+                  </button>
+                ))}
+              </div>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Technology
-            </h3>
-            <p className="text-gray-600 mb-4">
-              ICT, software development, and digital innovation investments.
-            </p>
-            <button className="text-primary-600 hover:text-primary-700 font-medium">
-              Explore →
-            </button>
           </div>
-          
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Manufacturing
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Industrial production, processing, and manufacturing investments.
-            </p>
-            <button className="text-primary-600 hover:text-primary-700 font-medium">
-              Explore →
-            </button>
+
+          {/* Investment Grid */}
+          <div className="flex-1">
+            <InvestmentGrid
+              investments={filteredInvestments}
+              isLoading={isLoading}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              onInvestmentSelect={handleInvestmentSelect}
+              searchQuery={filters.searchQuery}
+              onSearchChange={(query) => setFilters(prev => ({ ...prev, searchQuery: query }))}
+              sortBy={sortBy}
+              sortOrder={sortOrder}
+              onSortChange={handleSortChange}
+              showFilters={true}
+            />
           </div>
-          
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a4 4 0 004-4V5z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Mining
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Mineral extraction, processing, and mining sector investments.
+        </div>
+      </div>
+
+      {/* Call to Action */}
+      <div className="bg-gray-900 text-white">
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              Ready to Invest in Uganda?
+            </h2>
+            <p className="text-xl text-gray-300 mb-8">
+              Join thousands of investors who have already discovered the potential of Uganda&apos;s growing economy
             </p>
-            <button className="text-primary-600 hover:text-primary-700 font-medium">
-              Explore →
-            </button>
-          </div>
-          
-          <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-200">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/investments/onboarding"
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Get Started Now
+              </Link>
+              <Link
+                href="/contact"
+                className="border border-gray-300 text-white hover:bg-gray-800 px-8 py-3 rounded-lg font-semibold transition-colors"
+              >
+                Contact Our Team
+              </Link>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-3">
-              Energy
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Renewable energy, power generation, and energy infrastructure.
-            </p>
-            <button className="text-primary-600 hover:text-primary-700 font-medium">
-              Explore →
-            </button>
           </div>
         </div>
       </div>

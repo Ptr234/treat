@@ -39,6 +39,144 @@ export interface BusinessRegistration {
   updatedAt?: string;
 }
 
+// Investment-related types
+export interface ContactInfo {
+  agency: string;
+  email: string;
+  phone: string;
+  website: string;
+  address?: string;
+  director?: string;
+}
+
+export interface InvestmentOpportunity {
+  id: string;
+  title: string;
+  category: string;
+  sector: string;
+  description: string;
+  investmentRange: string;
+  expectedROI: string;
+  timeline: string;
+  marketPotential?: string;
+  requirements?: string[];
+  incentives?: string[];
+  riskFactors?: string[];
+  contact: ContactInfo;
+  contactKey?: string;
+  priority: 'high' | 'medium' | 'low';
+  logo?: string;
+}
+
+export interface InvestmentData {
+  // Step 1: Investment Profile
+  investorType: 'individual' | 'institutional' | 'foreign' | '';
+  experience: 'beginner' | 'intermediate' | 'advanced' | '';
+  investmentGoal: 'growth' | 'income' | 'diversification' | 'strategic' | '';
+  
+  // Step 2: Investment Capacity
+  investmentAmount: string;
+  timeHorizon: 'short-term' | 'medium-term' | 'long-term' | '';
+  riskTolerance: 'conservative' | 'moderate' | 'aggressive' | '';
+  
+  // Step 3: Sector Interest
+  primarySector: string;
+  secondarySectors: string[];
+  specificInterests: string;
+  
+  // Step 4: Personal/Entity Details
+  name: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  companyName: string;
+  position: string;
+  
+  // Step 5: Investment Readiness
+  capitalSource: 'savings' | 'loan' | 'partnership' | 'grant' | '';
+  timeframe: 'immediate' | '3-months' | '6-months' | '1-year' | '';
+  supportNeeded: string[];
+}
+
+export interface ROICalculatorData {
+  initialInvestment: string;
+  sector: string;
+  projectDuration: string;
+  annualRevenue: string;
+  operatingCosts: string;
+  employeeCount: string;
+  location: string;
+  isATMSQualified: boolean;
+}
+
+export interface ROIResults {
+  sector: {
+    multiplier: number;
+    taxCredit: number;
+    description: string;
+  };
+  initial: number;
+  duration: number;
+  annualRevenue: number;
+  annualProfit: number;
+  netAnnualCashFlow: number;
+  totalCashFlow: number;
+  totalProfit: number;
+  roi: number;
+  annualROI: number;
+  riskAdjustedROI: number;
+  paybackPeriod: number;
+  taxCredit: number;
+  taxSavings: number;
+  jobsCreated: number;
+  economicImpact: number;
+  normalTax: number;
+  actualTax: number;
+}
+
+export interface InvestorProfile {
+  tier: string;
+  amount: string;
+  icon: string;
+  color: string;
+  benefits: string[];
+  successRate: string;
+  minInvestment?: string;
+}
+
+export interface InvestmentSector {
+  name: string;
+  roi: string;
+  icon: string;
+  opportunities: string;
+  incentives: string;
+  minInvestment: string;
+}
+
+export interface InvestmentStep {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  visual: string;
+  keyPoints?: string[];
+  profiles?: InvestorProfile[];
+  sectors?: InvestmentSector[];
+  timeline?: Array<{
+    phase: string;
+    duration: string;
+    description: string;
+  }>;
+  contacts?: Array<{
+    title: string;
+    contact: string;
+    description: string;
+    available: string;
+  }>;
+  action: string;
+  nextStep: string;
+}
+
 export interface Investment {
   id: string;
   title: string;

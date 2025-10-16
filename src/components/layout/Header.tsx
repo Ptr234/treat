@@ -170,7 +170,7 @@ const Header: React.FC = () => {
         { name: 'ICT Investments', href: '/investments#ict', icon: 'ComputerDesktopIcon' },
         { name: 'Manufacturing Investments', href: '/investments#manufacturing', icon: 'CogIcon' },
         { name: 'Investment ROI Calculator', href: '/tools/roi-calculator', icon: 'ChartBarIcon' },
-        { name: 'Investment Onboarding', href: '/investment-onboarding', icon: 'RocketLaunchIcon' }
+        { name: 'Investment Onboarding', href: '/investments/onboarding', icon: 'RocketLaunchIcon' }
       ]
     },
     { 
