@@ -73,7 +73,7 @@ export default function AgenciesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <div className="bg-gradient-to-r from-brand-black to-brand-red text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -83,7 +83,7 @@ export default function AgenciesPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Uganda Government Agencies
             </h1>
-            <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto">
               Direct access to all government agencies for your business needs. 
               Contact officials, book appointments, and get the support you need.
             </p>
@@ -92,19 +92,19 @@ export default function AgenciesPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                 <div className="text-2xl font-bold">{stats.totalAgencies}</div>
-                <div className="text-sm text-blue-100">Total Agencies</div>
+                <div className="text-sm text-gray-100">Total Agencies</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                 <div className="text-2xl font-bold">{stats.highPriority}</div>
-                <div className="text-sm text-blue-100">High Priority</div>
+                <div className="text-sm text-gray-100">High Priority</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                 <div className="text-2xl font-bold">{stats.withAppointments}</div>
-                <div className="text-sm text-blue-100">Book Appointments</div>
+                <div className="text-sm text-gray-100">Book Appointments</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                 <div className="text-2xl font-bold">{stats.avgResponseTime}</div>
-                <div className="text-sm text-blue-100">Avg Response</div>
+                <div className="text-sm text-gray-100">Avg Response</div>
               </div>
             </div>
           </motion.div>

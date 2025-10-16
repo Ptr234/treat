@@ -137,7 +137,7 @@ export const InvestmentGrid: React.FC<InvestmentGridProps> = ({
     return (
       <div className={`${className}`}>
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-yellow-600" />
           <span className="ml-2 text-gray-600">Loading investment opportunities...</span>
         </div>
       </div>
@@ -157,7 +157,7 @@ export const InvestmentGrid: React.FC<InvestmentGridProps> = ({
               placeholder="Search investments..."
               value={localSearchQuery}
               onChange={handleSearchChange}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 bg-neutral-100 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition-colors"
             />
           </div>
 
@@ -167,7 +167,7 @@ export const InvestmentGrid: React.FC<InvestmentGridProps> = ({
             <select
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+              className="px-3 py-2 bg-neutral-100 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 text-sm transition-colors"
             >
               <option value="priority">Priority</option>
               <option value="title">Title</option>
@@ -177,7 +177,7 @@ export const InvestmentGrid: React.FC<InvestmentGridProps> = ({
             </select>
             <button
               onClick={() => handleSortChange(sortBy)}
-              className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors"
               title={`Sort ${sortOrder === 'asc' ? 'Descending' : 'Ascending'}`}
             >
               {getSortIcon(sortBy) || <SortAsc className="w-4 h-4" />}
@@ -186,13 +186,13 @@ export const InvestmentGrid: React.FC<InvestmentGridProps> = ({
 
           {/* View Mode Toggle */}
           {onViewModeChange && (
-            <div className="flex items-center border border-gray-300 rounded-lg">
+            <div className="flex items-center border border-neutral-300 rounded-lg bg-neutral-100">
               <button
                 onClick={() => onViewModeChange('grid')}
                 className={`p-2 transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-green-100 text-green-600'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-gray-600 hover:bg-yellow-100'
                 }`}
                 title="Grid View"
               >
@@ -202,8 +202,8 @@ export const InvestmentGrid: React.FC<InvestmentGridProps> = ({
                 onClick={() => onViewModeChange('list')}
                 className={`p-2 transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-green-100 text-green-600'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-yellow-400 text-black'
+                    : 'text-gray-600 hover:bg-yellow-100'
                 }`}
                 title="List View"
               >
@@ -247,7 +247,7 @@ export const InvestmentGrid: React.FC<InvestmentGridProps> = ({
                   setLocalSearchQuery('');
                   onSearchChange?.('');
                 }}
-                className="text-green-600 hover:text-green-700 font-medium"
+                className="text-yellow-600 hover:text-yellow-700 font-medium"
               >
                 Clear search
               </button>

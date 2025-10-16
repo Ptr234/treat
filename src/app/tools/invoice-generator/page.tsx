@@ -7,14 +7,22 @@ export const metadata: Metadata = {
 
 export default function InvoiceGeneratorPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">
-          Professional Invoice Generator
-        </h1>
-        <p className="text-xl text-gray-600 mb-8">
-          Generate professional invoices for your business transactions with our easy-to-use invoice generator.
-        </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-brand-black to-brand-red text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Professional Invoice Generator
+            </h1>
+            <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto">
+              Generate professional, tax-compliant invoices for your business transactions with our easy-to-use invoice generator.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Invoice Form */}
@@ -122,7 +130,7 @@ export default function InvoiceGeneratorPage() {
               </div>
 
               <div className="flex gap-4">
-                <button className="flex-1 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors">
+                <button className="flex-1 bg-brand-red text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors">
                   Generate Invoice
                 </button>
                 <button className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
@@ -151,12 +159,12 @@ export default function InvoiceGeneratorPage() {
           </div>
         </div>
         
-        <div className="mt-12 bg-green-50 rounded-lg p-6">
+        <div className="mt-12 bg-brand-yellow/10 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Invoice Features</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-brand-red/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -164,8 +172,8 @@ export default function InvoiceGeneratorPage() {
               <p className="text-sm text-gray-600">Clean, professional invoice templates that look great</p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-brand-yellow/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-brand-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                 </svg>
               </div>
@@ -173,8 +181,8 @@ export default function InvoiceGeneratorPage() {
               <p className="text-sm text-gray-600">Download as PDF, send via email, or print directly</p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-brand-black/10 rounded-lg flex items-center justify-center mx-auto mb-3">
+                <svg className="w-6 h-6 text-brand-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>

@@ -75,13 +75,16 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-black text-white relative">
+      {/* Decorative top border */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-yellow-400"></div>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-2">
             <div>
               <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-primary-600 to-primary-800 rounded-lg overflow-hidden flex items-center justify-center mr-3 shadow-lg">
+                <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center mr-3">
                   <Image 
                     src="/images/oneStopCenter-logo.jpeg" 
                     alt="OneStopCentre Uganda Official Logo" 
@@ -89,21 +92,21 @@ const Footer: React.FC = () => {
                     height={48}
                     className="w-full h-full object-cover"
                   />
-                  <span className="hidden text-white font-bold text-lg">OSC</span>
+                  <span className="hidden text-black font-bold text-lg">OSC</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">OneStopCentre Uganda</h3>
-                  <p className="text-sm text-gray-400 font-medium">InvestUganda simplified</p>
+                  <h3 className="text-xl font-bold text-white">OneStopCentre Uganda</h3>
+                  <p className="text-sm text-yellow-400 font-semibold">InvestUganda simplified</p>
                 </div>
               </div>
-              <p className="text-gray-400 mb-4 max-w-md">
+              <p className="text-neutral-300 mb-6 max-w-md leading-relaxed">
                 Your gateway to streamlined government services, business registration, 
-                and investment opportunities in Uganda.
+                and investment opportunities in Uganda. Professional, reliable, and efficient.
               </p>
               <div className="flex space-x-4">
                 <button 
                   onClick={() => openExternalLink('https://twitter.com/ugandainvest')}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-400 hover:text-yellow-400 transition-colors duration-300 transform hover:scale-110"
                   title="Follow UIA on Twitter"
                   aria-label="Follow UIA on Twitter"
                 >
@@ -113,7 +116,7 @@ const Footer: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => openExternalLink('https://facebook.com/UgandaInvestmentAuthority')}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-400 hover:text-yellow-400 transition-colors duration-300 transform hover:scale-110"
                   title="Follow UIA on Facebook"
                   aria-label="Follow UIA on Facebook"
                 >
@@ -123,7 +126,7 @@ const Footer: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => openExternalLink('https://linkedin.com/company/uganda-investment-authority')}
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-400 hover:text-yellow-400 transition-colors duration-300 transform hover:scale-110"
                   title="Connect with UIA on LinkedIn"
                   aria-label="Connect with UIA on LinkedIn"
                 >
@@ -138,21 +141,21 @@ const Footer: React.FC = () => {
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
               <div>
-                <h4 className="text-lg font-semibold mb-4">{category}</h4>
-                <ul className="space-y-2">
+                <h4 className="text-lg font-semibold mb-4 text-yellow-400">{category}</h4>
+                <ul className="space-y-3">
                   {links.map((link) => (
                     <li key={link.name}>
                       {link.type === 'route' ? (
                         <Link
                           href={link.href as never}
-                          className="text-gray-400 hover:text-white transition-colors text-sm hover:text-primary-300"
+                          className="text-neutral-300 hover:text-white transition-colors text-sm hover:text-yellow-300 block py-1"
                         >
                           {link.name}
                         </Link>
                       ) : (
                         <button
                           onClick={() => handleLinkClick(link)}
-                          className="text-gray-400 hover:text-white transition-colors text-sm text-left hover:text-primary-300"
+                          className="text-neutral-300 hover:text-white transition-colors text-sm text-left hover:text-yellow-300 block py-1"
                         >
                           {link.name}
                         </button>
@@ -166,30 +169,30 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Official Government Portals */}
-        <div className="mt-12 pt-8 border-t border-gray-800">
+        <div className="mt-12 pt-8 border-t border-neutral-800">
           <div className="mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <BuildingLibraryIcon className="w-6 h-6 text-primary-400 mr-2" />
-              <h4 className="text-lg font-semibold text-primary-400">
+            <div className="flex items-center justify-center mb-6">
+              <BuildingLibraryIcon className="w-6 h-6 text-yellow-400 mr-2" />
+              <h4 className="text-lg font-semibold text-yellow-400">
                 Official Government Portals
               </h4>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div
-                className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg p-4 border border-gray-600 hover:border-primary-400 transition-all"
+                className="bg-neutral-900 rounded-xl p-6 border border-neutral-700 transition-all duration-300 group"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 border-2 border-yellow-400 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h5 className="font-semibold text-white">MyBusiness Portal</h5>
-                    <p className="text-xs text-gray-400">Business registration & licensing</p>
+                    <h5 className="font-semibold text-white mb-1">MyBusiness Portal</h5>
+                    <p className="text-xs text-neutral-400 mb-2">Business registration & licensing</p>
                     <button
                       onClick={() => openExternalLink('https://mybusiness.go.ug/')}
-                      className="text-primary-400 hover:text-primary-300 text-sm font-medium mt-1 transition-colors"
+                      className="text-yellow-400 hover:text-yellow-300 text-sm font-medium transition-colors"
                     >
                       mybusiness.go.ug →
                     </button>
@@ -198,27 +201,27 @@ const Footer: React.FC = () => {
               </div>
 
               <div
-                className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg p-4 border border-gray-600 hover:border-primary-400 transition-all"
+                className="bg-neutral-900 rounded-xl p-6 border border-neutral-700 transition-all duration-300 group"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center overflow-hidden p-1">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center overflow-hidden p-1 group-hover:bg-yellow-50 transition-all duration-300">
                     <Image 
                       src="/images/logos/UIA logo.png" 
                       alt="UIA Logo" 
                       width={60}
                       height={40}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300"
                     />
-                    <svg className="hidden w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="hidden w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h5 className="font-semibold text-white">Uganda Investment Authority</h5>
-                    <p className="text-xs text-gray-400">Investment opportunities & incentives</p>
+                    <h5 className="font-semibold text-white mb-1">Uganda Investment Authority</h5>
+                    <p className="text-xs text-neutral-400 mb-2">Investment opportunities & incentives</p>
                     <button
                       onClick={() => openExternalLink('https://ugandainvest.go.ug/')}
-                      className="text-primary-400 hover:text-primary-300 text-sm font-medium mt-1 transition-colors"
+                      className="text-yellow-400 hover:text-yellow-300 text-sm font-medium transition-colors"
                     >
                       ugandainvest.go.ug →
                     </button>
@@ -227,20 +230,20 @@ const Footer: React.FC = () => {
               </div>
 
               <div
-                className="bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg p-4 border border-gray-600 hover:border-primary-400 transition-all"
+                className="bg-neutral-900 rounded-xl p-6 border border-neutral-700 transition-all duration-300 group"
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 border-2 border-yellow-400 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h5 className="font-semibold text-white">eBiz Portal</h5>
-                    <p className="text-xs text-gray-400">Electronic business services</p>
+                    <h5 className="font-semibold text-white mb-1">eBiz Portal</h5>
+                    <p className="text-xs text-neutral-400 mb-2">Electronic business services</p>
                     <button
                       onClick={() => openExternalLink('https://ebiz.go.ug/')}
-                      className="text-primary-400 hover:text-primary-300 text-sm font-medium mt-1 transition-colors"
+                      className="text-yellow-400 hover:text-yellow-300 text-sm font-medium transition-colors"
                     >
                       ebiz.go.ug →
                     </button>
@@ -250,26 +253,26 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm">
+          <div className="flex flex-col md:flex-row justify-between items-center pt-6 border-t border-neutral-800">
+            <p className="text-neutral-400 text-sm">
               © {currentYear} OneStop Centre Uganda. All rights reserved.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <button 
                 onClick={() => openExternalLink('https://www.ugandainvest.go.ug/privacy-policy')}
-                className="text-gray-400 hover:text-white text-sm transition-colors"
+                className="text-neutral-400 hover:text-yellow-400 text-sm transition-colors"
               >
                 Privacy Policy
               </button>
               <button 
                 onClick={() => openExternalLink('https://www.ugandainvest.go.ug/terms-of-service')}
-                className="text-gray-400 hover:text-white text-sm transition-colors"
+                className="text-neutral-400 hover:text-yellow-400 text-sm transition-colors"
               >
                 Terms of Service
               </button>
               <button 
                 onClick={() => openExternalLink('https://www.ugandainvest.go.ug/accessibility')}
-                className="text-gray-400 hover:text-white text-sm transition-colors"
+                className="text-neutral-400 hover:text-yellow-400 text-sm transition-colors"
               >
                 Accessibility
               </button>

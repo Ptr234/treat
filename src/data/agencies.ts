@@ -54,10 +54,10 @@ export const ugandaAgencies: AgencyContact[] = [
       'Business Name Registration'
     ],
     contact: {
-      email: 'info@ursb.go.ug',
-      phone: '+256414256000',
-      website: 'https://www.ursb.go.ug',
-      address: 'Plot 10 George Street, Commercial House, P.O. Box 6848, Kampala'
+      email: 'ursb@ursb.go.ug',
+      phone: '+256414235915',
+      website: 'https://ursb.go.ug',
+      address: 'Uganda Business Facilitation Centre Plot 1 Baskerville Avenue, Kololo, P.O. Box 6848, Kampala'
     },
     logo: '/images/logos/URSB logo.png',
     category: 'registration',
@@ -78,9 +78,9 @@ export const ugandaAgencies: AgencyContact[] = [
     ],
     contact: {
       email: 'info@ura.go.ug',
-      phone: '+256417111000',
-      website: 'https://www.ura.go.ug',
-      address: 'Plot 28-35 Nakasero Road, URA Tower, P.O. Box 7279, Kampala'
+      phone: '+256417444602',
+      website: 'https://ura.go.ug',
+      address: 'URA Headquarters, Plot M193/M194, Nakawa Industrial Area, P.O. Box 7279, Kampala'
     },
     logo: '/images/logos/URA logo.png',
     category: 'taxation',
@@ -99,9 +99,9 @@ export const ugandaAgencies: AgencyContact[] = [
     ],
     contact: {
       email: 'info@kcca.go.ug',
-      phone: '+256417111300',
-      website: 'https://www.kcca.go.ug',
-      address: 'City Hall, P.O. Box 7010, Kampala'
+      phone: '+256312900000',
+      website: 'https://kcca.go.ug',
+      address: 'City Hall, Plot 1-3, Apollo Kaggwa Road, P.O. Box 7010, Kampala'
     },
     logo: '/images/logos/kcca.png',
     category: 'registration',
@@ -150,9 +150,9 @@ export const ugandaAgencies: AgencyContact[] = [
     ],
     contact: {
       email: 'info@nema.go.ug',
-      phone: '+256414251064',
-      website: 'https://www.nema.go.ug',
-      address: 'Plot 17/19/21 Jinja Road, NEMA House, P.O. Box 22255, Kampala'
+      phone: '+256414425068',
+      website: 'https://nema.go.ug',
+      address: 'NEMA House Plot 17/19/21 Jinja Road, P.O. Box 222, Kampala'
     },
     logo: '/images/logos/NEMA.png',
     category: 'environment',

@@ -11,30 +11,36 @@ export default function ROICalculatorPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <div className="bg-gradient-to-r from-brand-black to-brand-red text-white">
         <div className="container mx-auto px-4 py-16">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               Investment ROI Calculator
             </h1>
-            <p className="text-xl md:text-2xl text-blue-100 mb-8">
+            <p className="text-xl md:text-2xl text-gray-100 mb-8">
               Calculate your return on investment for Uganda business opportunities with sector-specific incentives and ATMS tax benefits
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-2xl font-bold mb-2">🎯</div>
+                <div className="w-12 h-12 bg-brand-yellow rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <span className="text-brand-black font-bold text-lg">ROI</span>
+                </div>
                 <h3 className="font-semibold mb-2">Accurate Calculations</h3>
-                <p className="text-sm text-blue-100">Comprehensive ROI analysis with Uganda-specific factors</p>
+                <p className="text-sm text-gray-100">Comprehensive ROI analysis with Uganda-specific factors</p>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-2xl font-bold mb-2">🏛️</div>
+                <div className="w-12 h-12 bg-brand-yellow rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <span className="text-brand-black font-bold text-lg">TAX</span>
+                </div>
                 <h3 className="font-semibold mb-2">ATMS Incentives</h3>
-                <p className="text-sm text-blue-100">Factor in tax credits and investment incentives</p>
+                <p className="text-sm text-gray-100">Factor in tax credits and investment incentives</p>
               </div>
               <div className="bg-white/10 rounded-lg p-4">
-                <div className="text-2xl font-bold mb-2">📊</div>
+                <div className="w-12 h-12 bg-brand-yellow rounded-lg flex items-center justify-center mx-auto mb-2">
+                  <span className="text-brand-black font-bold text-lg">SEC</span>
+                </div>
                 <h3 className="font-semibold mb-2">Sector Analysis</h3>
-                <p className="text-sm text-blue-100">Sector-specific multipliers and risk assessments</p>
+                <p className="text-sm text-gray-100">Sector-specific multipliers and risk assessments</p>
               </div>
             </div>
           </div>

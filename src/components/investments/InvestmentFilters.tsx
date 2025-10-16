@@ -97,20 +97,20 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
   );
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}>
+    <div className={`${className}`}>
       {/* Header */}
       <div 
-        className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="flex items-center justify-between p-4 cursor-pointer hover:bg-neutral-50 transition-colors"
         onClick={() => {
           setIsCollapsed(!isCollapsed);
           onToggle?.();
         }}
       >
         <div className="flex items-center gap-3">
-          <Filter className="w-5 h-5 text-gray-600" />
+          <Filter className="w-5 h-5 text-yellow-600" />
           <h3 className="font-semibold text-gray-900">Filters</h3>
           {activeFiltersCount > 0 && (
-            <span className="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+            <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">
               {activeFiltersCount}
             </span>
           )}
@@ -152,7 +152,7 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
                 <select
                   value={filters.category}
                   onChange={(e) => updateFilter('category', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 bg-neutral-100 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 text-sm transition-colors"
                 >
                   <option value="all">All Categories</option>
                   {INVESTMENT_CATEGORIES.map((category) => (
@@ -168,7 +168,7 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
                 <select
                   value={filters.sector}
                   onChange={(e) => updateFilter('sector', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                  className="w-full px-3 py-2 bg-neutral-100 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 text-sm transition-colors"
                 >
                   {INVESTMENT_SECTORS.map((sector) => (
                     <option key={sector} value={sector.toLowerCase()}>
@@ -187,8 +187,8 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
                       onClick={() => updateFilter('priority', priority.value)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors border ${
                         filters.priority === priority.value
-                          ? 'bg-green-100 text-green-800 border-green-300'
-                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                          ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                          : 'bg-neutral-100 text-gray-700 border-neutral-300 hover:bg-neutral-200'
                       }`}
                     >
                       {priority.label}
@@ -211,7 +211,7 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
                         value={range.value}
                         checked={filters.investmentRange === range.value}
                         onChange={(e) => updateFilter('investmentRange', e.target.value)}
-                        className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                        className="w-4 h-4 text-yellow-600 border-neutral-300 focus:ring-yellow-500"
                       />
                       <span className="text-sm text-gray-700 group-hover:text-gray-900">
                         {range.label}
@@ -235,7 +235,7 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
                         value={range.value}
                         checked={filters.roiRange === range.value}
                         onChange={(e) => updateFilter('roiRange', e.target.value)}
-                        className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                        className="w-4 h-4 text-yellow-600 border-neutral-300 focus:ring-yellow-500"
                       />
                       <span className="text-sm text-gray-700 group-hover:text-gray-900">
                         {range.label}
@@ -259,7 +259,7 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
                         value={range.value}
                         checked={filters.timelineRange === range.value}
                         onChange={(e) => updateFilter('timelineRange', e.target.value)}
-                        className="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500"
+                        className="w-4 h-4 text-yellow-600 border-neutral-300 focus:ring-yellow-500"
                       />
                       <span className="text-sm text-gray-700 group-hover:text-gray-900">
                         {range.label}
@@ -290,12 +290,12 @@ export const InvestmentFiltersComponent: React.FC<InvestmentFiltersProps> = ({
                       return (
                         <span
                           key={key}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full"
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full"
                         >
                           {value}
                           <button
                             onClick={() => updateFilter(key as keyof InvestmentFilters, 'all')}
-                            className="hover:bg-green-200 rounded-full p-0.5"
+                            className="hover:bg-yellow-200 rounded-full p-0.5"
                           >
                             <X className="w-3 h-3" />
                           </button>

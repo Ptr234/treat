@@ -60,6 +60,8 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [dropdownClickMode, setDropdownClickMode] = useState<string | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -69,6 +71,47 @@ const Header: React.FC = () => {
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Clear any pending dropdown close timeout
+  const clearDropdownTimeout = useCallback(() => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+      dropdownTimeoutRef.current = null;
+    }
+  }, []);
+
+  // Set dropdown close timeout
+  const setDropdownTimeout = useCallback((callback: () => void, delay: number = 150) => {
+    clearDropdownTimeout();
+    dropdownTimeoutRef.current = setTimeout(callback, delay);
+  }, [clearDropdownTimeout]);
+
+  // Handle dropdown visibility
+  const handleDropdownOpen = useCallback((itemName: string, isClick = false) => {
+    clearDropdownTimeout();
+    setActiveDropdown(itemName);
+    if (isClick) {
+      setDropdownClickMode(itemName);
+    }
+  }, [clearDropdownTimeout]);
+
+  const handleDropdownClose = useCallback((itemName: string, immediate = false) => {
+    // If in click mode, don't close on hover
+    if (dropdownClickMode === itemName && !immediate) {
+      return;
+    }
+    
+    if (immediate) {
+      clearDropdownTimeout();
+      setActiveDropdown(null);
+      setDropdownClickMode(null);
+    } else {
+      setDropdownTimeout(() => {
+        setActiveDropdown(null);
+        setDropdownClickMode(null);
+      });
+    }
+  }, [dropdownClickMode, setDropdownTimeout, clearDropdownTimeout]);
 
   // Icon mapping for professional icons
   const iconMap: IconMapType = {
@@ -124,11 +167,13 @@ const Header: React.FC = () => {
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
       setActiveDropdown(null);
+      setDropdownClickMode(null);
+      clearDropdownTimeout();
     }
     if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
       setIsSearchOpen(false);
     }
-  }, []);
+  }, [clearDropdownTimeout]);
 
   useEffect(() => {
     // Optimized scroll handler - less frequent updates
@@ -164,13 +209,13 @@ const Header: React.FC = () => {
       icon: 'CurrencyDollarIcon',
       dropdown: [
         { name: 'All Investment Sectors', href: '/investments', icon: 'BriefcaseIcon' },
-        { name: 'Agriculture Investments', href: '/investments#agriculture', icon: 'BeakerIcon' },
-        { name: 'Tourism Investments', href: '/investments#tourism', icon: 'GlobeAltIcon' },
-        { name: 'Mining Investments', href: '/investments#mining', icon: 'CubeIcon' },
-        { name: 'ICT Investments', href: '/investments#ict', icon: 'ComputerDesktopIcon' },
-        { name: 'Manufacturing Investments', href: '/investments#manufacturing', icon: 'CogIcon' },
+        { name: 'Agriculture & Agribusiness', href: '/investments?category=agriculture', icon: 'BeakerIcon' },
+        { name: 'Tourism & Hospitality', href: '/investments?category=tourism', icon: 'GlobeAltIcon' },
+        { name: 'Mining & Natural Resources', href: '/investments?category=mining', icon: 'CubeIcon' },
+        { name: 'ICT & Technology', href: '/investments?category=technology', icon: 'ComputerDesktopIcon' },
+        { name: 'Manufacturing & Industry', href: '/investments?category=manufacturing', icon: 'CogIcon' },
         { name: 'Investment ROI Calculator', href: '/tools/roi-calculator', icon: 'ChartBarIcon' },
-        { name: 'Investment Onboarding', href: '/investments/onboarding', icon: 'RocketLaunchIcon' }
+        { name: 'Start Investment Journey', href: '/investments/onboarding', icon: 'RocketLaunchIcon' }
       ]
     },
     { 
@@ -178,12 +223,12 @@ const Header: React.FC = () => {
       href: '/services', 
       icon: 'BuildingOfficeIcon',
       dropdown: [
-        { name: 'Investment Support Services', href: '/services#investment-support', icon: 'TargetIcon' },
+        { name: 'Investment Support & Advisory', href: '/services', icon: 'TargetIcon' },
         { name: 'Business Registration & Licensing', href: '/business/registration', icon: 'BuildingOffice2Icon' },
-        { name: 'Tax & Revenue Services', href: '/services#tax-revenue', icon: 'CalculatorIcon' },
-        { name: 'Immigration & Work Permits', href: '/services#immigration-permits', icon: 'ClipboardDocumentListIcon' },
-        { name: 'Export & Import Services', href: '/services#export-import', icon: 'ArchiveBoxIcon' },
-        { name: 'All Government Services', href: '/services', icon: 'BuildingOfficeIcon' }
+        { name: 'Tax Services & URA Support', href: '/services', icon: 'CalculatorIcon' },
+        { name: 'Work Permits & Immigration', href: '/services', icon: 'ClipboardDocumentListIcon' },
+        { name: 'Import/Export Facilitation', href: '/services', icon: 'ArchiveBoxIcon' },
+        { name: 'View All Services', href: '/services', icon: 'BuildingOfficeIcon' }
       ]
     },
     { 
@@ -195,8 +240,8 @@ const Header: React.FC = () => {
         { name: 'Tax Calculator', href: '/tools/tax-calculator', icon: 'CalculatorIcon' },
         { name: 'Business Invoice Generator', href: '/tools/invoice-generator', icon: 'DocumentTextIcon' },
         { name: 'Document Checklist', href: '/tools/document-checklist', icon: 'CheckCircleIcon' },
-        { name: 'Investment Status Tracker', href: '/tools#status-tracker', icon: 'MapPinIcon' },
-        { name: 'All Investment Tools', href: '/tools', icon: 'WrenchScrewdriverIcon' }
+        { name: 'Investment Tracker', href: '/tools', icon: 'MapPinIcon' },
+        { name: 'View All Tools', href: '/tools', icon: 'WrenchScrewdriverIcon' }
       ]
     },
     { 
@@ -204,11 +249,11 @@ const Header: React.FC = () => {
       href: '/downloads', 
       icon: 'FolderIcon',
       dropdown: [
-        { name: 'Investment Guides', href: '/downloads#investment-guides', icon: 'BookOpenIcon' },
-        { name: 'Legal Documents', href: '/downloads#legal-documents', icon: 'ScaleIcon' },
-        { name: 'Tax Information', href: '/downloads#tax-information', icon: 'CurrencyDollarIcon' },
-        { name: 'Sector Reports', href: '/downloads#sector-reports', icon: 'ChartBarIcon' },
-        { name: 'All Resources', href: '/downloads', icon: 'FolderIcon' }
+        { name: 'Investment Guides & Manuals', href: '/downloads', icon: 'BookOpenIcon' },
+        { name: 'Legal Forms & Documents', href: '/downloads', icon: 'ScaleIcon' },
+        { name: 'Tax Information & Guidelines', href: '/downloads', icon: 'CurrencyDollarIcon' },
+        { name: 'Sector Analysis & Reports', href: '/downloads', icon: 'ChartBarIcon' },
+        { name: 'View All Resources', href: '/downloads', icon: 'FolderIcon' }
       ]
     },
     { 
@@ -216,10 +261,10 @@ const Header: React.FC = () => {
       href: '/support', 
       icon: 'HandRaisedIcon',
       dropdown: [
-        { name: 'Investment Consultation', href: '/support#investment-consultation', icon: 'BriefcaseIcon' },
-        { name: 'Agency Directory', href: '/agencies', icon: 'BuildingOffice2Icon' },
-        { name: 'Emergency Support', href: '/support#emergency', icon: 'ExclamationTriangleIcon' },
-        { name: 'Investor FAQ', href: '/support#faq', icon: 'QuestionMarkCircleIcon' }
+        { name: 'Investment Consultation', href: '/support', icon: 'BriefcaseIcon' },
+        { name: 'Government Agencies', href: '/agencies', icon: 'BuildingOffice2Icon' },
+        { name: 'Emergency Support', href: '/support', icon: 'ExclamationTriangleIcon' },
+        { name: 'Investor FAQ & Help', href: '/support', icon: 'QuestionMarkCircleIcon' }
       ]
     }
   ], []);
@@ -260,13 +305,13 @@ const Header: React.FC = () => {
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
           isScrolled 
-            ? 'bg-primary-600/95 backdrop-blur-xl shadow-2xl shadow-black/10 border-b border-primary-700/50' 
-            : 'bg-primary-600/90 backdrop-blur-md shadow-xl shadow-black/5'
+            ? 'bg-black/95 backdrop-blur-xl shadow-strong border-b border-yellow-500/30' 
+            : 'bg-black/90 backdrop-blur-md shadow-medium'
         }`}
         style={{
           boxShadow: isScrolled 
-            ? '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.4)'
-            : '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+            ? '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(234, 179, 8, 0.2), inset 0 1px 0 rgba(234, 179, 8, 0.1)'
+            : '0 10px 25px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(234, 179, 8, 0.05)'
         }}
       >
         <div className="w-full">
@@ -279,7 +324,7 @@ const Header: React.FC = () => {
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
             >
               <Link href="/" className="flex items-center group">
-                <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-lg md:rounded-xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl bg-gradient-to-br from-primary-600 to-primary-800">
+                <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-yellow transition-all duration-300">
                   <Image 
                     src="/images/oneStopCenter-logo.jpeg" 
                     alt="OneStopCentre Uganda" 
@@ -287,7 +332,7 @@ const Header: React.FC = () => {
                     height={48}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                   />
-                  <div className="hidden w-full h-full bg-gradient-to-br from-primary-600 to-primary-800 items-center justify-center text-white font-bold text-sm md:text-base">
+                  <div className="hidden w-full h-full bg-gradient-to-br from-yellow-500 to-red-600 items-center justify-center text-black font-bold text-sm md:text-base">
                     OSC
                   </div>
                 </div>
@@ -296,10 +341,10 @@ const Header: React.FC = () => {
                     <span className="hidden sm:inline">OneStopCentre</span>
                     <span className="sm:hidden">OSC</span>
                   </div>
-                  <div className="text-xs md:text-sm font-semibold leading-tight transition-colors duration-300 text-accent-yellow-400 -mt-0.5">
+                  <div className="text-xs md:text-sm font-semibold leading-tight transition-colors duration-300 text-yellow-400 -mt-0.5">
                     Uganda
                   </div>
-                  <div className="hidden md:block text-xs font-medium text-white/90 italic -mt-0.5">
+                  <div className="hidden md:block text-xs font-medium text-white/80 italic -mt-0.5">
                     Investing in Uganda simplified
                   </div>
                 </div>
@@ -310,42 +355,104 @@ const Header: React.FC = () => {
             <nav className="hidden lg:flex items-center space-x-1" ref={dropdownRef}>
               {navigationItems.map((item) => (
                 <div key={item.name} className="relative group">
-                  <Link
-                    href={item.href as never}
-                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${
-                      isActiveRoute(item.href)
-                        ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm'
-                        : 'text-white/90 hover:bg-white/10 hover:text-white'
-                    }`}
-                    onMouseEnter={() => item.dropdown && setActiveDropdown(item.name)}
-                    onMouseLeave={() => setActiveDropdown(null)}
-                  >
-                    {renderIcon(item.icon, "w-4 h-4")}
-                    <span className="ml-2">{item.name}</span>
-                    {item.dropdown && (
-                      <ChevronDownIcon className="w-4 h-4 ml-1 transition-transform duration-200" />
-                    )}
-                  </Link>
+                  {item.dropdown ? (
+                    <button
+                      className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black w-full ${
+                        isActiveRoute(item.href)
+                          ? 'bg-yellow-400/10 text-yellow-400'
+                          : 'text-white/90 hover:bg-yellow-400/5 hover:text-yellow-400'
+                      }`}
+                      onMouseEnter={() => handleDropdownOpen(item.name)}
+                      onMouseLeave={() => handleDropdownClose(item.name)}
+                      onClick={() => {
+                        if (activeDropdown === item.name && dropdownClickMode === item.name) {
+                          handleDropdownClose(item.name, true);
+                        } else {
+                          handleDropdownOpen(item.name, true);
+                        }
+                      }}
+                      onFocus={() => handleDropdownOpen(item.name)}
+                      aria-expanded={activeDropdown === item.name}
+                      aria-haspopup="menu"
+                      type="button"
+                    >
+                      {renderIcon(item.icon, "w-4 h-4")}
+                      <span className="ml-2">{item.name}</span>
+                      <ChevronDownIcon className={`w-4 h-4 ml-1 transition-transform duration-200 ${
+                        activeDropdown === item.name ? 'rotate-180' : ''
+                      }`} aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.href as never}
+                      className={`flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 focus:ring-offset-black ${
+                        isActiveRoute(item.href)
+                          ? 'bg-yellow-400/10 text-yellow-400'
+                          : 'text-white/90 hover:bg-yellow-400/5 hover:text-yellow-400'
+                      }`}
+                    >
+                      {renderIcon(item.icon, "w-4 h-4")}
+                      <span className="ml-2">{item.name}</span>
+                    </Link>
+                  )}
 
-                  {/* Dropdown Menu */}
+                  {/* Enhanced Dropdown Menu */}
                   {item.dropdown && activeDropdown === item.name && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
-                      onMouseEnter={() => setActiveDropdown(item.name)}
-                      onMouseLeave={() => setActiveDropdown(null)}
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="absolute top-full left-0 mt-3 w-80 max-w-[90vw] bg-black/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-neutral-700 py-3 z-50"
+                      style={{
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(234, 179, 8, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                      }}
+                      onMouseEnter={() => {
+                        clearDropdownTimeout();
+                        setActiveDropdown(item.name);
+                      }}
+                      onMouseLeave={() => handleDropdownClose(item.name)}
+                      data-dropdown={item.name}
+                      role="menu"
+                      aria-label={`${item.name} submenu`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          setActiveDropdown(null);
+                          const previousElement = e.currentTarget.previousElementSibling as HTMLElement;
+                          previousElement?.focus();
+                        }
+                      }}
                     >
-                      {item.dropdown.map((dropdownItem) => (
+                      <div className="px-4 py-2 border-b border-neutral-700">
+                        <h3 className="text-xs font-bold text-neutral-400 uppercase tracking-wider">
+                          {item.name}
+                        </h3>
+                      </div>
+                      {item.dropdown.map((dropdownItem, _index) => (
                         <Link
                           key={dropdownItem.name}
                           href={dropdownItem.href as never}
-                          className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors duration-200"
+                          className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300 relative overflow-hidden focus:outline-none focus:text-yellow-400 focus:bg-yellow-400/5"
+                          role="menuitem"
+                          tabIndex={0}
+                          onClick={() => {
+                            // Close dropdown when clicking on link
+                            handleDropdownClose(item.name, true);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              e.currentTarget.click();
+                            }
+                          }}
                         >
-                          {renderIcon(dropdownItem.icon, "w-4 h-4")}
-                          <span className="ml-3">{dropdownItem.name}</span>
-                          <ChevronRightIcon className="w-4 h-4 ml-auto opacity-40" />
+                          <div className="relative flex items-center w-full">
+                            <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center transition-all duration-300">
+                              {renderIcon(dropdownItem.icon, "w-4 h-4 text-yellow-400")}
+                            </div>
+                            <span className="ml-3 flex-1 transition-all duration-300">{dropdownItem.name}</span>
+                            <ChevronRightIcon className="w-4 h-4 text-neutral-400 group-hover:text-yellow-400 group-hover:translate-x-1 transition-all duration-300" />
+                          </div>
                         </Link>
                       ))}
                     </motion.div>
@@ -361,7 +468,7 @@ const Header: React.FC = () => {
                 {!isSearchOpen ? (
                   <button
                     onClick={() => setIsSearchOpen(true)}
-                    className="p-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                    className="p-2 text-white/90 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all duration-200"
                     aria-label="Search"
                   >
                     <MagnifyingGlassIcon className="w-5 h-5" />
@@ -378,7 +485,7 @@ const Header: React.FC = () => {
                       placeholder="Search investments..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-48 md:w-64 px-4 py-2 bg-white/10 text-white placeholder-white/70 rounded-lg border border-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent"
+                      className="w-48 md:w-64 px-4 py-2 bg-black-800/50 text-white placeholder-white/60 rounded-xl border border-yellow-500/30 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent backdrop-blur-sm"
                       autoFocus
                     />
                   </motion.form>
@@ -388,32 +495,43 @@ const Header: React.FC = () => {
               {/* User Authentication */}
               {isAuthenticated && user ? (
                 <div className="relative group">
-                  <button className="flex items-center space-x-2 p-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                  <button className="flex items-center space-x-2 p-2 text-white/90 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all duration-200">
                     <UserIcon className="w-5 h-5" />
                     <span className="hidden md:inline text-sm font-medium">{user.name}</span>
                   </button>
                   
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="absolute right-0 top-full mt-3 w-56 max-w-[90vw] bg-black/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-neutral-700 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50" style={{
+                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(234, 179, 8, 0.1)'
+                  }}>
                     <Link
                       href="/profile"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors duration-200"
+                      className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300 relative overflow-hidden"
                     >
-                      <UserIcon className="w-4 h-4 mr-3" />
-                      Profile
+                      <div className="relative flex items-center">
+                        <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center transition-all duration-300">
+                          <UserIcon className="w-4 h-4 text-yellow-400" />
+                        </div>
+                        <span className="ml-3 transition-all duration-300">Profile</span>
+                      </div>
                     </Link>
+                    <div className="border-t border-neutral-700 my-1"></div>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors duration-200"
+                      className="group flex items-center w-full px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300 relative overflow-hidden"
                     >
-                      <ArrowRightOnRectangleIcon className="w-4 h-4 mr-3" />
-                      Sign Out
+                      <div className="relative flex items-center">
+                        <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center transition-all duration-300">
+                          <ArrowRightOnRectangleIcon className="w-4 h-4 text-yellow-400" />
+                        </div>
+                        <span className="ml-3 transition-all duration-300">Sign Out</span>
+                      </div>
                     </button>
                   </div>
                 </div>
               ) : (
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="px-4 py-2 bg-white text-primary-600 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200"
+                  className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black font-semibold rounded-xl transition-all duration-300 transform hover:scale-105"
                 >
                   Get Started
                 </button>
@@ -422,7 +540,7 @@ const Header: React.FC = () => {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="lg:hidden p-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                className="lg:hidden p-2 text-white/90 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all duration-200"
                 aria-label="Toggle menu"
               >
                 {isMenuOpen ? (
@@ -441,40 +559,69 @@ const Header: React.FC = () => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="lg:hidden bg-primary-700/95 backdrop-blur-xl border-t border-primary-600/50"
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="lg:hidden bg-gradient-to-b from-black-900/98 to-black-800/98 backdrop-blur-xl border-t border-yellow-500/30 shadow-2xl"
               >
-                <div className="px-4 py-6 space-y-2">
-                  {navigationItems.map((item) => (
-                    <div key={item.name}>
+                <div className="px-4 py-6 space-y-3 max-h-[70vh] overflow-y-auto">
+                  {navigationItems.map((item, itemIndex) => (
+                    <motion.div 
+                      key={item.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: itemIndex * 0.1 }}
+                    >
                       <Link
                         href={item.href as never}
-                        className={`flex items-center px-4 py-3 text-base font-medium rounded-lg transition-all duration-200 ${
+                        className={`group flex items-center px-4 py-4 text-base font-semibold rounded-2xl transition-all duration-300 relative overflow-hidden ${
                           isActiveRoute(item.href)
-                            ? 'bg-white/20 text-white'
-                            : 'text-white/90 hover:bg-white/10 hover:text-white'
+                            ? 'bg-yellow-400/10 text-yellow-400'
+                            : 'text-white/90 hover:bg-yellow-400/5 hover:text-yellow-400'
                         }`}
                         onClick={() => setIsMenuOpen(false)}
                       >
-                        {renderIcon(item.icon, "w-5 h-5")}
-                        <span className="ml-3">{item.name}</span>
+                        <div className="relative flex items-center w-full">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                            isActiveRoute(item.href) 
+                              ? 'bg-yellow-400/20' 
+                              : 'bg-white/5 group-hover:bg-yellow-400/10'
+                          }`}>
+                            {renderIcon(item.icon, "w-5 h-5")}
+                          </div>
+                          <span className="ml-4 flex-1">{item.name}</span>
+                          {item.dropdown && (
+                            <ChevronDownIcon className="w-5 h-5 opacity-60" />
+                          )}
+                        </div>
                       </Link>
                       
                       {item.dropdown && (
-                        <div className="ml-8 mt-2 space-y-1">
-                          {item.dropdown.map((dropdownItem) => (
-                            <Link
+                        <div className="ml-6 mt-3 space-y-2 border-l-2 border-white/10 pl-4">
+                          <div className="text-xs font-bold text-yellow-400/80 uppercase tracking-wider mb-2">
+                            {item.name} Options
+                          </div>
+                          {item.dropdown.map((dropdownItem, _subIndex) => (
+                            <motion.div
                               key={dropdownItem.name}
-                              href={dropdownItem.href as never}
-                              className="flex items-center px-4 py-2 text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
-                              onClick={() => setIsMenuOpen(false)}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: (itemIndex * 0.1) + (dropdownItem.name.length * 0.01) }}
                             >
-                              {renderIcon(dropdownItem.icon, "w-4 h-4")}
-                              <span className="ml-3">{dropdownItem.name}</span>
-                            </Link>
+                              <Link
+                                href={dropdownItem.href as never}
+                                className="group flex items-center px-3 py-3 text-sm font-medium text-white/80 hover:text-yellow-400 hover:bg-gradient-to-r hover:from-yellow-500/10 hover:to-red-500/10 rounded-xl transition-all duration-300 border border-white/5 hover:border-yellow-500/20"
+                                onClick={() => setIsMenuOpen(false)}
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-gradient-to-br group-hover:from-yellow-500/20 group-hover:to-red-500/20 flex items-center justify-center transition-all duration-300">
+                                  {renderIcon(dropdownItem.icon, "w-4 h-4")}
+                                </div>
+                                <span className="ml-3 flex-1 group-hover:font-semibold transition-all duration-300">{dropdownItem.name}</span>
+                                <ChevronRightIcon className="w-4 h-4 opacity-40 group-hover:opacity-70 group-hover:translate-x-1 transition-all duration-300" />
+                              </Link>
+                            </motion.div>
                           ))}
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </motion.div>
@@ -485,18 +632,22 @@ const Header: React.FC = () => {
 
       {/* Auth Modal Placeholder - Will be implemented separately */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm">
           <div className="flex items-center justify-center min-h-screen p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication</h2>
-              <p className="text-gray-600 mb-6">Auth modal will be implemented in the next phase.</p>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-strong border border-yellow-200"
+            >
+              <h2 className="text-2xl font-bold text-black-900 mb-4">Authentication</h2>
+              <p className="text-black-600 mb-6">Auth modal will be implemented in the next phase.</p>
               <button
                 onClick={() => setShowAuthModal(false)}
-                className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                className="w-full px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl hover:from-red-700 hover:to-red-800 transition-all duration-300"
               >
                 Close
               </button>
-            </div>
+            </motion.div>
           </div>
         </div>
       )}
