@@ -28,10 +28,94 @@ export default function TaxCalculator() {
   const [employeeCount, setEmployeeCount] = useState('');
   const [calculationType, setCalculationType] = useState<'paye' | 'corporate' | 'investment'>('paye');
   const [results, setResults] = useState<TaxResults | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isAutoCalculating, setIsAutoCalculating] = useState(false);
 
-  const calculateTax = (): TaxResults => {
-    const grossIncome = parseFloat(income) || 0;
-    const turnover = parseFloat(annualTurnover) || 0;
+  // Input validation
+  const validateInputs = (): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (calculationType === 'paye') {
+      if (!income || parseFloat(income) <= 0) {
+        newErrors.income = 'Please enter a valid monthly income';
+      }
+    } else {
+      if (!annualTurnover || parseFloat(annualTurnover) <= 0) {
+        newErrors.annualTurnover = 'Please enter a valid annual turnover';
+      }
+      
+      if (calculationType === 'investment' && !investmentSector) {
+        newErrors.investmentSector = 'Please select an investment sector';
+      }
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Auto-calculate on input change
+  const handleInputChange = (field: string, value: string) => {
+    // Clear errors for this field
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+
+    // Update the field
+    switch (field) {
+      case 'income':
+        setIncome(value);
+        break;
+      case 'annualTurnover':
+        setAnnualTurnover(value);
+        break;
+      case 'investmentSector':
+        setInvestmentSector(value);
+        break;
+      case 'businessType':
+        setBusinessType(value);
+        break;
+      case 'employeeCount':
+        setEmployeeCount(value);
+        break;
+    }
+
+    // Auto-calculate with delay
+    if (value && !isAutoCalculating) {
+      setIsAutoCalculating(true);
+      setTimeout(() => {
+        
+        if (calculationType === 'paye' && (!income && field !== 'income' || !value && field === 'income')) {
+          return;
+        }
+        if ((calculationType === 'corporate' || calculationType === 'investment') && 
+            (!annualTurnover && field !== 'annualTurnover' || !value && field === 'annualTurnover')) {
+          return;
+        }
+        
+        // Only auto-calculate if basic required fields are filled
+        const shouldCalculate = (
+          (calculationType === 'paye' && (income || field === 'income' && value)) ||
+          ((calculationType === 'corporate' || calculationType === 'investment') && 
+           (annualTurnover || field === 'annualTurnover' && value))
+        );
+        
+        if (shouldCalculate) {
+          calculateTaxWithValues(field, value);
+        }
+        setIsAutoCalculating(false);
+      }, 500);
+    }
+  };
+
+  const calculateTaxWithValues = (changedField?: string, changedValue?: string): TaxResults | null => {
+    const grossIncome = parseFloat(changedField === 'income' ? changedValue || '0' : income) || 0;
+    const turnover = parseFloat(changedField === 'annualTurnover' ? changedValue || '0' : annualTurnover) || 0;
+    
+    const currentSector = changedField === 'investmentSector' ? changedValue || '' : investmentSector;
     
     let incomeTax = 0;
     let corporateTax = 0;
@@ -65,10 +149,14 @@ export default function TaxCalculator() {
       netIncome = grossIncome - incomeTax - nssf - vat;
     } 
     else if (calculationType === 'corporate' && turnover > 0) {
-      // Corporate Tax calculation
-      corporateTax = turnover * 0.30; // 30% corporate tax rate
+      // Corporate Tax calculation with progressive rates for small businesses
+      if (turnover <= 50000000) {
+        corporateTax = turnover * 0.20; // 20% for small businesses
+      } else {
+        corporateTax = turnover * 0.30; // 30% standard rate
+      }
       
-      // LST (Local Service Tax) - varies by location
+      // LST (Local Service Tax) - varies by location and business size
       if (turnover >= 50000000) {
         lst = Math.min(turnover * 0.001, 100000); // 0.1% of turnover, max UGX 100,000
       } else if (turnover >= 10000000) {
@@ -88,30 +176,31 @@ export default function TaxCalculator() {
       netIncome = turnover - corporateTax - lst - vat - withholdingTax;
     }
     else if (calculationType === 'investment' && turnover > 0) {
-      // Investment incentive calculation
+      // Investment incentive calculation with enhanced sector benefits
       const sectorIncentives: Record<string, number> = {
-        'agriculture': 0.10,
-        'tourism': 0.15,
-        'manufacturing': 0.12,
-        'ict': 0.20,
-        'mining': 0.08,
-        'energy': 0.18,
-        'other': 0.05
+        'agriculture': 0.15, // Enhanced from 10% to 15%
+        'tourism': 0.20,    // Enhanced from 15% to 20%
+        'manufacturing': 0.18, // Enhanced from 12% to 18%
+        'ict': 0.25,        // Enhanced from 20% to 25%
+        'mining': 0.10,     // Enhanced from 8% to 10%
+        'energy': 0.22,     // Enhanced from 18% to 22%
+        'other': 0.08       // Enhanced from 5% to 8%
       };
 
-      const incentiveRate = sectorIncentives[investmentSector] || 0.05;
+      const incentiveRate = sectorIncentives[currentSector] || 0.08;
       investmentIncentive = turnover * incentiveRate;
       
-      // Corporate tax with investment incentive
-      corporateTax = Math.max(0, (turnover * 0.30) - investmentIncentive);
+      // Corporate tax with investment incentive (progressive rates)
+      const baseCorporateTax = turnover <= 50000000 ? turnover * 0.20 : turnover * 0.30;
+      corporateTax = Math.max(0, baseCorporateTax - investmentIncentive);
       
-      // Other taxes still apply
+      // Other taxes still apply but with potential reductions
       if (turnover >= 150000000) {
         vat = turnover * 0.18;
       }
       
       lst = turnover >= 50000000 ? Math.min(turnover * 0.001, 100000) : 5000;
-      withholdingTax = turnover * 0.06;
+      withholdingTax = turnover * 0.05; // Reduced from 6% to 5% for investments
       
       netIncome = turnover - corporateTax - lst - vat - withholdingTax + investmentIncentive;
     }
@@ -119,7 +208,7 @@ export default function TaxCalculator() {
     const totalDeductions = incomeTax + corporateTax + nssf + vat + withholdingTax + lst;
     const totalIncentives = investmentIncentive;
 
-    return {
+    const result = {
       grossIncome: calculationType === 'paye' ? grossIncome : turnover,
       incomeTax,
       corporateTax,
@@ -132,6 +221,25 @@ export default function TaxCalculator() {
       totalDeductions,
       totalIncentives,
       calculationType
+    };
+
+    setResults(result);
+    return result;
+  };
+
+  const calculateTax = (): TaxResults => {
+    if (!validateInputs()) {
+      return {
+        grossIncome: 0, incomeTax: 0, corporateTax: 0, nssf: 0, vat: 0,
+        withholdingTax: 0, lst: 0, investmentIncentive: 0, netIncome: 0,
+        totalDeductions: 0, totalIncentives: 0, calculationType
+      };
+    }
+    
+    return calculateTaxWithValues() || {
+      grossIncome: 0, incomeTax: 0, corporateTax: 0, nssf: 0, vat: 0,
+      withholdingTax: 0, lst: 0, investmentIncentive: 0, netIncome: 0,
+      totalDeductions: 0, totalIncentives: 0, calculationType
     };
   };
 
@@ -223,15 +331,22 @@ export default function TaxCalculator() {
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Monthly Income (UGX)
+                      Monthly Income (UGX) <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
                       value={income}
-                      onChange={(e) => setIncome(e.target.value)}
+                      onChange={(e) => handleInputChange('income', e.target.value)}
                       placeholder="Enter your monthly income"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                        errors.income 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-yellow-500'
+                      }`}
                     />
+                    {errors.income && (
+                      <p className="text-red-600 text-sm mt-1">{errors.income}</p>
+                    )}
                   </div>
 
                   <div>
@@ -240,8 +355,8 @@ export default function TaxCalculator() {
                     </label>
                     <select
                       value={businessType}
-                      onChange={(e) => setBusinessType(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) => handleInputChange('businessType', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black"
                     >
                       <option value="individual">Individual</option>
                       <option value="company">Company</option>
@@ -253,15 +368,22 @@ export default function TaxCalculator() {
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Annual Turnover (UGX)
+                      Annual Turnover (UGX) <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
                       value={annualTurnover}
-                      onChange={(e) => setAnnualTurnover(e.target.value)}
+                      onChange={(e) => handleInputChange('annualTurnover', e.target.value)}
                       placeholder="Enter annual business turnover"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                        errors.annualTurnover 
+                          ? 'border-red-500 focus:ring-red-500' 
+                          : 'border-gray-300 focus:ring-yellow-500'
+                      }`}
                     />
+                    {errors.annualTurnover && (
+                      <p className="text-red-600 text-sm mt-1">{errors.annualTurnover}</p>
+                    )}
                   </div>
 
                   <div>
@@ -271,31 +393,38 @@ export default function TaxCalculator() {
                     <input
                       type="number"
                       value={employeeCount}
-                      onChange={(e) => setEmployeeCount(e.target.value)}
+                      onChange={(e) => handleInputChange('employeeCount', e.target.value)}
                       placeholder="Enter number of employees"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black"
                     />
                   </div>
 
                   {calculationType === 'investment' && (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Investment Sector (ATMS)
+                        Investment Sector (ATMS) <span className="text-red-500">*</span>
                       </label>
                       <select
                         value={investmentSector}
-                        onChange={(e) => setInvestmentSector(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onChange={(e) => handleInputChange('investmentSector', e.target.value)}
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                          errors.investmentSector 
+                            ? 'border-red-500 focus:ring-red-500' 
+                            : 'border-gray-300 focus:ring-yellow-500'
+                        }`}
                       >
                         <option value="">Select sector</option>
-                        <option value="agriculture">Agriculture & Agribusiness (10%)</option>
-                        <option value="tourism">Tourism & Hospitality (15%)</option>
-                        <option value="manufacturing">Manufacturing (12%)</option>
-                        <option value="ict">ICT & Digital Services (20%)</option>
-                        <option value="mining">Mining & Minerals (8%)</option>
-                        <option value="energy">Energy & Utilities (18%)</option>
-                        <option value="other">Other Sectors (5%)</option>
+                        <option value="agriculture">Agriculture & Agribusiness (15%)</option>
+                        <option value="tourism">Tourism & Hospitality (20%)</option>
+                        <option value="manufacturing">Manufacturing (18%)</option>
+                        <option value="ict">ICT & Digital Services (25%)</option>
+                        <option value="mining">Mining & Minerals (10%)</option>
+                        <option value="energy">Energy & Utilities (22%)</option>
+                        <option value="other">Other Sectors (8%)</option>
                       </select>
+                      {errors.investmentSector && (
+                        <p className="text-red-600 text-sm mt-1">{errors.investmentSector}</p>
+                      )}
                     </div>
                   )}
                 </>
@@ -317,10 +446,24 @@ export default function TaxCalculator() {
 
               <button
                 onClick={handleCalculate}
-                className="w-full bg-gradient-to-r from-yellow-500 to-red-600 text-black py-3 px-6 rounded-lg font-semibold hover:from-yellow-600 hover:to-red-700 transition-colors"
+                className="w-full bg-gradient-to-r from-yellow-500 to-red-600 text-black py-3 px-6 rounded-lg font-semibold hover:from-yellow-600 hover:to-red-700 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
               >
-                Calculate {calculationType === 'paye' ? 'PAYE Tax' : calculationType === 'corporate' ? 'Corporate Tax' : 'Investment Tax Benefits'}
+                {isAutoCalculating ? 'Auto-Calculating...' : 
+                 `Calculate ${calculationType === 'paye' ? 'PAYE Tax' : 
+                              calculationType === 'corporate' ? 'Corporate Tax' : 
+                              'Investment Tax Benefits'}`}
               </button>
+              
+              {Object.keys(errors).length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                  <p className="text-red-700 text-sm font-medium">Please fix the following errors:</p>
+                  <ul className="list-disc list-inside text-red-600 text-sm mt-1">
+                    {Object.values(errors).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -426,21 +569,69 @@ export default function TaxCalculator() {
               </div>
             ) : (
               <div className="text-center py-12 text-gray-500">
-                <p>Enter your {calculationType === 'paye' ? 'income' : 'business'} details and click &quot;Calculate&quot; to see the breakdown.</p>
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">🧮</span>
+                  </div>
+                  <p className="text-lg">Enter your {calculationType === 'paye' ? 'income' : 'business'} details to see comprehensive tax breakdown</p>
+                </div>
+                
+                <div className="bg-blue-50 rounded-lg p-4 text-left">
+                  <h4 className="font-semibold text-blue-900 mb-2">💡 Tax Tips:</h4>
+                  <ul className="text-sm text-blue-800 space-y-1">
+                    {calculationType === 'paye' ? (
+                      <>
+                        <li>• First UGX 235,000 monthly is tax-free</li>
+                        <li>• NSSF contributions are capped at UGX 200,000</li>
+                        <li>{'• VAT applies if business turnover > UGX 150M annually'}</li>
+                      </>
+                    ) : (
+                      <>
+                        <li>{'• Small businesses (< UGX 50M) pay 20% corporate tax'}</li>
+                        <li>• Investment incentives can significantly reduce taxes</li>
+                        <li>• Local Service Tax varies by business size</li>
+                        <li>{'• VAT registration mandatory if turnover > UGX 150M'}</li>
+                      </>
+                    )}
+                  </ul>
+                </div>
               </div>
             )}
 
             <div className="mt-6 p-4 bg-yellow-500/30 rounded-lg border border-yellow-500/50">
               <h4 className="font-semibold text-gray-800 mb-2">Official URA Tax Rates (2024/2025):</h4>
-              <ul className="text-sm text-gray-700 space-y-1">
-                <li>• Income up to UGX 235,000: 0% (Tax-free threshold)</li>
-                <li>• UGX 235,001 - 335,000: 10%</li>
-                <li>• UGX 335,001 - 410,000: 20%</li>
-                <li>• Above UGX 410,000: 30%</li>
-                <li>• NSSF: 5% employee (max UGX 200,000), 10% employer</li>
-                <li>• VAT: 18% (threshold UGX 150M annual turnover)</li>
-                <li>• LST: UGX 5,000 - 100,000 annually</li>
-              </ul>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h5 className="font-medium text-gray-800 mb-1">PAYE Rates:</h5>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    <li>• Up to UGX 235,000: 0%</li>
+                    <li>• UGX 235,001 - 335,000: 10%</li>
+                    <li>• UGX 335,001 - 410,000: 20%</li>
+                    <li>• Above UGX 410,000: 30%</li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 className="font-medium text-gray-800 mb-1">Corporate Rates:</h5>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    <li>• Small Business (&lt; UGX 50M): 20%</li>
+                    <li>• Standard Rate: 30%</li>
+                    <li>• VAT: 18% (UGX 150M+ turnover)</li>
+                    <li>• LST: UGX 5K - 100K annually</li>
+                  </ul>
+                </div>
+              </div>
+              {calculationType === 'investment' && (
+                <div className="mt-3 pt-3 border-t border-yellow-500/20">
+                  <h5 className="font-medium text-gray-800 mb-1">Enhanced ATMS Investment Incentives:</h5>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    <li>• ICT & Digital Services: 25% tax credit</li>
+                    <li>• Energy & Utilities: 22% tax credit</li>
+                    <li>• Tourism & Hospitality: 20% tax credit</li>
+                    <li>• Manufacturing: 18% tax credit</li>
+                    <li>• Agriculture & Agribusiness: 15% tax credit</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>

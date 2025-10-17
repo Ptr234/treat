@@ -274,7 +274,7 @@ ${investmentData.name}`);
               <select
                 value={investmentData.investmentAmount}
                 onChange={(e) => updateData('investmentAmount', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">Select investment range</option>
                 <option value="10000-50000">$10,000 - $50,000</option>
@@ -292,7 +292,7 @@ ${investmentData.name}`);
               <select
                 value={investmentData.timeHorizon}
                 onChange={(e) => updateData('timeHorizon', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">Select time horizon</option>
                 <option value="short-term">Short-term (1-3 years)</option>
@@ -308,7 +308,7 @@ ${investmentData.name}`);
               <select
                 value={investmentData.riskTolerance}
                 onChange={(e) => updateData('riskTolerance', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">Select risk tolerance</option>
                 <option value="conservative">Conservative (Low risk, stable returns)</option>
@@ -364,7 +364,7 @@ ${investmentData.name}`);
               <textarea
                 value={investmentData.specificInterests}
                 onChange={(e) => updateData('specificInterests', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 rows={4}
                 placeholder="Describe your specific investment interests..."
               />
@@ -386,7 +386,7 @@ ${investmentData.name}`);
                   type="text"
                   value={investmentData.name}
                   onChange={(e) => updateData('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -399,7 +399,7 @@ ${investmentData.name}`);
                   type="email"
                   value={investmentData.email}
                   onChange={(e) => updateData('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Enter your email"
                 />
               </div>
@@ -412,7 +412,7 @@ ${investmentData.name}`);
                   type="tel"
                   value={investmentData.phone}
                   onChange={(e) => updateData('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Enter your phone number"
                 />
               </div>
@@ -425,7 +425,7 @@ ${investmentData.name}`);
                   type="text"
                   value={investmentData.nationality}
                   onChange={(e) => updateData('nationality', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Enter your nationality"
                 />
               </div>
@@ -438,7 +438,7 @@ ${investmentData.name}`);
                   type="text"
                   value={investmentData.companyName}
                   onChange={(e) => updateData('companyName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Enter company name"
                 />
               </div>
@@ -451,7 +451,7 @@ ${investmentData.name}`);
                   type="text"
                   value={investmentData.position}
                   onChange={(e) => updateData('position', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Enter your position"
                 />
               </div>
@@ -471,7 +471,7 @@ ${investmentData.name}`);
               <select
                 value={investmentData.capitalSource}
                 onChange={(e) => updateData('capitalSource', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">Select capital source</option>
                 <option value="savings">Personal Savings</option>
@@ -488,7 +488,7 @@ ${investmentData.name}`);
               <select
                 value={investmentData.timeframe}
                 onChange={(e) => updateData('timeframe', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">Select timeframe</option>
                 <option value="immediate">Immediate (Ready now)</option>

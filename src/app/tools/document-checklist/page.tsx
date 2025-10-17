@@ -1,9 +1,24 @@
-import { Metadata } from 'next';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Document Checklist',
-  description: 'Comprehensive checklist for business registration and licensing documents required in Uganda.',
-};
+import React from 'react';
+import { Building, FileText, LandPlot, CheckCircle } from 'lucide-react';
+
+interface Document {
+  id: string;
+  name: string;
+  required: boolean;
+  description: string;
+  completed?: boolean;
+  notes?: string;
+  uploadedFile?: File | null;
+}
+
+interface Checklist {
+  title: string;
+  category: string;
+  documents: Document[];
+  progress?: number;
+}
 
 export default function DocumentChecklistPage() {
   const checklists = [
@@ -62,23 +77,11 @@ export default function DocumentChecklistPage() {
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'registration':
-        return (
-          <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-        );
+        return <Building className="w-6 h-6 text-blue-600" />;
       case 'tax':
-        return (
-          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
-        );
+        return <FileText className="w-6 h-6 text-green-600" />;
       case 'investment':
-        return (
-          <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        );
+        return <LandPlot className="w-6 h-6 text-purple-600" />;
       default:
         return null;
     }
@@ -115,9 +118,7 @@ export default function DocumentChecklistPage() {
                           : 'border-gray-300'
                       }`}>
                         {document.required && (
-                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
+                          <CheckCircle className="w-3 h-3 text-white" />
                         )}
                       </div>
                     </div>

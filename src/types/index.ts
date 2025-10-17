@@ -49,23 +49,47 @@ export interface ContactInfo {
   director?: string;
 }
 
+export interface InvestmentDocument {
+  name: string;
+  type: string;
+  size: string;
+  url: string;
+}
+
+export interface InvestmentContact {
+  email: string;
+  phone: string;
+  website: string;
+  address: string;
+}
+
+export interface InvestmentKeyMetrics {
+  marketGrowth: string;
+  exportValue: string;
+  employmentPotential: string;
+  paybackPeriod: string;
+}
+
 export interface InvestmentOpportunity {
-  id: string;
+  id: number;
   title: string;
   category: string;
-  sector: string;
   description: string;
+  fullDescription: string;
   investmentRange: string;
-  expectedROI: string;
+  roi: string;
   timeline: string;
-  marketPotential?: string;
-  requirements?: string[];
-  incentives?: string[];
-  riskFactors?: string[];
-  contact: ContactInfo;
-  contactKey?: string;
-  priority: 'high' | 'medium' | 'low';
-  logo?: string;
+  agency: string;
+  priority: string;
+  keyRisks: string;
+  contact: InvestmentContact;
+  logoPath: string;
+  marketSize: string;
+  competitiveAdvantage: string;
+  requiredLicenses: string[];
+  incentives: string[];
+  keyMetrics: InvestmentKeyMetrics;
+  documents: InvestmentDocument[];
 }
 
 export interface InvestmentData {

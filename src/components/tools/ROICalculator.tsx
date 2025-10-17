@@ -48,27 +48,85 @@ export default function ROICalculator() {
     isATMSQualified: false
   });
   const [results, setResults] = useState<ROIResults | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
+    
+    // Clear errors for this field
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    
     setInvestment(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    
+    // Auto-calculate when all required fields are filled
+    if (type !== 'checkbox') {
+      const updatedInvestment = {
+        ...investment,
+        [name]: value
+      };
+      
+      if (updatedInvestment.initialInvestment && 
+          updatedInvestment.annualRevenue && 
+          updatedInvestment.operatingCosts && 
+          updatedInvestment.sector) {
+        // Trigger calculation with delay for better UX
+        setTimeout(() => calculateROIWithData(updatedInvestment), 300);
+      }
+    }
   };
 
-  const calculateROI = () => {
-    const initial = parseFloat(investment.initialInvestment) || 0;
-    const duration = parseInt(investment.projectDuration) || 5;
-    const revenue = parseFloat(investment.annualRevenue) || 0;
-    const costs = parseFloat(investment.operatingCosts) || 0;
-    const employees = parseInt(investment.employeeCount) || 0;
-
-    if (initial === 0 || revenue === 0) {
-      alert('Please enter initial investment and expected annual revenue');
-      return;
+  const validateInputs = (data: InvestmentData): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!data.initialInvestment || parseFloat(data.initialInvestment) <= 0) {
+      newErrors.initialInvestment = 'Please enter a valid initial investment amount';
     }
+    
+    if (!data.annualRevenue || parseFloat(data.annualRevenue) <= 0) {
+      newErrors.annualRevenue = 'Please enter expected annual revenue';
+    }
+    
+    if (!data.operatingCosts || parseFloat(data.operatingCosts) < 0) {
+      newErrors.operatingCosts = 'Please enter valid operating costs';
+    }
+    
+    if (!data.sector) {
+      newErrors.sector = 'Please select an investment sector';
+    }
+    
+    if (!data.location) {
+      newErrors.location = 'Please select a location';
+    }
+    
+    // Validate revenue vs costs
+    const revenue = parseFloat(data.annualRevenue) || 0;
+    const costs = parseFloat(data.operatingCosts) || 0;
+    if (revenue > 0 && costs >= revenue) {
+      newErrors.operatingCosts = 'Operating costs cannot exceed annual revenue';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const calculateROIWithData = (data: InvestmentData) => {
+    if (!validateInputs(data)) return;
+    
+    const initial = parseFloat(data.initialInvestment) || 0;
+    const duration = parseInt(data.projectDuration) || 5;
+    const revenue = parseFloat(data.annualRevenue) || 0;
+    const costs = parseFloat(data.operatingCosts) || 0;
+    const employees = parseInt(data.employeeCount) || 0;
 
     // Sector-specific multipliers and incentives
     const sectorData: Record<string, { multiplier: number; taxCredit: number; description: string }> = {
@@ -83,23 +141,23 @@ export default function ROICalculator() {
       'other': { multiplier: 1.0, taxCredit: 0.05, description: 'Other Sectors' }
     };
 
-    const sector = sectorData[investment.sector as keyof typeof sectorData] || sectorData.other || { multiplier: 1.0, taxCredit: 0.05, description: 'Other Sectors' };
+    const sector = sectorData[data.sector as keyof typeof sectorData] || sectorData.other || { multiplier: 1.0, taxCredit: 0.05, description: 'Other Sectors' };
     const adjustedRevenue = revenue * sector.multiplier;
 
     // Calculate tax benefits
     const corporateTaxRate = 0.30;
     const annualProfit = adjustedRevenue - costs;
-    const normalTax = annualProfit * corporateTaxRate;
-    const taxCredit = investment.isATMSQualified ? initial * sector.taxCredit : 0;
+    const normalTax = annualProfit > 0 ? annualProfit * corporateTaxRate : 0;
+    const taxCredit = data.isATMSQualified ? initial * sector.taxCredit : 0;
     const actualTax = Math.max(0, normalTax - (taxCredit / duration));
 
     // Calculate cash flows
     const netAnnualCashFlow = annualProfit - actualTax;
     const totalCashFlow = netAnnualCashFlow * duration;
     const totalProfit = totalCashFlow - initial;
-    const roi = (totalProfit / initial) * 100;
+    const roi = initial > 0 ? (totalProfit / initial) * 100 : 0;
     const annualROI = roi / duration;
-    const paybackPeriod = initial / netAnnualCashFlow;
+    const paybackPeriod = netAnnualCashFlow > 0 ? initial / netAnnualCashFlow : Infinity;
 
     // Employment impact
     const jobsCreated = employees;
@@ -114,7 +172,7 @@ export default function ROICalculator() {
       'northern': 0.3,
       'other': 0.2
     };
-    const riskAdjustment = riskFactors[investment.location] || 0.2;
+    const riskAdjustment = riskFactors[data.location] || 0.2;
     const riskAdjustedROI = annualROI * (1 - riskAdjustment);
 
     setResults({
@@ -134,6 +192,10 @@ export default function ROICalculator() {
       riskAdjustedROI,
       taxBenefits: taxCredit
     });
+  };
+
+  const calculateROI = () => {
+    calculateROIWithData(investment);
   };
 
   return (
@@ -167,7 +229,7 @@ export default function ROICalculator() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Initial Investment (UGX)
+                Initial Investment (UGX) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -175,19 +237,30 @@ export default function ROICalculator() {
                 value={investment.initialInvestment}
                 onChange={handleInputChange}
                 placeholder="Enter initial investment amount"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                  errors.initialInvestment 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
               />
+              {errors.initialInvestment && (
+                <p className="text-red-600 text-sm mt-1">{errors.initialInvestment}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Investment Sector
+                Investment Sector <span className="text-red-500">*</span>
               </label>
               <select
                 name="sector"
                 value={investment.sector}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                  errors.sector 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
               >
                 <option value="">Select a sector</option>
                 <option value="agriculture">Agriculture & Agribusiness</option>
@@ -200,6 +273,9 @@ export default function ROICalculator() {
                 <option value="education">Education & Training</option>
                 <option value="other">Other Sectors</option>
               </select>
+              {errors.sector && (
+                <p className="text-red-600 text-sm mt-1">{errors.sector}</p>
+              )}
             </div>
 
             <div>
@@ -223,7 +299,7 @@ export default function ROICalculator() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Expected Annual Revenue (UGX)
+                Expected Annual Revenue (UGX) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -231,13 +307,20 @@ export default function ROICalculator() {
                 value={investment.annualRevenue}
                 onChange={handleInputChange}
                 placeholder="Enter expected annual revenue"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                  errors.annualRevenue 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
               />
+              {errors.annualRevenue && (
+                <p className="text-red-600 text-sm mt-1">{errors.annualRevenue}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Annual Operating Costs (UGX)
+                Annual Operating Costs (UGX) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -245,8 +328,15 @@ export default function ROICalculator() {
                 value={investment.operatingCosts}
                 onChange={handleInputChange}
                 placeholder="Enter annual operating costs"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                  errors.operatingCosts 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
               />
+              {errors.operatingCosts && (
+                <p className="text-red-600 text-sm mt-1">{errors.operatingCosts}</p>
+              )}
             </div>
 
             <div>
@@ -265,13 +355,17 @@ export default function ROICalculator() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Investment Location
+                Investment Location <span className="text-red-500">*</span>
               </label>
               <select
                 name="location"
                 value={investment.location}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent text-black ${
+                  errors.location 
+                    ? 'border-red-500 focus:ring-red-500' 
+                    : 'border-gray-300 focus:ring-blue-500'
+                }`}
               >
                 <option value="">Select location</option>
                 <option value="kampala">Kampala (Central)</option>
@@ -281,6 +375,9 @@ export default function ROICalculator() {
                 <option value="northern">Northern Region</option>
                 <option value="other">Other Location</option>
               </select>
+              {errors.location && (
+                <p className="text-red-600 text-sm mt-1">{errors.location}</p>
+              )}
             </div>
 
             <div className="flex items-center">
@@ -298,10 +395,21 @@ export default function ROICalculator() {
 
             <button
               onClick={calculateROI}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-colors"
+              className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-black py-3 px-6 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
             >
               Calculate ROI
             </button>
+            
+            {Object.keys(errors).length > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-4">
+                <p className="text-red-700 text-sm font-medium">Please fix the following errors:</p>
+                <ul className="list-disc list-inside text-red-600 text-sm mt-1">
+                  {Object.values(errors).map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -360,7 +468,9 @@ export default function ROICalculator() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Payback Period:</span>
-                    <span className="font-medium">{results.paybackPeriod.toFixed(1)} years</span>
+                    <span className={`font-medium ${results.paybackPeriod === Infinity ? 'text-red-600' : ''}`}>
+                      {results.paybackPeriod === Infinity ? 'Never (Negative cashflow)' : `${results.paybackPeriod.toFixed(1)} years`}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Risk-Adjusted ROI:</span>
@@ -403,7 +513,22 @@ export default function ROICalculator() {
             </div>
           ) : (
             <div className="text-center py-12 text-gray-500">
-              <p>Enter your investment details and click &quot;Calculate ROI&quot; to see the analysis.</p>
+              <div className="mb-6">
+                <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">📊</span>
+                </div>
+                <p className="text-lg">Enter your investment details to see comprehensive ROI analysis</p>
+              </div>
+              
+              <div className="bg-blue-50 rounded-lg p-4 text-left">
+                <h4 className="font-semibold text-blue-900 mb-2">💡 Pro Tips:</h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• Use realistic revenue and cost projections</li>
+                  <li>• Consider ATMS incentives for qualifying projects</li>
+                  <li>• Factor in local market conditions</li>
+                  <li>• Review sector-specific multipliers</li>
+                </ul>
+              </div>
             </div>
           )}
         </motion.div>

@@ -119,12 +119,16 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <motion.div 
-        className="bg-black text-white"
+        className="relative bg-cover bg-center bg-no-repeat text-white"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1520004434532-cd6686036076?q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)'
+        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="absolute inset-0 bg-black/70"></div> {/* Overlay for readability */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <motion.h1 
               className="text-4xl md:text-5xl font-extrabold mb-4"

@@ -187,7 +187,7 @@ Thank you.`;
                   value={appointmentData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Your full name"
                 />
               </div>
@@ -201,7 +201,7 @@ Thank you.`;
                   value={appointmentData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -217,7 +217,7 @@ Thank you.`;
                   value={appointmentData.phone}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="+256 XXX XXX XXX"
                 />
               </div>
@@ -230,7 +230,7 @@ Thank you.`;
                   name="company"
                   value={appointmentData.company}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   placeholder="Your company (optional)"
                 />
               </div>
@@ -251,7 +251,7 @@ Thank you.`;
                 value={appointmentData.serviceType}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
               >
                 <option value="">Select a service</option>
                 {agency.services.map((service, index) => (
@@ -270,7 +270,7 @@ Thank you.`;
                   name="duration"
                   value={appointmentData.duration}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 >
                   {durations.map((duration) => (
                     <option key={duration.value} value={duration.value}>
@@ -287,7 +287,7 @@ Thank you.`;
                   name="meetingType"
                   value={appointmentData.meetingType}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 >
                   <option value="in-person">In-Person Meeting</option>
                   <option value="virtual">Virtual Meeting</option>
@@ -305,7 +305,7 @@ Thank you.`;
                 onChange={handleInputChange}
                 required
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 placeholder="Please describe what you'd like to discuss or accomplish in this meeting..."
               />
             </div>
@@ -338,7 +338,7 @@ Thank you.`;
                     required
                     min={getMinDate()}
                     max={getMaxDate()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   />
                 </div>
                 <div>
@@ -350,7 +350,7 @@ Thank you.`;
                     value={appointmentData.preferredTime}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   >
                     <option value="">Select time</option>
                     {timeSlots.map((time) => (
@@ -375,7 +375,7 @@ Thank you.`;
                     onChange={handleInputChange}
                     min={getMinDate()}
                     max={getMaxDate()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   />
                 </div>
                 <div>
@@ -386,7 +386,7 @@ Thank you.`;
                     name="alternativeTime"
                     value={appointmentData.alternativeTime}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                   >
                     <option value="">Select time</option>
                     {timeSlots.map((time) => (
@@ -438,7 +438,7 @@ Thank you.`;
                 value={appointmentData.specialRequirements}
                 onChange={handleInputChange}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 placeholder="Any special requirements, accessibility needs, or additional notes..."
               />
             </div>

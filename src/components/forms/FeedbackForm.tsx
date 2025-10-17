@@ -226,7 +226,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                 type="text"
                 value={feedbackData.subject}
                 onChange={(e) => updateFeedbackData('subject', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 placeholder="Brief summary of your feedback"
               />
             </div>
@@ -238,7 +238,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
               <textarea
                 value={feedbackData.message}
                 onChange={(e) => updateFeedbackData('message', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                 rows={6}
                 placeholder="Please provide detailed feedback to help us improve..."
               />
@@ -293,7 +293,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                     type="text"
                     value={feedbackData.contactInfo.name}
                     onChange={(e) => updateContactInfo('name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     placeholder="Your full name"
                   />
                 </div>
@@ -306,7 +306,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                     type="email"
                     value={feedbackData.contactInfo.email}
                     onChange={(e) => updateContactInfo('email', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -319,7 +319,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                     type="tel"
                     value={feedbackData.contactInfo.phone}
                     onChange={(e) => updateContactInfo('phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     placeholder="+256 XXX XXX XXX"
                   />
                 </div>

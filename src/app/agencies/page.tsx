@@ -1,318 +1,300 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  MagnifyingGlassIcon, 
-  FunnelIcon,
-  BuildingOfficeIcon,
-  PhoneIcon
-} from '@heroicons/react/24/outline';
-import { ugandaAgencies, getAgencyByCategory } from '@/data/agencies';
-import AgencyCard from '@/components/agencies/AgencyCard';
-import { useDebouncedSearch } from '@/hooks/useDebounce';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import { Phone, Mail, MapPin, Clock, Globe, Search, Star, Calendar, X } from 'lucide-react';
+import { ugandaAgencies } from '@/data/agencies';
 
-export default function AgenciesPage() {
+const GovernmentAgencies = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedUrgency, setSelectedUrgency] = useState<string>('all');
-  
-  const { debouncedValue: debouncedSearch, isSearching } = useDebouncedSearch(searchQuery, 300);
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = [
-    { value: 'all', label: 'All Agencies', count: ugandaAgencies.length },
-    { value: 'investment', label: 'Investment', count: getAgencyByCategory('investment').length },
-    { value: 'registration', label: 'Registration', count: getAgencyByCategory('registration').length },
-    { value: 'taxation', label: 'Taxation', count: getAgencyByCategory('taxation').length },
-    { value: 'environment', label: 'Environment', count: getAgencyByCategory('environment').length },
-    { value: 'standards', label: 'Standards', count: getAgencyByCategory('standards').length },
-    { value: 'infrastructure', label: 'Infrastructure', count: getAgencyByCategory('infrastructure').length }
-  ];
+  // Transform our existing data to match template structure with enhanced properties
+  const agencies = ugandaAgencies.map(agency => ({
+    id: agency.id,
+    name: agency.name,
+    acronym: agency.acronym,
+    category: agency.category.charAt(0).toUpperCase() + agency.category.slice(1),
+    priority: agency.urgencyLevel === 'high' ? 'High' : agency.urgencyLevel === 'medium' ? 'Medium' : 'Standard',
+    description: agency.description,
+    color: getAgencyColor(agency.category),
+    gradient: getAgencyGradient(agency.category),
+    services: agency.services,
+    hours: agency.operatingHours,
+    address: agency.contact.address,
+    website: agency.contact.website || `www.${agency.acronym.toLowerCase()}.go.ug`,
+    contact: agency.contact,
+    logo: agency.logo,
+    hasAppointmentBooking: agency.hasAppointmentBooking
+  }));
 
-  const urgencyLevels = [
-    { value: 'all', label: 'All Priority Levels' },
-    { value: 'high', label: 'High Priority' },
-    { value: 'medium', label: 'Medium Priority' },
-    { value: 'low', label: 'Standard Priority' }
-  ];
+  function getAgencyColor(category: string): string {
+    const colorMap: Record<string, string> = {
+      'investment': 'green',
+      'registration': 'blue', 
+      'taxation': 'orange',
+      'environment': 'teal',
+      'standards': 'purple',
+      'infrastructure': 'indigo',
+      'immigration': 'blue',
+      'lands': 'emerald',
+      'social_security': 'cyan',
+      'finance': 'amber',
+      'tourism': 'rose',
+      'employers': 'violet',
+      'conservation': 'green'
+    };
+    return colorMap[category] || 'gray';
+  }
 
-  const filteredAgencies = useMemo(() => {
-    let filtered = ugandaAgencies;
+  function getAgencyGradient(category: string): string {
+    const gradientMap: Record<string, string> = {
+      'investment': 'from-green-500 to-emerald-600',
+      'registration': 'from-blue-500 to-indigo-600',
+      'taxation': 'from-orange-500 to-red-600',
+      'environment': 'from-teal-500 to-green-600',
+      'standards': 'from-purple-500 to-violet-600',
+      'infrastructure': 'from-indigo-500 to-blue-600',
+      'immigration': 'from-blue-600 to-cyan-600',
+      'lands': 'from-emerald-500 to-teal-600',
+      'social_security': 'from-cyan-500 to-blue-600',
+      'finance': 'from-amber-500 to-orange-600',
+      'tourism': 'from-rose-500 to-pink-600',
+      'employers': 'from-violet-500 to-purple-600',
+      'conservation': 'from-green-600 to-emerald-700'
+    };
+    return gradientMap[category] || 'from-gray-500 to-gray-600';
+  }
 
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(agency => agency.category === selectedCategory);
+  const categories = ['all', 'Investment', 'Registration', 'Taxation', 'Immigration', 'Environment', 'Standards', 'Infrastructure'];
+
+  const filteredAgencies = agencies.filter(agency => {
+    const matchesSearch = searchQuery === '' || 
+      agency.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agency.acronym.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agency.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'all' || agency.category === selectedCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const getPriorityBadge = (priority: string) => {
+    if (priority === 'High') {
+      return 'bg-red-500';
+    } else if (priority === 'Medium') {
+      return 'bg-yellow-500';
     }
-
-    // Filter by urgency
-    if (selectedUrgency !== 'all') {
-      filtered = filtered.filter(agency => agency.urgencyLevel === selectedUrgency);
-    }
-
-    // Filter by search query
-    if (debouncedSearch) {
-      const query = debouncedSearch.toLowerCase();
-      filtered = filtered.filter(agency =>
-        agency.name.toLowerCase().includes(query) ||
-        agency.acronym.toLowerCase().includes(query) ||
-        agency.description.toLowerCase().includes(query) ||
-        agency.services.some(service => service.toLowerCase().includes(query))
-      );
-    }
-
-    return filtered;
-  }, [selectedCategory, selectedUrgency, debouncedSearch]);
-
-  const stats = {
-    totalAgencies: ugandaAgencies.length,
-    highPriority: ugandaAgencies.filter(a => a.urgencyLevel === 'high').length,
-    withAppointments: ugandaAgencies.filter(a => a.hasAppointmentBooking).length,
-    avgResponseTime: '24 hours'
+    return 'bg-green-500';
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-brand-black to-brand-red text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Uganda Government Agencies
-            </h1>
-            <p className="text-xl text-gray-100 mb-8 max-w-3xl mx-auto">
-              Direct access to all government agencies for your business needs. 
-              Contact officials, book appointments, and get the support you need.
-            </p>
-            
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-2xl font-bold">{stats.totalAgencies}</div>
-                <div className="text-sm text-gray-100">Total Agencies</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-2xl font-bold">{stats.highPriority}</div>
-                <div className="text-sm text-gray-100">High Priority</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-2xl font-bold">{stats.withAppointments}</div>
-                <div className="text-sm text-gray-100">Book Appointments</div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-2xl font-bold">{stats.avgResponseTime}</div>
-                <div className="text-sm text-gray-100">Avg Response</div>
-              </div>
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: 'url(https://images.unsplash.com/photo-1587574293963-416154235727?q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)'
+      }}
+    >
+      <div className="absolute inset-0 bg-black/60"></div> {/* Overlay for readability */}
+      <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-8">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">All Government Agencies</h2>
+              <p className="text-gray-600">Access essential government services for business and investment</p>
             </div>
-          </motion.div>
-        </div>
-      </div>
+            <div className="bg-white px-4 py-2 rounded-xl border-2 border-gray-200 shadow-sm">
+              <p className="text-sm text-gray-600">Showing</p>
+              <p className="text-2xl font-bold text-gray-900">{filteredAgencies.length} <span className="text-sm font-normal">of {agencies.length}</span></p>
+            </div>
+          </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-6">
-            {/* Search */}
+          {/* Search and Filter */}
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search agencies, services, or keywords..."
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search agencies by name, acronym, or service..."
+                className="w-full pl-10 pr-12 py-3.5 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent hover:border-yellow-300 transition-all text-black"
               />
-              {isSearching && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
-                </div>
-              )}
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-              <div className="relative">
-                <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 hover:scale-110 transition-all"
                 >
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label} ({category.count})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <select
-                value={selectedUrgency}
-                onChange={(e) => setSelectedUrgency(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              >
-                {urgencyLevels.map((level) => (
-                  <option key={level.value} value={level.value}>
-                    {level.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Active Filters Display */}
-          {(selectedCategory !== 'all' || selectedUrgency !== 'all' || debouncedSearch) && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {selectedCategory !== 'all' && (
-                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center">
-                  Category: {categories.find(c => c.value === selectedCategory)?.label}
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    className="ml-2 text-blue-600 hover:text-blue-800"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-              {selectedUrgency !== 'all' && (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center">
-                  Priority: {urgencyLevels.find(l => l.value === selectedUrgency)?.label}
-                  <button
-                    onClick={() => setSelectedUrgency('all')}
-                    className="ml-2 text-green-600 hover:text-green-800"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-              {debouncedSearch && (
-                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm flex items-center">
-                  Search: &ldquo;{debouncedSearch}&rdquo;
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="ml-2 text-purple-600 hover:text-purple-800"
-                  >
-                    ×
-                  </button>
-                </span>
+                  <X className="w-5 h-5" />
+                </button>
               )}
             </div>
-          )}
-        </div>
-
-        {/* Results Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {filteredAgencies.length === ugandaAgencies.length 
-              ? 'All Government Agencies' 
-              : `${filteredAgencies.length} ${filteredAgencies.length === 1 ? 'Agency' : 'Agencies'} Found`
-            }
-          </h2>
-          
-          <div className="text-sm text-gray-600">
-            Showing {filteredAgencies.length} of {ugandaAgencies.length} agencies
-          </div>
-        </div>
-
-        {/* Emergency Contact Banner */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="bg-red-100 rounded-full p-2">
-                <PhoneIcon className="w-5 h-5 text-red-600" />
-              </div>
-              <div>
-                <h3 className="font-medium text-red-900">Need Urgent Assistance?</h3>
-                <p className="text-sm text-red-700">Contact UIA directly for immediate investment support</p>
-              </div>
-            </div>
-            <div className="flex space-x-2">
-              <a
-                href="tel:+256414301000"
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-              >
-                Call Now
-              </a>
-              <a
-                href="mailto:info@ugandainvestment.go.ug"
-                className="bg-white text-red-600 border border-red-600 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
-              >
-                Email
-              </a>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-4 py-3 rounded-xl font-medium whitespace-nowrap transition-all ${
+                    selectedCategory === cat
+                      ? 'bg-yellow-400 text-black shadow-md scale-105'
+                      : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-yellow-400 hover:scale-105'
+                  }`}
+                >
+                  {cat === 'all' ? 'All Categories' : cat}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Agencies Grid */}
-        {filteredAgencies.length > 0 ? (
-          <motion.div
-            layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          >
-            {filteredAgencies.map((agency, index) => (
-              <motion.div
-                key={agency.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <AgencyCard agency={agency} />
-              </motion.div>
-            ))}
-          </motion.div>
+        {filteredAgencies.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-sm border-2 border-gray-200 p-12 text-center">
+            <div className="text-6xl mb-4">🏛️</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No agencies found</h3>
+            <p className="text-gray-600">Try adjusting your search or filter</p>
+          </div>
         ) : (
-          <div className="text-center py-12">
-            <BuildingOfficeIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No agencies found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Try adjusting your search criteria or filters.
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('all');
-                setSelectedUrgency('all');
-              }}
-              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Clear All Filters
-            </button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {filteredAgencies.map((agency) => (
+              <div
+                key={agency.id}
+                className="bg-white rounded-2xl shadow-sm border-2 border-gray-200 overflow-hidden hover:shadow-2xl hover:border-yellow-400 hover:-translate-y-2 transition-all duration-300 group"
+              >
+                {/* Agency Header */}
+                <div className={`bg-gradient-to-r ${agency.gradient} p-6 relative overflow-hidden`}>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-16 translate-x-16"></div>
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-black opacity-10 rounded-full translate-y-12 -translate-x-12"></div>
+                  
+                  <div className="relative flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+                        {agency.logo ? (
+                          <Image
+                            src={agency.logo}
+                            alt={`${agency.acronym} logo`}
+                            width={40}
+                            height={40}
+                            className="object-contain"
+                          />
+                        ) : (
+                          <span className="text-2xl font-bold text-gray-700">{agency.acronym[0]}</span>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-white">{agency.acronym}</h3>
+                        <p className="text-xs text-white/80">{agency.category}</p>
+                      </div>
+                    </div>
+                    <span className={`${getPriorityBadge(agency.priority)} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg`}>
+                      {agency.priority} Priority
+                    </span>
+                  </div>
+                  
+                  <h4 className="text-white font-semibold text-lg mb-2">{agency.name}</h4>
+                  <p className="text-white/90 text-sm leading-relaxed">{agency.description}</p>
+                </div>
+
+                {/* Agency Content */}
+                <div className="p-6">
+                  {/* Key Services */}
+                  <div className="mb-5">
+                    <h5 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                      <Star className="w-4 h-4 text-yellow-500" />
+                      Key Services
+                    </h5>
+                    <ul className="space-y-2">
+                      {agency.services.slice(0, 2).map((service, idx) => (
+                        <li key={idx} className="text-sm text-gray-600 flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-yellow-400 rounded-full mt-1.5 flex-shrink-0"></span>
+                          <span>{service}</span>
+                        </li>
+                      ))}
+                      {agency.services.length > 2 && (
+                        <li className="text-sm text-yellow-600 font-medium">+{agency.services.length - 2} more services</li>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* Contact Info */}
+                  <div className="space-y-3 mb-5 pb-5 border-b border-gray-100">
+                    <div className="flex items-start gap-3 text-sm">
+                      <Clock className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{agency.hours}</span>
+                    </div>
+                    <div className="flex items-start gap-3 text-sm">
+                      <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-gray-700">{agency.address}</span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <button 
+                      onClick={() => {
+                        const subject = encodeURIComponent(`Inquiry for ${agency.name} Services`);
+                        const body = encodeURIComponent(
+                          `Dear ${agency.name} Team,\\n\\n` +
+                          `I am interested in learning more about your services, specifically:\\n\\n` +
+                          `- ${agency.services[0] || 'General information'}\\n\\n` +
+                          `Please provide me with more information about:\\n` +
+                          `- Service requirements and procedures\\n` +
+                          `- Required documents\\n` +
+                          `- Processing timelines\\n` +
+                          `- Fees and charges\\n\\n` +
+                          `Thank you for your assistance.\\n\\n` +
+                          `Best regards`
+                        );
+                        window.location.href = `mailto:${agency.contact.email}?subject=${subject}&body=${body}`;
+                      }}
+                      className="bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-blue-700 hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Mail className="w-4 h-4" />
+                      Send Email
+                    </button>
+                    <button 
+                      onClick={() => window.location.href = `tel:${agency.contact.phone}`}
+                      className="bg-green-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-green-700 hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Phone className="w-4 h-4" />
+                      Call
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {agency.hasAppointmentBooking ? (
+                      <button 
+                        onClick={() => alert(`Booking appointment with ${agency.name}. This would open a calendar/booking system.`)}
+                        className="bg-purple-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-purple-700 hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Calendar className="w-4 h-4" />
+                        Book
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => window.location.href = `tel:${agency.contact.phone}`}
+                        className="bg-gray-600 text-white px-4 py-2.5 rounded-xl font-medium hover:bg-gray-700 hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                      >
+                        <Phone className="w-4 h-4" />
+                        Contact
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => window.open(agency.website, '_blank')}
+                      className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-4 py-2.5 rounded-xl font-bold hover:from-yellow-500 hover:to-yellow-600 hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Globe className="w-4 h-4" />
+                      Visit Site
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
-
-        {/* Additional Resources */}
-        <div className="mt-12 bg-gray-100 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Resources</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
-              href="/downloads"
-              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h4 className="font-medium text-gray-900">Forms & Documents</h4>
-              <p className="text-sm text-gray-600 mt-1">Download required forms and application documents</p>
-            </a>
-            <a
-              href="/tools"
-              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h4 className="font-medium text-gray-900">Business Tools</h4>
-              <p className="text-sm text-gray-600 mt-1">Calculators and planning tools for your business</p>
-            </a>
-            <a
-              href="/support"
-              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h4 className="font-medium text-gray-900">Get Support</h4>
-              <p className="text-sm text-gray-600 mt-1">Need help? Contact our support team</p>
-            </a>
-          </div>
-        </div>
       </div>
     </div>
   );
-}
+};
+
+export default GovernmentAgencies;

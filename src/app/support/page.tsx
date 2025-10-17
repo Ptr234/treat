@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { MessageSquare, Phone, Mail, MapPin } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Support',
@@ -11,11 +12,7 @@ export default function SupportPage() {
     {
       title: 'Live Chat Support',
       description: 'Get instant help from our support team',
-      icon: (
-        <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      ),
+      icon: <MessageSquare className="w-8 h-8 text-blue-600" />,
       availability: 'Mon-Fri: 8AM-6PM',
       action: 'Start Chat',
       href: '#chat'
@@ -23,11 +20,7 @@ export default function SupportPage() {
     {
       title: 'Phone Support',
       description: 'Speak directly with our experts',
-      icon: (
-        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-        </svg>
-      ),
+      icon: <Phone className="w-8 h-8 text-green-600" />,
       availability: '+256 800 123 456',
       action: 'Call Now',
       href: 'tel:+256800123456'
@@ -35,11 +28,7 @@ export default function SupportPage() {
     {
       title: 'Email Support',
       description: 'Send us detailed questions',
-      icon: (
-        <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      ),
+      icon: <Mail className="w-8 h-8 text-purple-600" />,
       availability: 'support@onestopcentre.go.ug',
       action: 'Send Email',
       href: 'mailto:support@onestopcentre.go.ug'
@@ -47,12 +36,7 @@ export default function SupportPage() {
     {
       title: 'Office Visits',
       description: 'Visit our physical location',
-      icon: (
-        <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
+      icon: <MapPin className="w-8 h-8 text-orange-600" />,
       availability: 'Kampala, Uganda Investment Authority',
       action: 'Get Directions',
       href: '#directions'
@@ -114,17 +98,31 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            Support Center
+    <div className="min-h-screen bg-gray-50">
+      <section 
+        className="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1552664730-d307ca8849d1?q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)'
+        }}
+      >
+        {/* Professional Dark Overlay */}
+        <div className="absolute inset-0 bg-black/60"></div>
+
+        {/* Header Content */}
+        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <span className="block text-white font-light">Dedicated</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 font-black">
+              Support Center
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Get help with business registration, investment processes, and any questions about OneStopCentre Uganda services.
-            We&apos;re here to support your business journey.
+          <p className="text-xl md:text-2xl text-neutral-200 leading-relaxed font-light">
+            Your trusted partner for seamless business and investment journeys in Uganda
           </p>
         </div>
+      </section>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
 
         {/* Support Channels */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
@@ -167,7 +165,7 @@ export default function SupportPage() {
                   <input
                     type="text"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black"
                     placeholder="Your full name"
                   />
                 </div>
@@ -178,7 +176,7 @@ export default function SupportPage() {
                   <input
                     type="email"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black"
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -188,7 +186,7 @@ export default function SupportPage() {
                   </label>
                   <input
                     type="tel"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black"
                     placeholder="+256 700 000 000"
                   />
                 </div>
@@ -196,7 +194,7 @@ export default function SupportPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Subject Category
                   </label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent">
+                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black">
                     <option value="">Select a category</option>
                     <option value="business-registration">Business Registration</option>
                     <option value="investment-licensing">Investment Licensing</option>
@@ -216,7 +214,7 @@ export default function SupportPage() {
                   <textarea
                     required
                     rows={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black"
                     placeholder="Please describe your question or issue in detail..."
                   />
                 </div>

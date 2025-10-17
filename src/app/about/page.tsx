@@ -47,7 +47,7 @@ export default function AboutPage() {
           <div 
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
-              backgroundImage: 'url(/images/oneStopCenter-logo.jpeg)'
+              backgroundImage: 'url(https://images.unsplash.com/photo-1604591877395-0437a5757007?q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)'
             }}
           />
           {/* Professional Dark Overlay */}

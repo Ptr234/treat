@@ -36,8 +36,14 @@ interface BusinessData {
   timeframe: string;
 }
 
+interface ValidationErrors {
+  [key: string]: string;
+}
+
 export default function BusinessRegistrationWizard() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [businessData, setBusinessData] = useState<BusinessData>({
     // Step 1: Business Type
     businessType: '',
@@ -124,6 +130,95 @@ export default function BusinessRegistrationWizard() {
     'Other'
   ];
 
+  // Validation functions
+  const validateStep = (step: number): boolean => {
+    const newErrors: ValidationErrors = {};
+
+    switch (step) {
+      case 1:
+        if (!businessData.businessType) {
+          newErrors.businessType = 'Please select a business type';
+        }
+        if (!businessData.businessStructure) {
+          newErrors.businessStructure = 'Please select a business structure';
+        }
+        break;
+
+      case 2:
+        if (!businessData.businessName.trim()) {
+          newErrors.businessName = 'Business name is required';
+        }
+        if (!businessData.businessDescription.trim()) {
+          newErrors.businessDescription = 'Business description is required';
+        }
+        if (!businessData.sector) {
+          newErrors.sector = 'Please select a business sector';
+        }
+        if (!businessData.location) {
+          newErrors.location = 'Please select a business location';
+        }
+        break;
+
+      case 3:
+        businessData.owners.forEach((owner, index) => {
+          if (!owner.name.trim()) {
+            newErrors[`owner_${index}_name`] = 'Owner name is required';
+          }
+          if (!owner.nationality.trim()) {
+            newErrors[`owner_${index}_nationality`] = 'Nationality is required';
+          }
+          if (!owner.idNumber.trim()) {
+            newErrors[`owner_${index}_idNumber`] = 'ID number is required';
+          }
+          if (!owner.percentage.trim()) {
+            newErrors[`owner_${index}_percentage`] = 'Percentage is required';
+          } else {
+            const percentage = parseFloat(owner.percentage);
+            if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
+              newErrors[`owner_${index}_percentage`] = 'Percentage must be between 1 and 100';
+            }
+          }
+        });
+
+        // Check if total percentage equals 100%
+        const totalPercentage = businessData.owners.reduce((sum, owner) => {
+          const percentage = parseFloat(owner.percentage) || 0;
+          return sum + percentage;
+        }, 0);
+        
+        if (Math.abs(totalPercentage - 100) > 0.01) {
+          newErrors.totalPercentage = 'Total ownership percentage must equal 100%';
+        }
+        break;
+
+      case 4:
+        if (!businessData.initialCapital.trim()) {
+          newErrors.initialCapital = 'Initial capital is required';
+        } else {
+          const capital = parseFloat(businessData.initialCapital);
+          if (isNaN(capital) || capital <= 0) {
+            newErrors.initialCapital = 'Initial capital must be a positive number';
+          }
+        }
+        if (!businessData.projectedTurnover.trim()) {
+          newErrors.projectedTurnover = 'Projected turnover is required';
+        } else {
+          const turnover = parseFloat(businessData.projectedTurnover);
+          if (isNaN(turnover) || turnover <= 0) {
+            newErrors.projectedTurnover = 'Projected turnover must be a positive number';
+          }
+        }
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const clearErrors = () => {
+    setErrors({});
+  };
+
   const handleInputChange = (field: keyof BusinessData, value: unknown, index: number | null = null) => {
     if (field === 'owners' && index !== null) {
       const newOwners = [...businessData.owners];
@@ -204,17 +299,59 @@ export default function BusinessRegistrationWizard() {
   };
 
   const nextStep = () => {
-    if (currentStep < 5) {
-      if (currentStep === 4) {
-        calculateRequirements();
+    if (validateStep(currentStep)) {
+      clearErrors();
+      if (currentStep < 5) {
+        if (currentStep === 4) {
+          calculateRequirements();
+        }
+        setCurrentStep(currentStep + 1);
       }
-      setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
+      clearErrors();
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(5)) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Generate reference number
+      const referenceNumber = `BRW-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+      
+      // Show success message (you would integrate with your notification system)
+      alert(`Registration wizard completed successfully!\n\nReference Number: ${referenceNumber}\n\nNext steps:\n1. Prepare required documents\n2. Visit respective authorities\n3. Pay required fees\n4. Track your applications`);
+      
+      // Reset form
+      setCurrentStep(1);
+      setBusinessData({
+        businessType: '',
+        businessStructure: '',
+        businessName: '',
+        businessDescription: '',
+        sector: '',
+        location: '',
+        owners: [{ name: '', nationality: '', idNumber: '', percentage: '' }],
+        initialCapital: '',
+        projectedTurnover: '',
+        requirements: [],
+        estimatedCost: 0,
+        timeframe: ''
+      });
+      
+    } catch {
+      alert('An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -229,6 +366,9 @@ export default function BusinessRegistrationWizard() {
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Choose your business type:
               </label>
+              {errors.businessType && (
+                <p className="text-red-600 text-sm mb-2">{errors.businessType}</p>
+              )}
               <div className="grid grid-cols-1 gap-4">
                 {businessTypes.map((type) => (
                   <div
@@ -264,6 +404,9 @@ export default function BusinessRegistrationWizard() {
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Choose your business structure:
                 </label>
+                {errors.businessStructure && (
+                  <p className="text-red-600 text-sm mb-2">{errors.businessStructure}</p>
+                )}
                 <div className="grid grid-cols-1 gap-3">
                   {businessStructures[businessData.businessType as keyof typeof businessStructures]?.map((structure) => (
                     <div
@@ -307,9 +450,14 @@ export default function BusinessRegistrationWizard() {
                 type="text"
                 value={businessData.businessName}
                 onChange={(e) => handleInputChange('businessName', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                  errors.businessName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                }`}
                 placeholder="Enter your business name"
               />
+              {errors.businessName && (
+                <p className="text-red-600 text-sm mt-1">{errors.businessName}</p>
+              )}
             </div>
 
             <div>
@@ -319,10 +467,15 @@ export default function BusinessRegistrationWizard() {
               <textarea
                 value={businessData.businessDescription}
                 onChange={(e) => handleInputChange('businessDescription', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                  errors.businessDescription ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                }`}
                 rows={4}
                 placeholder="Describe what your business does"
               />
+              {errors.businessDescription && (
+                <p className="text-red-600 text-sm mt-1">{errors.businessDescription}</p>
+              )}
             </div>
 
             <div>
@@ -332,7 +485,9 @@ export default function BusinessRegistrationWizard() {
               <select
                 value={businessData.sector}
                 onChange={(e) => handleInputChange('sector', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                  errors.sector ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                }`}
               >
                 <option value="">Select a sector</option>
                 {sectors.map((sector) => (
@@ -341,6 +496,9 @@ export default function BusinessRegistrationWizard() {
                   </option>
                 ))}
               </select>
+              {errors.sector && (
+                <p className="text-red-600 text-sm mt-1">{errors.sector}</p>
+              )}
             </div>
 
             <div>
@@ -350,7 +508,9 @@ export default function BusinessRegistrationWizard() {
               <select
                 value={businessData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                  errors.location ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                }`}
               >
                 <option value="">Select a location</option>
                 {locations.map((location) => (
@@ -359,6 +519,9 @@ export default function BusinessRegistrationWizard() {
                   </option>
                 ))}
               </select>
+              {errors.location && (
+                <p className="text-red-600 text-sm mt-1">{errors.location}</p>
+              )}
             </div>
           </div>
         );
@@ -368,6 +531,21 @@ export default function BusinessRegistrationWizard() {
           <div className="space-y-6">
             <h3 className="text-2xl font-bold text-gray-900">Ownership Information</h3>
             
+            {errors.totalPercentage && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-red-600 text-sm">{errors.totalPercentage}</p>
+              </div>
+            )}
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <p className="text-blue-700 text-sm">
+                Current Total Ownership: {businessData.owners.reduce((sum, owner) => {
+                  const percentage = parseFloat(owner.percentage) || 0;
+                  return sum + percentage;
+                }, 0)}%
+              </p>
+            </div>
+
             {businessData.owners.map((owner, index) => (
               <div key={index} className="border border-gray-300 rounded-lg p-4">
                 <div className="flex justify-between items-center mb-4">
@@ -393,9 +571,14 @@ export default function BusinessRegistrationWizard() {
                       type="text"
                       value={owner.name}
                       onChange={(e) => handleInputChange('owners', { name: e.target.value }, index)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                        errors[`owner_${index}_name`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Enter full name"
                     />
+                    {errors[`owner_${index}_name`] && (
+                      <p className="text-red-600 text-sm mt-1">{errors[`owner_${index}_name`]}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -406,9 +589,14 @@ export default function BusinessRegistrationWizard() {
                       type="text"
                       value={owner.nationality}
                       onChange={(e) => handleInputChange('owners', { nationality: e.target.value }, index)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                        errors[`owner_${index}_nationality`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Enter nationality"
                     />
+                    {errors[`owner_${index}_nationality`] && (
+                      <p className="text-red-600 text-sm mt-1">{errors[`owner_${index}_nationality`]}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -419,9 +607,14 @@ export default function BusinessRegistrationWizard() {
                       type="text"
                       value={owner.idNumber}
                       onChange={(e) => handleInputChange('owners', { idNumber: e.target.value }, index)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                        errors[`owner_${index}_idNumber`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Enter ID number"
                     />
+                    {errors[`owner_${index}_idNumber`] && (
+                      <p className="text-red-600 text-sm mt-1">{errors[`owner_${index}_idNumber`]}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -432,11 +625,16 @@ export default function BusinessRegistrationWizard() {
                       type="number"
                       value={owner.percentage}
                       onChange={(e) => handleInputChange('owners', { percentage: e.target.value }, index)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                        errors[`owner_${index}_percentage`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                      }`}
                       placeholder="Enter percentage"
                       min="0"
                       max="100"
                     />
+                    {errors[`owner_${index}_percentage`] && (
+                      <p className="text-red-600 text-sm mt-1">{errors[`owner_${index}_percentage`]}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -464,9 +662,14 @@ export default function BusinessRegistrationWizard() {
                 type="number"
                 value={businessData.initialCapital}
                 onChange={(e) => handleInputChange('initialCapital', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                  errors.initialCapital ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                }`}
                 placeholder="Enter initial capital"
               />
+              {errors.initialCapital && (
+                <p className="text-red-600 text-sm mt-1">{errors.initialCapital}</p>
+              )}
             </div>
 
             <div>
@@ -477,9 +680,14 @@ export default function BusinessRegistrationWizard() {
                 type="number"
                 value={businessData.projectedTurnover}
                 onChange={(e) => handleInputChange('projectedTurnover', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                  errors.projectedTurnover ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                }`}
                 placeholder="Enter projected turnover"
               />
+              {errors.projectedTurnover && (
+                <p className="text-red-600 text-sm mt-1">{errors.projectedTurnover}</p>
+              )}
             </div>
           </div>
         );
@@ -596,8 +804,19 @@ export default function BusinessRegistrationWizard() {
             Next
           </button>
         ) : (
-          <button className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-            Start Registration Process
+          <button 
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Processing...
+              </>
+            ) : (
+              'Start Registration Process'
+            )}
           </button>
         )}
       </div>

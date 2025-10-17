@@ -305,8 +305,8 @@ const Header: React.FC = () => {
         animate={{ y: 0 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out ${
           isScrolled 
-            ? 'bg-black/95 backdrop-blur-xl shadow-strong border-b border-yellow-500/30' 
-            : 'bg-black/90 backdrop-blur-md shadow-medium'
+            ? 'bg-gradient-to-r from-black via-yellow-500 to-red-600 backdrop-blur-xl shadow-strong border-b border-yellow-500/30' 
+            : 'bg-gradient-to-r from-black via-yellow-500 to-red-600 backdrop-blur-md shadow-medium'
         }`}
         style={{
           boxShadow: isScrolled 
@@ -428,7 +428,7 @@ const Header: React.FC = () => {
                           {item.name}
                         </h3>
                       </div>
-                      {item.dropdown.map((dropdownItem, _index) => (
+                      {item.dropdown.map((dropdownItem, subIndex) => (
                         <Link
                           key={dropdownItem.name}
                           href={dropdownItem.href as never}
@@ -563,12 +563,12 @@ const Header: React.FC = () => {
                 className="lg:hidden bg-gradient-to-b from-black-900/98 to-black-800/98 backdrop-blur-xl border-t border-yellow-500/30 shadow-2xl"
               >
                 <div className="px-4 py-6 space-y-3 max-h-[70vh] overflow-y-auto">
-                  {navigationItems.map((item, itemIndex) => (
+                  {navigationItems.map((item, _itemIndex) => (
                     <motion.div 
                       key={item.name}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: itemIndex * 0.1 }}
+                      transition={{ delay: _itemIndex * 0.1 }}
                     >
                       <Link
                         href={item.href as never}
@@ -604,7 +604,7 @@ const Header: React.FC = () => {
                               key={dropdownItem.name}
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: (itemIndex * 0.1) + (dropdownItem.name.length * 0.01) }}
+                              transition={{ delay: (_itemIndex * 0.1) + (dropdownItem.name.length * 0.01) }}
                             >
                               <Link
                                 href={dropdownItem.href as never}
