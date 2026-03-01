@@ -2,9 +2,9 @@
 
 **Project:** UIA One-Stop Centre Digital Tool
 **Current Phase:** 1 (Platform Foundation)
-**Current Plan:** — (not yet planned)
+**Current Plan:** 1/1 complete
 **Session Date:** 2026-03-01
-**Model:** Claude Opus 4.6 (Haiku 4.5 for speed)
+**Model:** Claude Sonnet 4.6
 
 ---
 
@@ -44,7 +44,7 @@
 7. Phase 7: Inter-Agency Collaboration Hub (officer messaging)
 8. Phase 8: Director General Dashboard & Polish (executive view, UI refresh)
 
-**Next Action:** Plan Phase 1
+**Next Action:** Plan/Execute Phase 2 (Core Ticket System)
 
 ---
 
@@ -60,6 +60,9 @@
 | Phase 7 (Agencies) after Phase 2 | Officers need ticket context to collaborate effectively | Dependency ordering ensures context is available |
 | Phase 8 (Dashboard + Polish) last | Aggregates data from multiple phases; UI polish should happen after features are solid | All data dependencies resolved before Phase 8 |
 | 100% requirement coverage | All 51 v1 requirements mapped to exactly one phase; no orphans | Roadmap is complete and traceable |
+| next-sanity@9.12.3 (not v12) | v12 requires Next.js 16 (unreleased); v9.12.3 explicitly supports Next.js 15 | Unblocks Sanity Studio embed on existing Next.js 15 codebase |
+| Removed output: export from next.config.ts | Firebase static export is incompatible with Sanity Studio (SSR) and API routes needed for all phases | Enables Vercel deployment with full SSR + API routes |
+| Dual-client Sanity pattern | CDN client for public reads (fast/cheap), token-gated serverClient for admin writes (secure) | Prevents token exposure to browser; all phases follow this pattern |
 
 ### Key Requirements by Impact
 
@@ -145,17 +148,29 @@
 - Created ROADMAP.md, STATE.md
 - Updated REQUIREMENTS.md traceability section
 
+### 2026-03-01 (Execute Phase 1 Plan 1)
+- Executed 01-01-PLAN.md: Sanity CMS schema + client setup
+- Installed next-sanity@9.12.3 (Next.js 15 compatible), sanity, @sanity/vision
+- Created 8 document type schemas (event, licenseProject, agency, ticket, ticketMessage, analyticsMetadata, dashboardConfig, agencyProfile)
+- Configured dual-client (CDN read + token-write) and 15 GROQ queries
+- Removed `output: export` from next.config.ts (Firebase static export incompatible with Vercel + Sanity Studio)
+- tsc --noEmit: zero errors; ESLint: zero warnings
+- Commits: 80f868b, 1ed4933, 6f9ffae (in treat/frontend git repo)
+- REQUIREMENT PLAT-01 complete
+
 ---
 
 ## Next Steps
 
-1. **Run `/gsd:plan-phase 1`** to break Phase 1 into executable plans
-2. **For Phase 1 planning, focus on:**
-   - Sanity CMS schema design (all 9 content types)
-   - Admin authentication setup
-   - Next.js API route conversion from Firebase Cloud Functions
-   - Responsive design audit and fixes
-3. **Defer Phase 2 planning** until Phase 1 infrastructure is clear
+1. **Plan/Execute Phase 2** — Core Ticket System (TICK-01 to TICK-10)
+   - API routes for ticket CRUD (replacing Firebase Cloud Functions)
+   - Ticket submission form (public-facing)
+   - Admin ticket queue with status management
+   - SLA tracking and escalation logic
+2. **User action required before Phase 2:**
+   - Create Sanity project at sanity.io
+   - Configure .env.local with project credentials
+   - Verify /studio route renders Sanity Studio
 
 ---
 

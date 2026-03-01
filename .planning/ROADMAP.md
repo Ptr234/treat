@@ -37,7 +37,13 @@
 4. All pages render without console errors, broken links, or dead features — codebase is clean and functional
 5. Responsive design verified on mobile (375px), tablet (768px), and desktop (1440px) viewports — all layouts adapt correctly
 
-**Plans:** TBD
+**Plans:** 1/4 plans executed
+
+Plans:
+- [ ] 01-01-PLAN.md — Sanity CMS setup: install packages, define all 9 content type schemas, configure Sanity client and GROQ queries
+- [ ] 01-02-PLAN.md — Firebase removal: uninstall firebase package, remove all 9 Firebase-dependent source files, replace AuthContext with stub
+- [ ] 01-03-PLAN.md — API routes + Vercel deployment: 8 Next.js API routes replacing Cloud Functions, deploy to Vercel, Sanity Studio admin access
+- [ ] 01-04-PLAN.md — Codebase cleanup + responsive audit: fix all lint/TS errors, zero console errors across all pages, responsive at 375/768/1440px
 
 ---
 
@@ -188,7 +194,7 @@
 
 | Category | Requirements | Phase | Status |
 |----------|--------------|-------|--------|
-| Platform & Infrastructure | PLAT-01 to PLAT-06 | Phase 1 | Pending |
+| Platform & Infrastructure | PLAT-01 to PLAT-06 | Phase 1 | Planned |
 | UIA Assistant Chatbot | CHAT-01 to CHAT-08 | Phase 4 | Pending |
 | Events & Investment Activities | EVNT-01 to EVNT-05 | Phase 6 | Pending |
 | Inquiry Analytics & Intelligence | ANLY-01 to ANLY-06 | Phase 3 | Pending |
@@ -206,7 +212,7 @@
 
 | Phase | Goal | Plans | Status | Completed |
 |-------|------|-------|--------|-----------|
-| 1 | Platform Foundation | TBD | Not started | — |
+| 1 | 1/4 | In Progress|  | — |
 | 2 | Core Ticket System | TBD | Not started | — |
 | 3 | Inquiry Analytics & Intelligence | TBD | Not started | — |
 | 4 | UIA Assistant Chatbot | TBD | Not started | — |
@@ -218,4 +224,4 @@
 ---
 
 *Roadmap created: 2026-03-01*
-*Next step: `/gsd:plan-phase 1` to break Phase 1 into executable plans*
+*Phase 1 planned: 2026-03-01 — 4 plans, 2 waves*

@@ -9,7 +9,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Platform & Infrastructure
 
-- [ ] **PLAT-01**: Sanity CMS schema deployed with all content types (events, projects, agencies, tickets, analytics, dashboard config)
+- [x] **PLAT-01**: Sanity CMS schema deployed with all content types (events, projects, agencies, tickets, analytics, dashboard config)
 - [ ] **PLAT-02**: Next.js app deployed on Vercel with all API routes functional (replacing Firebase Cloud Functions)
 - [ ] **PLAT-03**: Admin authentication — staff can log in to Sanity Studio to manage all content
 - [ ] **PLAT-04**: All existing pages render without console errors, broken links, or dead features
@@ -127,7 +127,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLAT-01 | Phase 1 | Pending |
+| PLAT-01 | Phase 1 | Complete |
 | PLAT-02 | Phase 1 | Pending |
 | PLAT-03 | Phase 1 | Pending |
 | PLAT-04 | Phase 1 | Pending |
