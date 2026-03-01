@@ -127,72 +127,73 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PLAT-01 | — | Pending |
-| PLAT-02 | — | Pending |
-| PLAT-03 | — | Pending |
-| PLAT-04 | — | Pending |
-| PLAT-05 | — | Pending |
-| PLAT-06 | — | Pending |
-| CHAT-01 | — | Pending |
-| CHAT-02 | — | Pending |
-| CHAT-03 | — | Pending |
-| CHAT-04 | — | Pending |
-| CHAT-05 | — | Pending |
-| CHAT-06 | — | Pending |
-| CHAT-07 | — | Pending |
-| CHAT-08 | — | Pending |
-| EVNT-01 | — | Pending |
-| EVNT-02 | — | Pending |
-| EVNT-03 | — | Pending |
-| EVNT-04 | — | Pending |
-| EVNT-05 | — | Pending |
-| ANLY-01 | — | Pending |
-| ANLY-02 | — | Pending |
-| ANLY-03 | — | Pending |
-| ANLY-04 | — | Pending |
-| ANLY-05 | — | Pending |
-| ANLY-06 | — | Pending |
-| TICK-01 | — | Pending |
-| TICK-02 | — | Pending |
-| TICK-03 | — | Pending |
-| TICK-04 | — | Pending |
-| TICK-05 | — | Pending |
-| TICK-06 | — | Pending |
-| TICK-07 | — | Pending |
-| TICK-08 | — | Pending |
-| TICK-09 | — | Pending |
-| TICK-10 | — | Pending |
-| AGCY-01 | — | Pending |
-| AGCY-02 | — | Pending |
-| AGCY-03 | — | Pending |
-| AGCY-04 | — | Pending |
-| AGCY-05 | — | Pending |
-| AGCY-06 | — | Pending |
-| PROJ-01 | — | Pending |
-| PROJ-02 | — | Pending |
-| PROJ-03 | — | Pending |
-| PROJ-04 | — | Pending |
-| PROJ-05 | — | Pending |
-| PROJ-06 | — | Pending |
-| PROJ-07 | — | Pending |
-| PROJ-08 | — | Pending |
-| PROJ-09 | — | Pending |
-| DGLV-01 | — | Pending |
-| DGLV-02 | — | Pending |
-| DGLV-03 | — | Pending |
-| DGLV-04 | — | Pending |
-| DGLV-05 | — | Pending |
-| UIUX-01 | — | Pending |
-| UIUX-02 | — | Pending |
-| UIUX-03 | — | Pending |
-| UIUX-04 | — | Pending |
-| UIUX-05 | — | Pending |
+| PLAT-01 | Phase 1 | Pending |
+| PLAT-02 | Phase 1 | Pending |
+| PLAT-03 | Phase 1 | Pending |
+| PLAT-04 | Phase 1 | Pending |
+| PLAT-05 | Phase 1 | Pending |
+| PLAT-06 | Phase 1 | Pending |
+| CHAT-01 | Phase 4 | Pending |
+| CHAT-02 | Phase 4 | Pending |
+| CHAT-03 | Phase 4 | Pending |
+| CHAT-04 | Phase 4 | Pending |
+| CHAT-05 | Phase 4 | Pending |
+| CHAT-06 | Phase 4 | Pending |
+| CHAT-07 | Phase 4 | Pending |
+| CHAT-08 | Phase 4 | Pending |
+| EVNT-01 | Phase 6 | Pending |
+| EVNT-02 | Phase 6 | Pending |
+| EVNT-03 | Phase 6 | Pending |
+| EVNT-04 | Phase 6 | Pending |
+| EVNT-05 | Phase 6 | Pending |
+| ANLY-01 | Phase 3 | Pending |
+| ANLY-02 | Phase 3 | Pending |
+| ANLY-03 | Phase 3 | Pending |
+| ANLY-04 | Phase 3 | Pending |
+| ANLY-05 | Phase 3 | Pending |
+| ANLY-06 | Phase 3 | Pending |
+| TICK-01 | Phase 2 | Pending |
+| TICK-02 | Phase 2 | Pending |
+| TICK-03 | Phase 2 | Pending |
+| TICK-04 | Phase 2 | Pending |
+| TICK-05 | Phase 2 | Pending |
+| TICK-06 | Phase 2 | Pending |
+| TICK-07 | Phase 2 | Pending |
+| TICK-08 | Phase 2 | Pending |
+| TICK-09 | Phase 2 | Pending |
+| TICK-10 | Phase 2 | Pending |
+| AGCY-01 | Phase 7 | Pending |
+| AGCY-02 | Phase 7 | Pending |
+| AGCY-03 | Phase 7 | Pending |
+| AGCY-04 | Phase 7 | Pending |
+| AGCY-05 | Phase 7 | Pending |
+| AGCY-06 | Phase 7 | Pending |
+| PROJ-01 | Phase 5 | Pending |
+| PROJ-02 | Phase 5 | Pending |
+| PROJ-03 | Phase 5 | Pending |
+| PROJ-04 | Phase 5 | Pending |
+| PROJ-05 | Phase 5 | Pending |
+| PROJ-06 | Phase 5 | Pending |
+| PROJ-07 | Phase 5 | Pending |
+| PROJ-08 | Phase 5 | Pending |
+| PROJ-09 | Phase 5 | Pending |
+| DGLV-01 | Phase 8 | Pending |
+| DGLV-02 | Phase 8 | Pending |
+| DGLV-03 | Phase 8 | Pending |
+| DGLV-04 | Phase 8 | Pending |
+| DGLV-05 | Phase 8 | Pending |
+| UIUX-01 | Phase 8 | Pending |
+| UIUX-02 | Phase 8 | Pending |
+| UIUX-03 | Phase 8 | Pending |
+| UIUX-04 | Phase 8 | Pending |
+| UIUX-05 | Phase 8 | Pending |
 
 **Coverage:**
 - v1 requirements: 51 total
-- Mapped to phases: 0
-- Unmapped: 51
+- Mapped to phases: 51
+- Unmapped: 0
 
 ---
+
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 after roadmap creation*
