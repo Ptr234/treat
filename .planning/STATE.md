@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 1 (Platform Foundation)
-current_plan: 2/2 complete (Phase 1)
-status: unknown
-last_updated: "2026-03-01T12:09:50.939Z"
+current_plan: 3/4 (Phase 1 — checkpoint:human-verify reached)
+status: awaiting-human-checkpoint
+last_updated: "2026-03-01T12:44:49Z"
 progress:
   total_phases: 1
   completed_phases: 0
@@ -17,7 +17,7 @@ progress:
 
 **Project:** UIA One-Stop Centre Digital Tool
 **Current Phase:** 1 (Platform Foundation)
-**Current Plan:** 2/2 complete (Phase 1 done — proceed to Phase 2)
+**Current Plan:** 3/4 (01-03 — Task 1 done, checkpoint:human-verify reached)
 **Session Date:** 2026-03-01
 **Model:** Claude Sonnet 4.6
 
@@ -59,7 +59,7 @@ progress:
 7. Phase 7: Inter-Agency Collaboration Hub (officer messaging)
 8. Phase 8: Director General Dashboard & Polish (executive view, UI refresh)
 
-**Next Action:** Plan/Execute Phase 2 (Core Ticket System)
+**Next Action:** Complete user setup (Sanity project creation + Vercel deployment) then resume 01-03 Task 2 checkpoint
 
 ---
 
@@ -80,6 +80,8 @@ progress:
 | Dual-client Sanity pattern | CDN client for public reads (fast/cheap), token-gated serverClient for admin writes (secure) | Prevents token exposure to browser; all phases follow this pattern |
 - [Phase 01-platform-foundation]: AuthContextType interface preserved identically — only Firebase SDK implementation replaced with admin stubs
 - [Phase 01-platform-foundation]: useFirestoreCollection stub preserves full hook API shape for zero breaking changes downstream
+- [Phase 01-platform-foundation]: next-sanity upgraded 9->11.6.12, sanity downgraded 5->4.22.0 — v5 imports useEffectEvent not in stable React 19.1.0
+- [Phase 01-platform-foundation]: sanity-client.ts uses placeholder projectId for build safety — @sanity/client v4 throws synchronously on createClient when env var missing
 
 ### Key Requirements by Impact
 
@@ -189,9 +191,27 @@ progress:
 
 ---
 
+### 2026-03-01 (Execute Phase 1 Plan 3 — partial)
+- Executed 01-03-PLAN.md Task 1: Created 8 Next.js API routes replacing Cloud Functions
+- Upgraded next-sanity@9->11.6.12 and sanity@5->4.22.0 (v5 uses useEffectEvent not in stable React 19)
+- Fixed sanity-client.ts placeholder projectId for build-time safety (@sanity/client v4 strict)
+- tsc --noEmit: zero errors; ESLint: zero warnings; npm run build: 89 pages, zero errors
+- Commit: dafd3d0 (in treat/ git repo)
+- CHECKPOINT REACHED: Task 2 requires user to create Sanity project + deploy to Vercel
+
+---
+
 ## Next Steps
 
-1. **Plan/Execute Phase 2** — Core Ticket System (TICK-01 to TICK-10)
+1. **Complete user setup (BLOCKING)**:
+   - Create Sanity project at https://sanity.io/manage
+   - Get API write token (Editor permission)
+   - Set env vars in treat/frontend/.env.local
+   - Import repo to Vercel (Root Directory = treat/frontend)
+   - Add env vars to Vercel deployment
+   - Invite admin staff to Sanity project with Editor role
+2. **After user setup: Resume 01-03 Task 2** — verify Vercel deployment and Sanity Studio
+3. **Plan/Execute Phase 2** — Core Ticket System (TICK-01 to TICK-10)
    - API routes for ticket CRUD (replacing Firebase Cloud Functions)
    - Ticket submission form (public-facing)
    - Admin ticket queue with status management

@@ -37,12 +37,12 @@
 4. All pages render without console errors, broken links, or dead features — codebase is clean and functional
 5. Responsive design verified on mobile (375px), tablet (768px), and desktop (1440px) viewports — all layouts adapt correctly
 
-**Plans:** 2/4 plans executed
+**Plans:** 2/4 plans executed (01-03 partial — Task 1 done, checkpoint reached)
 
 Plans:
-- [ ] 01-01-PLAN.md — Sanity CMS setup: install packages, define all 9 content type schemas, configure Sanity client and GROQ queries
-- [ ] 01-02-PLAN.md — Firebase removal: uninstall firebase package, remove all 9 Firebase-dependent source files, replace AuthContext with stub
-- [ ] 01-03-PLAN.md — API routes + Vercel deployment: 8 Next.js API routes replacing Cloud Functions, deploy to Vercel, Sanity Studio admin access
+- [x] 01-01-PLAN.md — Sanity CMS setup: install packages, define all 9 content type schemas, configure Sanity client and GROQ queries
+- [x] 01-02-PLAN.md — Firebase removal: uninstall firebase package, remove all 9 Firebase-dependent source files, replace AuthContext with stub
+- [~] 01-03-PLAN.md — API routes + Vercel deployment: 8 API routes created, build passes locally; awaiting Sanity project creation + Vercel deployment (human checkpoint)
 - [ ] 01-04-PLAN.md — Codebase cleanup + responsive audit: fix all lint/TS errors, zero console errors across all pages, responsive at 375/768/1440px
 
 ---
