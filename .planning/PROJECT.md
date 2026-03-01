@@ -17,7 +17,7 @@ Investors can find information, submit inquiries, and track their issues through
 ### Active
 
 - [ ] Migrate from Firebase (Spark plan) to Sanity CMS + Vercel + Gemini free tier
-- [ ] AI Investor Assistant — scoped strictly to UIA/OSC/Uganda investment topics only, multilingual (English, French, Arabic, Chinese, Swahili), knowledge base on investment procedures/incentives/sectors/licensing, escalation to human officers, Gemini free tier
+- [ ] UIA Assistant (AI Chatbot) — branded as "UIA Assistant", scoped strictly to UIA/OSC/Uganda investment topics only, multilingual (English, French, Arabic, Chinese, Swahili), knowledge base on investment procedures/incentives/sectors/licensing, escalation to human officers, Gemini free tier
 - [ ] Events & Investment Activities — event categories (UIA forums, government missions, sector symposiums, EAC summits, global events, webinars), online registration/RSVP, calendar sync (iCal, Google, Outlook), post-event resources
 - [ ] Inquiry Analytics Dashboard — geographic heat map (world map with inquiry density), sector distribution charts, investment funnel (Inquiry > Facilitation > Application > Licensing > Operation), time-series trends, MoM/YoY benchmarks
 - [ ] Issue Tracking System — full lifecycle (NEW > ASSIGNED > IN PROGRESS > PENDING EXTERNAL > RESOLVED > CLOSED), SLA monitoring per category/priority, public ticket submission without login, reference number tracking, communication history, document upload, satisfaction rating, escalation requests
