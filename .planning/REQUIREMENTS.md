@@ -14,7 +14,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **PLAT-03**: Admin authentication — staff can log in to Sanity Studio to manage all content
 - [ ] **PLAT-04**: All existing pages render without console errors, broken links, or dead features
 - [ ] **PLAT-05**: Responsive design works correctly on mobile, tablet, and desktop
-- [ ] **PLAT-06**: All Firebase dependencies removed — no references to Firebase SDK, Firestore, or Cloud Functions remain
+- [x] **PLAT-06**: All Firebase dependencies removed — no references to Firebase SDK, Firestore, or Cloud Functions remain
 
 ### UIA Assistant (AI Chatbot)
 
@@ -132,7 +132,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PLAT-03 | Phase 1 | Pending |
 | PLAT-04 | Phase 1 | Pending |
 | PLAT-05 | Phase 1 | Pending |
-| PLAT-06 | Phase 1 | Pending |
+| PLAT-06 | Phase 1 | Complete |
 | CHAT-01 | Phase 4 | Pending |
 | CHAT-02 | Phase 4 | Pending |
 | CHAT-03 | Phase 4 | Pending |

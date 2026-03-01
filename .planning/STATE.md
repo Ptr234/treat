@@ -1,8 +1,23 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+current_phase: 1 (Platform Foundation)
+current_plan: 2/2 complete (Phase 1)
+status: unknown
+last_updated: "2026-03-01T12:09:50.939Z"
+progress:
+  total_phases: 1
+  completed_phases: 0
+  total_plans: 4
+  completed_plans: 2
+---
+
 # STATE: UIA One-Stop Centre Digital Tool
 
 **Project:** UIA One-Stop Centre Digital Tool
 **Current Phase:** 1 (Platform Foundation)
-**Current Plan:** 1/1 complete
+**Current Plan:** 2/2 complete (Phase 1 done — proceed to Phase 2)
 **Session Date:** 2026-03-01
 **Model:** Claude Sonnet 4.6
 
@@ -63,6 +78,8 @@
 | next-sanity@9.12.3 (not v12) | v12 requires Next.js 16 (unreleased); v9.12.3 explicitly supports Next.js 15 | Unblocks Sanity Studio embed on existing Next.js 15 codebase |
 | Removed output: export from next.config.ts | Firebase static export is incompatible with Sanity Studio (SSR) and API routes needed for all phases | Enables Vercel deployment with full SSR + API routes |
 | Dual-client Sanity pattern | CDN client for public reads (fast/cheap), token-gated serverClient for admin writes (secure) | Prevents token exposure to browser; all phases follow this pattern |
+- [Phase 01-platform-foundation]: AuthContextType interface preserved identically — only Firebase SDK implementation replaced with admin stubs
+- [Phase 01-platform-foundation]: useFirestoreCollection stub preserves full hook API shape for zero breaking changes downstream
 
 ### Key Requirements by Impact
 
@@ -157,6 +174,18 @@
 - tsc --noEmit: zero errors; ESLint: zero warnings
 - Commits: 80f868b, 1ed4933, 6f9ffae (in treat/frontend git repo)
 - REQUIREMENT PLAT-01 complete
+
+### 2026-03-01 (Execute Phase 1 Plan 2)
+- Executed 01-02-PLAN.md: Complete Firebase removal from all 9 source files
+- Deleted firebase.ts, firebase.json, firestore.indexes.json, firestore.rules, storage.rules, service-account.json
+- Removed firebase@12.4.0 from package.json, removed 5 Firebase deploy scripts
+- Replaced AuthContext.tsx with admin stub (identical TypeScript interface)
+- Replaced useFirestoreCollection.ts and useDashboard.ts with stubs (same return shapes)
+- Fixed chatbot-service.ts, analytics/page.tsx, EventDetailClient.tsx, TicketDetailClient.tsx, tickets/create/page.tsx
+- tsc --noEmit: zero errors; ESLint: zero warnings
+- Commits: 109fc72, 4ded65d (in treat/ git repo)
+- REQUIREMENT PLAT-06 complete
+- Phase 1 COMPLETE — all 2 plans done
 
 ---
 
