@@ -50,10 +50,10 @@ interface UseTicketsReturn {
 }
 
 export function useTickets(): UseTicketsReturn {
-  const [data, setData] = useState<SupportTicket[]>(mockTickets);
+  const [data, setData] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(mockTickets.length);
+  const [total, setTotal] = useState(0);
 
   const fetchTickets = useCallback(async () => {
     try {

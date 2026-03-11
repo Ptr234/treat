@@ -5,7 +5,7 @@ import { mockDashboardMetrics } from '@/data/mock/dashboard';
 import type { DGDashboardMetrics } from '@/types';
 
 interface DashboardState {
-  metrics: DGDashboardMetrics;
+  metrics: DGDashboardMetrics | null;
   loading: boolean;
   error: string | null;
   isLive: boolean; // true when data comes from Sanity, false when using mock fallback
@@ -13,7 +13,7 @@ interface DashboardState {
 
 export function useDashboard() {
   const [state, setState] = useState<DashboardState>({
-    metrics: mockDashboardMetrics,
+    metrics: null,
     loading: true,
     error: null,
     isLive: false,

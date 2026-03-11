@@ -6,6 +6,8 @@ import ticketMessage from './ticketMessage';
 import analyticsMetadata from './analyticsMetadata';
 import dashboardConfig from './dashboardConfig';
 import agencyProfile from './agencyProfile';
+import agencyMessage from './agencyMessage';
+import adminUser from './adminUser';
 
 export const schemaTypes = [
   event,
@@ -16,4 +18,6 @@ export const schemaTypes = [
   analyticsMetadata,
   dashboardConfig,
   agencyProfile,
+  agencyMessage,
+  adminUser,
 ];

@@ -5,7 +5,7 @@ import { ugandaRegions } from '@/data/mock/projects';
 import { useProjects } from '@/hooks/useProjects';
 import { ProjectStatus } from '@/types';
 import ProjectCard from '@/components/projects/ProjectCard';
-import MapLegend from '@/components/projects/MapLegend';
+import DynamicLeafletMap from '@/components/projects/DynamicLeafletMap';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -456,145 +456,14 @@ export default function ProjectsPage() {
 
               /* === MAP VIEW === */
               ) : viewMode === 'map' ? (
-                <div className="relative">
-                  <div ref={mapRef} className="h-[700px] bg-neutral-950 flex items-center justify-center relative">
-                    <svg viewBox="0 0 800 700" className="w-full h-full">
-                      {/* Grid lines for depth */}
-                      <defs>
-                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#262626" strokeWidth="0.5" />
-                        </pattern>
-                      </defs>
-                      <rect width="800" height="700" fill="url(#grid)" />
-
-                      {/* Uganda border — golden outline on dark */}
-                      <path
-                        d="M360.3,569.4 L232.8,568 L192,580.9 L122.4,613.9 L94.2,603 L95.2,522.3 L122.2,481.4 L128.7,395.5 L153.2,345.8 L197.7,290 L242.4,261.6 L279.8,223.6 L233.2,209.1 L240.2,83.9 L288.1,54.7 L362.1,78.7 L455.8,53.6 L537.7,53.9 L609.2,4.7 L664.4,79 L678,132.7 L729.2,255.5 L686.8,333.5 L629.6,404.4 L596.3,447.7 L597.4,561.1 L360.3,569.4Z"
-                        fill="#1a1a0a"
-                        stroke="#FBBF24"
-                        strokeWidth="3"
-                      />
-                      {/* Inner glow on Uganda */}
-                      <path
-                        d="M360.3,569.4 L232.8,568 L192,580.9 L122.4,613.9 L94.2,603 L95.2,522.3 L122.2,481.4 L128.7,395.5 L153.2,345.8 L197.7,290 L242.4,261.6 L279.8,223.6 L233.2,209.1 L240.2,83.9 L288.1,54.7 L362.1,78.7 L455.8,53.6 L537.7,53.9 L609.2,4.7 L664.4,79 L678,132.7 L729.2,255.5 L686.8,333.5 L629.6,404.4 L596.3,447.7 L597.4,561.1 L360.3,569.4Z"
-                        fill="none"
-                        stroke="#FBBF24"
-                        strokeWidth="1"
-                        opacity="0.3"
-                        strokeDasharray="4 4"
-                      />
-
-                      {/* Lake Victoria */}
-                      <ellipse cx="480" cy="590" rx="90" ry="45" fill="#1e293b" stroke="#475569" strokeWidth="1" opacity="0.6" />
-                      <text x="480" y="595" textAnchor="middle" fontSize="11" fill="#64748b" fontWeight="500">L. Victoria</text>
-                      {/* Lake Albert */}
-                      <ellipse cx="115" cy="460" rx="20" ry="55" fill="#1e293b" stroke="#475569" strokeWidth="1" opacity="0.6" />
-                      <text x="115" y="465" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="500">L. Albert</text>
-                      {/* Lake Kyoga */}
-                      <ellipse cx="490" cy="300" rx="65" ry="22" fill="#1e293b" stroke="#475569" strokeWidth="1" opacity="0.5" />
-                      <text x="490" y="305" textAnchor="middle" fontSize="9" fill="#64748b" fontWeight="500">L. Kyoga</text>
-
-                      {filteredProjects.map((project) => {
-                        const x = 85 + ((project.coordinates.lng - 29.5) / (35 - 29.5)) * 640;
-                        const y = 620 - ((project.coordinates.lat + 1.5) / (4.5 + 1.5)) * 610;
-                        const size = Math.max(5, Math.min(20, project.investmentValue / 3000000));
-                        const color = getSectorColor(project.sector);
-                        const isActive = selectedProject === project.id;
-
-                        return (
-                          <g key={project.id}>
-                            {/* Glow ring for selected */}
-                            {isActive && (
-                              <circle
-                                cx={x}
-                                cy={y}
-                                r={size + 6}
-                                fill="none"
-                                stroke="#FBBF24"
-                                strokeWidth="2"
-                                opacity="0.5"
-                              >
-                                <animate attributeName="r" from={size + 4} to={size + 10} dur="1.5s" repeatCount="indefinite" />
-                                <animate attributeName="opacity" from="0.6" to="0" dur="1.5s" repeatCount="indefinite" />
-                              </circle>
-                            )}
-                            <circle
-                              cx={x}
-                              cy={y}
-                              r={size}
-                              fill={color}
-                              opacity={isActive ? 1 : 0.85}
-                              stroke={isActive ? '#FBBF24' : '#000'}
-                              strokeWidth={isActive ? 3 : 1.5}
-                              className="cursor-pointer hover:opacity-100 transition-opacity"
-                              onClick={() => setSelectedProject(project.id)}
-                            >
-                              <title>
-                                {project.name} - {project.company}
-                                {'\n'}
-                                {formatCurrency(project.investmentValue)}
-                                {'\n'}
-                                {project.plannedEmployment} jobs
-                              </title>
-                            </circle>
-                          </g>
-                        );
-                      })}
-                    </svg>
-
-                    <div className="absolute top-4 right-4">
-                      <MapLegend />
-                    </div>
-
-                    {selectedProject && (
-                      <div className="absolute bottom-4 left-4 bg-neutral-900 border border-neutral-700 p-4 rounded-lg shadow-2xl max-w-md">
-                        {(() => {
-                          const project = filteredProjects.find((p) => p.id === selectedProject);
-                          if (!project) return null;
-                          const badge = getStatusBadge(project.status);
-                          return (
-                            <>
-                              <div className="flex items-start justify-between mb-2">
-                                <h3 className="font-bold text-white">{project.name}</h3>
-                                <button
-                                  onClick={() => setSelectedProject(null)}
-                                  className="text-neutral-500 hover:text-white"
-                                >
-                                  <XMarkIcon className="w-5 h-5" />
-                                </button>
-                              </div>
-                              <p className="text-sm text-neutral-400 mb-2">{project.company}</p>
-                              <div className="flex flex-wrap gap-2 mb-2">
-                                <span
-                                  className="px-2 py-1 text-xs font-semibold rounded"
-                                  style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
-                                >
-                                  {project.sector}
-                                </span>
-                                <span className={`px-2 py-1 text-xs font-semibold rounded border ${badge.className}`}>
-                                  {badge.label}
-                                </span>
-                              </div>
-                              <div className="text-sm space-y-1">
-                                <p>
-                                  <span className="text-neutral-500">Location:</span>{' '}
-                                  <span className="text-neutral-300">{project.district}, {project.region}</span>
-                                </p>
-                                <p>
-                                  <span className="text-neutral-500">Investment:</span>{' '}
-                                  <span className="font-semibold text-yellow-400">{formatCurrency(project.investmentValue)}</span>
-                                </p>
-                                <p>
-                                  <span className="text-neutral-500">Employment:</span>{' '}
-                                  <span className="font-semibold text-red-400">{project.plannedEmployment.toLocaleString()} jobs</span>
-                                </p>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-                    )}
-                  </div>
+                <div ref={mapRef} className="relative">
+                  <DynamicLeafletMap
+                    projects={sortedProjects}
+                    selectedProject={selectedProject}
+                    onSelectProject={setSelectedProject}
+                    getSectorColor={getSectorColor}
+                    formatCurrency={formatCurrency}
+                  />
 
                   {/* Project cards grid below the map */}
                   <div className="p-6 border-t border-neutral-800">

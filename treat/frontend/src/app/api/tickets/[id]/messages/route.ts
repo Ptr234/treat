@@ -3,6 +3,7 @@ import { client, serverClient } from '@/lib/sanity-client';
 import { TICKET_BY_REFERENCE_QUERY } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody, sanitizeString } from '@/lib/api-utils';
 import { ticketMessageSchema } from '@/lib/validations';
+import { requireAdmin } from '@/lib/auth';
 import type { SanityTicket } from '@/types/sanity';
 
 export async function POST(
@@ -21,14 +22,19 @@ export async function POST(
       return apiError('Ticket not found', 404, 'NOT_FOUND');
     }
 
+    // Determine author role and internal flag based on authentication
+    const admin = await requireAdmin(request);
+    const authorRole = admin ? 'officer' : 'investor';
+    const isInternal = admin ? (data.isInternal === true) : false;
+
     const message = await serverClient.create({
       _type: 'ticketMessage',
       ticket: { _type: 'reference', _ref: ticket._id },
       content: sanitizeString(data.content),
-      authorName: sanitizeString(data.authorName),
-      authorRole: data.authorRole,
-      authorEmail: data.authorEmail,
-      isInternal: data.isInternal,
+      authorName: admin ? admin.name : sanitizeString(data.authorName),
+      authorRole,
+      authorEmail: admin ? admin.email : data.authorEmail,
+      isInternal,
       sentAt: new Date().toISOString(),
     });
 

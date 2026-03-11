@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       slaDeadlineAt: slaDeadlineAt.toISOString(),
       isEscalated: false,
       createdAt: now.toISOString(),
+      ...(data.documents && data.documents.length > 0 ? { documents: data.documents } : {}),
     });
 
     return apiSuccess(

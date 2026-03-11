@@ -122,6 +122,11 @@ const Header: React.FC = () => {
                 Issue Tracking
               </Link>
             )}
+            {isAuthenticated && (user?.role === 'admin') && (
+              <Link href="/agency-chat" className="text-xs font-medium text-gray-600 hover:text-black transition-colors">
+                Agency Chat
+              </Link>
+            )}
           </div>
         </div>
 
@@ -271,12 +276,12 @@ const Header: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <Link
-                  href="/investments/onboarding"
+                <button
+                  onClick={() => setShowAuthModal(true)}
                   className="px-4 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-semibold rounded-xl transition-all duration-300 transform hover:scale-105"
                 >
-                  Get Started
-                </Link>
+                  Sign In
+                </button>
               )}
 
               {/* Mobile Menu Button */}

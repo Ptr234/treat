@@ -23,7 +23,7 @@ export const EVENT_BY_SLUG_QUERY = `
 
 // ===================== LICENSED PROJECTS =====================
 export const PROJECTS_QUERY = `
-  *[_type == "licenseProject"] | order(companyName asc) {
+  *[_type == "licenseProject"] | order(investmentValueUSD desc) {
     _id, companyName, referenceNumber, sector, subSector,
     region, district, location, coordinates,
     investmentValueUSD, investmentValueRange, status,

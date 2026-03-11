@@ -1,15 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface RegisterFormProps {
   onSuccess?: () => void;
   onToggleForm?: () => void;
 }
 
+// Placeholder — registration not available on admin-only platform
 export default function RegisterForm({ onSuccess, onToggleForm }: RegisterFormProps) {
-  const { register, isLoading, error } = useAuth();
+  const isLoading = false;
+  const error: string | null = null;
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -48,13 +49,7 @@ export default function RegisterForm({ onSuccess, onToggleForm }: RegisterFormPr
     }
     
     try {
-      await register({
-        email: formData.email,
-        password: formData.password,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phone: formData.phone || undefined
-      });
+      throw new Error('Registration is not available — admin-only platform.');
       onSuccess?.();
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Registration failed');

@@ -39,6 +39,15 @@ export const SLA_HOURS: Record<string, number> = {
 
 // ── Zod schemas ─────────────────────────────────────────────────────
 
+const sanityFileRefSchema = z.object({
+  _type: z.literal('file'),
+  _key: z.string().optional(),
+  asset: z.object({
+    _type: z.literal('reference'),
+    _ref: z.string(),
+  }),
+});
+
 export const createTicketSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
   description: z.string().min(1, 'Description is required').max(5000),
@@ -50,6 +59,7 @@ export const createTicketSchema = z.object({
   investorNationality: z.string().max(100).optional().default(''),
   sector: z.string().max(100).optional().default(''),
   investmentSize: z.string().max(50).optional().default(''),
+  documents: z.array(sanityFileRefSchema).max(5).optional().default([]),
 });
 
 export const ticketUpdateSchema = z

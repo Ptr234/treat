@@ -1,21 +1,21 @@
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { AuthState } from '@/types';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import type { User } from '@/types';
+
+interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+}
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: {
-    email: string; password: string; firstName: string; lastName: string; phone?: string;
-  }) => Promise<void>;
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
-  verifyEmail: () => Promise<void>;
-  googleSignIn: () => Promise<void>;
-  resendVerificationCode: () => Promise<void>;
   clearError: () => void;
-  clearVerification: () => void;
   refreshUser: () => Promise<void>;
-  pendingVerification: { email: string; type: 'registration' | 'login' } | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,42 +24,106 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
-    isLoading: false,
+    isLoading: true, // start true — checking session on mount
     error: null,
-    pendingVerification: null,
   });
 
-  // Stub implementations — admin auth implemented in Plan 03 via Sanity
-  const login = async (_email: string, _password: string): Promise<void> => {
-    setState(s => ({ ...s, error: 'Admin login not yet configured. Complete Phase 1 Plan 03.' }));
-  };
+  // ── Check existing session on mount ────────────────────────────────
+  const checkSession = useCallback(async () => {
+    try {
+      const res = await fetch('/api/auth/me/');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data?.user) {
+          setState({
+            user: json.data.user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+          return;
+        }
+      }
+    } catch {
+      // Session check failed silently — user is not logged in
+    }
+    setState(s => ({ ...s, isLoading: false }));
+  }, []);
 
-  const register = async () => {
-    setState(s => ({ ...s, error: 'Public registration is not available — admin-only platform.' }));
-  };
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
 
-  const logout = async () => {
-    setState(s => ({ ...s, user: null, isAuthenticated: false }));
-  };
+  // ── Login via API ──────────────────────────────────────────────────
+  const login = useCallback(async (email: string, password: string) => {
+    setState(s => ({ ...s, isLoading: true, error: null }));
 
-  const googleSignIn = async () => {
-    setState(s => ({ ...s, error: 'Google sign-in not configured.' }));
-  };
+    const res = await fetch('/api/auth/login/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-  const noop = async () => {};
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      setState(s => ({ ...s, isLoading: false }));
+      throw new Error(json.error || 'Login failed');
+    }
+
+    setState({
+      user: json.data.user,
+      isAuthenticated: true,
+      isLoading: false,
+      error: null,
+    });
+  }, []);
+
+  // ── Login with Google credential ──────────────────────────────────
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    setState(s => ({ ...s, isLoading: true, error: null }));
+
+    const res = await fetch('/api/auth/google/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential }),
+    });
+
+    const json = await res.json();
+
+    if (!res.ok || !json.success) {
+      setState(s => ({ ...s, isLoading: false }));
+      throw new Error(json.error || 'Google login failed');
+    }
+
+    setState({
+      user: json.data.user,
+      isAuthenticated: true,
+      isLoading: false,
+      error: null,
+    });
+  }, []);
+
+  // ── Logout via API ─────────────────────────────────────────────────
+  const logout = useCallback(async () => {
+    await fetch('/api/auth/logout/', { method: 'POST' });
+    setState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+      error: null,
+    });
+  }, []);
+
+  const clearError = useCallback(() => setState(s => ({ ...s, error: null })), []);
 
   const value: AuthContextType = {
     ...state,
     login,
-    register,
+    loginWithGoogle,
     logout,
-    verifyEmail: noop,
-    googleSignIn,
-    resendVerificationCode: noop,
-    clearError: () => setState(s => ({ ...s, error: null })),
-    clearVerification: () => setState(s => ({ ...s, pendingVerification: null })),
-    refreshUser: noop,
-    pendingVerification: state.pendingVerification,
+    clearError,
+    refreshUser: checkSession,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

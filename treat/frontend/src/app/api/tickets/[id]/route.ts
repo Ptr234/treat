@@ -3,6 +3,7 @@ import { client, serverClient } from '@/lib/sanity-client';
 import { TICKET_BY_REFERENCE_QUERY, TICKET_MESSAGES_QUERY } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody } from '@/lib/api-utils';
 import { ticketUpdateSchema } from '@/lib/validations';
+import { requireAdmin } from '@/lib/auth';
 import type { SanityTicket, SanityTicketMessage } from '@/types/sanity';
 
 export async function GET(
@@ -33,6 +34,12 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Require admin authentication
+    const admin = await requireAdmin(request);
+    if (!admin) {
+      return apiError('Authentication required', 401, 'UNAUTHORIZED');
+    }
+
     const { id } = await params;
     const [data, err] = await validateBody(request, ticketUpdateSchema);
     if (err) return err;

@@ -1047,5 +1047,180 @@
     "name": "agencyProfile",
     "type": "document",
     "title": "Agency Officer Profile"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Channel ID: \"general\" or ticket reference like \"UIA-2026-0001\"",
+        "name": "channel",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "content",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "senderName",
+        "type": "string"
+      },
+      {
+        "to": [
+          {
+            "type": "agency"
+          }
+        ],
+        "name": "senderAgency",
+        "type": "reference"
+      },
+      {
+        "name": "senderAgencyCode",
+        "type": "string"
+      },
+      {
+        "name": "senderEmail",
+        "type": "email"
+      },
+      {
+        "of": [
+          {
+            "type": "file"
+          }
+        ],
+        "name": "attachments",
+        "type": "array"
+      },
+      {
+        "initialValue": false,
+        "name": "isInternal",
+        "type": "boolean",
+        "title": "Internal Only"
+      },
+      {
+        "name": "sentAt",
+        "type": "datetime"
+      }
+    ],
+    "name": "agencyMessage",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string",
+        "title": "Full Name"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "email",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "SHA-256 hashed password — never store plaintext",
+        "hidden": true,
+        "name": "passwordHash",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "admin"
+          ]
+        },
+        "initialValue": "admin",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "admin"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "role",
+        "type": "string"
+      },
+      {
+        "initialValue": true,
+        "name": "isActive",
+        "type": "boolean",
+        "title": "Active"
+      }
+    ],
+    "name": "adminUser",
+    "type": "document"
   }
 ]

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useDashboard } from '@/hooks/useDashboard';
 import { DGActivity, AlertSeverity } from '@/types';
 import {
@@ -13,34 +14,37 @@ import {
   FlagIcon,
   DocumentTextIcon,
   CalendarIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  LockClosedIcon
 } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 type AlertFilter = 'all' | 'critical' | 'high' | 'medium';
 
 export default function DashboardPage() {
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const { isAuthenticated, user } = useAuth();
+  const isAdmin = isAuthenticated && user?.role === 'admin';
   const [alertFilter, setAlertFilter] = useState<AlertFilter>('all');
   const [acknowledgedAlerts, setAcknowledgedAlerts] = useState<Set<string>>(new Set());
   const { metrics, loading, error, isLive, refresh } = useDashboard();
 
-  if (!isAuthorized) {
+  if (!isAdmin) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-strong p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FlagIcon className="w-8 h-8 text-yellow-700" />
+            <LockClosedIcon className="w-8 h-8 text-yellow-700" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-3">Director General Dashboard</h1>
           <p className="text-gray-600 mb-6">
             This dashboard requires Director General authorization to access live operational data and executive controls.
           </p>
-          <button
-            onClick={() => setIsAuthorized(true)}
-            className="w-full px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors shadow-md hover:shadow-lg"
+          <Link
+            href="/"
+            className="inline-block w-full px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors shadow-md hover:shadow-lg"
           >
-            Enter Dashboard
-          </button>
+            Return Home
+          </Link>
         </div>
       </div>
     );
@@ -52,6 +56,17 @@ export default function DashboardPage() {
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 font-medium">No dashboard data available yet.</p>
+          <button onClick={refresh} className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-800">Refresh</button>
         </div>
       </div>
     );
