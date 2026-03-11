@@ -199,14 +199,14 @@ export default function ROICalculator() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-black min-h-screen">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-black min-h-screen">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-12"
+        className="text-center mb-6 sm:mb-8 lg:mb-12"
       >
-        <h2 className="text-4xl font-bold text-yellow-400 mb-4">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-400 mb-4">
           Investment ROI Calculator
         </h2>
         <p className="text-xl text-neutral-400">
@@ -222,7 +222,7 @@ export default function ROICalculator() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
         >
-          <h3 className="text-2xl font-semibold text-yellow-300 mb-6">
+          <h3 className="text-xl sm:text-2xl font-semibold text-yellow-300 mb-6">
             Investment Details
           </h3>
 
@@ -420,14 +420,14 @@ export default function ROICalculator() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
         >
-          <h3 className="text-2xl font-semibold text-yellow-300 mb-6">
+          <h3 className="text-xl sm:text-2xl font-semibold text-yellow-300 mb-6">
             Investment Analysis
           </h3>
 
           {results ? (
             <div className="space-y-6">
               {/* Key Metrics */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-yellow-900/30 rounded-lg p-4 text-center">
                   <div className="text-2xl font-bold text-yellow-400">{results.roi.toFixed(1)}%</div>
                   <div className="text-sm text-yellow-300">Total ROI</div>
@@ -539,9 +539,9 @@ export default function ROICalculator() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
-        className="mt-12 bg-gradient-to-r from-yellow-700 via-red-800 to-neutral-900 rounded-2xl p-8"
+        className="mt-6 sm:mt-8 lg:mt-12 bg-gradient-to-r from-yellow-700 via-red-800 to-neutral-900 rounded-2xl p-4 sm:p-6 lg:p-8"
       >
-        <h3 className="text-2xl font-bold text-yellow-300 mb-6 text-center">Uganda Investment Sectors</h3>
+        <h3 className="text-xl sm:text-2xl font-bold text-yellow-300 mb-6 text-center">Uganda Investment Sectors</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-black/30 rounded-lg p-4 border border-yellow-800/20 hover:bg-black/50 hover:border-yellow-600/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-900/20 transition-all duration-300 cursor-default">
             <h4 className="font-semibold text-yellow-300 mb-2">🌾 Agriculture</h4>

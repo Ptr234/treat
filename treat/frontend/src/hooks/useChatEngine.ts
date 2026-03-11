@@ -3,8 +3,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { ChatMessage, ChatLanguage } from '@/types';
 import { sendChatMessage } from '@/lib/chatbot-service';
+import type { ChatUserInfo } from '@/lib/chatbot-service';
 
 const STORAGE_KEY = 'uia-chat-messages';
+const SESSION_KEY = 'uia-chat-session-id';
 const MAX_PERSISTED = 50;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -42,10 +44,23 @@ function persistMessages(messages: ChatMessage[]) {
   }
 }
 
+function getOrCreateSessionId(): string {
+  try {
+    const existing = localStorage.getItem(SESSION_KEY);
+    if (existing) return existing;
+    const id = `chat-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    localStorage.setItem(SESSION_KEY, id);
+    return id;
+  } catch {
+    return `chat-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+}
+
 export interface ChatEngineResult {
   messages: ChatMessage[];
   isTyping: boolean;
-  sendMessage: (content: string, language: ChatLanguage, sessionId?: string) => Promise<void>;
+  sessionId: string;
+  sendMessage: (content: string, language: ChatLanguage, userInfo?: ChatUserInfo) => Promise<void>;
   clearMessages: () => void;
 }
 
@@ -54,11 +69,13 @@ export function useChatEngine(): ChatEngineResult {
   const [isTyping, setIsTyping] = useState(false);
   const isSendingRef = useRef(false);
   const initializedRef = useRef(false);
+  const sessionIdRef = useRef<string>('');
 
   // Restore from localStorage on mount
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
+    sessionIdRef.current = getOrCreateSessionId();
     const restored = loadMessages();
     if (restored.length > 0) setMessages(restored);
   }, []);
@@ -73,7 +90,7 @@ export function useChatEngine(): ChatEngineResult {
   const sendMessage = useCallback(async (
     content: string,
     language: ChatLanguage,
-    sessionId?: string,
+    userInfo?: ChatUserInfo,
   ) => {
     if (!content.trim() || isSendingRef.current) return;
     isSendingRef.current = true;
@@ -100,7 +117,13 @@ export function useChatEngine(): ChatEngineResult {
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
-      const result = await sendChatMessage(content.trim(), history, language, sessionId);
+      const result = await sendChatMessage(
+        content.trim(),
+        history,
+        language,
+        sessionIdRef.current,
+        userInfo,
+      );
 
       const response = typeof result === 'string' ? result : result.response;
       const sentiment = typeof result === 'string' ? undefined : result.sentiment;
@@ -150,7 +173,10 @@ export function useChatEngine(): ChatEngineResult {
   const clearMessages = useCallback(() => {
     setMessages([]);
     localStorage.removeItem(STORAGE_KEY);
+    // Generate a new session ID for fresh conversation
+    localStorage.removeItem(SESSION_KEY);
+    sessionIdRef.current = getOrCreateSessionId();
   }, []);
 
-  return { messages, isTyping, sendMessage, clearMessages };
+  return { messages, isTyping, sessionId: sessionIdRef.current, sendMessage, clearMessages };
 }

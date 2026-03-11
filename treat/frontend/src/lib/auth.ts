@@ -83,7 +83,8 @@ export interface TokenPayload {
   sub: string; // user ID
   email: string;
   name: string;
-  role: 'admin';
+  role: 'user' | 'admin';
+  picture?: string;
 }
 
 export async function createToken(payload: TokenPayload): Promise<string> {

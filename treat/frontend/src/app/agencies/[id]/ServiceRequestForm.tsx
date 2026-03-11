@@ -28,8 +28,8 @@ export default function ServiceRequestForm({ agencyName, services }: ServiceRequ
   };
 
   return (
-    <form onSubmit={handleFormSubmit} className="bg-neutral-800 p-6 rounded-lg border border-neutral-700">
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+    <form onSubmit={handleFormSubmit} className="bg-neutral-800 p-4 sm:p-6 rounded-lg border border-neutral-700">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-neutral-300 mb-2">
             Full Name <span className="text-red-500">*</span>
@@ -39,7 +39,7 @@ export default function ServiceRequestForm({ agencyName, services }: ServiceRequ
             id="name"
             name="name"
             required
-            className="w-full px-4 py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             placeholder="Enter your full name"
           />
         </div>
@@ -53,7 +53,7 @@ export default function ServiceRequestForm({ agencyName, services }: ServiceRequ
             id="email"
             name="email"
             required
-            className="w-full px-4 py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             placeholder="your.email@example.com"
           />
         </div>
@@ -67,7 +67,7 @@ export default function ServiceRequestForm({ agencyName, services }: ServiceRequ
           id="service"
           name="service"
           required
-          className="w-full px-4 py-2 bg-neutral-900 border border-neutral-600 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+          className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
         >
           <option value="">Select a service</option>
           {services.map((service, index) => (
@@ -87,7 +87,7 @@ export default function ServiceRequestForm({ agencyName, services }: ServiceRequ
           name="message"
           required
           rows={5}
-          className="w-full px-4 py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+          className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
           placeholder="Please provide details about your service request..."
         />
       </div>

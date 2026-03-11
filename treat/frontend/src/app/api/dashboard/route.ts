@@ -98,9 +98,9 @@ const AGENCY_ACRONYMS: Record<string, string> = {
 // ── Helper: compute agency composite score ──────────────────────────
 
 function computeAgencyScore(a: RawAgencyStats): number {
-  if (a.totalAssigned === 0) return 80; // no data → neutral score
+  if (a.totalAssigned === 0) return 0; // no ticket data → no score
   const resolutionRate = a.totalResolved / a.totalAssigned;
-  const slaRate = a.totalAssigned > 0 ? 1 - a.slaBreaches / a.totalAssigned : 1;
+  const slaRate = 1 - a.slaBreaches / a.totalAssigned;
   // Weighted: 50% resolution rate, 50% SLA compliance
   return Math.round((resolutionRate * 50 + slaRate * 50) * 100) / 100;
 }
@@ -143,12 +143,29 @@ function buildAlerts(
     });
   }
 
+  // Default SLA hours by priority (used when slaDeadlineAt is missing)
+  const DEFAULT_SLA_HOURS: Record<string, number> = {
+    critical: 4,
+    high: 8,
+    medium: 24,
+    low: 48,
+  };
+
   // SLA breaches (non-VIP)
   const vipIds = new Set(vipTickets.map((t) => t._id));
   for (const t of slaTickets) {
     if (vipIds.has(t._id)) continue;
-    if (!t.slaDeadlineAt) continue;
-    const hoursRemaining = (new Date(t.slaDeadlineAt).getTime() - now) / 3600000;
+
+    // Compute effective deadline: explicit or derived from createdAt + priority
+    let deadlineMs: number;
+    if (t.slaDeadlineAt) {
+      deadlineMs = new Date(t.slaDeadlineAt).getTime();
+    } else {
+      const slaHours = DEFAULT_SLA_HOURS[t.priority] ?? 24;
+      deadlineMs = new Date(t.createdAt).getTime() + slaHours * 3600000;
+    }
+
+    const hoursRemaining = (deadlineMs - now) / 3600000;
     if (hoursRemaining > 8) continue; // only alert for <8h remaining
 
     const isPastDue = hoursRemaining < 0;
@@ -292,7 +309,7 @@ export async function GET() {
       slaCompliance:
         a.totalAssigned > 0
           ? Math.round(((a.totalAssigned - a.slaBreaches) / a.totalAssigned) * 100)
-          : 100,
+          : 0,
     }));
     agencyScorecard.sort((a, b) => b.score - a.score);
 

@@ -79,7 +79,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-black py-12">
+    <div className="min-h-screen bg-black py-6 sm:py-8 lg:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link
           href="/agencies/"
@@ -91,21 +91,21 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
 
         <div className="bg-neutral-900 rounded-xl shadow-lg overflow-hidden border border-neutral-800">
           {/* Header */}
-          <div className="bg-gradient-to-r from-red-800 via-red-700 to-yellow-600 px-8 py-12">
-            <div className="flex items-start gap-6">
+          <div className="bg-gradient-to-r from-red-800 via-red-700 to-yellow-600 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
               {agency.logo && (
                 <div className="bg-white rounded-lg p-4 shadow-lg">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={agency.logo}
                     alt={`${agency.name} logo`}
-                    className="w-24 h-24 object-contain"
+                    className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 object-contain"
                   />
                 </div>
               )}
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold text-white">{agency.name}</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{agency.name}</h1>
                   <span className="px-3 py-1 bg-yellow-500 text-black text-sm font-bold rounded-full">
                     {agency.acronym}
                   </span>
@@ -118,10 +118,10 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
             </div>
           </div>
 
-          <div className="p-8">
+          <div className="p-4 sm:p-6 lg:p-8">
             {/* Services Offered */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <section className="mb-6 sm:mb-8 lg:mb-12">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
                 <CheckCircleIcon className="w-7 h-7 text-yellow-500" />
                 Services Offered
               </h2>
@@ -144,8 +144,8 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
             </section>
 
             {/* Contact Information */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold text-white mb-6">Contact Information</h2>
+            <section className="mb-6 sm:mb-8 lg:mb-12">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Contact Information</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="flex items-start gap-3">
                   <EnvelopeIcon className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
@@ -209,8 +209,8 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
             </section>
 
             {/* Officer Directory */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <section className="mb-6 sm:mb-8 lg:mb-12">
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
                 <UserGroupIcon className="w-7 h-7 text-red-500" />
                 Officer Directory
               </h2>
@@ -245,7 +245,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
 
             {/* Service Request Form */}
             <section>
-              <h2 className="text-2xl font-bold text-white mb-6">Request a Service</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Request a Service</h2>
               <ServiceRequestForm agencyName={agency.name} services={agency.services} />
             </section>
           </div>

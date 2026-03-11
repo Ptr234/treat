@@ -167,7 +167,7 @@ Thank you.`;
     }
   };
 
-  const inputClass = "w-full px-3 py-2 bg-neutral-800 border border-neutral-600 text-white placeholder-neutral-500 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 [&>option]:bg-neutral-800 [&>option]:text-white";
+  const inputClass = "w-full px-3 py-2 min-h-[44px] bg-neutral-800 border border-neutral-600 text-white placeholder-neutral-500 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 [&>option]:bg-neutral-800 [&>option]:text-white";
   const labelClass = "block text-sm font-medium text-neutral-300 mb-1";
 
   const renderStep = () => {
@@ -443,10 +443,10 @@ Thank you.`;
           className="bg-neutral-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-neutral-700"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-red-800 to-yellow-600 text-white p-6 rounded-t-xl">
+          <div className="bg-gradient-to-r from-red-800 to-yellow-600 text-white p-4 sm:p-6 rounded-t-xl">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold">Book Appointment</h2>
+                <h2 className="text-xl sm:text-2xl font-bold">Book Appointment</h2>
                 <p className="text-white/70">{agency.name}</p>
               </div>
               <button
@@ -476,16 +476,16 @@ Thank you.`;
           </div>
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             {renderStep()}
           </div>
 
           {/* Navigation */}
-          <div className="p-6 border-t border-neutral-700 flex justify-between">
+          <div className="p-4 sm:p-6 border-t border-neutral-700 flex justify-between">
             <button
               onClick={prevStep}
               disabled={currentStep === 1}
-              className={`px-6 py-2 border border-neutral-600 rounded-md transition-colors ${
+              className={`min-h-[44px] px-6 py-2 border border-neutral-600 rounded-md transition-colors ${
                 currentStep === 1
                   ? 'text-neutral-600 cursor-not-allowed'
                   : 'text-neutral-300 hover:bg-neutral-800'
@@ -498,7 +498,7 @@ Thank you.`;
               <button
                 onClick={nextStep}
                 disabled={!validateStep(currentStep)}
-                className={`px-6 py-2 rounded-md transition-colors ${
+                className={`min-h-[44px] px-6 py-2 rounded-md transition-colors ${
                   validateStep(currentStep)
                     ? 'bg-red-600 text-white hover:bg-red-500'
                     : 'bg-neutral-700 text-neutral-500 cursor-not-allowed'
@@ -510,7 +510,7 @@ Thank you.`;
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex items-center space-x-2 px-6 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-400 transition-colors disabled:opacity-50 font-bold"
+                className="min-h-[44px] flex items-center space-x-2 px-6 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-400 transition-colors disabled:opacity-50 font-bold"
               >
                 {isSubmitting ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent"></div>

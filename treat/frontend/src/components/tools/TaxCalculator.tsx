@@ -249,7 +249,7 @@ export default function TaxCalculator() {
   };
 
   return (
-    <section className="py-20 px-4 relative">
+    <section className="py-10 sm:py-16 lg:py-20 px-4 relative">
       {/* Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0">
@@ -289,13 +289,13 @@ export default function TaxCalculator() {
               className="object-contain ml-3 opacity-80"
             />
           </div>
-          <h2 className="text-4xl font-bold text-yellow-50 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-50 mb-4">
             Uganda Tax Calculator
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-red-300 text-2xl mt-2">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-red-300 text-xl sm:text-2xl mt-2">
               &quot;For God and My Country&quot;
             </span>
           </h2>
-          <p className="text-xl text-neutral-200">
+          <p className="text-lg sm:text-xl text-neutral-200">
             Official Uganda Revenue Authority (URA) tax calculation portal. Calculate PAYE, VAT, NSSF, and investment incentives accurately.
           </p>
         </motion.div>
@@ -307,7 +307,7 @@ export default function TaxCalculator() {
             transition={{ duration: 0.6 }}
             className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
           >
-            <h3 className="text-2xl font-semibold text-yellow-400 mb-6">
+            <h3 className="text-xl sm:text-2xl font-semibold text-yellow-400 mb-6">
               Tax Calculation
             </h3>
 
@@ -473,7 +473,7 @@ export default function TaxCalculator() {
             transition={{ duration: 0.6 }}
             className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
           >
-            <h3 className="text-2xl font-semibold text-yellow-400 mb-6">
+            <h3 className="text-xl sm:text-2xl font-semibold text-yellow-400 mb-6">
               Tax Breakdown
             </h3>
 
@@ -546,7 +546,7 @@ export default function TaxCalculator() {
                   <span className="text-lg font-bold text-yellow-400">UGX {results.netIncome.toLocaleString()}</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="text-center">
                     <span className="text-sm text-neutral-400 block">Total Deductions:</span>
                     <span className="text-sm font-semibold text-red-400">UGX {results.totalDeductions.toLocaleString()}</span>

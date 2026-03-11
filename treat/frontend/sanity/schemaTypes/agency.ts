@@ -10,7 +10,7 @@ export default defineType({
       name: 'code',
       title: 'Agency Code',
       type: 'string',
-      options: { list: ['UIA', 'URSB', 'URA', 'DCIC', 'NEMA', 'KCCA', 'LANDS', 'UNBS', 'ERA'] },
+      options: { list: ['UIA', 'URSB', 'URA', 'DCIC', 'NEMA', 'KCCA', 'LANDS', 'UNBS', 'ERA', 'NSSF', 'CMA', 'UMEME', 'NWSC', 'UTB', 'UFZA', 'FUE', 'GIANTS_CLUB', 'MLHUD'] },
     }),
     defineField({ name: 'description', title: 'Description', type: 'text' }),
     defineField({ name: 'contactEmail', title: 'Contact Email', type: 'email' }),

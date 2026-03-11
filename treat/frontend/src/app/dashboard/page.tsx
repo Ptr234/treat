@@ -264,8 +264,8 @@ export default function DashboardPage() {
 
     return (
       <div className="flex flex-col items-center">
-        <div className="relative w-28 h-28">
-          <svg className="w-full h-full transform -rotate-90">
+        <div className="relative w-20 h-20 sm:w-28 sm:h-28">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 112 112">
             <circle
               cx="56"
               cy="56"
@@ -288,10 +288,10 @@ export default function DashboardPage() {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold text-gray-900">{value}%</span>
+            <span className="text-lg sm:text-2xl font-bold text-gray-900">{value}%</span>
           </div>
         </div>
-        <p className="text-sm text-gray-700 font-medium mt-2 text-center">{label}</p>
+        <p className="text-xs sm:text-sm text-gray-700 font-medium mt-2 text-center">{label}</p>
       </div>
     );
   };
@@ -300,13 +300,13 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-neutral-50 py-8">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-4xl font-bold text-gray-900">Director General Dashboard</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Director General Dashboard</h1>
                 <span className="animate-ping-slow w-3 h-3 bg-yellow-500 rounded-full" />
               </div>
-              <p className="text-lg text-gray-600">Real-time operational overview and executive controls</p>
+              <p className="text-base sm:text-lg text-gray-600">Real-time operational overview and executive controls</p>
             </div>
             <div className="flex items-center gap-3">
               {error && (
@@ -340,44 +340,28 @@ export default function DashboardPage() {
               <p className="text-sm text-gray-500 font-medium">Live Inquiries</p>
               <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
             </div>
-            <p className="text-4xl font-bold text-gray-900 mb-2">{metrics.liveInquiries}</p>
-            <div className="flex items-center text-sm text-yellow-600">
-              <ArrowUpIcon className="w-4 h-4 mr-1" />
-              <span className="font-semibold">12.5%</span>
-              <span className="text-gray-500 ml-1">vs last week</span>
-            </div>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{metrics.liveInquiries}</p>
+            <p className="text-xs text-gray-400 mt-1">New + Assigned tickets</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-soft p-6">
             <p className="text-sm text-gray-500 font-medium mb-2">Active Cases</p>
-            <p className="text-4xl font-bold text-gray-900 mb-2">{metrics.activeCases}</p>
-            <div className="flex items-center text-sm text-yellow-600">
-              <ArrowUpIcon className="w-4 h-4 mr-1" />
-              <span className="font-semibold">8.3%</span>
-              <span className="text-gray-500 ml-1">vs last week</span>
-            </div>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">{metrics.activeCases}</p>
+            <p className="text-xs text-gray-400 mt-1">In Progress + Pending + Assigned</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-soft p-6">
             <p className="text-sm text-gray-500 font-medium mb-2">Pending Approvals</p>
-            <p className={`text-4xl font-bold mb-2 ${metrics.pendingApprovals > 20 ? 'text-orange-600' : 'text-gray-900'}`}>
+            <p className={`text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 ${metrics.pendingApprovals > 20 ? 'text-orange-600' : 'text-gray-900'}`}>
               {metrics.pendingApprovals}
             </p>
-            <div className="flex items-center text-sm text-red-600">
-              <ArrowUpIcon className="w-4 h-4 mr-1" />
-              <span className="font-semibold">15.0%</span>
-              <span className="text-gray-500 ml-1">vs last week</span>
-            </div>
+            <p className="text-xs text-gray-400 mt-1">Awaiting external response</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-soft p-6">
             <p className="text-sm text-gray-500 font-medium mb-2">Pipeline Value</p>
-            <p className="text-4xl font-bold text-yellow-700 mb-2">${(metrics.pipelineValue ?? 0).toFixed(1)}B</p>
-            <div className="flex items-center text-sm text-yellow-600">
-              <ArrowUpIcon className="w-4 h-4 mr-1" />
-              <span className="font-semibold">23.7%</span>
-              <span className="text-gray-500 ml-1">vs last month</span>
-            </div>
+            <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-700 mb-2">${(metrics.pipelineValue ?? 0).toFixed(1)}B</p>
+            <p className="text-xs text-gray-400 mt-1">Total licensed investment</p>
           </div>
         </div>
 
@@ -392,9 +376,41 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-soft p-6">
+          <div className="bg-white rounded-xl shadow-soft p-4 sm:p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Agency Scorecard</h2>
-            <div className="overflow-x-auto">
+            {/* Mobile card view */}
+            <div className="lg:hidden space-y-3 max-h-[400px] overflow-y-auto">
+              {agencyScorecard.slice(0, 9).map((agency) => (
+                <div key={agency.acronym} className="border border-gray-200 rounded-lg p-3 hover:border-yellow-300">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold text-gray-900">{agency.acronym}</span>
+                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${getScoreColor(agency.score)}`}>
+                      {agency.score}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-500">Active Cases</p>
+                      <p className="font-medium text-gray-700">{agency.activeCases}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Resolved Today</p>
+                      <p className="font-semibold text-yellow-700">{agency.resolvedToday}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Avg Response</p>
+                      <p className="font-medium text-gray-700">{agency.avgResponseTime}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">SLA</p>
+                      <p className="font-semibold text-gray-900">{agency.slaCompliance}%</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Desktop table view */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="border-b border-gray-200">
                   <tr className="text-left">
@@ -434,12 +450,12 @@ export default function DashboardPage() {
                 <BellAlertIcon className="w-6 h-6 text-red-600" />
                 Alerts Feed
               </h2>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {(['all', 'critical', 'high', 'medium'] as AlertFilter[]).map((filter) => (
                   <button
                     key={filter}
                     onClick={() => setAlertFilter(filter)}
-                    className={`px-3 py-1 text-xs font-semibold rounded-lg transition-colors ${
+                    className={`px-3 py-1.5 min-h-[36px] text-xs font-semibold rounded-lg transition-colors ${
                       alertFilter === filter
                         ? 'bg-yellow-600 text-black'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -511,6 +527,25 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Chat Enquiries Quick Link */}
+        <Link
+          href="/dashboard/enquiries"
+          className="block bg-white rounded-xl shadow-soft p-6 mb-8 hover:shadow-md transition-shadow border border-gray-100 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
+                <ChatBubbleLeftRightIcon className="w-6 h-6 text-yellow-700" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Chat Enquiries</h3>
+                <p className="text-sm text-gray-500">View AI chatbot conversations, user details, and sentiment analytics</p>
+              </div>
+            </div>
+            <ArrowUpIcon className="w-5 h-5 text-gray-400 rotate-90 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
         <div className="bg-gradient-to-r from-neutral-800 to-yellow-600 rounded-xl shadow-soft p-6">
           <h2 className="text-xl font-bold text-white mb-4">Executive Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -548,7 +583,7 @@ export default function DashboardPage() {
         {/* Action Modal */}
         {actionModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-4 sm:p-6 max-h-[85vh] overflow-y-auto">
               <h3 className="text-lg font-bold text-gray-900 mb-2">
                 {actionModal === 'flag'
                   ? 'Flag Priority Case'
@@ -583,13 +618,13 @@ export default function DashboardPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 />
               )}
-              <div className="flex gap-3 mt-4">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 mt-4">
                 <button
                   onClick={() => {
                     setActionModal(null);
                     setActionInput('');
                   }}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 min-h-[44px] border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancel
                 </button>

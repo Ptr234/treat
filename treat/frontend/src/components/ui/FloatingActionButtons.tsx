@@ -50,7 +50,7 @@ export default function FloatingActionButtons() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={action.action}
-                className="flex items-center bg-white text-gray-700 px-3 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors group text-sm"
+                className="flex items-center bg-white text-gray-700 px-3 py-2 min-h-[44px] rounded-lg shadow-md hover:bg-gray-50 transition-colors group text-sm"
               >
                 <span className="mr-2 text-base">{action.icon}</span>
                 <span className="font-medium whitespace-nowrap">
@@ -65,7 +65,7 @@ export default function FloatingActionButtons() {
       <motion.button
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`bg-black text-white p-3 rounded-full shadow-md hover:bg-neutral-800 transition-colors ${
+        className={`bg-black text-white p-3.5 rounded-full shadow-md hover:bg-neutral-800 transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
           isOpen ? 'rotate-45' : ''
         }`}
         style={{ transition: 'transform 0.2s ease' }}

@@ -62,7 +62,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -5, scale: 1.02 }}
+        whileHover={{ y: -2 }}
         className={`bg-neutral-900 rounded-xl shadow-lg overflow-hidden border-2 border-neutral-800 hover:border-yellow-600 hover:shadow-yellow-500/10 transition-all duration-300 ${className}`}
       >
         {/* Header */}
@@ -96,7 +96,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <h4 className="text-lg font-semibold text-white mb-2">{agency.name}</h4>
           <p className="text-neutral-400 text-sm mb-4 line-clamp-3">{agency.description}</p>
 
@@ -134,7 +134,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
           <div className="grid grid-cols-1 gap-2 mt-4">
             <button
               onClick={openAssistant}
-              className="flex items-center justify-center space-x-2 bg-yellow-500 text-black px-4 py-2.5 rounded-lg hover:bg-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20 transition-all font-bold"
+              className="flex items-center justify-center space-x-2 bg-yellow-500 text-black px-4 py-2.5 rounded-lg hover:bg-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20 transition-all font-bold min-h-[44px]"
             >
               <ChatBubbleLeftRightIcon className="w-5 h-5" />
               <span>Ask About {agency.acronym}</span>
@@ -143,7 +143,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
             <div className="grid grid-cols-2 gap-2">
               <Link
                 href={`/agencies/${agency.id}`}
-                className="flex items-center justify-center space-x-2 bg-neutral-800 text-neutral-300 px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition-all font-medium text-sm border border-neutral-700"
+                className="flex items-center justify-center space-x-2 bg-neutral-800 text-neutral-300 px-4 py-2 rounded-lg hover:bg-red-600 hover:text-white transition-all font-medium text-sm border border-neutral-700 min-h-[44px]"
               >
                 <BuildingOfficeIcon className="w-4 h-4" />
                 <span>View Services</span>
@@ -152,7 +152,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
               {agency.hasAppointmentBooking && (
                 <button
                   onClick={() => setShowAppointmentModal(true)}
-                  className="flex items-center justify-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-500 transition-all font-medium text-sm"
+                  className="flex items-center justify-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-500 transition-all font-medium text-sm min-h-[44px]"
                 >
                   <CalendarIcon className="w-4 h-4" />
                   <span>Book Appointment</span>

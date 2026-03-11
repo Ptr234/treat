@@ -237,3 +237,50 @@ export const AGENCY_PROFILES_QUERY = `
     agency->{ _id, name, code }
   }
 `;
+
+// ===================== CHAT ENQUIRIES =====================
+
+// Recent enquiries for admin dashboard (paginated)
+export const CHAT_ENQUIRIES_QUERY = `
+  *[_type == "chatEnquiry"] | order(createdAt desc) [$from...$to] {
+    _id, sessionId, userName, userEmail, userPhone, userLocation,
+    userMessage, botResponse, language, sentiment, tier, createdAt
+  }
+`;
+
+export const CHAT_ENQUIRIES_TOTAL_COUNT_QUERY = `
+  count(*[_type == "chatEnquiry"])
+`;
+
+// Aggregated stats for enquiry dashboard
+export const CHAT_ENQUIRY_STATS_QUERY = `{
+  "total": count(*[_type == "chatEnquiry"]),
+  "today": count(*[_type == "chatEnquiry" && createdAt >= now() - 60*60*24]),
+  "thisWeek": count(*[_type == "chatEnquiry" && createdAt >= now() - 60*60*24*7]),
+  "byLanguage": {
+    "en": count(*[_type == "chatEnquiry" && language == "en"]),
+    "fr": count(*[_type == "chatEnquiry" && language == "fr"]),
+    "ar": count(*[_type == "chatEnquiry" && language == "ar"]),
+    "zh": count(*[_type == "chatEnquiry" && language == "zh"]),
+    "sw": count(*[_type == "chatEnquiry" && language == "sw"])
+  },
+  "bySentiment": {
+    "positive": count(*[_type == "chatEnquiry" && sentiment == "positive"]),
+    "neutral": count(*[_type == "chatEnquiry" && sentiment == "neutral"]),
+    "negative": count(*[_type == "chatEnquiry" && sentiment == "negative"])
+  },
+  "byTier": {
+    "ai": count(*[_type == "chatEnquiry" && tier == "ai"]),
+    "kb": count(*[_type == "chatEnquiry" && tier == "kb"]),
+    "suggestions": count(*[_type == "chatEnquiry" && tier == "suggestions"])
+  },
+  "uniqueSessions": count(array::unique(*[_type == "chatEnquiry"].sessionId))
+}`;
+
+// All messages for a specific session (conversation view)
+export const CHAT_SESSION_MESSAGES_QUERY = `
+  *[_type == "chatEnquiry" && sessionId == $sessionId] | order(createdAt asc) {
+    _id, userName, userEmail, userPhone, userLocation,
+    userMessage, botResponse, language, sentiment, tier, createdAt
+  }
+`;

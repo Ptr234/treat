@@ -1,0 +1,95 @@
+import { defineField, defineType } from 'sanity';
+
+export default defineType({
+  name: 'investmentOpportunity',
+  title: 'Investment Opportunity',
+  type: 'document',
+  fields: [
+    defineField({ name: 'title', title: 'Title', type: 'string', validation: r => r.required() }),
+    defineField({
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      options: {
+        list: [
+          'Agriculture & Agribusiness',
+          'Tourism & Hospitality',
+          'Mining & Minerals',
+          'Healthcare',
+          'Infrastructure Development',
+          'Energy & Utilities',
+          'ICT & Technology',
+          'Manufacturing & Industrial',
+        ],
+      },
+      validation: r => r.required(),
+    }),
+    defineField({ name: 'description', title: 'Short Description', type: 'text', validation: r => r.required() }),
+    defineField({ name: 'fullDescription', title: 'Full Description', type: 'text' }),
+    defineField({ name: 'investmentRange', title: 'Investment Range', type: 'string' }),
+    defineField({ name: 'roi', title: 'ROI', type: 'string' }),
+    defineField({ name: 'timeline', title: 'Timeline', type: 'string' }),
+    defineField({ name: 'agency', title: 'Lead Agency', type: 'string' }),
+    defineField({
+      name: 'priority',
+      title: 'Priority',
+      type: 'string',
+      options: { list: ['High', 'Medium', 'Low'] },
+    }),
+    defineField({ name: 'keyRisks', title: 'Key Risks', type: 'text' }),
+    defineField({
+      name: 'contact',
+      title: 'Contact',
+      type: 'object',
+      fields: [
+        defineField({ name: 'email', title: 'Email', type: 'string' }),
+        defineField({ name: 'phone', title: 'Phone', type: 'string' }),
+        defineField({ name: 'website', title: 'Website', type: 'url' }),
+        defineField({ name: 'address', title: 'Address', type: 'string' }),
+      ],
+    }),
+    defineField({
+      name: 'projectContact',
+      title: 'Project Contact',
+      type: 'object',
+      fields: [
+        defineField({ name: 'name', title: 'Name', type: 'string' }),
+        defineField({ name: 'email', title: 'Email', type: 'string' }),
+        defineField({ name: 'phone', title: 'Phone', type: 'string' }),
+        defineField({ name: 'company', title: 'Company', type: 'string' }),
+      ],
+    }),
+    defineField({ name: 'investmentPromoter', title: 'Investment Promoter', type: 'string' }),
+    defineField({ name: 'logoPath', title: 'Logo Path', type: 'string' }),
+    defineField({ name: 'marketSize', title: 'Market Size', type: 'string' }),
+    defineField({ name: 'competitiveAdvantage', title: 'Competitive Advantage', type: 'text' }),
+    defineField({ name: 'requiredLicenses', title: 'Required Licenses', type: 'array', of: [{ type: 'string' }] }),
+    defineField({ name: 'incentives', title: 'Incentives', type: 'array', of: [{ type: 'string' }] }),
+    defineField({
+      name: 'keyMetrics',
+      title: 'Key Metrics',
+      type: 'object',
+      fields: [
+        defineField({ name: 'marketGrowth', title: 'Market Growth', type: 'string' }),
+        defineField({ name: 'exportValue', title: 'Export Value', type: 'string' }),
+        defineField({ name: 'employmentPotential', title: 'Employment Potential', type: 'string' }),
+        defineField({ name: 'paybackPeriod', title: 'Payback Period', type: 'string' }),
+      ],
+    }),
+    defineField({
+      name: 'projectType',
+      title: 'Project Type',
+      type: 'string',
+      options: { list: ['Greenfield', 'Brownfield', 'Expansion'] },
+    }),
+    defineField({
+      name: 'investmentType',
+      title: 'Investment Type',
+      type: 'string',
+      options: { list: ['PPP', 'Private', 'Government'] },
+    }),
+  ],
+  preview: {
+    select: { title: 'title', subtitle: 'category' },
+  },
+});

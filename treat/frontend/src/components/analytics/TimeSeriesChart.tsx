@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line } from 'recharts';
 import type { TimeSeriesPoint } from '@/types';
 
@@ -8,6 +9,14 @@ interface TimeSeriesChartProps {
 }
 
 export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
+  const [chartHeight, setChartHeight] = useState(400);
+
+  useEffect(() => {
+    const updateHeight = () => setChartHeight(window.innerWidth < 640 ? 280 : 400);
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
   const formatMonth = (dateString: string) => {
     const date = new Date(dateString + '-01');
     return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
@@ -56,7 +65,7 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
         <p className="text-sm text-gray-600">Monthly performance over the past year</p>
       </div>
 
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
         <AreaChart
           data={data}
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
@@ -71,8 +80,9 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
           <XAxis
             dataKey="date"
             tickFormatter={formatMonth}
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: chartHeight < 300 ? 10 : 12 }}
             stroke="#9ca3af"
+            interval={chartHeight < 300 ? 1 : 0}
           />
           <YAxis
             tick={{ fontSize: 12 }}
@@ -104,12 +114,12 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
       </ResponsiveContainer>
 
       {/* Summary Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6">
         {(() => {
           const totalInquiries = data.reduce((sum, point) => sum + point.inquiries, 0);
           const totalConversions = data.reduce((sum, point) => sum + point.conversions, 0);
-          const avgInquiries = Math.round(totalInquiries / data.length);
-          const conversionRate = ((totalConversions / totalInquiries) * 100).toFixed(1);
+          const avgInquiries = data.length > 0 ? Math.round(totalInquiries / data.length) : 0;
+          const conversionRate = totalInquiries > 0 ? ((totalConversions / totalInquiries) * 100).toFixed(1) : '0.0';
 
           return (
             <>

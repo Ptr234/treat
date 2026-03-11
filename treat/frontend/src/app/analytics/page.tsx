@@ -119,15 +119,15 @@ export default function AnalyticsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-bold mb-3">Analytics & Intelligence</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">Analytics & Intelligence</h1>
               <p className="text-yellow-100 text-lg max-w-2xl">
                 Comprehensive insights into investment inquiries, licensed projects, and performance benchmarks
               </p>
               {/* Tab Navigation */}
-              <div className="flex gap-2 mt-4">
+              <div className="flex gap-2 mt-4 overflow-x-auto">
                 <button
                   onClick={() => setActiveTab('inquiries')}
-                  className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 ${
+                  className={`px-3 sm:px-5 py-2 min-h-[44px] rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap ${
                     activeTab === 'inquiries'
                       ? 'bg-white text-yellow-700'
                       : 'bg-white/20 text-white hover:bg-white/30'
@@ -138,7 +138,7 @@ export default function AnalyticsPage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('projects')}
-                  className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 ${
+                  className={`px-3 sm:px-5 py-2 min-h-[44px] rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap ${
                     activeTab === 'projects'
                       ? 'bg-white text-yellow-700'
                       : 'bg-white/20 text-white hover:bg-white/30'
@@ -208,7 +208,7 @@ export default function AnalyticsPage() {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8"
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8"
             >
               {summaryCards.map((card) => (
                 <motion.div
@@ -221,7 +221,7 @@ export default function AnalyticsPage() {
                       <card.icon className="w-5 h-5 text-white" />
                     </div>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900 mb-1">{card.value}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{card.value}</p>
                   <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">{card.title}</p>
                 </motion.div>
               ))}
@@ -274,19 +274,51 @@ export default function AnalyticsPage() {
                 ].map((card) => (
                   <motion.div key={card.label} variants={itemVariants} className="bg-white rounded-lg shadow-sm p-5">
                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{card.label}</p>
-                    <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{card.value}</p>
                     <p className="text-sm text-yellow-700 font-medium mt-1">{card.sub}</p>
                   </motion.div>
                 ))}
               </div>
 
               {/* Licensed Projects by Decade */}
-              <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm p-6">
+              <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <CalendarIcon className="w-5 h-5 text-yellow-600" />
                   Licensed Projects by Period
                 </h3>
-                <div className="overflow-x-auto">
+                {/* Mobile card view */}
+                <div className="lg:hidden space-y-3">
+                  {projectAnalysis.licensedByDecade.map((row) => {
+                    const pct = (row.projects / projectAnalysis.overview.totalLicensedProjects) * 100;
+                    return (
+                      <div key={row.period} className="border border-gray-200 rounded-lg p-4 hover:border-yellow-300">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-gray-900">{row.period}</span>
+                          <span className="text-xs text-gray-500">{pct.toFixed(0)}% share</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div>
+                            <p className="text-xs text-gray-500">Projects</p>
+                            <p className="font-medium text-gray-900">{row.projects.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Investment</p>
+                            <p className="font-semibold text-yellow-700">${row.investment}B</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Employment</p>
+                            <p className="font-medium text-gray-700">{row.employment.toLocaleString()}</p>
+                          </div>
+                        </div>
+                        <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
+                          <div className="bg-yellow-500 h-1.5 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Desktop table view */}
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="border-b border-gray-200">
                       <tr>
@@ -324,12 +356,35 @@ export default function AnalyticsPage() {
 
               {/* Recent Financial Years Performance */}
               {projectAnalysis.recentFYData && (
-                <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm p-6">
+                <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <ArrowTrendingUpIcon className="w-5 h-5 text-yellow-600" />
                     Recent Performance (Last 5 Financial Years)
                   </h3>
-                  <div className="overflow-x-auto">
+                  {/* Mobile card view */}
+                  <div className="lg:hidden space-y-3">
+                    {projectAnalysis.recentFYData.map((fy: { fy: string; projects: number; investment: number; employment: number }) => (
+                      <div key={fy.fy} className="border border-gray-200 rounded-lg p-4 hover:border-yellow-300">
+                        <p className="font-semibold text-gray-900 mb-2">{fy.fy}</p>
+                        <div className="grid grid-cols-3 gap-3 text-sm">
+                          <div>
+                            <p className="text-xs text-gray-500">Projects</p>
+                            <p className="font-medium text-gray-900">{fy.projects.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Investment</p>
+                            <p className="font-semibold text-yellow-700">${(fy.investment / 1_000_000_000).toFixed(2)}B</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Employment</p>
+                            <p className="font-medium text-gray-700">{fy.employment.toLocaleString()}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Desktop table view */}
+                  <div className="hidden lg:block overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead className="border-b border-gray-200">
                         <tr>
@@ -420,13 +475,41 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Bankable Projects Pipeline */}
-              <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm p-6">
+              <motion.div variants={itemVariants} className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
                   <CurrencyDollarIcon className="w-5 h-5 text-yellow-600" />
                   Bankable Projects Pipeline — 2025
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">Investment-ready projects identified by UIA for potential investors</p>
-                <div className="overflow-x-auto">
+                {/* Mobile card view */}
+                <div className="lg:hidden space-y-3">
+                  {projectAnalysis.bankableProjects.map((b) => (
+                    <div key={b.sector} className="border border-gray-200 rounded-lg p-4 hover:border-yellow-300">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-gray-900">{b.sector}</span>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded ${
+                          b.status === 'Ready for investment' ? 'bg-green-100 text-green-800' :
+                          b.status === 'Feasibility complete' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {b.status}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <p className="text-xs text-gray-500">Projects</p>
+                          <p className="font-medium text-gray-900">{b.count}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Total Value</p>
+                          <p className="font-semibold text-yellow-700">${b.totalValue}M</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {/* Desktop table view */}
+                <div className="hidden lg:block overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="border-b border-gray-200">
                       <tr>
@@ -464,13 +547,13 @@ export default function AnalyticsPage() {
                   <ArrowTrendingUpIcon className="w-5 h-5 text-yellow-600" />
                   Annual Licensing Trend (2018–2025)
                 </h3>
-                <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
+                <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-3">
                   {projectAnalysis.yearlyTrend.map((y) => {
                     const maxProjects = Math.max(...projectAnalysis.yearlyTrend.map(t => t.projects));
                     const heightPct = (y.projects / maxProjects) * 100;
                     return (
                       <div key={y.year} className="flex flex-col items-center">
-                        <div className="w-full h-32 flex items-end justify-center">
+                        <div className="w-full h-20 sm:h-32 flex items-end justify-center">
                           <div
                             className="w-full max-w-[40px] bg-yellow-500 rounded-t-lg transition-all"
                             style={{ height: `${heightPct}%` }}
@@ -502,7 +585,7 @@ export default function AnalyticsPage() {
               timeZone: 'Africa/Kampala'
             })} (EAT)
             {activeTab === 'projects' && (
-              <span className="ml-2">| Source: UIA Licensed Projects Database & Bankable Projects Report 2025</span>
+              <span className="block sm:inline sm:ml-2">| Source: UIA Licensed Projects Database & Bankable Projects Report 2025</span>
             )}
           </p>
         </motion.div>

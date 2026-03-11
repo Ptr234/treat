@@ -55,8 +55,8 @@ export default function LeafletMap({ projects, selectedProject, onSelectProject,
     <MapContainer
       center={center}
       zoom={7}
-      style={{ height: '700px', width: '100%', background: '#0a0a0a' }}
-      className="rounded-lg"
+      style={{ width: '100%', background: '#0a0a0a' }}
+      className="rounded-lg h-[400px] sm:h-[500px] lg:h-[700px]"
     >
       <TileLayer
         attribution='&copy; <a href="https://carto.com/">CARTO</a>'

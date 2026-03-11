@@ -59,7 +59,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
       <Link href={`/events/${event.id}/`} className="block">
         <div className="bg-white rounded-lg shadow-md border border-neutral-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 h-full flex flex-col">
@@ -93,7 +93,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
           </div>
 
           {/* Card Content */}
-          <div className="p-6 flex-1 flex flex-col">
+          <div className="p-4 sm:p-6 flex-1 flex flex-col">
             {/* Title */}
             <h3 className="text-xl font-bold text-neutral-900 mb-3 line-clamp-2 min-h-[3.5rem]">
               {event.title}
@@ -151,7 +151,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
 
             {/* CTA Button */}
             <button
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors duration-200 group"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors duration-200 group min-h-[44px]"
             >
               {getButtonText()}
               <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

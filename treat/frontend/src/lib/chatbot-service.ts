@@ -278,6 +278,44 @@ const TOPIC_SUGGESTIONS: Record<ChatLanguage, string> = {
     "Simu: +256-414-301000 | Barua pepe: info@ugandainvest.go.ug",
 };
 
+// ===================== ENQUIRY LOGGING =====================
+
+export interface ChatUserInfo {
+  name?: string;
+  email?: string;
+  phone?: string;
+  location?: string;
+}
+
+function logEnquiry(
+  sessionId: string,
+  userInfo: ChatUserInfo,
+  userMessage: string,
+  botResponse: string,
+  language: ChatLanguage,
+  sentiment: string | undefined,
+  tier: 'ai' | 'kb' | 'suggestions',
+) {
+  const baseUrl = getChatbotBaseUrl();
+  // Fire-and-forget — don't block the chat response
+  fetch(`${baseUrl}/api/chatbot/log`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sessionId,
+      userName: userInfo.name,
+      userEmail: userInfo.email,
+      userPhone: userInfo.phone,
+      userLocation: userInfo.location,
+      userMessage,
+      botResponse,
+      language,
+      sentiment,
+      tier,
+    }),
+  }).catch((err) => console.warn('[chatbot] Log failed:', err));
+}
+
 // ===================== PUBLIC API =====================
 
 export interface ChatResponse {
@@ -289,9 +327,10 @@ export async function sendChatMessage(
   message: string,
   history: { role: 'user' | 'assistant'; content: string }[],
   language: ChatLanguage,
-  sessionId?: string
+  sessionId: string,
+  userInfo: ChatUserInfo = {},
 ): Promise<ChatResponse> {
-  // Tier 1: Call API route (Gemini)
+  // Tier 1: Call API route (Groq / Llama 3.3)
   try {
     const baseUrl = getChatbotBaseUrl();
     const res = await fetch(`${baseUrl}/api/chatbot`, {
@@ -308,10 +347,12 @@ export async function sendChatMessage(
     const data = await res.json();
 
     if (res.ok && data.success && data.response) {
-      return {
+      const result: ChatResponse = {
         response: data.response,
         sentiment: data.sentiment,
       };
+      logEnquiry(sessionId, userInfo, message, result.response, language, result.sentiment, 'ai');
+      return result;
     }
 
     // API returned an error — check if it's a quota/config issue
@@ -328,11 +369,13 @@ export async function sendChatMessage(
   // Tier 2: Local KB keyword match (with multilingual expansion)
   const kbAnswer = findKBAnswer(message);
   if (kbAnswer) {
-    return {
-      response: kbAnswer + (KB_DISCLAIMER[language] || KB_DISCLAIMER.en),
-    };
+    const response = kbAnswer + (KB_DISCLAIMER[language] || KB_DISCLAIMER.en);
+    logEnquiry(sessionId, userInfo, message, response, language, undefined, 'kb');
+    return { response };
   }
 
   // Tier 3: Show available topics in the user's language
-  return { response: TOPIC_SUGGESTIONS[language] || TOPIC_SUGGESTIONS.en };
+  const response = TOPIC_SUGGESTIONS[language] || TOPIC_SUGGESTIONS.en;
+  logEnquiry(sessionId, userInfo, message, response, language, undefined, 'suggestions');
+  return { response };
 }

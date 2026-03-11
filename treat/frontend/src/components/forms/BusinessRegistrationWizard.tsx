@@ -360,7 +360,7 @@ export default function BusinessRegistrationWizard() {
       case 1:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">Business Type & Structure</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Business Type & Structure</h3>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -440,7 +440,7 @@ export default function BusinessRegistrationWizard() {
       case 2:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">Business Details</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Business Details</h3>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -450,7 +450,7 @@ export default function BusinessRegistrationWizard() {
                 type="text"
                 value={businessData.businessName}
                 onChange={(e) => handleInputChange('businessName', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                   errors.businessName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                 }`}
                 placeholder="Enter your business name"
@@ -467,7 +467,7 @@ export default function BusinessRegistrationWizard() {
               <textarea
                 value={businessData.businessDescription}
                 onChange={(e) => handleInputChange('businessDescription', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                   errors.businessDescription ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                 }`}
                 rows={4}
@@ -485,7 +485,7 @@ export default function BusinessRegistrationWizard() {
               <select
                 value={businessData.sector}
                 onChange={(e) => handleInputChange('sector', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                   errors.sector ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                 }`}
               >
@@ -508,7 +508,7 @@ export default function BusinessRegistrationWizard() {
               <select
                 value={businessData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                   errors.location ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                 }`}
               >
@@ -529,7 +529,7 @@ export default function BusinessRegistrationWizard() {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">Ownership Information</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Ownership Information</h3>
             
             {errors.totalPercentage && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
@@ -571,7 +571,7 @@ export default function BusinessRegistrationWizard() {
                       type="text"
                       value={owner.name}
                       onChange={(e) => handleInputChange('owners', { name: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                         errors[`owner_${index}_name`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                       }`}
                       placeholder="Enter full name"
@@ -589,7 +589,7 @@ export default function BusinessRegistrationWizard() {
                       type="text"
                       value={owner.nationality}
                       onChange={(e) => handleInputChange('owners', { nationality: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                         errors[`owner_${index}_nationality`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                       }`}
                       placeholder="Enter nationality"
@@ -607,7 +607,7 @@ export default function BusinessRegistrationWizard() {
                       type="text"
                       value={owner.idNumber}
                       onChange={(e) => handleInputChange('owners', { idNumber: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                         errors[`owner_${index}_idNumber`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                       }`}
                       placeholder="Enter ID number"
@@ -625,7 +625,7 @@ export default function BusinessRegistrationWizard() {
                       type="number"
                       value={owner.percentage}
                       onChange={(e) => handleInputChange('owners', { percentage: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                         errors[`owner_${index}_percentage`] ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                       }`}
                       placeholder="Enter percentage"
@@ -652,7 +652,7 @@ export default function BusinessRegistrationWizard() {
       case 4:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">Financial Information</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Financial Information</h3>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -662,7 +662,7 @@ export default function BusinessRegistrationWizard() {
                 type="number"
                 value={businessData.initialCapital}
                 onChange={(e) => handleInputChange('initialCapital', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                   errors.initialCapital ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                 }`}
                 placeholder="Enter initial capital"
@@ -680,7 +680,7 @@ export default function BusinessRegistrationWizard() {
                 type="number"
                 value={businessData.projectedTurnover}
                 onChange={(e) => handleInputChange('projectedTurnover', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
                   errors.projectedTurnover ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
                 }`}
                 placeholder="Enter projected turnover"
@@ -695,7 +695,7 @@ export default function BusinessRegistrationWizard() {
       case 5:
         return (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold text-gray-900">Registration Requirements</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Registration Requirements</h3>
             
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <h4 className="text-lg font-medium text-blue-900 mb-2">
@@ -746,22 +746,24 @@ export default function BusinessRegistrationWizard() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Progress Bar */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          {[1, 2, 3, 4, 5].map((step) => (
-            <div
-              key={step}
-              className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                currentStep >= step
-                  ? 'border-yellow-600 bg-yellow-600 text-black'
-                  : 'border-gray-300 bg-white text-gray-500'
-              }`}
-            >
-              {step}
-            </div>
-          ))}
+      <div className="mb-4 sm:mb-6 lg:mb-8">
+        <div className="overflow-x-auto">
+          <div className="flex items-center justify-between min-w-[280px]">
+            {[1, 2, 3, 4, 5].map((step) => (
+              <div
+                key={step}
+                className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 text-sm sm:text-base ${
+                  currentStep >= step
+                    ? 'border-yellow-600 bg-yellow-600 text-black'
+                    : 'border-gray-300 bg-white text-gray-500'
+                }`}
+              >
+                {step}
+              </div>
+            ))}
+          </div>
         </div>
         <div className="mt-2">
           <div className="bg-gray-200 rounded-full h-2">
@@ -787,27 +789,27 @@ export default function BusinessRegistrationWizard() {
       </AnimatePresence>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between mt-8">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 mt-8">
         <button
           onClick={prevStep}
           disabled={currentStep === 1}
-          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
         >
           Previous
         </button>
-        
+
         {currentStep < 5 ? (
           <button
             onClick={nextStep}
-            className="px-6 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-700"
+            className="px-6 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-700 min-h-[44px]"
           >
             Next
           </button>
         ) : (
-          <button 
+          <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-6 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-6 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
           >
             {isSubmitting ? (
               <>

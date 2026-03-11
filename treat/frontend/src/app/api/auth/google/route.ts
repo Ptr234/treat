@@ -43,7 +43,10 @@ export async function POST(request: NextRequest) {
       return apiError('Google account email not verified', 401);
     }
 
-    // Look up admin user in Sanity by email
+    const googleName = String(payload.name || email.split('@')[0]);
+    const googlePicture = typeof payload.picture === 'string' ? payload.picture : undefined;
+
+    // Check if this email belongs to an admin in Sanity
     const admin = await serverClient.fetch<SanityAdmin | null>(
       `*[_type == "adminUser" && email == $email && isActive == true][0]{
         _id, name, email, role, isActive
@@ -51,29 +54,53 @@ export async function POST(request: NextRequest) {
       { email: email.toLowerCase().trim() }
     );
 
-    if (!admin) {
-      return apiError(
-        'No admin account found for this Google email. Contact your administrator.',
-        403
-      );
+    if (admin) {
+      // Admin user — full dashboard access
+      const token = await createToken({
+        sub: admin._id,
+        email: admin.email,
+        name: admin.name,
+        role: 'admin',
+        picture: googlePicture,
+      });
+
+      const response = NextResponse.json({
+        success: true,
+        data: {
+          user: {
+            id: admin._id,
+            name: admin.name,
+            email: admin.email,
+            role: 'admin' as const,
+            picture: googlePicture,
+            isVerified: true,
+          },
+        },
+      });
+
+      response.cookies.set(COOKIE_NAME, token, sessionCookieOptions());
+      return response;
     }
 
-    // Create JWT session — same as password login
+    // Regular user — Google sign-in only, no dashboard access
+    const userId = `google-${email.toLowerCase().trim().replace(/[^a-z0-9]/g, '-')}`;
     const token = await createToken({
-      sub: admin._id,
-      email: admin.email,
-      name: admin.name,
-      role: 'admin',
+      sub: userId,
+      email: email.toLowerCase().trim(),
+      name: googleName,
+      role: 'user',
+      picture: googlePicture,
     });
 
     const response = NextResponse.json({
       success: true,
       data: {
         user: {
-          id: admin._id,
-          name: admin.name,
-          email: admin.email,
-          role: admin.role,
+          id: userId,
+          name: googleName,
+          email: email.toLowerCase().trim(),
+          role: 'user' as const,
+          picture: googlePicture,
           isVerified: true,
         },
       },

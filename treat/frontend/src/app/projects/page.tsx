@@ -164,7 +164,7 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black py-12">
+    <div className="min-h-screen bg-black py-6 sm:py-8 lg:py-12">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
@@ -178,21 +178,21 @@ export default function ProjectsPage() {
           </div>
 
           {/* Hero Summary Stats */}
-          <div className="bg-gradient-to-r from-neutral-900 via-neutral-900 to-red-950 rounded-2xl shadow-lg p-8 border border-neutral-800">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center md:text-left border-l-4 border-yellow-500 pl-6">
+          <div className="bg-gradient-to-r from-neutral-900 via-neutral-900 to-red-950 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-neutral-800">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              <div className="text-center md:text-left border-l-4 border-yellow-500 pl-4 sm:pl-6">
                 <p className="text-yellow-500 text-sm font-bold uppercase tracking-widest mb-2">Licensed Projects</p>
-                <p className="text-5xl lg:text-6xl font-black text-white">{filteredProjects.length}</p>
+                <p className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">{filteredProjects.length}</p>
                 <p className="text-neutral-500 text-sm mt-1">of {projects.length} total projects</p>
               </div>
-              <div className="text-center md:text-left border-l-4 border-red-600 pl-6">
+              <div className="text-center md:text-left border-l-4 border-red-600 pl-4 sm:pl-6">
                 <p className="text-red-500 text-sm font-bold uppercase tracking-widest mb-2">Total Investment</p>
-                <p className="text-5xl lg:text-6xl font-black text-white">${(totalInvestment / 1000000000).toFixed(2)}B</p>
+                <p className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">${(totalInvestment / 1000000000).toFixed(2)}B</p>
                 <p className="text-neutral-500 text-sm mt-1">combined capital value</p>
               </div>
-              <div className="text-center md:text-left border-l-4 border-yellow-500 pl-6">
+              <div className="text-center md:text-left border-l-4 border-yellow-500 pl-4 sm:pl-6">
                 <p className="text-yellow-500 text-sm font-bold uppercase tracking-widest mb-2">Total Employment</p>
-                <p className="text-5xl lg:text-6xl font-black text-white">{totalEmployment.toLocaleString()}</p>
+                <p className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">{totalEmployment.toLocaleString()}</p>
                 <p className="text-neutral-500 text-sm mt-1">jobs created &amp; planned</p>
               </div>
             </div>
@@ -200,9 +200,20 @@ export default function ProjectsPage() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Filters Sidebar */}
-          <aside className={`${showFilters ? 'lg:w-80' : 'lg:w-0'} transition-all duration-300 overflow-hidden`}>
-            <div className="bg-neutral-900 rounded-xl shadow-lg p-6 sticky top-6 border border-neutral-800">
+          {/* Filters Sidebar — mobile overlay drawer */}
+          {showFilters && (
+            <div
+              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+              onClick={() => setShowFilters(false)}
+            />
+          )}
+          <aside className={`
+            ${showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            fixed inset-y-0 left-0 z-50 w-80 lg:relative lg:z-auto
+            ${showFilters ? 'lg:w-80' : 'lg:w-0 lg:overflow-hidden'}
+            transition-all duration-300
+          `}>
+            <div className="bg-neutral-900 h-full lg:h-auto rounded-none lg:rounded-xl shadow-lg p-6 overflow-y-auto lg:sticky lg:top-6 border-r lg:border border-neutral-800">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <FunnelIcon className="w-6 h-6 text-yellow-500" />
@@ -210,7 +221,7 @@ export default function ProjectsPage() {
                 </h2>
                 <button
                   onClick={() => setShowFilters(false)}
-                  className="lg:hidden text-neutral-400 hover:text-white"
+                  className="text-neutral-400 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center"
                 >
                   <XMarkIcon className="w-5 h-5" />
                 </button>
@@ -341,41 +352,41 @@ export default function ProjectsPage() {
           <main className="flex-1">
             <div className="bg-neutral-900 rounded-xl shadow-lg overflow-hidden border border-neutral-800">
               {/* View Toggle Bar */}
-              <div className="p-6 border-b border-neutral-800">
-                <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="p-4 sm:p-6 border-b border-neutral-800">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setViewMode('map')}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                      className={`px-3 sm:px-4 py-2 min-h-[44px] rounded-lg font-medium transition-colors flex items-center gap-2 ${
                         viewMode === 'map'
                           ? 'bg-red-600 text-white'
                           : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                       }`}
                     >
                       <MapIcon className="w-5 h-5" />
-                      Map View
+                      <span className="hidden sm:inline">Map View</span>
                     </button>
                     <button
                       onClick={() => setViewMode('table')}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                      className={`px-3 sm:px-4 py-2 min-h-[44px] rounded-lg font-medium transition-colors flex items-center gap-2 ${
                         viewMode === 'table'
                           ? 'bg-red-600 text-white'
                           : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                       }`}
                     >
                       <TableCellsIcon className="w-5 h-5" />
-                      Table View
+                      <span className="hidden sm:inline">Table View</span>
                     </button>
                     <button
                       onClick={() => setViewMode('cards')}
-                      className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                      className={`px-3 sm:px-4 py-2 min-h-[44px] rounded-lg font-medium transition-colors flex items-center gap-2 ${
                         viewMode === 'cards'
                           ? 'bg-red-600 text-white'
                           : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
                       }`}
                     >
                       <Squares2X2Icon className="w-5 h-5" />
-                      Cards View
+                      <span className="hidden sm:inline">Cards View</span>
                     </button>
                   </div>
                   <div className="flex items-center gap-3">
@@ -547,95 +558,136 @@ export default function ProjectsPage() {
 
               /* === TABLE VIEW === */
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-neutral-800 border-b border-neutral-700">
-                      <tr>
-                        <th
-                          onClick={() => handleSort('name')}
-                          className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                        >
-                          <div className="flex items-center gap-1">
-                            Project Name
-                            {sortField === 'name' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                <>
+                  {/* Mobile card view for table */}
+                  <div className="md:hidden p-4 space-y-3">
+                    {sortedProjects.map((project) => {
+                      const badge = getStatusBadge(project.status);
+                      return (
+                        <div key={project.id} className="border border-neutral-700 rounded-lg p-4 bg-neutral-800">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-white text-sm leading-tight">{project.name}</h3>
+                              <p className="text-xs text-neutral-400 mt-0.5">{project.company}</p>
+                            </div>
+                            <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded border whitespace-nowrap ${badge.className}`}>
+                              {badge.label}
+                            </span>
                           </div>
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">Company</th>
-                        <th
-                          onClick={() => handleSort('sector')}
-                          className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                        >
-                          <div className="flex items-center gap-1">
-                            Sector
-                            {sortField === 'sector' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                          <div className="flex items-center gap-2 flex-wrap mb-3">
+                            <span
+                              className="px-2 py-0.5 text-xs font-semibold rounded-full"
+                              style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
+                            >
+                              {project.sector}
+                            </span>
+                            <span className="text-xs text-neutral-500">{project.region} · {project.district}</span>
                           </div>
-                        </th>
-                        <th
-                          onClick={() => handleSort('region')}
-                          className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                        >
-                          <div className="flex items-center gap-1">
-                            Region
-                            {sortField === 'region' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-neutral-700">
+                            <div>
+                              <p className="text-xs text-neutral-500">Investment</p>
+                              <p className="text-base font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-neutral-500">Employment</p>
+                              <p className="text-base font-bold text-red-400">{project.plannedEmployment.toLocaleString()}</p>
+                            </div>
                           </div>
-                        </th>
-                        <th
-                          onClick={() => handleSort('investmentValue')}
-                          className="px-6 py-3 text-right text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                        >
-                          <div className="flex items-center justify-end gap-1">
-                            Investment
-                            {sortField === 'investmentValue' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
-                          </div>
-                        </th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-yellow-500 uppercase tracking-wider">Status</th>
-                        <th
-                          onClick={() => handleSort('plannedEmployment')}
-                          className="px-6 py-3 text-right text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                        >
-                          <div className="flex items-center justify-end gap-1">
-                            Employment
-                            {sortField === 'plannedEmployment' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
-                          </div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-800">
-                      {sortedProjects.map((project, idx) => {
-                        const badge = getStatusBadge(project.status);
-                        return (
-                          <tr key={project.id} className={`transition-colors hover:bg-neutral-800 ${idx % 2 === 0 ? 'bg-neutral-900' : 'bg-neutral-900/50'}`}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-white">{project.name}</div>
-                              <div className="text-sm text-neutral-500">{project.district}</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">{project.company}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
-                              >
-                                {project.sector}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">{project.region}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-yellow-400 text-right">
-                              {formatCurrency(project.investmentValue)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded border ${badge.className}`}>
-                                {badge.label}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-400 text-right">
-                              {project.plannedEmployment.toLocaleString()}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {/* Desktop table view */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-neutral-800 border-b border-neutral-700">
+                        <tr>
+                          <th
+                            onClick={() => handleSort('name')}
+                            className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
+                          >
+                            <div className="flex items-center gap-1">
+                              Project Name
+                              {sortField === 'name' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                            </div>
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">Company</th>
+                          <th
+                            onClick={() => handleSort('sector')}
+                            className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
+                          >
+                            <div className="flex items-center gap-1">
+                              Sector
+                              {sortField === 'sector' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                            </div>
+                          </th>
+                          <th
+                            onClick={() => handleSort('region')}
+                            className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
+                          >
+                            <div className="flex items-center gap-1">
+                              Region
+                              {sortField === 'region' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                            </div>
+                          </th>
+                          <th
+                            onClick={() => handleSort('investmentValue')}
+                            className="px-6 py-3 text-right text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
+                          >
+                            <div className="flex items-center justify-end gap-1">
+                              Investment
+                              {sortField === 'investmentValue' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                            </div>
+                          </th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-yellow-500 uppercase tracking-wider">Status</th>
+                          <th
+                            onClick={() => handleSort('plannedEmployment')}
+                            className="px-6 py-3 text-right text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
+                          >
+                            <div className="flex items-center justify-end gap-1">
+                              Employment
+                              {sortField === 'plannedEmployment' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-800">
+                        {sortedProjects.map((project, idx) => {
+                          const badge = getStatusBadge(project.status);
+                          return (
+                            <tr key={project.id} className={`transition-colors hover:bg-neutral-800 ${idx % 2 === 0 ? 'bg-neutral-900' : 'bg-neutral-900/50'}`}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-white">{project.name}</div>
+                                <div className="text-sm text-neutral-500">{project.district}</div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">{project.company}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                  style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
+                                >
+                                  {project.sector}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">{project.region}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-yellow-400 text-right">
+                                {formatCurrency(project.investmentValue)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-center">
+                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded border ${badge.className}`}>
+                                  {badge.label}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-400 text-right">
+                                {project.plannedEmployment.toLocaleString()}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </main>

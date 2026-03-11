@@ -384,14 +384,14 @@ export default function InvoiceGenerator() {
   const totals = calculateInvoiceTotal();
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-black min-h-screen">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-black min-h-screen">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-center mb-8"
+        className="text-center mb-4 sm:mb-6 lg:mb-8"
       >
-        <h2 className="text-4xl font-bold text-yellow-400 mb-4">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-400 mb-4">
           Professional Invoice Generator
         </h2>
         <p className="text-xl text-neutral-400">
@@ -407,13 +407,13 @@ export default function InvoiceGenerator() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
         >
-          <h3 className="text-2xl font-semibold text-yellow-300 mb-6">
+          <h3 className="text-xl sm:text-2xl font-semibold text-yellow-300 mb-6">
             Invoice Details
           </h3>
 
           <div className="space-y-6">
             {/* Invoice Info */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-yellow-200/80 mb-2">
                   Invoice Number
@@ -443,7 +443,7 @@ export default function InvoiceGenerator() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-yellow-200/80 mb-2">
                   Invoice Date
@@ -488,7 +488,7 @@ export default function InvoiceGenerator() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-yellow-200/80 mb-2">
                       Email
@@ -578,7 +578,7 @@ export default function InvoiceGenerator() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                           <label className="block text-sm font-medium text-yellow-200/80 mb-1">
                             Quantity
@@ -665,7 +665,7 @@ export default function InvoiceGenerator() {
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowPreview(!showPreview)}
                 className="flex-1 bg-yellow-600 text-black py-3 px-6 rounded-lg font-semibold hover:bg-yellow-500 hover:shadow-lg hover:shadow-yellow-500/20 active:scale-95 transition-all duration-200"
@@ -689,7 +689,7 @@ export default function InvoiceGenerator() {
           transition={{ duration: 0.6, delay: 0.4 }}
           className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
         >
-          <h3 className="text-2xl font-semibold text-yellow-400 mb-6">
+          <h3 className="text-xl sm:text-2xl font-semibold text-yellow-400 mb-6">
             Invoice Preview
           </h3>
 

@@ -57,7 +57,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
         </div>
 
         {/* Header Section */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4 sm:mb-6 lg:mb-8">
           {/* Uganda Flag Stripe */}
           <div className="h-2 flex">
             <div className="flex-1 bg-black"></div>
@@ -65,9 +65,9 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
             <div className="flex-1 bg-red-600"></div>
           </div>
           
-          <div className="p-8">
-            <div className="flex items-start gap-6">
-              <div className="w-20 h-20 bg-white rounded-xl flex items-center justify-center flex-shrink-0 border border-yellow-300 overflow-hidden">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 bg-white rounded-xl flex items-center justify-center flex-shrink-0 border border-yellow-300 overflow-hidden">
                 <div className="w-16 h-16 relative">
                   <Image 
                     src={opportunity.logoPath} 
@@ -82,7 +82,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{opportunity.title}</h1>
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">{opportunity.title}</h1>
                     <div className="flex items-center gap-4 text-sm text-gray-600">
                       <span className="bg-gray-100 px-3 py-1 rounded-full">{opportunity.category}</span>
                       <span className="bg-red-50 text-red-600 px-3 py-1 rounded-full border border-red-200 font-medium">
@@ -97,7 +97,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
                 </p>
                 
                 {/* Key Metrics Row */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200">
                     <div className="flex items-center gap-2 mb-2">
                       <DollarSign className="w-5 h-5 text-yellow-700" />
@@ -137,10 +137,10 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
             {/* Detailed Description */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Investment Overview</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Investment Overview</h2>
               <div className="prose prose-gray max-w-none">
                 {opportunity.fullDescription.split('\n\n').map((paragraph, index) => (
                   <p key={index} className="text-gray-700 leading-relaxed mb-4">
@@ -151,8 +151,8 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
             </div>
 
             {/* Key Metrics */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Key Investment Metrics</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Key Investment Metrics</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div>
@@ -178,8 +178,8 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
             </div>
 
             {/* Investment Incentives */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Government Incentives</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Government Incentives</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {opportunity.incentives.map((incentive, index) => (
                   <div key={index} className="flex items-center gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
@@ -191,8 +191,8 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
             </div>
 
             {/* Required Licenses */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Required Licenses & Permits</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 lg:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Required Licenses & Permits</h2>
               <div className="space-y-3">
                 {opportunity.requiredLicenses.map((license, index) => (
                   <div key={index} className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -207,7 +207,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Risk Assessment */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Risk Assessment</h3>
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div className="flex items-start gap-3">
@@ -221,7 +221,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
             </div>
 
             {/* Contact Information */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Contact Information</h3>
               <div className="space-y-4">
                 <div>
@@ -264,7 +264,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
             
             {/* Documents */}
             {opportunity.documents && opportunity.documents.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Documents & Resources</h3>
               <div className="space-y-3">
                 {(opportunity.documents as Array<{name: string; type: string; size: string; url: string}>).map((doc, index) => (

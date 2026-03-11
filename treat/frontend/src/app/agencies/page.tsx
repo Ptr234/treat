@@ -76,12 +76,12 @@ const GovernmentAgencies = () => {
       <section className="relative bg-cover bg-center bg-no-repeat py-16" style={{ backgroundImage: 'url(/images/uganda-map-flag.jpg)' }}>
         <div className="absolute inset-0 bg-black/65"></div>
         <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">All Government Agencies</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-white mb-3">All Government Agencies</h2>
           <p className="text-lg text-neutral-200">Access essential government services for business and investment</p>
         </div>
       </section>
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-8">
+      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
@@ -116,7 +116,7 @@ const GovernmentAgencies = () => {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-3 rounded-xl font-medium whitespace-nowrap transition-all ${
+                  className={`px-4 py-3 min-h-[44px] rounded-xl font-medium whitespace-nowrap transition-all ${
                     selectedCategory === cat
                       ? 'bg-red-600 text-white shadow-lg shadow-red-600/30 scale-105'
                       : 'bg-neutral-900 text-neutral-300 border-2 border-neutral-700 hover:border-yellow-500 hover:scale-105'
@@ -137,93 +137,93 @@ const GovernmentAgencies = () => {
             <p className="text-neutral-400">Try adjusting your search or filter</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filteredAgencies.map((agency) => (
               <div
                 key={agency.id}
-                className="bg-neutral-900 rounded-2xl border-2 border-neutral-800 overflow-hidden hover:shadow-2xl hover:shadow-yellow-500/10 hover:border-yellow-600 hover:-translate-y-2 transition-all duration-300 group"
+                className="bg-neutral-900 rounded-2xl border-2 border-neutral-800 overflow-hidden hover:shadow-2xl hover:shadow-yellow-500/10 hover:border-yellow-600 hover:-translate-y-2 transition-all duration-300 group flex flex-col"
               >
                 {/* Agency Header */}
-                <div className={`bg-gradient-to-r ${agency.gradient} p-6 relative overflow-hidden`}>
+                <div className={`bg-gradient-to-r ${agency.gradient} p-4 relative overflow-hidden`}>
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -translate-y-16 translate-x-16"></div>
                   <div className="absolute bottom-0 left-0 w-24 h-24 bg-black opacity-20 rounded-full translate-y-12 -translate-x-12"></div>
 
-                  <div className="relative flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+                  <div className="relative flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
                         {agency.logo ? (
                           <Image
                             src={agency.logo}
                             alt={`${agency.acronym} logo`}
-                            width={40}
-                            height={40}
+                            width={30}
+                            height={30}
                             className="object-contain"
                           />
                         ) : (
-                          <span className="text-2xl font-bold text-neutral-800">{agency.acronym[0]}</span>
+                          <span className="text-lg font-bold text-neutral-800">{agency.acronym[0]}</span>
                         )}
                       </div>
                       <div>
-                        <h3 className="text-2xl font-bold text-white">{agency.acronym}</h3>
-                        <p className="text-xs text-white/70">{agency.category}</p>
+                        <h3 className="text-lg font-bold text-white">{agency.acronym}</h3>
+                        <p className="text-[11px] text-white/70">{agency.category}</p>
                       </div>
                     </div>
-                    <span className={`${getPriorityBadge(agency.priority)} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg`}>
-                      {agency.priority} Priority
+                    <span className={`${getPriorityBadge(agency.priority)} text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-lg`}>
+                      {agency.priority}
                     </span>
                   </div>
 
-                  <h4 className="text-white font-semibold text-lg mb-2">{agency.name}</h4>
-                  <p className="text-white/80 text-sm leading-relaxed">{agency.description}</p>
+                  <h4 className="text-white font-semibold text-sm leading-snug mb-1 line-clamp-2 min-h-[2.5rem]">{agency.name}</h4>
+                  <p className="text-white/80 text-xs leading-relaxed line-clamp-2">{agency.description}</p>
                 </div>
 
                 {/* Agency Content */}
-                <div className="p-6">
+                <div className="p-4 flex-1 flex flex-col">
                   {/* Key Services */}
-                  <div className="mb-5">
-                    <h5 className="text-sm font-bold text-yellow-500 mb-3 flex items-center gap-2">
-                      <Star className="w-4 h-4 text-yellow-500" />
+                  <div className="mb-4">
+                    <h5 className="text-xs font-bold text-yellow-500 mb-2 flex items-center gap-1.5">
+                      <Star className="w-3 h-3 text-yellow-500" />
                       Key Services
                     </h5>
-                    <ul className="space-y-2">
+                    <ul className="space-y-1.5">
                       {agency.services.slice(0, 2).map((service, idx) => (
-                        <li key={idx} className="text-sm text-neutral-300 flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0"></span>
-                          <span>{service}</span>
+                        <li key={idx} className="text-xs text-neutral-300 flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1 flex-shrink-0"></span>
+                          <span className="line-clamp-1">{service}</span>
                         </li>
                       ))}
                       {agency.services.length > 2 && (
-                        <li className="text-sm text-yellow-600 font-medium">+{agency.services.length - 2} more services</li>
+                        <li className="text-xs text-yellow-600 font-medium">+{agency.services.length - 2} more services</li>
                       )}
                     </ul>
                   </div>
 
                   {/* Info */}
-                  <div className="space-y-3 mb-5 pb-5 border-b border-neutral-800">
-                    <div className="flex items-start gap-3 text-sm">
-                      <Clock className="w-4 h-4 text-neutral-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-neutral-400">{agency.hours}</span>
+                  <div className="space-y-2 mb-4 pb-4 border-b border-neutral-800">
+                    <div className="flex items-start gap-2 text-xs">
+                      <Clock className="w-3 h-3 text-neutral-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-neutral-400 line-clamp-1">{agency.hours}</span>
                     </div>
-                    <div className="flex items-start gap-3 text-sm">
-                      <MapPin className="w-4 h-4 text-neutral-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-neutral-400">{agency.address}</span>
+                    <div className="flex items-start gap-2 text-xs">
+                      <MapPin className="w-3 h-3 text-neutral-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-neutral-400 line-clamp-1">{agency.address}</span>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-1 gap-2 mt-auto">
                     <button
                       onClick={() => openAssistant(agency.name, agency.acronym)}
-                      className="bg-yellow-500 text-black px-4 py-2.5 rounded-xl font-bold hover:bg-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-2"
+                      className="bg-yellow-500 text-black px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold hover:bg-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center justify-center gap-1.5"
                     >
-                      <MessageCircle className="w-4 h-4" />
+                      <MessageCircle className="w-3.5 h-3.5" />
                       Ask the Assistant
                     </button>
                     <Link
                       href={`/agencies/${agency.id}`}
-                      className="bg-neutral-800 text-neutral-300 px-4 py-2.5 rounded-xl font-medium hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-2 text-sm border border-neutral-700"
+                      className="bg-neutral-800 text-neutral-300 px-3 py-2.5 min-h-[44px] rounded-xl font-medium hover:bg-red-600 hover:text-white transition-all flex items-center justify-center gap-1.5 text-xs border border-neutral-700"
                     >
-                      <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                      <ChatBubbleLeftRightIcon className="w-3.5 h-3.5" />
                       Request Service
                     </Link>
                   </div>

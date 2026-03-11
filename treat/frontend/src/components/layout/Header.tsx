@@ -247,7 +247,16 @@ const Header: React.FC = () => {
               {isAuthenticated && user ? (
                 <div className="relative group">
                   <button className="flex items-center space-x-2 p-2 text-white/90 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all duration-200">
-                    <UserIcon className="w-5 h-5" />
+                    {user.picture ? (
+                      <img
+                        src={user.picture}
+                        alt={user.name}
+                        className="w-7 h-7 rounded-full object-cover ring-2 ring-yellow-400/50"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <UserIcon className="w-5 h-5" />
+                    )}
                     <span className="hidden md:inline text-sm font-medium">{user.name}</span>
                   </button>
 
@@ -258,9 +267,18 @@ const Header: React.FC = () => {
                       href="/profile"
                       className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300"
                     >
-                      <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center">
-                        <UserIcon className="w-4 h-4 text-yellow-400" />
-                      </div>
+                      {user.picture ? (
+                        <img
+                          src={user.picture}
+                          alt={user.name}
+                          className="w-8 h-8 rounded-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center">
+                          <UserIcon className="w-4 h-4 text-yellow-400" />
+                        </div>
+                      )}
                       <span className="ml-3">Profile</span>
                     </Link>
                     <div className="border-t border-neutral-700 my-1"></div>
@@ -356,8 +374,8 @@ const Header: React.FC = () => {
         </div>
       </motion.header>
 
-      {/* Auth Modal */}
-      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
+      {/* Auth Modal — user mode (Google sign-in only) */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} mode="user" />
     </>
   );
 };

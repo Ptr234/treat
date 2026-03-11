@@ -9,6 +9,8 @@ import agencyProfile from './agencyProfile';
 import agencyMessage from './agencyMessage';
 import adminUser from './adminUser';
 import investorProfile from './investorProfile';
+import chatEnquiry from './chatEnquiry';
+import investmentOpportunity from './investmentOpportunity';
 
 export const schemaTypes = [
   event,
@@ -22,4 +24,6 @@ export const schemaTypes = [
   agencyMessage,
   adminUser,
   investorProfile,
+  chatEnquiry,
+  investmentOpportunity,
 ];

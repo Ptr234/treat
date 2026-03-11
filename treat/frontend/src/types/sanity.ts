@@ -183,3 +183,19 @@ export interface SanityAgencyMessage {
   isInternal: boolean;
   sentAt: string;
 }
+
+export interface SanityChatEnquiry {
+  _id: string;
+  _type: 'chatEnquiry';
+  sessionId: string;
+  userName?: string;
+  userEmail?: string;
+  userPhone?: string;
+  userLocation?: string;
+  userMessage: string;
+  botResponse: string;
+  language: 'en' | 'fr' | 'ar' | 'zh' | 'sw';
+  sentiment?: 'positive' | 'neutral' | 'negative';
+  tier: 'ai' | 'kb' | 'suggestions';
+  createdAt: string;
+}

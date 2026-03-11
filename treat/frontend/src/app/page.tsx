@@ -83,10 +83,10 @@ export default function HomePage() {
         <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
           <div>
             <h1 className="mb-8 leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              <span className="block text-white text-4xl md:text-5xl lg:text-6xl font-medium tracking-wide uppercase mb-3" style={{ letterSpacing: '0.15em' }}>
+              <span className="block text-white text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-medium tracking-wide uppercase mb-3" style={{ letterSpacing: '0.15em' }}>
                 Uganda Investment
               </span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300 text-6xl md:text-8xl lg:text-9xl font-black italic tracking-tight drop-shadow-lg">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300 text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black italic tracking-tight drop-shadow-lg">
                 Excellence Hub
               </span>
             </h1>
@@ -217,7 +217,7 @@ export default function HomePage() {
       {/* About Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
             <div className="relative">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
@@ -333,7 +333,7 @@ export default function HomePage() {
             ].map((service, index) => (
               <div
                 key={index}
-                className="bg-white p-8 rounded-lg shadow-sm border border-neutral-200 hover:shadow-md hover:border-yellow-400/50 transition-all duration-300"
+                className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-sm border border-neutral-200 hover:shadow-md hover:border-yellow-400/50 transition-all duration-300"
               >
                 <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mb-6">
                   <service.icon className="w-6 h-6 text-yellow-600" />
