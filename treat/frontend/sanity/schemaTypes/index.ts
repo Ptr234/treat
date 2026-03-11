@@ -1,0 +1,19 @@
+import event from './event';
+import licenseProject from './licenseProject';
+import agency from './agency';
+import ticket from './ticket';
+import ticketMessage from './ticketMessage';
+import analyticsMetadata from './analyticsMetadata';
+import dashboardConfig from './dashboardConfig';
+import agencyProfile from './agencyProfile';
+
+export const schemaTypes = [
+  event,
+  licenseProject,
+  agency,
+  ticket,
+  ticketMessage,
+  analyticsMetadata,
+  dashboardConfig,
+  agencyProfile,
+];

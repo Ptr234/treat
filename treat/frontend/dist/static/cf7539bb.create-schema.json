@@ -1,0 +1,1051 @@
+[
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "source": "title"
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "custom"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "slug",
+        "type": "slug"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "date",
+        "type": "datetime"
+      },
+      {
+        "name": "endDate",
+        "type": "datetime"
+      },
+      {
+        "options": {
+          "list": [
+            "UIA Forum",
+            "Government Mission",
+            "Sector Symposium",
+            "EAC Summit",
+            "Global Event",
+            "Webinar"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "UIA Forum",
+                  "Government Mission",
+                  "Sector Symposium",
+                  "EAC Summit",
+                  "Global Event",
+                  "Webinar"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "name": "location",
+        "type": "string"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "image",
+        "type": "image"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "registrationUrl",
+        "type": "url",
+        "title": "Registration URL"
+      },
+      {
+        "initialValue": false,
+        "name": "isPublished",
+        "type": "boolean",
+        "title": "Published"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "name": "file",
+                "type": "file"
+              },
+              {
+                "validation": [
+                  {
+                    "rules": [
+                      {
+                        "flag": "uri",
+                        "constraint": {
+                          "options": {
+                            "scheme": [
+                              "/^http$/",
+                              "/^https$/"
+                            ],
+                            "allowRelative": false,
+                            "relativeOnly": false,
+                            "allowCredentials": false
+                          }
+                        }
+                      }
+                    ],
+                    "level": "error"
+                  }
+                ],
+                "name": "url",
+                "type": "url",
+                "title": "URL"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "resources",
+        "type": "array",
+        "title": "Post-Event Resources"
+      }
+    ],
+    "name": "event",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "companyName",
+        "type": "string"
+      },
+      {
+        "name": "referenceNumber",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "Agriculture",
+            "Manufacturing",
+            "Services",
+            "Tourism",
+            "ICT",
+            "Energy",
+            "Mining",
+            "Real Estate",
+            "Other"
+          ]
+        },
+        "name": "sector",
+        "type": "string"
+      },
+      {
+        "name": "subSector",
+        "type": "string",
+        "title": "Sub-Sector"
+      },
+      {
+        "options": {
+          "list": [
+            "Central",
+            "Eastern",
+            "Northern",
+            "Western",
+            "Kampala"
+          ]
+        },
+        "name": "region",
+        "type": "string"
+      },
+      {
+        "name": "district",
+        "type": "string"
+      },
+      {
+        "name": "location",
+        "type": "string",
+        "title": "Location Name"
+      },
+      {
+        "fields": [
+          {
+            "name": "lat",
+            "type": "number",
+            "title": "Latitude"
+          },
+          {
+            "name": "lng",
+            "type": "number",
+            "title": "Longitude"
+          }
+        ],
+        "name": "coordinates",
+        "type": "object",
+        "title": "GPS Coordinates"
+      },
+      {
+        "name": "investmentValueUSD",
+        "type": "number",
+        "title": "Investment Value (USD)"
+      },
+      {
+        "options": {
+          "list": [
+            "<$100K",
+            "$100K-$500K",
+            "$500K-$1M",
+            "$1M-$5M",
+            "$5M-$10M",
+            "$10M-$50M",
+            ">$50M"
+          ]
+        },
+        "name": "investmentValueRange",
+        "type": "string",
+        "title": "Investment Range"
+      },
+      {
+        "name": "employmentLocal",
+        "type": "number",
+        "title": "Local Jobs"
+      },
+      {
+        "name": "employmentForeign",
+        "type": "number",
+        "title": "Foreign Jobs"
+      },
+      {
+        "options": {
+          "list": [
+            "Licensed",
+            "Operational",
+            "Under Construction",
+            "Suspended",
+            "Cancelled"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "Licensed",
+                  "Operational",
+                  "Under Construction",
+                  "Suspended",
+                  "Cancelled"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "name": "licenseDate",
+        "type": "date"
+      },
+      {
+        "name": "fiscalYear",
+        "type": "string"
+      },
+      {
+        "name": "nationality",
+        "type": "string",
+        "title": "Investor Nationality"
+      },
+      {
+        "initialValue": false,
+        "name": "isIndustrialPark",
+        "type": "boolean",
+        "title": "In Industrial Park"
+      },
+      {
+        "name": "industrialParkName",
+        "type": "string"
+      }
+    ],
+    "name": "licenseProject",
+    "type": "document",
+    "title": "Licensed Project"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string",
+        "title": "Agency Name"
+      },
+      {
+        "options": {
+          "list": [
+            "UIA",
+            "URSB",
+            "URA",
+            "DCIC",
+            "NEMA",
+            "KCCA",
+            "LANDS",
+            "UNBS",
+            "ERA"
+          ]
+        },
+        "name": "code",
+        "type": "string",
+        "title": "Agency Code"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "name": "contactEmail",
+        "type": "email"
+      },
+      {
+        "name": "contactPhone",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "website",
+        "type": "url"
+      },
+      {
+        "name": "logo",
+        "type": "image"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "services",
+        "type": "array",
+        "title": "Services Offered"
+      },
+      {
+        "name": "slaResponseHours",
+        "type": "number",
+        "title": "SLA Response Hours"
+      }
+    ],
+    "name": "agency",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Format: UIA-YYYY-NNNN",
+        "name": "referenceNumber",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "options": {
+          "list": [
+            "general_inquiry",
+            "procedure_query",
+            "application_support",
+            "license_delay",
+            "complaint",
+            "vip"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "general_inquiry",
+                  "procedure_query",
+                  "application_support",
+                  "license_delay",
+                  "complaint",
+                  "vip"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "initialValue": "medium",
+        "name": "priority",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "NEW",
+            "ASSIGNED",
+            "IN_PROGRESS",
+            "PENDING_EXTERNAL",
+            "RESOLVED",
+            "CLOSED"
+          ]
+        },
+        "initialValue": "NEW",
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "NEW",
+                  "ASSIGNED",
+                  "IN_PROGRESS",
+                  "PENDING_EXTERNAL",
+                  "RESOLVED",
+                  "CLOSED"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "contactName",
+        "type": "string",
+        "title": "Investor Name"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "contactEmail",
+        "type": "email",
+        "title": "Investor Email"
+      },
+      {
+        "name": "contactPhone",
+        "type": "string"
+      },
+      {
+        "name": "investorNationality",
+        "type": "string"
+      },
+      {
+        "name": "sector",
+        "type": "string",
+        "title": "Sector of Interest"
+      },
+      {
+        "name": "investmentSize",
+        "type": "string",
+        "title": "Investment Size (USD)"
+      },
+      {
+        "name": "assignee",
+        "type": "string",
+        "title": "Assigned To"
+      },
+      {
+        "to": [
+          {
+            "type": "agency"
+          }
+        ],
+        "name": "assignedAgency",
+        "type": "reference"
+      },
+      {
+        "name": "slaDeadlineHours",
+        "type": "number",
+        "title": "SLA Hours"
+      },
+      {
+        "name": "slaDeadlineAt",
+        "type": "datetime",
+        "title": "SLA Deadline"
+      },
+      {
+        "description": "1-5 rating after resolution",
+        "name": "satisfactionRating",
+        "type": "number"
+      },
+      {
+        "name": "satisfactionComment",
+        "type": "text"
+      },
+      {
+        "of": [
+          {
+            "type": "file"
+          }
+        ],
+        "name": "documents",
+        "type": "array",
+        "title": "Attached Documents"
+      },
+      {
+        "initialValue": false,
+        "name": "isEscalated",
+        "type": "boolean",
+        "title": "Escalated"
+      },
+      {
+        "name": "createdAt",
+        "type": "datetime"
+      },
+      {
+        "name": "resolvedAt",
+        "type": "datetime"
+      },
+      {
+        "name": "closedAt",
+        "type": "datetime"
+      }
+    ],
+    "name": "ticket",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "to": [
+          {
+            "type": "ticket"
+          }
+        ],
+        "name": "ticket",
+        "type": "reference"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "content",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "authorName",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "investor",
+            "officer",
+            "system"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "investor",
+                  "officer",
+                  "system"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "authorRole",
+        "type": "string"
+      },
+      {
+        "name": "authorEmail",
+        "type": "email"
+      },
+      {
+        "of": [
+          {
+            "type": "file"
+          }
+        ],
+        "name": "attachments",
+        "type": "array"
+      },
+      {
+        "name": "sentAt",
+        "type": "datetime"
+      },
+      {
+        "initialValue": false,
+        "name": "isInternal",
+        "type": "boolean",
+        "title": "Internal Note (officers only)"
+      }
+    ],
+    "name": "ticketMessage",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "description": "e.g. 2025-Q1, 2024-FY",
+        "name": "period",
+        "type": "string"
+      },
+      {
+        "name": "totalInquiries",
+        "type": "number"
+      },
+      {
+        "name": "resolvedInquiries",
+        "type": "number",
+        "title": "Resolved"
+      },
+      {
+        "name": "avgResolutionHours",
+        "type": "number"
+      },
+      {
+        "name": "slaComplianceRate",
+        "type": "number",
+        "title": "SLA Compliance %"
+      },
+      {
+        "name": "satisfactionAverage",
+        "type": "number",
+        "title": "Avg Satisfaction (1-5)"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "region",
+                "type": "string"
+              },
+              {
+                "name": "count",
+                "type": "number"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "inquiriesByRegion",
+        "type": "array",
+        "title": "By Region"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "sector",
+                "type": "string"
+              },
+              {
+                "name": "count",
+                "type": "number"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "inquiriesBySector",
+        "type": "array",
+        "title": "By Sector"
+      },
+      {
+        "fields": [
+          {
+            "name": "inquiries",
+            "type": "number"
+          },
+          {
+            "name": "facilitation",
+            "type": "number"
+          },
+          {
+            "name": "applications",
+            "type": "number"
+          },
+          {
+            "name": "licensing",
+            "type": "number"
+          },
+          {
+            "name": "operational",
+            "type": "number"
+          }
+        ],
+        "name": "funnelData",
+        "type": "object",
+        "title": "Investment Funnel"
+      }
+    ],
+    "name": "analyticsMetadata",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "key",
+        "type": "string",
+        "title": "Config Key"
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "title": "Display Label"
+      },
+      {
+        "name": "value",
+        "type": "string"
+      },
+      {
+        "name": "numericValue",
+        "type": "number"
+      },
+      {
+        "name": "alertThreshold",
+        "type": "number"
+      },
+      {
+        "initialValue": true,
+        "name": "isActive",
+        "type": "boolean",
+        "title": "Active"
+      },
+      {
+        "description": "JSON string for complex config values",
+        "name": "metadata",
+        "type": "text",
+        "title": "Metadata (JSON)"
+      }
+    ],
+    "name": "dashboardConfig",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "name",
+        "type": "string",
+        "title": "Officer Name"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "email",
+        "type": "email"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "to": [
+          {
+            "type": "agency"
+          }
+        ],
+        "name": "agency",
+        "type": "reference"
+      },
+      {
+        "options": {
+          "list": [
+            "Officer",
+            "Senior Officer",
+            "Manager",
+            "Director"
+          ]
+        },
+        "name": "role",
+        "type": "string"
+      },
+      {
+        "initialValue": true,
+        "name": "isActive",
+        "type": "boolean",
+        "title": "Active"
+      },
+      {
+        "description": "Links to Sanity Studio user account for auth",
+        "name": "sanityUserId",
+        "type": "string",
+        "title": "Sanity User ID"
+      }
+    ],
+    "name": "agencyProfile",
+    "type": "document",
+    "title": "Agency Officer Profile"
+  }
+]
