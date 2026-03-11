@@ -118,21 +118,21 @@ export default function DownloadsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-2 h-12 bg-gradient-to-b from-yellow-400 via-red-600 to-black rounded-full" />
-            <h1 className="text-4xl font-bold text-white">
-              Downloads & Resources
-            </h1>
-            <div className="w-2 h-12 bg-gradient-to-b from-black via-red-600 to-yellow-400 rounded-full" />
-          </div>
-          <p className="text-lg text-neutral-400 max-w-3xl mx-auto">
+      {/* Hero Section */}
+      <section className="relative bg-cover bg-center bg-no-repeat py-20" style={{ backgroundImage: 'url(/images/uganda-flag-city.jpg)' }}>
+        <div className="absolute inset-0 bg-black/65"></div>
+        <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Downloads & Resources
+          </h1>
+          <p className="text-lg text-neutral-200 max-w-3xl mx-auto">
             Download essential forms, guides, and resources for business registration and investment in Uganda.
             All documents are official and up-to-date.
           </p>
         </div>
+      </section>
+
+      <div className="max-w-6xl mx-auto px-4 py-12">
 
         {/* Download Categories */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

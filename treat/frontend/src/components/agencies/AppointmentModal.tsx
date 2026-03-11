@@ -167,7 +167,7 @@ Thank you.`;
     }
   };
 
-  const inputClass = "w-full px-3 py-2 bg-neutral-800 border border-neutral-600 text-white placeholder-neutral-500 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500";
+  const inputClass = "w-full px-3 py-2 bg-neutral-800 border border-neutral-600 text-white placeholder-neutral-500 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 [&>option]:bg-neutral-800 [&>option]:text-white";
   const labelClass = "block text-sm font-medium text-neutral-300 mb-1";
 
   const renderStep = () => {

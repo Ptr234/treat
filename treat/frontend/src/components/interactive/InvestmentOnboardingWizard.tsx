@@ -83,58 +83,43 @@ export default function InvestmentOnboardingWizard() {
     }
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ referenceNumber: string; existing: boolean } | null>(null);
+
   const submitApplication = async () => {
+    setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const res = await fetch('/api/investors/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(investmentData),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json.success) {
+        throw new Error(json.error || 'Submission failed');
+      }
+
+      setSubmitResult({ referenceNumber: json.data.referenceNumber, existing: json.data.existing });
+
       addNotification({
         type: 'success',
-        title: 'Application Submitted Successfully!',
-        message: 'Our investment team will contact you within 24 hours.'
+        title: json.data.existing
+          ? 'Profile Already Exists'
+          : 'Application Submitted Successfully!',
+        message: json.data.existing
+          ? `We already have your profile on file (${json.data.referenceNumber}). Our team will be in touch.`
+          : `Your investor reference is ${json.data.referenceNumber}. Our investment team will contact you within 24 hours.`,
       });
-      
-      // Generate consultation email
-      const subject = encodeURIComponent('Investment Consultation Request - OneStopCentre Uganda');
-      const body = encodeURIComponent(`Dear OneStopCentre Uganda Investment Team,
-
-I have completed the investment onboarding wizard and would like to schedule a consultation.
-
-Investment Profile:
-- Investor Type: ${investmentData.investorType}
-- Experience Level: ${investmentData.experience}
-- Investment Goal: ${investmentData.investmentGoal}
-- Investment Amount: USD ${investmentData.investmentAmount}
-- Time Horizon: ${investmentData.timeHorizon}
-- Risk Tolerance: ${investmentData.riskTolerance}
-- Primary Sector Interest: ${investmentData.primarySector}
-
-Contact Information:
-- Name: ${investmentData.name}
-- Email: ${investmentData.email}
-- Phone: ${investmentData.phone}
-- Nationality: ${investmentData.nationality}
-${investmentData.companyName ? `- Company: ${investmentData.companyName}` : ''}
-
-Investment Readiness:
-- Capital Source: ${investmentData.capitalSource}
-- Investment Timeframe: ${investmentData.timeframe}
-- Support Needed: ${investmentData.supportNeeded.join(', ')}
-
-Please contact me to discuss investment opportunities in Uganda.
-
-Best regards,
-${investmentData.name}`);
-
-      // Open email client
-      window.location.href = `mailto:invest@onestopcentre.ug?subject=${subject}&body=${body}`;
-      
-    } catch {
+    } catch (err) {
       addNotification({
         type: 'error',
         title: 'Submission Failed',
-        message: 'Failed to submit application. Please try again.'
+        message: err instanceof Error ? err.message : 'Failed to submit application. Please try again.',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -604,13 +589,31 @@ ${investmentData.name}`);
         ) : (
           <button
             onClick={submitApplication}
-            disabled={!validateCurrentStep()}
+            disabled={!validateCurrentStep() || isSubmitting}
             className="px-6 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Submit Application
+            {isSubmitting ? 'Submitting...' : 'Submit Application'}
           </button>
         )}
       </div>
+
+      {/* Success result */}
+      {submitResult && (
+        <div className="mt-6 p-6 bg-green-50 border border-green-200 rounded-lg text-center">
+          <div className="text-green-800 font-bold text-lg mb-2">
+            {submitResult.existing ? 'Profile Found' : 'Profile Created Successfully'}
+          </div>
+          <p className="text-green-700 mb-2">
+            Your investor reference number is:
+          </p>
+          <p className="text-2xl font-mono font-bold text-green-900 mb-4">
+            {submitResult.referenceNumber}
+          </p>
+          <p className="text-sm text-green-600">
+            Our investment team will contact you within 24 hours. Check your email for confirmation.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -185,7 +185,7 @@ export default function NotificationSettings() {
             <select
               value={preferences.frequency}
               onChange={(e) => updatePreference('frequency', e.target.value as NotificationPreferences['frequency'])}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
             >
               <option value="immediate">Immediate</option>
               <option value="daily">Daily Digest</option>
@@ -227,7 +227,7 @@ export default function NotificationSettings() {
                       type="time"
                       value={preferences.quietHours.start}
                       onChange={(e) => updateQuietHours('start', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     />
                   </div>
                   <div>
@@ -238,7 +238,7 @@ export default function NotificationSettings() {
                       type="time"
                       value={preferences.quietHours.end}
                       onChange={(e) => updateQuietHours('end', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                     />
                   </div>
                 </div>

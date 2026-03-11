@@ -90,12 +90,8 @@ export default function EventsPage() {
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-black via-neutral-900 to-neutral-800 py-20">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 25% 25%, #22c55e 0%, transparent 50%), radial-gradient(circle at 75% 75%, #166534 0%, transparent 50%)'
-          }} />
-        </div>
+      <section className="relative bg-cover bg-center bg-no-repeat py-20" style={{ backgroundImage: 'url(/images/uganda-pearl-africa.jpg)' }}>
+        <div className="absolute inset-0 bg-black/60"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div

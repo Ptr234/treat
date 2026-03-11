@@ -160,7 +160,7 @@ export default function SupportPage() {
       <section
         className="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1552664730-d307ca8849d1?q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)'
+          backgroundImage: 'url(/images/uganda-kampala-city-view.webp)'
         }}
       >
         <div className="absolute inset-0 bg-black/60"></div>

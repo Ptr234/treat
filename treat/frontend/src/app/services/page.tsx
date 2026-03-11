@@ -124,7 +124,7 @@ export default function ServicesPage() {
       <motion.div
         className="relative bg-cover bg-center bg-no-repeat text-white"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1520004434532-cd6686036076?q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1920&h=1080&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)'
+          backgroundImage: 'url(/images/Tourism.webp)'
         }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

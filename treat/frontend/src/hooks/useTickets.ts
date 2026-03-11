@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { mockTickets } from '@/data/mock/tickets';
 import type { SupportTicket } from '@/types';
 
 interface SanityTicketRow {
@@ -63,20 +62,14 @@ export function useTickets(): UseTicketsReturn {
       const json = await res.json();
       if (!json.success) throw new Error(json.error || 'Unknown error');
 
-      const tickets: SanityTicketRow[] = json.data;
-      if (tickets.length === 0) {
-        // Empty dataset — fall back to mock
-        setData(mockTickets);
-        setTotal(mockTickets.length);
-      } else {
-        setData(tickets.map(mapToSupportTicket));
-        setTotal(json.meta?.total ?? tickets.length);
-      }
+      const tickets: SanityTicketRow[] = json.data ?? [];
+      setData(tickets.map(mapToSupportTicket));
+      setTotal(json.meta?.total ?? tickets.length);
       setError(null);
     } catch (err) {
-      console.error('[useTickets] fetch failed, using mock data:', err);
-      setData(mockTickets);
-      setTotal(mockTickets.length);
+      console.error('[useTickets] fetch failed:', err);
+      setData([]);
+      setTotal(0);
       setError(err instanceof Error ? err.message : 'Failed to load tickets');
     } finally {
       setLoading(false);

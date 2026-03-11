@@ -56,17 +56,22 @@ export default function ToolsPage() {
 
   return (
     <div className="bg-black min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-cover bg-center bg-no-repeat py-20" style={{ backgroundImage: 'url(/images/Pride.webp)' }}>
+        <div className="absolute inset-0 bg-black/65"></div>
+        <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-yellow-400 mb-6">
+            Investment Tools
+          </h1>
+          <p className="text-xl text-neutral-200 max-w-3xl mx-auto">
+            Comprehensive tools and calculators to support your business and investment decisions in Uganda.
+            Make informed choices with our professional-grade utilities.
+          </p>
+        </div>
+      </section>
+
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-yellow-400 mb-6">
-              Investment Tools
-            </h1>
-            <p className="text-xl text-neutral-400 max-w-3xl mx-auto">
-              Comprehensive tools and calculators to support your business and investment decisions in Uganda.
-              Make informed choices with our professional-grade utilities.
-            </p>
-          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {tools.map((tool) => (

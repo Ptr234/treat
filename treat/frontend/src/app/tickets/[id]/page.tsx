@@ -1,23 +1,25 @@
-import React from 'react';
-import { mockTickets } from '@/data/mock/tickets';
+import { Suspense } from 'react';
 import TicketDetailClient from './TicketDetailClient';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// Static params for build-time route generation (mock data as baseline)
-export async function generateStaticParams() {
-  return mockTickets.map((ticket) => ({
-    id: ticket.id,
-  }));
-}
-
 export default async function TicketDetailPage({ params }: PageProps) {
   const { id } = await params;
 
-  // Pass mock ticket as initial data; client component will fetch from Firestore
-  const initialTicket = mockTickets.find((t) => t.id === id) || null;
-
-  return <TicketDetailClient ticket={initialTicket} ticketId={id} />;
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-gray-600 font-medium">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <TicketDetailClient ticketId={id} />
+    </Suspense>
+  );
 }

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { chatKnowledgeBase } from '@/data/mock/chat-kb';
 import { apiError, validateBody, sanitizeString } from '@/lib/api-utils';
 import { chatbotMessageSchema } from '@/lib/validations';
@@ -216,7 +215,7 @@ export async function POST(request: NextRequest) {
     return apiError('Too many requests. Please wait a moment before trying again.', 429, 'RATE_LIMITED');
   }
 
-  const apiKey = process.env.GOOGLE_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return apiError('Chatbot service is not configured', 500, 'NOT_CONFIGURED');
   }
@@ -232,34 +231,54 @@ export async function POST(request: NextRequest) {
     const kbEntries = findRelevantKBEntries(sanitizedMessage);
     const systemPrompt = buildSystemPrompt(lang, kbEntries);
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      systemInstruction: systemPrompt,
+    // Build messages array for Groq (OpenAI-compatible format)
+    const messages: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+      { role: 'system', content: systemPrompt },
+    ];
+
+    // Add chat history
+    for (const msg of data.history) {
+      messages.push({ role: msg.role, content: msg.content });
+    }
+
+    // Add current user message
+    messages.push({ role: 'user', content: sanitizedMessage });
+
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages,
+        temperature: 0.7,
+        max_tokens: 1024,
+      }),
     });
 
-    const chatHistory = data.history.map(msg => ({
-      role: msg.role === 'assistant' ? 'model' as const : 'user' as const,
-      parts: [{ text: msg.content }],
-    }));
+    if (!groqResponse.ok) {
+      const errorBody = await groqResponse.text();
+      throw new Error(`Groq API ${groqResponse.status}: ${errorBody}`);
+    }
 
-    const chat = model.startChat({ history: chatHistory });
-    const result = await chat.sendMessage(sanitizedMessage);
-    const rawResponse = result.response.text();
+    const groqData = await groqResponse.json();
+    const rawResponse = groqData.choices?.[0]?.message?.content || '';
 
     const { response, sentiment } = parseSentiment(rawResponse);
 
     return NextResponse.json({ success: true, response, sentiment });
   } catch (error: unknown) {
-    console.error('Gemini API error:', error);
+    console.error('Groq API error:', error);
 
     const errMsg = error instanceof Error ? error.message : String(error);
 
-    if (errMsg.includes('429') || errMsg.includes('RESOURCE_EXHAUSTED') || errMsg.includes('quota')) {
+    if (errMsg.includes('429') || errMsg.includes('rate_limit')) {
       return apiError(errMsgs.quota, 503, 'QUOTA_EXCEEDED');
     }
 
-    if (errMsg.includes('403') || errMsg.includes('PERMISSION_DENIED') || errMsg.includes('API key')) {
+    if (errMsg.includes('401') || errMsg.includes('invalid_api_key')) {
       return apiError(errMsgs.config, 503, 'API_KEY_INVALID');
     }
 
