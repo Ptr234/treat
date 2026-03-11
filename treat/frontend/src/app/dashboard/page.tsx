@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDashboard } from '@/hooks/useDashboard';
 import { DGActivity, AlertSeverity } from '@/types';
@@ -27,6 +27,121 @@ export default function DashboardPage() {
   const [alertFilter, setAlertFilter] = useState<AlertFilter>('all');
   const [acknowledgedAlerts, setAcknowledgedAlerts] = useState<Set<string>>(new Set());
   const { metrics, loading, error, isLive, refresh } = useDashboard();
+
+  // Executive action state
+  const [actionModal, setActionModal] = useState<'flag' | 'message' | 'review' | null>(null);
+  const [actionInput, setActionInput] = useState('');
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (actionSuccess) {
+      const t = setTimeout(() => setActionSuccess(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [actionSuccess]);
+
+  const handleFlagCase = async () => {
+    if (!actionInput.trim()) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/tickets/${actionInput.trim()}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isEscalated: true, priority: 'critical' }),
+      });
+      if (res.ok) {
+        setActionSuccess(`Ticket ${actionInput.trim()} flagged as priority case`);
+        setActionModal(null);
+        setActionInput('');
+        refresh();
+      } else {
+        const data = await res.json();
+        setActionSuccess(`Error: ${data.error || 'Failed to flag ticket'}`);
+      }
+    } catch {
+      setActionSuccess('Network error — could not flag ticket');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!actionInput.trim()) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch('/api/messages/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: 'general',
+          content: actionInput.trim(),
+          senderAgencyCode: 'UIA',
+        }),
+      });
+      if (res.ok) {
+        setActionSuccess('Team message sent successfully');
+        setActionModal(null);
+        setActionInput('');
+      }
+    } catch {
+      setActionSuccess('Network error — could not send message');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleGenerateReport = () => {
+    if (!metrics) return;
+    const lines = ['Metric,Value'];
+    lines.push(`Live Inquiries,${metrics.liveInquiries}`);
+    lines.push(`Active Cases,${metrics.activeCases}`);
+    lines.push(`Pending Approvals,${metrics.pendingApprovals}`);
+    lines.push(`Pipeline Value (USD B),${(metrics.pipelineValue ?? 0).toFixed(1)}`);
+    lines.push(`Response Rate,${metrics.responseRate}%`);
+    lines.push(`Conversion Rate,${metrics.conversionRate}%`);
+    lines.push(`SLA Compliance,${metrics.slaCompliance}%`);
+    lines.push(`Investor Satisfaction,${metrics.investorSatisfaction}%`);
+    lines.push('');
+    lines.push('Agency,Score,Active Cases,Resolved Today,Avg Response,SLA Compliance');
+    for (const a of (metrics.agencyScorecard ?? [])) {
+      lines.push(`${a.acronym},${a.score},${a.activeCases},${a.resolvedToday},${a.avgResponseTime},${a.slaCompliance}%`);
+    }
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `dashboard-report-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setActionSuccess('Report downloaded');
+  };
+
+  const handleScheduleReview = async () => {
+    if (!actionInput.trim()) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch('/api/messages/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: 'general',
+          content: `Review Scheduled: ${actionInput.trim()}\n\nRequested by Director General on ${new Date().toLocaleDateString('en-GB')}`,
+          senderAgencyCode: 'UIA',
+        }),
+      });
+      if (res.ok) {
+        setActionSuccess('Review scheduled and team notified');
+        setActionModal(null);
+        setActionInput('');
+      }
+    } catch {
+      setActionSuccess('Network error — could not schedule review');
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   if (!isAdmin) {
     return (
@@ -72,7 +187,11 @@ export default function DashboardPage() {
     );
   }
 
-  const filteredAlerts = metrics.alerts.filter((alert) => {
+  const alerts = metrics.alerts ?? [];
+  const agencyScorecard = metrics.agencyScorecard ?? [];
+  const recentActivity = metrics.recentActivity ?? [];
+
+  const filteredAlerts = alerts.filter((alert) => {
     if (alertFilter === 'all') return true;
     return alert.severity === alertFilter;
   });
@@ -253,7 +372,7 @@ export default function DashboardPage() {
 
           <div className="bg-white rounded-xl shadow-soft p-6">
             <p className="text-sm text-gray-500 font-medium mb-2">Pipeline Value</p>
-            <p className="text-4xl font-bold text-yellow-700 mb-2">${metrics.pipelineValue.toFixed(1)}B</p>
+            <p className="text-4xl font-bold text-yellow-700 mb-2">${(metrics.pipelineValue ?? 0).toFixed(1)}B</p>
             <div className="flex items-center text-sm text-yellow-600">
               <ArrowUpIcon className="w-4 h-4 mr-1" />
               <span className="font-semibold">23.7%</span>
@@ -288,7 +407,7 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {metrics.agencyScorecard.slice(0, 9).map((agency) => (
+                  {agencyScorecard.slice(0, 9).map((agency) => (
                     <tr key={agency.acronym} className="hover:bg-gray-50">
                       <td className="py-2 font-medium text-gray-900">{agency.acronym}</td>
                       <td className="py-2 text-center">
@@ -372,7 +491,7 @@ export default function DashboardPage() {
               Recent Activity
             </h2>
             <div className="space-y-4 max-h-[500px] overflow-y-auto">
-              {metrics.recentActivity.map((activity) => (
+              {recentActivity.map((activity) => (
                 <div key={activity.id} className="flex gap-3">
                   <div className="flex flex-col items-center">
                     <div className={`w-3 h-3 rounded-full ${getActivityColor(activity.type)} flex-shrink-0`} />
@@ -396,28 +515,28 @@ export default function DashboardPage() {
           <h2 className="text-xl font-bold text-white mb-4">Executive Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
-              onClick={() => alert('Flag Priority Case - This would open a modal to flag a case for immediate attention')}
+              onClick={() => { setActionModal('flag'); setActionInput(''); }}
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-lg transition-all hover:shadow-lg flex items-center gap-3"
             >
               <FlagIcon className="w-6 h-6" />
               <span className="font-semibold">Flag Priority Case</span>
             </button>
             <button
-              onClick={() => alert('Send Team Message - This would open a messaging interface to broadcast to the team')}
+              onClick={() => { setActionModal('message'); setActionInput(''); }}
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-lg transition-all hover:shadow-lg flex items-center gap-3"
             >
               <ChatBubbleLeftRightIcon className="w-6 h-6" />
               <span className="font-semibold">Send Team Message</span>
             </button>
             <button
-              onClick={() => alert('Generate Report - This would open a report generation wizard')}
+              onClick={handleGenerateReport}
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-lg transition-all hover:shadow-lg flex items-center gap-3"
             >
               <DocumentTextIcon className="w-6 h-6" />
               <span className="font-semibold">Generate Report</span>
             </button>
             <button
-              onClick={() => alert('Schedule Review - This would open a calendar to schedule a team review meeting')}
+              onClick={() => { setActionModal('review'); setActionInput(''); }}
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-lg transition-all hover:shadow-lg flex items-center gap-3"
             >
               <CalendarIcon className="w-6 h-6" />
@@ -425,6 +544,85 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Action Modal */}
+        {actionModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                {actionModal === 'flag'
+                  ? 'Flag Priority Case'
+                  : actionModal === 'message'
+                    ? 'Send Team Message'
+                    : 'Schedule Review'}
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                {actionModal === 'flag'
+                  ? 'Enter the ticket reference number (e.g. UIA-2026-0001):'
+                  : actionModal === 'message'
+                    ? 'Enter your message to broadcast to all agency officers:'
+                    : 'Enter the review topic and any notes:'}
+              </p>
+              {actionModal === 'flag' ? (
+                <input
+                  value={actionInput}
+                  onChange={(e) => setActionInput(e.target.value)}
+                  placeholder="UIA-2026-0001"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                />
+              ) : (
+                <textarea
+                  value={actionInput}
+                  onChange={(e) => setActionInput(e.target.value)}
+                  rows={4}
+                  placeholder={
+                    actionModal === 'message'
+                      ? 'Type your message...'
+                      : 'Review topic and notes...'
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                />
+              )}
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => {
+                    setActionModal(null);
+                    setActionInput('');
+                  }}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={
+                    actionModal === 'flag'
+                      ? handleFlagCase
+                      : actionModal === 'message'
+                        ? handleSendMessage
+                        : handleScheduleReview
+                  }
+                  disabled={!actionInput.trim() || actionLoading}
+                  className="flex-1 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-neutral-800 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
+                >
+                  {actionLoading
+                    ? 'Processing...'
+                    : actionModal === 'flag'
+                      ? 'Flag Case'
+                      : actionModal === 'message'
+                        ? 'Send Message'
+                        : 'Schedule'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success Toast */}
+        {actionSuccess && (
+          <div className="fixed bottom-6 right-6 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            {actionSuccess}
+          </div>
+        )}
       </div>
     </div>
   );

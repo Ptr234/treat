@@ -134,3 +134,52 @@ export interface SanityAgencyProfile {
   isActive: boolean;
   sanityUserId?: string;
 }
+
+export interface SanityInvestorProfile {
+  _id: string;
+  _type: 'investorProfile';
+  referenceNumber: string;
+  name: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  companyName?: string;
+  position?: string;
+  investorType?: 'individual' | 'institutional' | 'foreign';
+  experience?: 'beginner' | 'intermediate' | 'advanced';
+  investmentGoal?: 'growth' | 'income' | 'diversification' | 'strategic';
+  investmentAmount?: string;
+  timeHorizon?: 'short-term' | 'medium-term' | 'long-term';
+  riskTolerance?: 'conservative' | 'moderate' | 'aggressive';
+  primarySector?: string;
+  secondarySectors?: string[];
+  specificInterests?: string;
+  capitalSource?: 'savings' | 'loan' | 'partnership' | 'grant';
+  timeframe?: 'immediate' | '3-months' | '6-months' | '1-year';
+  supportNeeded?: ('legal' | 'financial' | 'technical' | 'marketing')[];
+  status?: 'new' | 'contacted' | 'active' | 'inactive';
+  createdAt?: string;
+}
+
+export interface SanityAdminUser {
+  _id: string;
+  _type: 'adminUser';
+  name: string;
+  email: string;
+  passwordHash?: string;
+  role: 'admin';
+  isActive: boolean;
+}
+
+export interface SanityAgencyMessage {
+  _id: string;
+  _type: 'agencyMessage';
+  channel: string;
+  content: string;
+  senderName: string;
+  senderAgencyCode?: string;
+  senderEmail?: string;
+  attachments?: Array<{ asset: { url: string } }>;
+  isInternal: boolean;
+  sentAt: string;
+}

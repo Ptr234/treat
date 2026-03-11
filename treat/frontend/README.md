@@ -338,6 +338,167 @@ Required CORS origins in Sanity project settings:
 
 ---
 
+## How the App Works
+
+### Overview
+
+The Uganda OneStop Centre is a **dual-audience platform**:
+
+1. **Public-facing** — Investors and business owners browse services, explore opportunities, submit support tickets, and use AI-assisted tools. No login required.
+2. **Admin-facing** — UIA administrators manage tickets, coordinate across government agencies, and monitor KPIs via a live dashboard. Requires sign-in.
+
+### User Journeys
+
+#### General Public (Investors / Business Owners)
+
+```
+Investor visits site
+  |
+  |-- Browse ---------- /services       -> Government services catalog
+  |                     /investments     -> Investment opportunities
+  |                     /agencies        -> 16 OSC agencies (UIA, URSB, URA, etc.)
+  |                     /events          -> Investment events calendar
+  |                     /projects        -> Interactive GIS map of licensed projects
+  |
+  |-- Use Tools ------- /tools/roi-calculator       -> Estimate return on investment
+  |                     /tools/tax-calculator        -> Uganda tax breakdown
+  |                     /tools/document-checklist    -> Required documents list
+  |                     /tools/invoice-generator     -> Invoice creation tool
+  |
+  |-- Get AI Help ----- /chatbot        -> Gemini-powered AI assistant
+  |                                       (5 languages: EN, FR, AR, ZH, SW)
+  |                                       Rate-limited: 20 requests/min per IP
+  |
+  |-- Start Investing - /investments/onboarding -> 5-step wizard
+  |                                       Collects: investor profile, capacity,
+  |                                       sector interest, personal details,
+  |                                       readiness assessment
+  |                                       -> Opens mailto: to UIA with summary
+  |
+  +-- Submit a Ticket - /tickets/create -> Multi-step support request form
+                                          Collects: category, description, contact
+                                          info, nationality, sector, investment size
+                                          -> Saved to Sanity CMS with SLA tracking
+                                          -> Returns reference number (e.g. UIA-2026-0001)
+```
+
+#### Admin (UIA Staff)
+
+```
+Admin signs in (header "Sign In" button)
+  |
+  |-- Email + Password - POST /api/auth/login  -> Verify against Sanity adminUser
+  |                                               -> Issue JWT cookie (24h)
+  |-- Google Sign-In --- POST /api/auth/google -> Verify Google ID token
+  |                                               -> Match email to Sanity adminUser
+  |                                               -> Issue JWT cookie (24h)
+  |
+  |-- Dashboard -------- /dashboard     -> Live KPIs, SLA alerts, agency scorecard,
+  |                                       pipeline value, activity feed
+  |
+  |-- Ticket Mgmt ------ /tickets       -> View, assign, escalate, resolve tickets
+  |                       /tickets/[id]  -> Ticket detail + conversation thread
+  |
+  |-- Agency Chat ------ /agency-chat   -> Inter-agency messaging by ticket channel
+  |                                       File attachments via Sanity Assets
+  |
+  |-- Profile ---------- /profile       -> Update name, change password
+  |
+  +-- Sanity Studio ---- /studio        -> Direct CMS content management
+```
+
+### How Auth Protects Routes
+
+```
+Request arrives
+  |
+  |-- Middleware checks pathname against PROTECTED_ROUTES
+  |   (/dashboard, /agency-chat, /admin)
+  |
+  |-- If protected -> read JWT from "osc-session" cookie
+  |   |-- Valid admin JWT -> allow through
+  |   +-- Missing or invalid -> redirect to /?auth=required
+  |
+  |-- API routes (/api/dashboard, /api/messages, /api/upload)
+  |   |-- Valid admin JWT -> allow through
+  |   +-- Missing or invalid -> 401 JSON response
+  |
+  +-- All other routes -> pass through (public)
+```
+
+---
+
+## How Data Is Collected
+
+### Data Collection Points
+
+| Source | What Is Collected | Where It Goes | Who Can Access |
+|--------|-------------------|---------------|----------------|
+| **Ticket Form** (`/tickets/create`) | Name, email, phone, nationality, sector, investment size, description, file attachments | Sanity CMS (`ticket` documents) | Admin dashboard + Sanity Studio |
+| **Onboarding Wizard** (`/investments/onboarding`) | Investor type, experience, investment amount, risk tolerance, sector interest, personal details, capital source, support needed | Sent via `mailto:` to `invest@onestopcentre.ug` (not stored in DB) | UIA staff via email only |
+| **AI Chatbot** (`/chatbot`) | User messages + conversation history | Sent to Google Gemini API per-session. **Not persisted** — conversations are lost on page refresh | No one (ephemeral) |
+| **Agency Chat** (`/agency-chat`) | Messages between admin officers, file attachments | Sanity CMS (`agencyMessage` documents) | Authenticated admins only |
+| **Admin Profile** (`/profile`) | Name updates, password changes | Sanity CMS (`adminUser` documents) | The admin themselves |
+
+### Data Flow Diagram
+
+```
+                    PUBLIC                          ADMIN
+                      |                               |
+  Ticket Form --------|                               |
+  (name, email,       |     +-------------+           |
+   phone, sector,     |---->|  Sanity CMS |<----------|-- Agency Chat messages
+   attachments)       |     |  (Sanity    |           |-- Ticket assignments
+                      |     |   Cloud)    |           |-- Profile updates
+  AI Chatbot ---------|     +------+------+           |
+  (messages)          |            |                   |
+        |             |     Served via CDN             |
+        v             |     (cdn.sanity.io)            |
+  Google Gemini API   |                                |
+  (ephemeral, not     |     +-------------+           |
+   stored)            |     |   Vercel    |           |
+                      |     |  (Next.js)  |           |
+  Onboarding ---------|     +-------------+           |
+  Wizard              |            |                   |
+        |             |     JWT cookies stored         |
+        v             |     in browser (httpOnly,      |
+  mailto: to UIA      |     24h expiry)                |
+  (email only)        |                                |
+```
+
+### What Is NOT Collected
+
+- **No public user accounts** — general public never signs up or logs in
+- **No cookies for public users** — session cookies are only set on admin login
+- **No analytics/tracking scripts** — no Google Analytics, Facebook Pixel, etc.
+- **No payment data** — no payment processing in the current version
+- **No chatbot history persistence** — AI conversations are not saved server-side
+- **No IP logging** — IP addresses are used for chatbot rate-limiting only (in-memory, cleared every 5 minutes)
+
+### Data Storage
+
+| Store | Type | Contents |
+|-------|------|----------|
+| **Sanity CMS** (Sanity Cloud) | Primary database | All tickets, projects, agencies, events, messages, admin users |
+| **Sanity Assets** (cdn.sanity.io) | File storage | Uploaded documents (PDFs, images, spreadsheets) |
+| **Browser cookie** (`osc-session`) | Session | JWT token for admin auth (httpOnly, 24h TTL) |
+| **Google Gemini** | Transient | Chat messages sent per-request, not stored by the app |
+| **Vercel** | Hosting | Application code + environment variables (encrypted) |
+
+### Security Measures
+
+| Measure | Implementation |
+|---------|---------------|
+| Password hashing | PBKDF2 with random salt (100,000 iterations) |
+| Session tokens | JWT signed with HS256, httpOnly cookie, 24h expiry |
+| Input sanitization | All user inputs sanitized via `sanitizeString()` before storage |
+| File validation | Type whitelist (PDF, DOC, PNG, JPG) + 10MB size limit |
+| Rate limiting | AI chatbot: 20 req/min per IP (in-memory) |
+| Route protection | Next.js middleware verifies JWT on admin routes |
+| API token isolation | Public Sanity client (read-only CDN) vs server client (write token, server-side only) |
+
+---
+
 ## Architecture Decisions
 
 1. **Admin-only auth**: No public registration. Admins are seeded into Sanity via script. JWT in HTTP-only cookies for security.

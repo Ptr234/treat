@@ -2,12 +2,13 @@ import { NextRequest } from 'next/server';
 import { client, serverClient } from '@/lib/sanity-client';
 import { TICKET_BY_REFERENCE_QUERY, TICKET_MESSAGES_QUERY } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody } from '@/lib/api-utils';
-import { ticketUpdateSchema } from '@/lib/validations';
+import { ticketUpdateSchema, publicTicketUpdateSchema } from '@/lib/validations';
 import { requireAdmin } from '@/lib/auth';
+import { sendTicketStatusEmail } from '@/lib/email';
 import type { SanityTicket, SanityTicketMessage } from '@/types/sanity';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -18,11 +19,31 @@ export async function GET(
       return apiError('Ticket not found', 404, 'NOT_FOUND');
     }
 
+    // Check if requester is admin
+    const admin = await requireAdmin(request);
+
+    // Public access: require email query param to match ticket contactEmail
+    if (!admin) {
+      const email = new URL(request.url).searchParams.get('email');
+      if (!email || email.toLowerCase() !== ticket.contactEmail.toLowerCase()) {
+        return apiError(
+          'Email verification required. Provide ?email= matching the ticket contact email.',
+          403,
+          'EMAIL_MISMATCH'
+        );
+      }
+    }
+
     const messages = await client.fetch<SanityTicketMessage[]>(TICKET_MESSAGES_QUERY, {
       ticketId: ticket._id,
     });
 
-    return apiSuccess({ ...ticket, messages });
+    // Filter out internal messages for non-admin users
+    const visibleMessages = admin
+      ? messages
+      : messages.filter((m) => !m.isInternal);
+
+    return apiSuccess({ ...ticket, messages: visibleMessages });
   } catch (error) {
     console.error('[GET /api/tickets/[id]]', error);
     return apiError('Failed to fetch ticket');
@@ -34,17 +55,34 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Require admin authentication
+    const { id } = await params;
     const admin = await requireAdmin(request);
+
+    // --- Public user path: email-verified escalation/rating only ---
     if (!admin) {
-      return apiError('Authentication required', 401, 'UNAUTHORIZED');
+      const [pubData, pubErr] = await validateBody(request, publicTicketUpdateSchema);
+      if (pubErr) return pubErr;
+
+      const ticket = await client.fetch<SanityTicket | null>(TICKET_BY_REFERENCE_QUERY, { ref: id });
+      if (!ticket) return apiError('Ticket not found', 404, 'NOT_FOUND');
+
+      if (pubData.email.toLowerCase() !== ticket.contactEmail.toLowerCase()) {
+        return apiError('Email verification failed', 403, 'EMAIL_MISMATCH');
+      }
+
+      const pubPatch: Record<string, unknown> = {};
+      if (pubData.isEscalated) pubPatch.isEscalated = true;
+      if (pubData.satisfactionRating !== undefined) pubPatch.satisfactionRating = pubData.satisfactionRating;
+      if (pubData.satisfactionComment !== undefined) pubPatch.satisfactionComment = pubData.satisfactionComment;
+
+      await serverClient.patch(ticket._id).set(pubPatch).commit();
+      return apiSuccess({ _id: ticket._id, ...pubPatch });
     }
 
-    const { id } = await params;
+    // --- Admin path: full update capability ---
     const [data, err] = await validateBody(request, ticketUpdateSchema);
     if (err) return err;
 
-    // Verify ticket exists
     const ticket = await client.fetch<SanityTicket | null>(TICKET_BY_REFERENCE_QUERY, { ref: id });
     if (!ticket) {
       return apiError('Ticket not found', 404, 'NOT_FOUND');
@@ -68,6 +106,17 @@ export async function PATCH(
     if (data.status === 'CLOSED') patch.closedAt = now;
 
     const updated = await serverClient.patch(ticket._id).set(patch).commit();
+
+    // Send email notification on status changes (fire-and-forget)
+    if (data.status && data.status !== ticket.status) {
+      sendTicketStatusEmail({
+        to: ticket.contactEmail,
+        contactName: ticket.contactName,
+        referenceNumber: ticket.referenceNumber,
+        title: ticket.title,
+        newStatus: data.status,
+      }).catch((emailErr) => console.error('[PATCH /api/tickets] email failed:', emailErr));
+    }
 
     return apiSuccess({ _id: updated._id, ...patch });
   } catch (error) {

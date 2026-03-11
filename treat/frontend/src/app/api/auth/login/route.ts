@@ -33,6 +33,11 @@ export async function POST(request: NextRequest) {
       return apiError('Invalid credentials', 401);
     }
 
+    // Google-only admins have no passwordHash — must use Google Sign-In
+    if (!admin.passwordHash) {
+      return apiError('This account uses Google Sign-In only', 401);
+    }
+
     // Verify password
     const valid = await verifyPassword(password, admin.passwordHash);
     if (!valid) {

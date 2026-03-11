@@ -8,6 +8,7 @@ import dashboardConfig from './dashboardConfig';
 import agencyProfile from './agencyProfile';
 import agencyMessage from './agencyMessage';
 import adminUser from './adminUser';
+import investorProfile from './investorProfile';
 
 export const schemaTypes = [
   event,
@@ -20,4 +21,5 @@ export const schemaTypes = [
   agencyProfile,
   agencyMessage,
   adminUser,
+  investorProfile,
 ];

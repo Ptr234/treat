@@ -72,17 +72,19 @@ const GovernmentAgencies = () => {
 
   return (
     <div className="min-h-screen bg-black">
+      {/* Hero Section */}
+      <section className="relative bg-cover bg-center bg-no-repeat py-16" style={{ backgroundImage: 'url(/images/uganda-map-flag.jpg)' }}>
+        <div className="absolute inset-0 bg-black/65"></div>
+        <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-3">All Government Agencies</h2>
+          <p className="text-lg text-neutral-200">Access essential government services for business and investment</p>
+        </div>
+      </section>
+
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-12 bg-gradient-to-b from-yellow-400 via-red-600 to-black rounded-full" />
-              <div>
-                <h2 className="text-3xl font-bold text-white mb-1">All Government Agencies</h2>
-                <p className="text-neutral-400">Access essential government services for business and investment</p>
-              </div>
-            </div>
             <div className="bg-neutral-900 border border-neutral-700 px-5 py-3 rounded-xl">
               <p className="text-sm text-neutral-400">Showing</p>
               <p className="text-2xl font-bold text-yellow-400">{filteredAgencies.length} <span className="text-sm font-normal text-neutral-500">of {agencies.length}</span></p>

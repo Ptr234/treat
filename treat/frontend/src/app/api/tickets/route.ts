@@ -8,6 +8,7 @@ import {
 } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody, validateSearchParams, sanitizeString } from '@/lib/api-utils';
 import { createTicketSchema, paginationSchema, SLA_HOURS } from '@/lib/validations';
+import { sendTicketConfirmationEmail } from '@/lib/email';
 import type { SanityTicket } from '@/types/sanity';
 
 export async function GET(request: NextRequest) {
@@ -79,6 +80,16 @@ export async function POST(request: NextRequest) {
       createdAt: now.toISOString(),
       ...(data.documents && data.documents.length > 0 ? { documents: data.documents } : {}),
     });
+
+    // Send confirmation email (fire-and-forget)
+    sendTicketConfirmationEmail({
+      to: data.contactEmail,
+      contactName: data.contactName,
+      referenceNumber,
+      title: data.title,
+      category: data.category,
+      slaHours: SLA_HOURS[data.category] || 24,
+    }).catch((err) => console.error('[POST /api/tickets] email failed:', err));
 
     return apiSuccess(
       { referenceNumber: ticket.referenceNumber as string, ticketId: ticket._id },

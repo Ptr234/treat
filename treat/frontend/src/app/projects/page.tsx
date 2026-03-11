@@ -389,7 +389,28 @@ export default function ProjectsPage() {
                       </button>
                     )}
                     <button
-                      onClick={() => alert('Export functionality - would generate CSV/Excel file')}
+                      onClick={() => {
+                        const headers = ['Project Name', 'Company', 'Sector', 'Region', 'District', 'Investment Value (USD)', 'Employment', 'Status', 'Industrial Park'];
+                        const rows = sortedProjects.map((p) => [
+                          `"${p.name.replace(/"/g, '""')}"`,
+                          `"${p.company.replace(/"/g, '""')}"`,
+                          p.sector,
+                          p.region,
+                          p.district,
+                          p.investmentValue,
+                          p.plannedEmployment,
+                          p.status.replace('_', ' '),
+                          p.industrialPark || '',
+                        ]);
+                        const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `projects-export-${new Date().toISOString().split('T')[0]}.csv`;
+                        link.click();
+                        URL.revokeObjectURL(url);
+                      }}
                       className="px-4 py-2 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400 font-bold flex items-center gap-2"
                     >
                       <DocumentArrowDownIcon className="w-5 h-5" />

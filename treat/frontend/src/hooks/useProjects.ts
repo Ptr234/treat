@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { mockProjects } from '@/data/mock/projects';
 import type { LicensedProject, ProjectStatus } from '@/types';
 
 function mapSanityStatus(status: string): ProjectStatus {
@@ -44,13 +43,10 @@ export function useProjects() {
       const res = await fetch('/api/projects');
       if (!res.ok) throw new Error(`API ${res.status}`);
       const json = await res.json();
-      if (!json.success || !json.data?.length) {
-        setData(mockProjects);
-        setLoading(false);
-        return;
-      }
+      if (!json.success) throw new Error(json.error || 'Unknown error');
 
-      const mapped: LicensedProject[] = json.data.map((p: SanityProject) => ({
+      const projects: SanityProject[] = json.data ?? [];
+      const mapped: LicensedProject[] = projects.map((p) => ({
         id: p._id,
         name: p.companyName,
         company: p.companyName,
@@ -71,8 +67,8 @@ export function useProjects() {
       setData(mapped);
       setError(null);
     } catch (err) {
-      console.error('[useProjects] fetch failed, using mock:', err);
-      setData(mockProjects);
+      console.error('[useProjects] fetch failed:', err);
+      setData([]);
       setError(err instanceof Error ? err.message : 'Failed to fetch');
     } finally {
       setLoading(false);

@@ -21,9 +21,8 @@ export default defineType({
       name: 'passwordHash',
       title: 'Password Hash',
       type: 'string',
-      description: 'SHA-256 hashed password — never store plaintext',
-      validation: (r) => r.required(),
-      hidden: true,
+      description:
+        'SHA-256 hash of the password. Leave empty for Google-only login. Generate via: echo -n "YourPassword" | sha256sum',
     }),
     defineField({
       name: 'role',

@@ -122,9 +122,8 @@ export default function AgencyChatPage() {
   const [activeChannel, setActiveChannel] = useState('general');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [senderName, setSenderName] = useState('');
   const [senderAgencyCode, setSenderAgencyCode] = useState<string>('UIA');
-  const [senderEmail, setSenderEmail] = useState('');
+  const [sendError, setSendError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -140,6 +139,7 @@ export default function AgencyChatPage() {
   const fetchChannels = useCallback(async () => {
     try {
       const res = await fetch('/api/messages/');
+      if (!res.ok) return;
       const json = await res.json();
       if (json.success) {
         setChannels(json.data.channels ?? []);
@@ -160,6 +160,7 @@ export default function AgencyChatPage() {
     try {
       setLoadingMessages(true);
       const res = await fetch(`/api/messages/?channel=${encodeURIComponent(activeChannel)}`);
+      if (!res.ok) return;
       const json = await res.json();
       if (json.success) {
         setMessages(json.data ?? []);
@@ -194,9 +195,10 @@ export default function AgencyChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !senderName.trim()) return;
+    if (!newMessage.trim()) return;
 
     setSending(true);
+    setSendError(null);
     try {
       const res = await fetch('/api/messages/', {
         method: 'POST',
@@ -204,24 +206,23 @@ export default function AgencyChatPage() {
         body: JSON.stringify({
           channel: activeChannel,
           content: newMessage.trim(),
-          senderName: senderName.trim(),
           senderAgencyCode,
-          senderEmail: senderEmail.trim() || undefined,
           ...(pendingAttachments.length > 0
             ? { attachments: pendingAttachments.map((a) => a.fileRef) }
             : {}),
         }),
       });
       const json = await res.json();
-      if (json.success) {
-        setNewMessage('');
-        setPendingAttachments([]);
-        // Optimistic — re-fetch to get the server-side _id & sentAt
-        void fetchMessages();
-        void fetchChannels();
+      if (!res.ok || !json.success) {
+        setSendError(json.error || 'Failed to send message');
+        return;
       }
+      setNewMessage('');
+      setPendingAttachments([]);
+      void fetchMessages();
+      void fetchChannels();
     } catch (err) {
-      console.error('Failed to send message', err);
+      setSendError(err instanceof Error ? err.message : 'Failed to send message');
     } finally {
       setSending(false);
       inputRef.current?.focus();
@@ -247,6 +248,7 @@ export default function AgencyChatPage() {
         const formData = new FormData();
         formData.append('file', file);
         const res = await fetch('/api/upload/', { method: 'POST', body: formData });
+        if (!res.ok) continue;
         const json = await res.json();
         if (json.success) {
           uploaded.push({
@@ -564,14 +566,10 @@ export default function AgencyChatPage() {
             {/* ── Sender info bar ─────────────────────────────────── */}
             <div className="px-4 sm:px-6 py-3 border-t border-neutral-800 bg-neutral-900/80">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                {/* Name */}
-                <input
-                  type="text"
-                  placeholder="Your name"
-                  value={senderName}
-                  onChange={(e) => setSenderName(e.target.value)}
-                  className="flex-1 min-w-[140px] px-3 py-1.5 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50"
-                />
+                {/* Logged-in user identity */}
+                <span className="px-3 py-1.5 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-300">
+                  {user?.name || 'Admin'}
+                </span>
 
                 {/* Agency selector */}
                 <select
@@ -585,16 +583,14 @@ export default function AgencyChatPage() {
                     </option>
                   ))}
                 </select>
-
-                {/* Email (optional) */}
-                <input
-                  type="email"
-                  placeholder="Email (optional)"
-                  value={senderEmail}
-                  onChange={(e) => setSenderEmail(e.target.value)}
-                  className="flex-1 min-w-[160px] px-3 py-1.5 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50"
-                />
               </div>
+
+              {/* Send error display */}
+              {sendError && (
+                <div className="mb-2 px-3 py-1.5 text-xs text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg">
+                  {sendError}
+                </div>
+              )}
 
               {/* Pending attachments pills */}
               {pendingAttachments.length > 0 && (
@@ -651,19 +647,15 @@ export default function AgencyChatPage() {
                       void handleSend(e);
                     }
                   }}
-                  placeholder={
-                    senderName.trim()
-                      ? `Message #${activeChannel === 'general' ? 'general' : activeChannel}...`
-                      : 'Enter your name above to start chatting...'
-                  }
-                  disabled={!senderName.trim()}
+                  placeholder={`Message #${activeChannel === 'general' ? 'general' : activeChannel}...`}
+                  disabled={false}
                   rows={1}
                   className="flex-1 px-4 py-2.5 text-sm bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={!senderName.trim() || uploading || pendingAttachments.length >= 3}
+                  disabled={uploading || pendingAttachments.length >= 3}
                   className="px-3 py-2.5 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 hover:border-yellow-500/40 disabled:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-400 hover:text-yellow-400 rounded-xl transition-colors flex items-center flex-shrink-0"
                   title="Attach files (max 3)"
                 >
@@ -671,7 +663,7 @@ export default function AgencyChatPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={sending || !newMessage.trim() || !senderName.trim()}
+                  disabled={sending || !newMessage.trim()}
                   className="px-4 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-neutral-700 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center gap-2 flex-shrink-0 font-medium text-sm"
                 >
                   <PaperAirplaneIcon className="w-4 h-4" />

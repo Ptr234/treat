@@ -1,10 +1,40 @@
 import { NextRequest } from 'next/server';
 import { client, serverClient } from '@/lib/sanity-client';
-import { TICKET_BY_REFERENCE_QUERY } from '@/lib/sanity-queries';
+import { TICKET_BY_REFERENCE_QUERY, TICKET_MESSAGES_QUERY } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody, sanitizeString } from '@/lib/api-utils';
-import { ticketMessageSchema } from '@/lib/validations';
+import { ticketMessageSchema, publicCommentSchema } from '@/lib/validations';
 import { requireAdmin } from '@/lib/auth';
-import type { SanityTicket } from '@/types/sanity';
+import type { SanityTicket, SanityTicketMessage } from '@/types/sanity';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const ticket = await client.fetch<SanityTicket | null>(TICKET_BY_REFERENCE_QUERY, { ref: id });
+    if (!ticket) return apiError('Ticket not found', 404, 'NOT_FOUND');
+
+    const admin = await requireAdmin(request);
+
+    if (!admin) {
+      const email = new URL(request.url).searchParams.get('email');
+      if (!email || email.toLowerCase() !== ticket.contactEmail.toLowerCase()) {
+        return apiError('Email verification required', 403, 'EMAIL_MISMATCH');
+      }
+    }
+
+    const messages = await client.fetch<SanityTicketMessage[]>(TICKET_MESSAGES_QUERY, {
+      ticketId: ticket._id,
+    });
+    const visibleMessages = admin ? messages : messages.filter((m) => !m.isInternal);
+
+    return apiSuccess(visibleMessages);
+  } catch (error) {
+    console.error('[GET /api/tickets/[id]/messages]', error);
+    return apiError('Failed to fetch messages');
+  }
+}
 
 export async function POST(
   request: NextRequest,
@@ -12,33 +42,50 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-
-    const [data, err] = await validateBody(request, ticketMessageSchema);
-    if (err) return err;
-
-    // Verify ticket exists
     const ticket = await client.fetch<SanityTicket | null>(TICKET_BY_REFERENCE_QUERY, { ref: id });
-    if (!ticket) {
-      return apiError('Ticket not found', 404, 'NOT_FOUND');
+    if (!ticket) return apiError('Ticket not found', 404, 'NOT_FOUND');
+
+    const admin = await requireAdmin(request);
+
+    if (admin) {
+      // Admin: full message schema (can set role, isInternal)
+      const [data, err] = await validateBody(request, ticketMessageSchema);
+      if (err) return err;
+
+      const doc = await serverClient.create({
+        _type: 'ticketMessage',
+        ticket: { _type: 'reference', _ref: ticket._id },
+        content: sanitizeString(data.content),
+        authorName: sanitizeString(data.authorName),
+        authorRole: data.authorRole,
+        authorEmail: data.authorEmail,
+        isInternal: data.isInternal,
+        sentAt: new Date().toISOString(),
+      });
+
+      return apiSuccess({ _id: doc._id }, undefined, 201);
     }
 
-    // Determine author role and internal flag based on authentication
-    const admin = await requireAdmin(request);
-    const authorRole = admin ? 'officer' : 'investor';
-    const isInternal = admin ? (data.isInternal === true) : false;
+    // Public user: simplified schema + email verification
+    const [data, err] = await validateBody(request, publicCommentSchema);
+    if (err) return err;
 
-    const message = await serverClient.create({
+    if (data.authorEmail.toLowerCase() !== ticket.contactEmail.toLowerCase()) {
+      return apiError('Email does not match ticket contact', 403, 'EMAIL_MISMATCH');
+    }
+
+    const doc = await serverClient.create({
       _type: 'ticketMessage',
       ticket: { _type: 'reference', _ref: ticket._id },
       content: sanitizeString(data.content),
-      authorName: admin ? admin.name : sanitizeString(data.authorName),
-      authorRole,
-      authorEmail: admin ? admin.email : data.authorEmail,
-      isInternal,
+      authorName: sanitizeString(data.authorName),
+      authorRole: 'investor',
+      authorEmail: data.authorEmail,
+      isInternal: false,
       sentAt: new Date().toISOString(),
     });
 
-    return apiSuccess({ _id: message._id, sentAt: message.sentAt }, undefined, 201);
+    return apiSuccess({ _id: doc._id }, undefined, 201);
   } catch (error) {
     console.error('[POST /api/tickets/[id]/messages]', error);
     return apiError('Failed to create message');

@@ -66,7 +66,9 @@ export const TICKET_BY_REFERENCE_QUERY = `
   *[_type == "ticket" && referenceNumber == $ref][0] {
     _id, referenceNumber, title, description, category, priority, status,
     contactName, contactEmail, assignee, slaDeadlineAt,
-    satisfactionRating, isEscalated, createdAt, resolvedAt, closedAt,
+    satisfactionRating, satisfactionComment, isEscalated,
+    createdAt, resolvedAt, closedAt,
+    documents[] { asset->{ url } },
     assignedAgency->{ _id, name, code }
   }
 `;
@@ -206,6 +208,25 @@ export const DASHBOARD_ANALYTICS_LATEST_QUERY = `
     _id, period, totalInquiries, resolvedInquiries,
     avgResolutionHours, slaComplianceRate, satisfactionAverage,
     funnelData
+  }
+`;
+
+// ===================== INVESTOR PROFILES =====================
+export const INVESTOR_COUNT_BY_YEAR_QUERY = `
+  count(*[_type == "investorProfile" && referenceNumber match $pattern])
+`;
+
+export const INVESTOR_REF_EXISTS_QUERY = `
+  count(*[_type == "investorProfile" && referenceNumber == $ref]) > 0
+`;
+
+export const INVESTOR_BY_EMAIL_QUERY = `
+  *[_type == "investorProfile" && email == $email][0] {
+    _id, referenceNumber, name, email, phone, nationality,
+    companyName, position, investorType, experience, investmentGoal,
+    investmentAmount, timeHorizon, riskTolerance, primarySector,
+    secondarySectors, specificInterests, capitalSource, timeframe,
+    supportNeeded, status, createdAt
   }
 `;
 

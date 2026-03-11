@@ -25,12 +25,6 @@ export default defineType({
       validation: r => r.required(),
     }),
     defineField({
-      name: 'senderAgency',
-      title: 'Sender Agency',
-      type: 'reference',
-      to: [{ type: 'agency' }],
-    }),
-    defineField({
       name: 'senderAgencyCode',
       title: 'Sender Agency Code',
       type: 'string',

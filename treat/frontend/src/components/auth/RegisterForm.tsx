@@ -70,7 +70,7 @@ export default function RegisterForm({ onSuccess, onToggleForm }: RegisterFormPr
             required
             value={formData.firstName}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black placeholder-gray-400"
           />
         </div>
 
@@ -85,7 +85,7 @@ export default function RegisterForm({ onSuccess, onToggleForm }: RegisterFormPr
             required
             value={formData.lastName}
             onChange={handleChange}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black placeholder-gray-400"
           />
         </div>
       </div>
@@ -147,7 +147,7 @@ export default function RegisterForm({ onSuccess, onToggleForm }: RegisterFormPr
           required
           value={formData.confirmPassword}
           onChange={handleChange}
-          className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+          className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-black placeholder-gray-400 ${
             passwordMatch ? 'border-gray-300' : 'border-red-300'
           }`}
         />

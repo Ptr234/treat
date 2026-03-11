@@ -249,23 +249,35 @@ export async function GET() {
         client.fetch<AnalyticsLatest | null>(DASHBOARD_ANALYTICS_LATEST_QUERY),
       ]);
 
-    // KPI cards
-    const liveInquiries = ticketStats.new + ticketStats.assigned;
-    const activeCases =
-      ticketStats.inProgress + ticketStats.pendingExternal + ticketStats.assigned;
-    const pendingApprovals = ticketStats.pendingExternal;
+    // KPI cards (guard against undefined counts from Sanity)
+    const ts: TicketStats = {
+      total: ticketStats.total ?? 0,
+      new: ticketStats.new ?? 0,
+      assigned: ticketStats.assigned ?? 0,
+      inProgress: ticketStats.inProgress ?? 0,
+      pendingExternal: ticketStats.pendingExternal ?? 0,
+      resolved: ticketStats.resolved ?? 0,
+      closed: ticketStats.closed ?? 0,
+      critical: ticketStats.critical ?? 0,
+      high: ticketStats.high ?? 0,
+      escalated: ticketStats.escalated ?? 0,
+    };
+
+    const liveInquiries = ts.new + ts.assigned;
+    const activeCases = ts.inProgress + ts.pendingExternal + ts.assigned;
+    const pendingApprovals = ts.pendingExternal;
     const pipelineValue = (pipeline.totalInvestmentUSD ?? 0) / 1_000_000_000; // convert to billions
 
     // Performance gauges — use analytics if available, else compute from tickets
-    const totalActionable = ticketStats.total || 1;
+    const totalActionable = ts.total || 1;
     const responseRate = analytics?.slaComplianceRate
-      ?? Math.round(((ticketStats.resolved + ticketStats.closed) / totalActionable) * 100);
+      ?? Math.round(((ts.resolved + ts.closed) / totalActionable) * 100);
     const conversionRate = analytics?.funnelData
-      ? Math.round((analytics.funnelData.licensing / Math.max(analytics.funnelData.inquiries, 1)) * 100)
-      : Math.round(((ticketStats.resolved + ticketStats.closed) / totalActionable) * 100);
+      ? Math.round(((analytics.funnelData.licensing ?? 0) / Math.max(analytics.funnelData.inquiries ?? 1, 1)) * 100)
+      : Math.round(((ts.resolved + ts.closed) / totalActionable) * 100);
     const slaCompliance = analytics?.slaComplianceRate
       ?? Math.round(
-          ((totalActionable - ticketStats.escalated) / totalActionable) * 100
+          ((totalActionable - ts.escalated) / totalActionable) * 100
         );
     const investorSatisfaction = analytics?.satisfactionAverage ?? 0;
 
@@ -285,7 +297,7 @@ export async function GET() {
     agencyScorecard.sort((a, b) => b.score - a.score);
 
     // Alerts
-    const alerts = buildAlerts(slaTickets, vipTickets, ticketStats);
+    const alerts = buildAlerts(slaTickets, vipTickets, ts);
 
     // Activity feed
     const recentActivity = buildActivityFeed(recentTickets).slice(0, 10);
@@ -305,7 +317,7 @@ export async function GET() {
     };
 
     // Flag if data is empty so the client can decide to use mock fallback
-    const isEmpty = ticketStats.total === 0 && agencyStats.length === 0;
+    const isEmpty = ts.total === 0 && agencyStats.length === 0;
 
     return NextResponse.json(
       { success: true, data: metrics, isEmpty },

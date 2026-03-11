@@ -99,6 +99,55 @@ export const projectsQuerySchema = z.object({
     .transform((v) => v === 'true'),
 });
 
+export const createInvestorProfileSchema = z.object({
+  // Contact info
+  name: z.string().min(2, 'Name is required').max(100),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(1, 'Phone is required').max(30),
+  nationality: z.string().min(1, 'Nationality is required').max(100),
+  companyName: z.string().max(200).optional().default(''),
+  position: z.string().max(100).optional().default(''),
+  // Investment profile
+  investorType: z.enum(['individual', 'institutional', 'foreign']),
+  experience: z.enum(['beginner', 'intermediate', 'advanced']),
+  investmentGoal: z.enum(['growth', 'income', 'diversification', 'strategic']),
+  // Capacity
+  investmentAmount: z.string().min(1),
+  timeHorizon: z.enum(['short-term', 'medium-term', 'long-term']),
+  riskTolerance: z.enum(['conservative', 'moderate', 'aggressive']),
+  // Sector
+  primarySector: z.string().min(1),
+  secondarySectors: z.array(z.string()).optional().default([]),
+  specificInterests: z.string().max(2000).optional().default(''),
+  // Readiness
+  capitalSource: z.enum(['savings', 'loan', 'partnership', 'grant']),
+  timeframe: z.enum(['immediate', '3-months', '6-months', '1-year']),
+  supportNeeded: z.array(z.string()).optional().default([]),
+});
+
+// Public-facing ticket update (email-verified escalation & rating only)
+export const publicTicketUpdateSchema = z
+  .object({
+    email: z.string().email('Email is required for verification'),
+    isEscalated: z.literal(true).optional(),
+    satisfactionRating: z.number().min(1).max(5).optional(),
+    satisfactionComment: z.string().max(1000).optional(),
+  })
+  .refine(
+    (data) =>
+      data.isEscalated !== undefined ||
+      data.satisfactionRating !== undefined ||
+      data.satisfactionComment !== undefined,
+    { message: 'At least one update field must be provided' }
+  );
+
+// Public comment on a ticket (email-verified)
+export const publicCommentSchema = z.object({
+  content: z.string().min(1, 'Comment is required').max(5000),
+  authorName: z.string().min(1, 'Name is required').max(100),
+  authorEmail: z.string().email('Email is required for verification'),
+});
+
 export const chatbotMessageSchema = z.object({
   message: z.string().min(1, 'Message is required').max(2000),
   history: z
