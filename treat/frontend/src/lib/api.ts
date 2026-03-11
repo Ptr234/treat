@@ -6,7 +6,7 @@ class APIClient {
   private defaultHeaders: HeadersInit;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://treat.onrender.com/api';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     };

@@ -248,11 +248,14 @@ const Header: React.FC = () => {
                 <div className="relative group">
                   <button className="flex items-center space-x-2 p-2 text-white/90 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all duration-200">
                     {user.picture ? (
-                      <img
+                      <Image
                         src={user.picture}
                         alt={user.name}
+                        width={28}
+                        height={28}
                         className="w-7 h-7 rounded-full object-cover ring-2 ring-yellow-400/50"
                         referrerPolicy="no-referrer"
+                        unoptimized
                       />
                     ) : (
                       <UserIcon className="w-5 h-5" />
@@ -268,11 +271,14 @@ const Header: React.FC = () => {
                       className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300"
                     >
                       {user.picture ? (
-                        <img
+                        <Image
                           src={user.picture}
                           alt={user.name}
+                          width={32}
+                          height={32}
                           className="w-8 h-8 rounded-full object-cover"
                           referrerPolicy="no-referrer"
+                          unoptimized
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center">

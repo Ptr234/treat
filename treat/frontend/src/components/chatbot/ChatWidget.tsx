@@ -307,7 +307,7 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-28 left-2 right-2 sm:left-auto sm:right-6 z-50 w-auto sm:w-[400px] h-[calc(100dvh-8rem)] sm:h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-[4.5rem] left-2 right-2 sm:bottom-24 sm:left-auto sm:right-6 z-50 w-auto sm:w-[400px] h-[calc(100dvh-6rem)] sm:h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="bg-black px-4 py-3 flex items-center justify-between">
@@ -545,11 +545,11 @@ export default function ChatWidget() {
             initial={{ opacity: 0, y: 10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
-            className="fixed bottom-28 right-6 z-50 bg-white rounded-xl shadow-xl px-4 py-3 max-w-[220px] border border-yellow-300"
+            className="fixed bottom-[4.5rem] right-4 sm:bottom-24 sm:right-6 z-50 bg-white rounded-xl shadow-xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-[180px] sm:max-w-[220px] border border-yellow-300"
           >
-            <p className="text-sm font-medium text-gray-800">How can I help you invest?</p>
-            <p className="text-xs text-gray-500 mt-1">Ask me anything about Uganda</p>
-            <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-r border-b border-yellow-300 rotate-45"></div>
+            <p className="text-xs sm:text-sm font-medium text-gray-800">How can I help you invest?</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1">Ask me anything about Uganda</p>
+            <div className="absolute -bottom-2 right-6 sm:right-8 w-3 h-3 sm:w-4 sm:h-4 bg-white border-r border-b border-yellow-300 rotate-45"></div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -560,7 +560,7 @@ export default function ChatWidget() {
           setIsOpen(!isOpen);
           setShowTooltip(false);
         }}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 h-16 bg-yellow-500 text-black rounded-full shadow-2xl shadow-yellow-500/30 hover:shadow-yellow-400/40 transition-all duration-300 px-5 ring-4 ring-yellow-400/20 hover:ring-yellow-400/40"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center gap-2 w-12 h-12 sm:w-auto sm:h-14 bg-yellow-500 text-black rounded-full shadow-lg shadow-yellow-500/25 hover:shadow-yellow-400/40 transition-all duration-300 sm:px-5 ring-2 ring-yellow-400/20 sm:ring-4 hover:ring-yellow-400/40"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         aria-label="Toggle AI Assistant"
@@ -574,7 +574,7 @@ export default function ChatWidget() {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <X className="w-7 h-7" />
+              <X className="w-5 h-5 sm:w-6 sm:h-6" />
             </motion.div>
           ) : (
             <motion.div
@@ -585,12 +585,12 @@ export default function ChatWidget() {
               transition={{ duration: 0.2 }}
               className="relative"
             >
-              <MessageCircle className="w-7 h-7" />
+              <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
               {unreadCount > 0 && (
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center"
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full flex items-center justify-center"
                 >
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </motion.span>
@@ -605,7 +605,7 @@ export default function ChatWidget() {
 
         {!isOpen && (
           <motion.div
-            className="absolute inset-0 rounded-full bg-yellow-500"
+            className="absolute inset-0 rounded-full bg-yellow-500 hidden sm:block"
             animate={{
               scale: [1, 1.3, 1],
               opacity: [0.4, 0, 0.4],

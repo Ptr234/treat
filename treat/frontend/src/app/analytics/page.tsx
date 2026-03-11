@@ -38,7 +38,53 @@ export default function AnalyticsPage() {
   // Analytics data comes from mock/Sanity in Phase 3 — using mock data for now
   const [mockAnalytics] = useState<InquiryAnalytics>(fallbackAnalytics);
 
-  const handleExport = (_type?: 'pdf' | 'csv') => {
+  const handleExport = (type?: 'pdf' | 'csv') => {
+    if (type === 'csv') {
+      // Build CSV from current analytics data
+      const rows: string[][] = [];
+
+      if (activeTab === 'inquiries') {
+        // Summary
+        rows.push(['Metric', 'Value']);
+        rows.push(['Total Inquiries', String(mockAnalytics.summary.totalInquiries)]);
+        rows.push(['Total Investment Value', String(mockAnalytics.summary.totalInvestmentValue)]);
+        rows.push(['Conversion Rate', `${mockAnalytics.summary.conversionRate}%`]);
+        rows.push(['Avg Response Time', mockAnalytics.summary.avgResponseTime]);
+        rows.push(['Top Country', mockAnalytics.summary.topCountry]);
+        rows.push(['Top Sector', mockAnalytics.summary.topSector]);
+        rows.push([]);
+
+        // Sector distribution
+        rows.push(['Sector', 'Count', 'Percentage', 'Investment Value', 'Trend']);
+        for (const s of mockAnalytics.sectorDistribution) {
+          rows.push([s.sector, String(s.count), `${s.percentage}%`, String(s.investmentValue), `${s.trend} ${s.trendPercentage}%`]);
+        }
+        rows.push([]);
+
+        // Geographic
+        rows.push(['Country', 'Code', 'Inquiries', 'Investment Value', 'Region']);
+        for (const g of mockAnalytics.geographic) {
+          rows.push([g.country, g.countryCode, String(g.inquiries), String(g.investmentValue), g.region]);
+        }
+      } else {
+        // Project analysis
+        rows.push(['Metric', 'Value']);
+        rows.push(['Total Licensed Projects', String(projectAnalysis.overview.totalLicensedProjects)]);
+        rows.push(['Total Investment Pledged', `$${projectAnalysis.overview.totalInvestmentPledged}`]);
+        rows.push(['Planned Employment', String(projectAnalysis.overview.totalPlannedEmployment)]);
+        rows.push(['Bankable Projects', String(projectAnalysis.overview.activeBankableProjects)]);
+      }
+
+      const csvContent = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `osc-analytics-${activeTab}-${selectedRange}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
     setShowNotification(true);
     setTimeout(() => setShowNotification(false), 3000);
   };
@@ -168,11 +214,11 @@ export default function AnalyticsPage() {
               </div>
 
               <button
-                onClick={() => handleExport('pdf')}
+                onClick={() => window.print()}
                 className="px-4 py-2.5 bg-white text-yellow-700 rounded-lg font-medium hover:bg-yellow-50 transition-colors flex items-center gap-2 justify-center"
               >
                 <DocumentArrowDownIcon className="w-5 h-5" />
-                Export PDF
+                Print / PDF
               </button>
 
               <button
@@ -196,7 +242,7 @@ export default function AnalyticsPage() {
           className="fixed top-4 right-4 z-50 bg-yellow-600 text-black px-6 py-3 rounded-lg shadow-lg flex items-center gap-3"
         >
           <DocumentArrowDownIcon className="w-5 h-5" />
-          <span className="font-medium">Export initiated! File will download shortly.</span>
+          <span className="font-medium">Export complete! Check your downloads.</span>
         </motion.div>
       )}
 
