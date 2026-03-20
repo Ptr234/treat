@@ -8,7 +8,7 @@ import {
 } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody, validateSearchParams, sanitizeString } from '@/lib/api-utils';
 import { createTicketSchema, paginationSchema, SLA_HOURS } from '@/lib/validations';
-import { sendTicketConfirmationEmail } from '@/lib/email';
+import { sendTicketConfirmationEmail, sendEscalationNotificationEmail } from '@/lib/email';
 import type { SanityTicket } from '@/types/sanity';
 
 export async function GET(request: NextRequest) {
@@ -54,9 +54,15 @@ export async function POST(request: NextRequest) {
     if (err) return err;
 
     const now = new Date();
-    const slaDeadlineAt = new Date(
-      now.getTime() + (SLA_HOURS[data.category] || 24) * 3600000
-    );
+    const isEscalated = data.isEscalated === true;
+
+    // Escalated tickets get priority boost and tighter SLA
+    const effectivePriority = isEscalated && data.priority === 'medium' ? 'high' : data.priority;
+    const ESCALATION_SLA_HOURS = 4; // 4-hour SLA for escalated tickets
+    const slaHours = isEscalated
+      ? Math.min(SLA_HOURS[data.category] || 24, ESCALATION_SLA_HOURS)
+      : (SLA_HOURS[data.category] || 24);
+    const slaDeadlineAt = new Date(now.getTime() + slaHours * 3600000);
 
     const referenceNumber = await generateRefNumber();
 
@@ -66,7 +72,7 @@ export async function POST(request: NextRequest) {
       title: sanitizeString(data.title),
       description: sanitizeString(data.description),
       category: data.category,
-      priority: data.priority,
+      priority: effectivePriority,
       status: 'NEW',
       contactName: sanitizeString(data.contactName),
       contactEmail: data.contactEmail,
@@ -74,9 +80,10 @@ export async function POST(request: NextRequest) {
       investorNationality: data.investorNationality,
       sector: data.sector,
       investmentSize: data.investmentSize,
-      slaDeadlineHours: SLA_HOURS[data.category] || 24,
+      slaDeadlineHours: slaHours,
       slaDeadlineAt: slaDeadlineAt.toISOString(),
-      isEscalated: false,
+      isEscalated,
+      ...(isEscalated ? { escalatedAt: now.toISOString() } : {}),
       createdAt: now.toISOString(),
       ...(data.documents && data.documents.length > 0 ? { documents: data.documents } : {}),
     });
@@ -88,8 +95,21 @@ export async function POST(request: NextRequest) {
       referenceNumber,
       title: data.title,
       category: data.category,
-      slaHours: SLA_HOURS[data.category] || 24,
+      slaHours,
     }).catch((err) => console.error('[POST /api/tickets] email failed:', err));
+
+    // Notify admin/officers on escalation (fire-and-forget)
+    if (isEscalated) {
+      sendEscalationNotificationEmail({
+        referenceNumber,
+        contactName: data.contactName,
+        contactEmail: data.contactEmail,
+        title: data.title,
+        description: data.description,
+        priority: effectivePriority,
+        slaHours,
+      }).catch((err) => console.error('[POST /api/tickets] escalation email failed:', err));
+    }
 
     return apiSuccess(
       { referenceNumber: ticket.referenceNumber as string, ticketId: ticket._id },

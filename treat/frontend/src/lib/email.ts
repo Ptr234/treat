@@ -8,7 +8,7 @@ function getPostmark(): postmark.ServerClient | null {
   return client;
 }
 
-const FROM_ADDRESS = process.env.EMAIL_FROM || 'notifications@onestopcentre.com';
+const FROM_ADDRESS = process.env.EMAIL_FROM || 'notifications@www.oscdigitaltool.com';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://frontend-beast4.vercel.app';
 
 // ── Status labels for emails ─────────────────────────────────────────
@@ -130,6 +130,89 @@ export async function sendTicketStatusEmail(opts: {
           <p>
             <a href="${trackingUrl}" style="display: inline-block; padding: 12px 24px; background: #1a1a1a; color: #facc15; text-decoration: none; border-radius: 6px; font-weight: 600;">
               View Details
+            </a>
+          </p>
+        </div>
+        <div style="background: #f5f5f5; padding: 16px; text-align: center; font-size: 12px; color: #999;">
+          Uganda Investment Authority &bull; Plot 22 Jinja Road, Kampala<br/>
+          +256-414-301000 &bull; info@ugandainvest.go.ug
+        </div>
+      </div>
+    `,
+    MessageStream: 'outbound',
+  });
+}
+
+// ── Escalation notification email (to admin/officers) ────────────────
+
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.EMAIL_FROM || 'admin@uia.go.ug';
+
+export async function sendEscalationNotificationEmail(opts: {
+  referenceNumber: string;
+  contactName: string;
+  contactEmail: string;
+  title: string;
+  description: string;
+  priority: string;
+  slaHours: number;
+}) {
+  const pm = getPostmark();
+  if (!pm) {
+    console.warn('[email] POSTMARK_SERVER_TOKEN not set — skipping escalation notification email');
+    return;
+  }
+
+  const ticketUrl = `${SITE_URL}/tickets/${opts.referenceNumber}`;
+  const priorityColors: Record<string, string> = {
+    critical: '#dc2626',
+    high: '#ea580c',
+    medium: '#ca8a04',
+    low: '#65a30d',
+  };
+  const color = priorityColors[opts.priority] || '#ca8a04';
+
+  await pm.sendEmail({
+    From: FROM_ADDRESS,
+    To: ADMIN_EMAIL,
+    Subject: `[ESCALATION] ${opts.referenceNumber} — ${opts.title}`,
+    HtmlBody: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: #1a1a1a; padding: 24px; text-align: center;">
+          <h1 style="color: #facc15; margin: 0; font-size: 20px;">Uganda Investment Authority</h1>
+          <p style="color: #999; margin: 4px 0 0; font-size: 13px;">OneStop Centre — Escalation Alert</p>
+        </div>
+        <div style="padding: 24px; background: #fff;">
+          <div style="background: #fef2f2; border-left: 4px solid ${color}; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+            <p style="margin: 0; font-weight: 700; font-size: 16px; color: ${color};">Escalation Requires Attention</p>
+            <p style="margin: 4px 0 0; color: #666;">A ticket has been escalated and needs immediate officer assignment.</p>
+          </div>
+          <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+            <tr>
+              <td style="padding: 8px 12px; background: #f9f9f9; font-weight: 600; width: 40%;">Reference</td>
+              <td style="padding: 8px 12px; background: #f9f9f9;">${opts.referenceNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; font-weight: 600;">Subject</td>
+              <td style="padding: 8px 12px;">${opts.title}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f9f9f9; font-weight: 600;">Priority</td>
+              <td style="padding: 8px 12px; background: #f9f9f9;"><span style="color: ${color}; font-weight: 700; text-transform: uppercase;">${opts.priority}</span></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; font-weight: 600;">SLA Deadline</td>
+              <td style="padding: 8px 12px;">${opts.slaHours} hours</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 12px; background: #f9f9f9; font-weight: 600;">Investor</td>
+              <td style="padding: 8px 12px; background: #f9f9f9;">${opts.contactName} (${opts.contactEmail})</td>
+            </tr>
+          </table>
+          <p style="margin: 16px 0 8px; font-weight: 600;">Description:</p>
+          <p style="margin: 0; color: #444; font-size: 14px; line-height: 1.5;">${opts.description.slice(0, 500)}${opts.description.length > 500 ? '...' : ''}</p>
+          <p style="margin-top: 24px;">
+            <a href="${ticketUrl}" style="display: inline-block; padding: 12px 24px; background: #dc2626; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+              View &amp; Assign Ticket
             </a>
           </p>
         </div>

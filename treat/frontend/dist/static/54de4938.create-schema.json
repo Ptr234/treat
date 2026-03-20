@@ -389,7 +389,16 @@
             "KCCA",
             "LANDS",
             "UNBS",
-            "ERA"
+            "ERA",
+            "NSSF",
+            "CMA",
+            "UMEME",
+            "NWSC",
+            "UTB",
+            "UFZA",
+            "FUE",
+            "GIANTS_CLUB",
+            "MLHUD"
           ]
         },
         "name": "code",
@@ -1627,6 +1636,611 @@
       }
     ],
     "name": "investorProfile",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Groups messages into a single conversation",
+        "name": "sessionId",
+        "type": "string",
+        "title": "Session ID"
+      },
+      {
+        "name": "userName",
+        "type": "string",
+        "title": "Enquirer Name"
+      },
+      {
+        "name": "userEmail",
+        "type": "string",
+        "title": "Enquirer Email"
+      },
+      {
+        "name": "userPhone",
+        "type": "string",
+        "title": "Enquirer Phone"
+      },
+      {
+        "description": "City, country, or address provided by the user",
+        "name": "userLocation",
+        "type": "string",
+        "title": "Enquirer Location"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "userMessage",
+        "type": "text"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "botResponse",
+        "type": "text"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "French",
+              "value": "fr"
+            },
+            {
+              "title": "Arabic",
+              "value": "ar"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Swahili",
+              "value": "sw"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "en",
+                  "fr",
+                  "ar",
+                  "zh",
+                  "sw"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "language",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Positive",
+              "value": "positive"
+            },
+            {
+              "title": "Neutral",
+              "value": "neutral"
+            },
+            {
+              "title": "Negative",
+              "value": "negative"
+            }
+          ]
+        },
+        "name": "sentiment",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "AI (Groq/Llama)",
+              "value": "ai"
+            },
+            {
+              "title": "Knowledge Base",
+              "value": "kb"
+            },
+            {
+              "title": "Topic Suggestions",
+              "value": "suggestions"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "ai",
+                  "kb",
+                  "suggestions"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Which system generated the response",
+        "name": "tier",
+        "type": "string",
+        "title": "Response Tier"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "createdAt",
+        "type": "datetime"
+      }
+    ],
+    "name": "chatEnquiry",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "Agriculture & Agribusiness",
+            "Tourism & Hospitality",
+            "Mining & Minerals",
+            "Healthcare",
+            "Infrastructure Development",
+            "Energy & Utilities",
+            "ICT & Technology",
+            "Manufacturing & Industrial"
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "Agriculture & Agribusiness",
+                  "Tourism & Hospitality",
+                  "Mining & Minerals",
+                  "Healthcare",
+                  "Infrastructure Development",
+                  "Energy & Utilities",
+                  "ICT & Technology",
+                  "Manufacturing & Industrial"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "description",
+        "type": "text",
+        "title": "Short Description"
+      },
+      {
+        "name": "fullDescription",
+        "type": "text"
+      },
+      {
+        "name": "investmentRange",
+        "type": "string"
+      },
+      {
+        "name": "roi",
+        "type": "string",
+        "title": "ROI"
+      },
+      {
+        "name": "timeline",
+        "type": "string"
+      },
+      {
+        "name": "agency",
+        "type": "string",
+        "title": "Lead Agency"
+      },
+      {
+        "options": {
+          "list": [
+            "High",
+            "Medium",
+            "Low"
+          ]
+        },
+        "name": "priority",
+        "type": "string"
+      },
+      {
+        "name": "keyRisks",
+        "type": "text"
+      },
+      {
+        "fields": [
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "type": "string"
+          },
+          {
+            "validation": [
+              {
+                "rules": [
+                  {
+                    "flag": "uri",
+                    "constraint": {
+                      "options": {
+                        "scheme": [
+                          "/^http$/",
+                          "/^https$/"
+                        ],
+                        "allowRelative": false,
+                        "relativeOnly": false,
+                        "allowCredentials": false
+                      }
+                    }
+                  }
+                ],
+                "level": "error"
+              }
+            ],
+            "name": "website",
+            "type": "url"
+          },
+          {
+            "name": "address",
+            "type": "string"
+          }
+        ],
+        "name": "contact",
+        "type": "object"
+      },
+      {
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "type": "string"
+          },
+          {
+            "name": "company",
+            "type": "string"
+          }
+        ],
+        "name": "projectContact",
+        "type": "object"
+      },
+      {
+        "name": "investmentPromoter",
+        "type": "string"
+      },
+      {
+        "name": "logoPath",
+        "type": "string"
+      },
+      {
+        "name": "marketSize",
+        "type": "string"
+      },
+      {
+        "name": "competitiveAdvantage",
+        "type": "text"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "requiredLicenses",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "incentives",
+        "type": "array"
+      },
+      {
+        "fields": [
+          {
+            "name": "marketGrowth",
+            "type": "string"
+          },
+          {
+            "name": "exportValue",
+            "type": "string"
+          },
+          {
+            "name": "employmentPotential",
+            "type": "string"
+          },
+          {
+            "name": "paybackPeriod",
+            "type": "string"
+          }
+        ],
+        "name": "keyMetrics",
+        "type": "object"
+      },
+      {
+        "options": {
+          "list": [
+            "Greenfield",
+            "Brownfield",
+            "Expansion"
+          ]
+        },
+        "name": "projectType",
+        "type": "string"
+      },
+      {
+        "options": {
+          "list": [
+            "PPP",
+            "Private",
+            "Government"
+          ]
+        },
+        "name": "investmentType",
+        "type": "string"
+      }
+    ],
+    "name": "investmentOpportunity",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "rows": 2,
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Business Registration Forms",
+              "value": "business_registration"
+            },
+            {
+              "title": "Tax Registration",
+              "value": "tax_registration"
+            },
+            {
+              "title": "Investment Licenses",
+              "value": "investment_licenses"
+            },
+            {
+              "title": "Guides & Resources",
+              "value": "guides_resources"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "business_registration",
+                  "tax_registration",
+                  "investment_licenses",
+                  "guides_resources"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Upload the downloadable file (PDF, DOCX, XLSX, ZIP, etc.)",
+        "name": "file",
+        "type": "file"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "PDF",
+              "value": "PDF"
+            },
+            {
+              "title": "DOCX",
+              "value": "DOCX"
+            },
+            {
+              "title": "XLSX",
+              "value": "XLSX"
+            },
+            {
+              "title": "ZIP",
+              "value": "ZIP"
+            },
+            {
+              "title": "CSV",
+              "value": "CSV"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "PDF",
+                  "DOCX",
+                  "XLSX",
+                  "ZIP",
+                  "CSV"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ],
+            "level": "error"
+          }
+        ],
+        "description": "Display label for file type (e.g. PDF, DOCX, XLSX, ZIP)",
+        "name": "fileType",
+        "type": "string",
+        "title": "File Type Label"
+      },
+      {
+        "initialValue": 0,
+        "description": "Lower numbers appear first within the category",
+        "name": "sortOrder",
+        "type": "number"
+      },
+      {
+        "initialValue": true,
+        "name": "isPublished",
+        "type": "boolean",
+        "title": "Published"
+      }
+    ],
+    "name": "downloadableResource",
     "type": "document"
   }
 ]

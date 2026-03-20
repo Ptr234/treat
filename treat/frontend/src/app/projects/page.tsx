@@ -497,8 +497,76 @@ export default function ProjectsPage() {
                     formatCurrency={formatCurrency}
                   />
 
-                  {/* Project cards grid below the map */}
-                  <div className="p-6 border-t border-neutral-800">
+                  {/* Selected project detail overlay (mobile) */}
+                  {selectedProject && (() => {
+                    const project = sortedProjects.find(p => p.id === selectedProject);
+                    if (!project) return null;
+                    const badge = getStatusBadge(project.status);
+                    return (
+                      <div className="sm:hidden absolute bottom-0 left-0 right-0 z-[1000] bg-neutral-900/95 backdrop-blur border-t border-neutral-700 p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-white text-sm leading-tight truncate">{project.name}</h3>
+                            <p className="text-xs text-neutral-400">{project.company}</p>
+                          </div>
+                          <button
+                            onClick={() => setSelectedProject(null)}
+                            className="text-neutral-400 p-1"
+                          >
+                            <XMarkIcon className="w-5 h-5" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span
+                            className="px-2 py-0.5 text-xs font-semibold rounded-full"
+                            style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
+                          >
+                            {project.sector}
+                          </span>
+                          <span className={`px-2 py-0.5 text-xs font-semibold rounded border ${badge.className}`}>
+                            {badge.label}
+                          </span>
+                          <span className="text-xs text-neutral-500">{project.district}, {project.region}</span>
+                        </div>
+                        <div className="flex items-center gap-6 mt-3">
+                          <div>
+                            <p className="text-xs text-neutral-500">Investment</p>
+                            <p className="text-base font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-neutral-500">Employment</p>
+                            <p className="text-base font-bold text-red-400">{project.plannedEmployment.toLocaleString()}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Mobile: horizontal scrollable project chips */}
+                  <div className="sm:hidden p-3 border-t border-neutral-800 overflow-x-auto">
+                    <div className="flex gap-2 pb-1" style={{ minWidth: 'max-content' }}>
+                      {sortedProjects.map((project) => (
+                        <button
+                          key={project.id}
+                          onClick={() => {
+                            setSelectedProject(project.id);
+                            mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }}
+                          className={`flex-shrink-0 px-3 py-2 rounded-lg border text-left transition-all ${
+                            selectedProject === project.id
+                              ? 'border-yellow-500 bg-yellow-500/10'
+                              : 'border-neutral-700 bg-neutral-800'
+                          }`}
+                        >
+                          <p className="text-xs font-semibold text-white truncate max-w-[160px]">{project.name}</p>
+                          <p className="text-xs text-yellow-400 font-bold">{formatCurrency(project.investmentValue)}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Desktop: full project cards grid below map */}
+                  <div className="hidden sm:block p-6 border-t border-neutral-800">
                     <h3 className="text-lg font-bold text-white mb-4">All Projects ({sortedProjects.length})</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                       {sortedProjects.map((project) => {

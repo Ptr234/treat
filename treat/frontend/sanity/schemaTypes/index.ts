@@ -11,6 +11,7 @@ import adminUser from './adminUser';
 import investorProfile from './investorProfile';
 import chatEnquiry from './chatEnquiry';
 import investmentOpportunity from './investmentOpportunity';
+import downloadableResource from './downloadableResource';
 
 export const schemaTypes = [
   event,
@@ -26,4 +27,5 @@ export const schemaTypes = [
   investorProfile,
   chatEnquiry,
   investmentOpportunity,
+  downloadableResource,
 ];

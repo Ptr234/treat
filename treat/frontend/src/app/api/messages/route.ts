@@ -30,7 +30,11 @@ const CHANNELS_QUERY = `{
 
 export async function GET(request: NextRequest) {
   try {
-    // Auth enforced by middleware for /api/messages
+    const admin = await requireAdmin(request);
+    if (!admin) {
+      return apiError('Authentication required', 401, 'UNAUTHORIZED');
+    }
+
     const channel = request.nextUrl.searchParams.get('channel');
 
     if (channel) {

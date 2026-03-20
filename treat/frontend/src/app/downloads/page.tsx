@@ -1,120 +1,149 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { client } from '@/lib/sanity-client';
+import { DOWNLOADABLE_RESOURCES_QUERY } from '@/lib/sanity-queries';
+import { SanityDownloadableResource } from '@/types/sanity';
+
+interface CategoryConfig {
+  key: string;
+  title: string;
+  description: string;
+  accent: 'yellow' | 'red';
+  icon: React.ReactNode;
+}
+
+const CATEGORIES: CategoryConfig[] = [
+  {
+    key: 'business_registration',
+    title: 'Business Registration Forms',
+    description: 'Official forms for business registration and licensing',
+    accent: 'yellow',
+    icon: (
+      <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+  },
+  {
+    key: 'tax_registration',
+    title: 'Tax Registration',
+    description: 'Tax-related forms and guides',
+    accent: 'red',
+    icon: (
+      <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
+  {
+    key: 'investment_licenses',
+    title: 'Investment Licenses',
+    description: 'Investment and licensing documentation',
+    accent: 'yellow',
+    icon: (
+      <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
+  {
+    key: 'guides_resources',
+    title: 'Guides & Resources',
+    description: 'Comprehensive guides and helpful resources',
+    accent: 'red',
+    icon: (
+      <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+      </svg>
+    ),
+  },
+];
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFileIcon(type: string) {
+  switch (type.toLowerCase()) {
+    case 'pdf':
+      return (
+        <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+        </svg>
+      );
+    case 'docx':
+      return (
+        <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+        </svg>
+      );
+    case 'xlsx':
+      return (
+        <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+        </svg>
+      );
+    default:
+      return (
+        <svg className="w-5 h-5 text-neutral-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+        </svg>
+      );
+  }
+}
 
 export default function DownloadsPage() {
+  const [resources, setResources] = useState<SanityDownloadableResource[]>([]);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{ show: boolean; message: string }>({
     show: false,
-    message: ''
+    message: '',
   });
+
+  useEffect(() => {
+    async function fetchResources() {
+      try {
+        const data = await client.fetch<SanityDownloadableResource[]>(DOWNLOADABLE_RESOURCES_QUERY);
+        setResources(data || []);
+      } catch (err) {
+        console.error('Failed to fetch downloadable resources:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchResources();
+  }, []);
 
   const showToast = (message: string) => {
     setToast({ show: true, message });
-    setTimeout(() => {
-      setToast({ show: false, message: '' });
-    }, 4000);
+    setTimeout(() => setToast({ show: false, message: '' }), 4000);
   };
 
-  const handleDownload = () => {
-    showToast('This document will be available for download soon. Contact support@onestopcentre.go.ug for immediate access.');
-  };
-
-  const downloadCategories = [
-    {
-      title: 'Business Registration Forms',
-      description: 'Official forms for business registration and licensing',
-      accent: 'yellow',
-      icon: (
-        <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-      downloads: [
-        { name: 'Company Registration Form', type: 'PDF', size: '2.1 MB', description: 'Form for registering a new company' },
-        { name: 'Business License Application', type: 'PDF', size: '1.8 MB', description: 'Application for business operating license' },
-        { name: 'Partnership Agreement Template', type: 'DOCX', size: '890 KB', description: 'Template for partnership agreements' },
-        { name: 'Articles of Association Template', type: 'DOCX', size: '1.2 MB', description: 'Template for company articles' }
-      ]
-    },
-    {
-      title: 'Tax Registration',
-      description: 'Tax-related forms and guides',
-      accent: 'red',
-      icon: (
-        <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      ),
-      downloads: [
-        { name: 'TIN Registration Form', type: 'PDF', size: '1.5 MB', description: 'Tax Identification Number application' },
-        { name: 'VAT Registration Guide', type: 'PDF', size: '3.2 MB', description: 'Complete guide to VAT registration' },
-        { name: 'PAYE Declaration Form', type: 'XLSX', size: '654 KB', description: 'Monthly PAYE declaration template' },
-        { name: 'Tax Compliance Certificate', type: 'PDF', size: '890 KB', description: 'Application for tax compliance certificate' }
-      ]
-    },
-    {
-      title: 'Investment Licenses',
-      description: 'Investment and licensing documentation',
-      accent: 'yellow',
-      icon: (
-        <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      downloads: [
-        { name: 'Investment License Application', type: 'PDF', size: '2.8 MB', description: 'UIA investment license application' },
-        { name: 'Business Plan Template', type: 'DOCX', size: '1.9 MB', description: 'Comprehensive business plan template' },
-        { name: 'Foreign Exchange Permit', type: 'PDF', size: '1.3 MB', description: 'Application for foreign exchange permit' },
-        { name: 'Investment Incentives Guide', type: 'PDF', size: '4.1 MB', description: 'Complete guide to investment incentives' }
-      ]
-    },
-    {
-      title: 'Guides & Resources',
-      description: 'Comprehensive guides and helpful resources',
-      accent: 'red',
-      icon: (
-        <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      ),
-      downloads: [
-        { name: 'Complete Business Setup Guide', type: 'PDF', size: '5.6 MB', description: 'Step-by-step business setup guide' },
-        { name: 'Investment Opportunities in Uganda', type: 'PDF', size: '7.2 MB', description: 'Comprehensive investment opportunities guide' },
-        { name: 'Legal Compliance Checklist', type: 'PDF', size: '2.1 MB', description: 'Essential legal compliance checklist' },
-        { name: 'Sector-Specific Guidelines', type: 'ZIP', size: '12.8 MB', description: 'Guidelines for different business sectors' }
-      ]
-    }
-  ];
-
-  const getFileIcon = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'pdf':
-        return (
-          <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-          </svg>
-        );
-      case 'docx':
-        return (
-          <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-          </svg>
-        );
-      case 'xlsx':
-        return (
-          <svg className="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-          </svg>
-        );
-      default:
-        return (
-          <svg className="w-5 h-5 text-neutral-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
-          </svg>
-        );
+  const handleDownload = (resource: SanityDownloadableResource) => {
+    if (resource.file?.asset?.url) {
+      const link = document.createElement('a');
+      link.href = resource.file.asset.url;
+      link.download = resource.title;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.click();
+    } else {
+      showToast('File not available. Contact support@onestopcentre.go.ug for assistance.');
     }
   };
+
+  // Group resources by category
+  const grouped = CATEGORIES.map((cat) => ({
+    ...cat,
+    resources: resources.filter((r) => r.category === cat.key),
+  }));
+
+  // Only show categories that have resources
+  const visibleCategories = grouped.filter((g) => g.resources.length > 0);
 
   return (
     <div className="min-h-screen bg-black">
@@ -134,73 +163,103 @@ export default function DownloadsPage() {
 
       <div className="max-w-6xl mx-auto px-4 py-12">
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-500"></div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && visibleCategories.length === 0 && (
+          <div className="text-center py-20">
+            <svg className="w-16 h-16 text-neutral-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+            <h2 className="text-xl font-semibold text-white mb-2">Resources Coming Soon</h2>
+            <p className="text-neutral-400 max-w-md mx-auto">
+              Downloadable forms, guides, and documents are being prepared. Check back soon or contact support for immediate access.
+            </p>
+          </div>
+        )}
+
         {/* Download Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {downloadCategories.map((category, categoryIndex) => (
-            <div key={categoryIndex} className="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 overflow-hidden">
-              {/* Category Header */}
-              <div className={`px-6 py-5 border-b border-neutral-800 ${
-                category.accent === 'red'
-                  ? 'bg-gradient-to-r from-red-900/40 to-neutral-900'
-                  : 'bg-gradient-to-r from-yellow-900/30 to-neutral-900'
-              }`}>
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 mr-4">
-                    {category.icon}
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-white">{category.title}</h2>
-                    <p className="text-neutral-400 mt-1">{category.description}</p>
-                  </div>
-                  <div className="ml-auto">
-                    <span className="text-sm text-neutral-500 bg-neutral-800 px-3 py-1 rounded-full border border-neutral-700">
-                      {category.downloads.length} files
-                    </span>
+        {!loading && visibleCategories.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {visibleCategories.map((category) => (
+              <div key={category.key} className="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 overflow-hidden">
+                {/* Category Header */}
+                <div className={`px-6 py-5 border-b border-neutral-800 ${
+                  category.accent === 'red'
+                    ? 'bg-gradient-to-r from-red-900/40 to-neutral-900'
+                    : 'bg-gradient-to-r from-yellow-900/30 to-neutral-900'
+                }`}>
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 mr-4">
+                      {category.icon}
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">{category.title}</h2>
+                      <p className="text-neutral-400 mt-1">{category.description}</p>
+                    </div>
+                    <div className="ml-auto">
+                      <span className="text-sm text-neutral-500 bg-neutral-800 px-3 py-1 rounded-full border border-neutral-700">
+                        {category.resources.length} file{category.resources.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Downloads Grid */}
-              <div className="p-6">
-                <div className="grid grid-cols-1 gap-3">
-                  {category.downloads.map((download, downloadIndex) => (
-                    <div
-                      key={downloadIndex}
-                      className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-yellow-600 hover:shadow-lg hover:shadow-yellow-500/5 transition-all group"
-                    >
-                      <div className="flex items-center flex-1 min-w-0">
-                        <div className="flex-shrink-0 mr-3">
-                          {getFileIcon(download.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-semibold text-white truncate">
-                            {download.name}
-                          </h3>
-                          <p className="text-sm text-neutral-400 mt-1">
-                            {download.description}
-                          </p>
-                          <div className="flex items-center mt-2 text-xs gap-2">
-                            <span className="bg-neutral-700 text-neutral-300 px-2 py-0.5 rounded border border-neutral-600">{download.type}</span>
-                            <span className="text-neutral-500">{download.size}</span>
+                {/* Downloads Grid */}
+                <div className="p-6">
+                  <div className="grid grid-cols-1 gap-3">
+                    {category.resources.map((resource) => (
+                      <div
+                        key={resource._id}
+                        className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg border border-neutral-700 hover:border-yellow-600 hover:shadow-lg hover:shadow-yellow-500/5 transition-all group"
+                      >
+                        <div className="flex items-center flex-1 min-w-0">
+                          <div className="flex-shrink-0 mr-3">
+                            {getFileIcon(resource.fileType)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base font-semibold text-white truncate">
+                              {resource.title}
+                            </h3>
+                            {resource.description && (
+                              <p className="text-sm text-neutral-400 mt-1">
+                                {resource.description}
+                              </p>
+                            )}
+                            <div className="flex items-center mt-2 text-xs gap-2">
+                              <span className="bg-neutral-700 text-neutral-300 px-2 py-0.5 rounded border border-neutral-600">
+                                {resource.fileType}
+                              </span>
+                              {resource.file?.asset?.size && (
+                                <span className="text-neutral-500">
+                                  {formatFileSize(resource.file.asset.size)}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        <button
+                          onClick={() => handleDownload(resource)}
+                          className="ml-4 bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center flex-shrink-0"
+                        >
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                          </svg>
+                          Download
+                        </button>
                       </div>
-                      <button
-                        onClick={handleDownload}
-                        className="ml-4 bg-yellow-500 text-black px-4 py-2 rounded-lg font-bold hover:bg-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20 transition-all flex items-center flex-shrink-0"
-                      >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                        </svg>
-                        Download
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Help CTA */}
         <div className="mt-12 bg-gradient-to-r from-red-900 via-red-800 to-yellow-700 rounded-xl p-8 text-center border border-red-700/50">

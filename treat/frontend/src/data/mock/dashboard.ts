@@ -1,9 +1,15 @@
 import { DGDashboardMetrics } from '@/types';
 
+// Generate timestamps relative to now so mock data always looks fresh
+function hoursAgo(h: number): string {
+  return new Date(Date.now() - h * 3600000).toISOString();
+}
+
 export const mockDashboardMetrics: DGDashboardMetrics = {
   liveInquiries: 47,
   activeCases: 156,
   pendingApprovals: 23,
+  escalatedCount: 3,
   pipelineValue: 2.8,
   responseRate: 92,
   conversionRate: 15.3,
@@ -94,79 +100,79 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
   ],
   alerts: [
     {
-      id: 'ALT-2025-001',
+      id: 'ALT-001',
       type: 'vip_delay',
       severity: 'critical',
       title: 'VIP Investor Case Approaching Deadline',
-      message: 'UAE pharmaceutical investor (TKT-2025-002, USD 50M) - land allocation deadline in 48 hours. Board approval expires Feb 28.',
-      timestamp: '2025-02-12T11:30:00Z',
+      message: 'UAE pharmaceutical investor (TKT-2026-002, USD 50M) - land allocation deadline in 48 hours. Board approval expiring soon.',
+      timestamp: hoursAgo(0.5),
       acknowledged: false,
-      relatedTicketId: 'TKT-2025-002'
+      relatedTicketId: 'TKT-2026-002'
     },
     {
-      id: 'ALT-2025-002',
+      id: 'ALT-002',
       type: 'sla_breach',
       severity: 'high',
       title: 'SLA Breach - Work Permit Processing',
       message: 'DCIC has 3 work permit applications exceeding SLA by 2+ weeks. Immediate escalation required.',
-      timestamp: '2025-02-12T09:15:00Z',
+      timestamp: hoursAgo(2.5),
       acknowledged: true,
-      relatedTicketId: 'TKT-2025-003'
+      relatedTicketId: 'TKT-2026-003'
     },
     {
-      id: 'ALT-2025-003',
+      id: 'ALT-003',
       type: 'large_investment',
       severity: 'high',
       title: 'Large Investment Inquiry - Steel Manufacturing',
-      message: 'Chinese consortium inquiring about USD 120M steel plant in Jinja. Minister meeting scheduled Feb 14.',
-      timestamp: '2025-02-12T08:30:00Z',
+      message: 'Chinese consortium inquiring about USD 120M steel plant in Jinja. Minister meeting scheduled this week.',
+      timestamp: hoursAgo(3),
       acknowledged: true,
-      relatedTicketId: 'TKT-2025-010'
+      relatedTicketId: 'TKT-2026-010'
     },
     {
-      id: 'ALT-2025-004',
+      id: 'ALT-004',
       type: 'high_volume',
       severity: 'medium',
       title: 'High Volume of Mining Inquiries',
       message: 'Unusual spike in gold mining inquiries (23 in last 48 hours) following new geological survey publication.',
-      timestamp: '2025-02-11T16:45:00Z',
+      timestamp: hoursAgo(19),
       acknowledged: true
     },
     {
-      id: 'ALT-2025-005',
+      id: 'ALT-005',
       type: 'sla_breach',
       severity: 'medium',
       title: 'UNBS Product Certification Delays',
       message: '5 product certification cases pending over 90 days due to laboratory equipment issues.',
-      timestamp: '2025-02-11T14:20:00Z',
+      timestamp: hoursAgo(22),
       acknowledged: true,
-      relatedTicketId: 'TKT-2025-006'
+      relatedTicketId: 'TKT-2026-006'
     },
     {
-      id: 'ALT-2025-006',
+      id: 'ALT-006',
       type: 'large_investment',
       severity: 'medium',
       title: 'Tourism Investment - Murchison Falls',
       message: 'South African hospitality group investing USD 8.2M in luxury eco-lodge. EIA approval pending from NEMA.',
-      timestamp: '2025-02-10T11:00:00Z',
+      timestamp: hoursAgo(48),
       acknowledged: true
     },
     {
-      id: 'ALT-2025-007',
+      id: 'ALT-007',
       type: 'system_down',
       severity: 'low',
       title: 'URSB Online Portal Scheduled Maintenance',
-      message: 'URSB online business registration portal will be down for maintenance Feb 15, 22:00-02:00. Plan accordingly.',
-      timestamp: '2025-02-10T08:30:00Z',
+      message: 'URSB online business registration portal will be down for maintenance this weekend 22:00-02:00.',
+      timestamp: hoursAgo(50),
       acknowledged: true
     },
     {
-      id: 'ALT-2025-008',
+      id: 'ALT-008',
       type: 'high_volume',
       severity: 'low',
       title: 'Investment Forum Registration Surge',
-      message: 'Uganda Investment Forum 2025 registrations at 68% capacity (342/500). Consider expanding venue or capping.',
-      timestamp: '2025-02-09T15:00:00Z',
+      message: 'Uganda Investment Forum 2026 registrations at 68% capacity (342/500). Consider expanding venue or capping.',
+      timestamp: hoursAgo(72),
       acknowledged: true
     }
   ],
@@ -175,8 +181,8 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
       id: 'ACT-001',
       action: 'License Issued',
       actor: 'Sarah Nakato (UIA)',
-      target: 'Coffee Processing Facility - Mbale (LIC/2025/0234)',
-      timestamp: '2025-02-12T11:45:00Z',
+      target: 'Coffee Processing Facility - Mbale (LIC/2026/0234)',
+      timestamp: hoursAgo(0.25),
       type: 'approval'
     },
     {
@@ -184,15 +190,15 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
       action: 'VIP Meeting Scheduled',
       actor: 'Dr. Chris Kassami (UIA ED)',
       target: 'Chinese Steel Consortium - Meeting with Minister of Finance',
-      timestamp: '2025-02-12T08:30:00Z',
+      timestamp: hoursAgo(3.5),
       type: 'escalation'
     },
     {
       id: 'ACT-003',
       action: 'Case Escalated to DCIC',
       actor: 'Grace Tumusiime (UIA)',
-      target: 'Work Permit Delay Complaint (TKT-2025-003)',
-      timestamp: '2025-02-12T07:15:00Z',
+      target: 'Work Permit Delay Complaint (TKT-2026-003)',
+      timestamp: hoursAgo(4.75),
       type: 'escalation'
     },
     {
@@ -200,15 +206,15 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
       action: 'New Inquiry Received',
       actor: 'System',
       target: 'USD 12M Solar Mini-Grid Network - German Investor',
-      timestamp: '2025-02-11T16:30:00Z',
+      timestamp: hoursAgo(19.5),
       type: 'inquiry'
     },
     {
       id: 'ACT-005',
       action: 'Ticket Resolved',
       actor: 'Patrick Mugisha (UIA)',
-      target: 'Tourism Tax Incentives Inquiry (TKT-2025-004)',
-      timestamp: '2025-02-11T14:20:00Z',
+      target: 'Tourism Tax Incentives Inquiry (TKT-2026-004)',
+      timestamp: hoursAgo(21.7),
       type: 'resolution'
     },
     {
@@ -216,7 +222,7 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
       action: 'EIA Approval Granted',
       actor: 'David Okware (NEMA)',
       target: 'Solar Farm Project - Soroti (5MW)',
-      timestamp: '2025-02-11T11:00:00Z',
+      timestamp: hoursAgo(25),
       type: 'approval'
     },
     {
@@ -224,7 +230,7 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
       action: 'Land Allocation Approved',
       actor: 'Ministry of Lands',
       target: 'Pharmaceutical Plant - Namanve (25 acres)',
-      timestamp: '2025-02-11T09:30:00Z',
+      timestamp: hoursAgo(26.5),
       type: 'approval'
     },
     {
@@ -232,7 +238,7 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
       action: 'New Inquiry Received',
       actor: 'System',
       target: 'USD 7.5M Fish Farming Complex - Norwegian Investor',
-      timestamp: '2025-02-10T15:45:00Z',
+      timestamp: hoursAgo(44),
       type: 'inquiry'
     },
     {
@@ -240,15 +246,15 @@ export const mockDashboardMetrics: DGDashboardMetrics = {
       action: 'TIN Registration Completed',
       actor: 'Robert Kyagulanyi (URA)',
       target: 'AgriTech Solutions Ltd (TIN: 1002345678)',
-      timestamp: '2025-02-10T13:20:00Z',
+      timestamp: hoursAgo(46),
       type: 'approval'
     },
     {
       id: 'ACT-010',
       action: 'Case Escalated to UNBS',
       actor: 'Grace Tumusiime (UIA)',
-      target: 'Product Certification Delay Complaint (TKT-2025-006)',
-      timestamp: '2025-02-09T11:45:00Z',
+      target: 'Product Certification Delay Complaint (TKT-2026-006)',
+      timestamp: hoursAgo(68),
       type: 'escalation'
     }
   ]

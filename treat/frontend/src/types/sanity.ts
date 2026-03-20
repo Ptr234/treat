@@ -77,6 +77,7 @@ export interface SanityTicket {
   satisfactionComment?: string;
   documents?: Array<{ asset: { url: string } }>;
   isEscalated: boolean;
+  escalatedAt?: string;
   createdAt: string;
   resolvedAt?: string;
   closedAt?: string;
@@ -169,6 +170,18 @@ export interface SanityAdminUser {
   passwordHash?: string;
   role: 'admin';
   isActive: boolean;
+}
+
+export interface SanityDownloadableResource {
+  _id: string;
+  _type: 'downloadableResource';
+  title: string;
+  description?: string;
+  category: 'business_registration' | 'tax_registration' | 'investment_licenses' | 'guides_resources';
+  file: { asset: { url: string; size: number; mimeType?: string } };
+  fileType: 'PDF' | 'DOCX' | 'XLSX' | 'ZIP' | 'CSV';
+  sortOrder?: number;
+  isPublished: boolean;
 }
 
 export interface SanityAgencyMessage {

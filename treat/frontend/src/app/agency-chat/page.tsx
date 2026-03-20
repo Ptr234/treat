@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   ChatBubbleLeftRightIcon,
   PaperAirplaneIcon,
@@ -10,6 +10,9 @@ import {
   PaperClipIcon,
   DocumentIcon,
   XMarkIcon,
+  MagnifyingGlassIcon,
+  ChevronDownIcon,
+  ArrowUturnLeftIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -39,6 +42,7 @@ interface Message {
   isInternal: boolean;
   sentAt: string;
   attachments?: MessageAttachment[];
+  _optimistic?: boolean;
 }
 
 interface Ticket {
@@ -46,6 +50,13 @@ interface Ticket {
   title: string;
   status: string;
   agencyCode?: string;
+}
+
+interface ReplyTarget {
+  _id: string;
+  senderName: string;
+  senderAgencyCode: string;
+  content: string;
 }
 
 // ── Agency colour map ────────────────────────────────────────────────
@@ -110,6 +121,33 @@ function groupMessagesByDate(messages: Message[]): { date: string; messages: Mes
   return groups;
 }
 
+function truncate(text: string, max: number): string {
+  return text.length > max ? text.slice(0, max) + '...' : text;
+}
+
+// ── Read-state persistence ──────────────────────────────────────────
+
+const READ_STATE_KEY = 'osc-chat-read-state';
+
+function getReadState(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(READ_STATE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function setReadState(channel: string, count: number) {
+  try {
+    const state = getReadState();
+    state[channel] = count;
+    localStorage.setItem(READ_STATE_KEY, JSON.stringify(state));
+  } catch {
+    // ignore
+  }
+}
+
 // ── Component ────────────────────────────────────────────────────────
 
 export default function AgencyChatPage() {
@@ -130,9 +168,41 @@ export default function AgencyChatPage() {
   const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  // New state for improvements
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [newMsgCount, setNewMsgCount] = useState(0);
+  const [replyTarget, setReplyTarget] = useState<ReplyTarget | null>(null);
+  const [channelMsgCounts, setChannelMsgCounts] = useState<Record<string, number>>({});
+  const [readState, setReadStateLocal] = useState<Record<string, number>>({});
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const prevMessageCountRef = useRef(0);
+
+  // Load read state on mount
+  useEffect(() => {
+    setReadStateLocal(getReadState());
+  }, []);
+
+  // ── Scroll tracking ──────────────────────────────────────────────
+
+  const handleScroll = useCallback(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const threshold = 80;
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+    setIsAtBottom(atBottom);
+    if (atBottom) setNewMsgCount(0);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    setNewMsgCount(0);
+  }, []);
 
   // ── Fetch channel list ──────────────────────────────────────────────
 
@@ -163,7 +233,11 @@ export default function AgencyChatPage() {
       if (!res.ok) return;
       const json = await res.json();
       if (json.success) {
-        setMessages(json.data ?? []);
+        const fetched: Message[] = json.data ?? [];
+        setMessages(fetched);
+
+        // Track channel message counts for unread
+        setChannelMsgCounts((prev) => ({ ...prev, [activeChannel]: fetched.length }));
       }
     } catch (err) {
       console.error('Failed to fetch messages', err);
@@ -185,17 +259,78 @@ export default function AgencyChatPage() {
     return () => clearInterval(interval);
   }, [fetchMessages]);
 
-  // ── Auto-scroll on new messages ────────────────────────────────────
+  // ── Track new messages for unread badge ─────────────────────────────
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (messages.length > prevMessageCountRef.current && !isAtBottom && prevMessageCountRef.current > 0) {
+      setNewMsgCount((c) => c + (messages.length - prevMessageCountRef.current));
+    }
+    prevMessageCountRef.current = messages.length;
+  }, [messages.length, isAtBottom]);
+
+  // ── Auto-scroll only when at bottom ─────────────────────────────────
+
+  useEffect(() => {
+    if (isAtBottom) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isAtBottom]);
+
+  // ── Mark channel as read when switching ─────────────────────────────
+
+  useEffect(() => {
+    setReadState(activeChannel, messages.length);
+    setReadStateLocal((prev) => ({ ...prev, [activeChannel]: messages.length }));
+  }, [activeChannel, messages.length]);
+
+  // ── Auto-resize textarea ────────────────────────────────────────────
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+    const el = e.target;
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }, []);
 
   // ── Send a message ─────────────────────────────────────────────────
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
+
+    const messageContent = replyTarget
+      ? `> **${replyTarget.senderName}** (${replyTarget.senderAgencyCode}): ${truncate(replyTarget.content, 100)}\n\n${newMessage.trim()}`
+      : newMessage.trim();
+
+    // Optimistic insert
+    const optimisticId = `optimistic-${Date.now()}`;
+    const optimisticMsg: Message = {
+      _id: optimisticId,
+      channel: activeChannel,
+      content: messageContent,
+      senderName: user?.name || 'Admin',
+      senderAgencyCode,
+      senderEmail: user?.email,
+      isInternal: false,
+      sentAt: new Date().toISOString(),
+      attachments: pendingAttachments.map((a) => ({ url: a.url, originalFilename: a.name })),
+      _optimistic: true,
+    };
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setIsAtBottom(true);
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
+
+    const savedMessage = newMessage;
+    const savedAttachments = [...pendingAttachments];
+    const savedReply = replyTarget;
+    setNewMessage('');
+    setPendingAttachments([]);
+    setReplyTarget(null);
+
+    // Reset textarea height
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
 
     setSending(true);
     setSendError(null);
@@ -205,23 +340,32 @@ export default function AgencyChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel: activeChannel,
-          content: newMessage.trim(),
+          content: messageContent,
           senderAgencyCode,
-          ...(pendingAttachments.length > 0
-            ? { attachments: pendingAttachments.map((a) => a.fileRef) }
+          ...(savedAttachments.length > 0
+            ? { attachments: savedAttachments.map((a) => a.fileRef) }
             : {}),
         }),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
+        // Rollback optimistic
+        setMessages((prev) => prev.filter((m) => m._id !== optimisticId));
+        setNewMessage(savedMessage);
+        setPendingAttachments(savedAttachments);
+        setReplyTarget(savedReply);
         setSendError(json.error || 'Failed to send message');
         return;
       }
-      setNewMessage('');
-      setPendingAttachments([]);
+      // Replace optimistic with real message on next poll
       void fetchMessages();
       void fetchChannels();
     } catch (err) {
+      // Rollback
+      setMessages((prev) => prev.filter((m) => m._id !== optimisticId));
+      setNewMessage(savedMessage);
+      setPendingAttachments(savedAttachments);
+      setReplyTarget(savedReply);
       setSendError(err instanceof Error ? err.message : 'Failed to send message');
     } finally {
       setSending(false);
@@ -235,7 +379,6 @@ export default function AgencyChatPage() {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // Limit to 3 files total
     const remaining = 3 - pendingAttachments.length;
     const toUpload = Array.from(files).slice(0, remaining);
 
@@ -265,7 +408,6 @@ export default function AgencyChatPage() {
       console.error('Failed to upload file', err);
     } finally {
       setUploading(false);
-      // Reset input so the same file can be re-selected
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -278,21 +420,37 @@ export default function AgencyChatPage() {
 
   const ticketChannels = tickets.map((t) => t.referenceNumber);
   const allChannels = ['general', ...ticketChannels.filter(Boolean)];
-  // Also include any channels that have messages but aren't ticket references
   const extraChannels = channels.filter(
     (ch) => ch !== 'general' && !ticketChannels.includes(ch),
   );
   const fullChannelList = [...allChannels, ...extraChannels];
-  // Dedupe
   const uniqueChannelList = [...new Set(fullChannelList)];
 
-  // Find ticket info for a channel
   const getTicketInfo = (channel: string): Ticket | undefined =>
     tickets.find((t) => t.referenceNumber === channel);
 
-  // ── Message date groups ────────────────────────────────────────────
+  // ── Filtered messages (search) ──────────────────────────────────────
 
-  const dateGroups = groupMessagesByDate(messages);
+  const displayMessages = useMemo(() => {
+    if (!searchQuery.trim()) return messages;
+    const q = searchQuery.toLowerCase();
+    return messages.filter(
+      (m) =>
+        m.content.toLowerCase().includes(q) ||
+        m.senderName.toLowerCase().includes(q) ||
+        m.senderAgencyCode.toLowerCase().includes(q),
+    );
+  }, [messages, searchQuery]);
+
+  const dateGroups = groupMessagesByDate(displayMessages);
+
+  // ── Unread count helper ──────────────────────────────────────────────
+
+  const getUnreadCount = (channel: string): number => {
+    const total = channelMsgCounts[channel] ?? 0;
+    const read = readState[channel] ?? 0;
+    return Math.max(0, total - read);
+  };
 
   // ── Render ─────────────────────────────────────────────────────────
 
@@ -378,6 +536,7 @@ export default function AgencyChatPage() {
                 const isActive = ch === activeChannel;
                 const ticketInfo = getTicketInfo(ch);
                 const isGeneral = ch === 'general';
+                const unread = getUnreadCount(ch);
 
                 return (
                   <button
@@ -385,6 +544,8 @@ export default function AgencyChatPage() {
                     onClick={() => {
                       setActiveChannel(ch);
                       setSidebarOpen(false);
+                      setSearchQuery('');
+                      setSearchOpen(false);
                     }}
                     className={`
                       w-full text-left px-3 py-2.5 rounded-xl transition-all duration-150
@@ -400,9 +561,14 @@ export default function AgencyChatPage() {
                       ) : (
                         <HashtagIcon className="w-4 h-4 flex-shrink-0" />
                       )}
-                      <span className="text-sm font-medium truncate">
+                      <span className={`text-sm font-medium truncate flex-1 ${unread > 0 && !isActive ? 'text-white font-bold' : ''}`}>
                         {isGeneral ? 'General' : ch}
                       </span>
+                      {unread > 0 && !isActive && (
+                        <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                          {unread > 99 ? '99+' : unread}
+                        </span>
+                      )}
                     </div>
                     {ticketInfo && (
                       <p className="mt-0.5 ml-6 text-xs text-neutral-500 truncate">
@@ -452,7 +618,7 @@ export default function AgencyChatPage() {
               ) : (
                 <HashtagIcon className="w-5 h-5 text-yellow-500 flex-shrink-0" />
               )}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <h3 className="text-base font-semibold text-white truncate">
                   {activeChannel === 'general' ? 'General' : activeChannel}
                 </h3>
@@ -471,13 +637,63 @@ export default function AgencyChatPage() {
                   })()
                 )}
               </div>
-              <div className="ml-auto flex items-center gap-2 text-xs text-neutral-500 flex-shrink-0">
-                <span>{messages.length} messages</span>
+
+              {/* Message search toggle + count */}
+              <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={() => {
+                    setSearchOpen(!searchOpen);
+                    if (searchOpen) setSearchQuery('');
+                  }}
+                  className={`p-2 rounded-lg transition-colors ${
+                    searchOpen
+                      ? 'bg-yellow-500/20 text-yellow-400'
+                      : 'text-neutral-500 hover:text-white hover:bg-neutral-800'
+                  }`}
+                  aria-label="Search messages"
+                >
+                  <MagnifyingGlassIcon className="w-4 h-4" />
+                </button>
+                <span className="text-xs text-neutral-500">{messages.length} msgs</span>
               </div>
             </div>
 
+            {/* Search bar (collapsible) */}
+            {searchOpen && (
+              <div className="px-4 sm:px-6 py-2 border-b border-neutral-800 bg-neutral-900/80">
+                <div className="relative">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search messages, names, or agencies..."
+                    autoFocus
+                    className="w-full pl-9 pr-8 py-2 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                {searchQuery && (
+                  <p className="text-[11px] text-neutral-500 mt-1.5">
+                    {displayMessages.length} result{displayMessages.length !== 1 ? 's' : ''} found
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Messages area */}
-            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+            <div
+              ref={messagesContainerRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4 relative"
+            >
               {loadingMessages && messages.length === 0 && (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-neutral-500 text-sm animate-pulse">
@@ -491,6 +707,13 @@ export default function AgencyChatPage() {
                   <ChatBubbleLeftRightIcon className="w-12 h-12" />
                   <p className="text-sm">No messages yet in this channel</p>
                   <p className="text-xs">Be the first to send a message</p>
+                </div>
+              )}
+
+              {searchQuery && displayMessages.length === 0 && messages.length > 0 && (
+                <div className="flex flex-col items-center justify-center h-full gap-3 text-neutral-500">
+                  <MagnifyingGlassIcon className="w-10 h-10" />
+                  <p className="text-sm">No messages match &ldquo;{searchQuery}&rdquo;</p>
                 </div>
               )}
 
@@ -508,8 +731,14 @@ export default function AgencyChatPage() {
                   {/* Messages in this group */}
                   {group.messages.map((msg) => {
                     const color = getAgencyColor(msg.senderAgencyCode);
+                    const isOptimistic = msg._optimistic;
                     return (
-                      <div key={msg._id} className="group flex gap-3 py-2 hover:bg-neutral-800/30 rounded-xl px-2 -mx-2 transition-colors">
+                      <div
+                        key={msg._id}
+                        className={`group flex gap-3 py-2 hover:bg-neutral-800/30 rounded-xl px-2 -mx-2 transition-colors ${
+                          isOptimistic ? 'opacity-60' : ''
+                        }`}
+                      >
                         {/* Avatar */}
                         <div
                           className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold ${color.bg} ${color.text}`}
@@ -531,6 +760,9 @@ export default function AgencyChatPage() {
                             <span className="text-[11px] text-neutral-600 group-hover:text-neutral-500 transition-colors">
                               {formatTime(msg.sentAt)}
                             </span>
+                            {isOptimistic && (
+                              <span className="text-[10px] text-neutral-600 italic">Sending...</span>
+                            )}
                           </div>
                           <p className="text-sm text-neutral-300 mt-0.5 whitespace-pre-wrap break-words">
                             {msg.content}
@@ -554,6 +786,25 @@ export default function AgencyChatPage() {
                             </div>
                           )}
                         </div>
+
+                        {/* Reply button (visible on hover) */}
+                        {!isOptimistic && (
+                          <button
+                            onClick={() => {
+                              setReplyTarget({
+                                _id: msg._id,
+                                senderName: msg.senderName,
+                                senderAgencyCode: msg.senderAgencyCode,
+                                content: msg.content,
+                              });
+                              inputRef.current?.focus();
+                            }}
+                            className="self-start mt-1 p-1.5 rounded-lg text-neutral-600 opacity-0 group-hover:opacity-100 hover:bg-neutral-800 hover:text-yellow-400 transition-all flex-shrink-0"
+                            title="Reply to this message"
+                          >
+                            <ArrowUturnLeftIcon className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     );
                   })}
@@ -563,8 +814,50 @@ export default function AgencyChatPage() {
               <div ref={messagesEndRef} />
             </div>
 
+            {/* ── Scroll-to-bottom button ────────────────────────── */}
+            {!isAtBottom && (
+              <div className="absolute bottom-[200px] right-8 z-10">
+                <button
+                  onClick={scrollToBottom}
+                  className="relative w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 hover:border-yellow-500/40 text-neutral-400 hover:text-yellow-400 shadow-lg transition-all flex items-center justify-center"
+                  aria-label="Scroll to bottom"
+                >
+                  <ChevronDownIcon className="w-5 h-5" />
+                  {newMsgCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">
+                      {newMsgCount > 99 ? '99+' : newMsgCount}
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
+
             {/* ── Sender info bar ─────────────────────────────────── */}
             <div className="px-4 sm:px-6 py-3 border-t border-neutral-800 bg-neutral-900/80">
+              {/* Reply preview */}
+              {replyTarget && (
+                <div className="mb-2 flex items-start gap-2 px-3 py-2 bg-neutral-800/60 border-l-2 border-yellow-500 rounded-r-lg">
+                  <ArrowUturnLeftIcon className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-semibold text-yellow-400">
+                      {replyTarget.senderName}
+                    </span>
+                    <span className="text-[10px] text-neutral-500 ml-1.5">
+                      {replyTarget.senderAgencyCode}
+                    </span>
+                    <p className="text-xs text-neutral-400 truncate mt-0.5">
+                      {truncate(replyTarget.content, 120)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setReplyTarget(null)}
+                    className="p-0.5 rounded hover:bg-neutral-700 text-neutral-500 hover:text-white transition-colors flex-shrink-0"
+                  >
+                    <XMarkIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {/* Logged-in user identity */}
                 <span className="px-3 py-1.5 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-300">
@@ -583,12 +876,23 @@ export default function AgencyChatPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* Keyboard hint */}
+                <span className="hidden sm:inline text-[10px] text-neutral-600 ml-auto">
+                  Enter to send &middot; Shift+Enter for new line
+                </span>
               </div>
 
               {/* Send error display */}
               {sendError && (
-                <div className="mb-2 px-3 py-1.5 text-xs text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg">
-                  {sendError}
+                <div className="mb-2 px-3 py-1.5 text-xs text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg flex items-center justify-between">
+                  <span>{sendError}</span>
+                  <button
+                    onClick={() => setSendError(null)}
+                    className="ml-2 p-0.5 rounded hover:bg-red-800/50 text-red-400 hover:text-red-300 transition-colors"
+                  >
+                    <XMarkIcon className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               )}
 
@@ -636,11 +940,11 @@ export default function AgencyChatPage() {
               />
 
               {/* Message input */}
-              <form onSubmit={handleSend} className="flex gap-2">
+              <form onSubmit={handleSend} className="flex gap-2 items-end">
                 <textarea
                   ref={inputRef}
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -648,9 +952,9 @@ export default function AgencyChatPage() {
                     }
                   }}
                   placeholder={`Message #${activeChannel === 'general' ? 'general' : activeChannel}...`}
-                  disabled={false}
                   rows={1}
-                  className="flex-1 px-4 py-2.5 text-sm bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2.5 text-sm bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 resize-none overflow-hidden"
+                  style={{ maxHeight: '120px' }}
                 />
                 <button
                   type="button"

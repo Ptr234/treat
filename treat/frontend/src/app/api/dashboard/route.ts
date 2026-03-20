@@ -5,6 +5,7 @@ import {
   DASHBOARD_RECENT_TICKETS_QUERY,
   DASHBOARD_SLA_ALERTS_QUERY,
   DASHBOARD_VIP_TICKETS_QUERY,
+  DASHBOARD_ESCALATED_TICKETS_QUERY,
   DASHBOARD_AGENCY_TICKETS_QUERY,
   DASHBOARD_PIPELINE_QUERY,
   DASHBOARD_ANALYTICS_LATEST_QUERY,
@@ -37,6 +38,8 @@ interface RawTicket {
   contactName: string;
   assignee?: string;
   isEscalated?: boolean;
+  escalatedAt?: string;
+  contactEmail?: string;
   investmentSize?: string;
   sector?: string;
   slaDeadlineAt?: string;
@@ -255,12 +258,13 @@ function buildActivityFeed(tickets: RawTicket[]): DGActivity[] {
 
 export async function GET() {
   try {
-    const [ticketStats, recentTickets, slaTickets, vipTickets, agencyStats, pipeline, analytics] =
+    const [ticketStats, recentTickets, slaTickets, vipTickets, escalatedTickets, agencyStats, pipeline, analytics] =
       await Promise.all([
         client.fetch<TicketStats>(DASHBOARD_TICKET_STATS_QUERY),
         client.fetch<RawTicket[]>(DASHBOARD_RECENT_TICKETS_QUERY),
         client.fetch<RawTicket[]>(DASHBOARD_SLA_ALERTS_QUERY),
         client.fetch<RawTicket[]>(DASHBOARD_VIP_TICKETS_QUERY),
+        client.fetch<RawTicket[]>(DASHBOARD_ESCALATED_TICKETS_QUERY),
         client.fetch<RawAgencyStats[]>(DASHBOARD_AGENCY_TICKETS_QUERY),
         client.fetch<PipelineStats>(DASHBOARD_PIPELINE_QUERY),
         client.fetch<AnalyticsLatest | null>(DASHBOARD_ANALYTICS_LATEST_QUERY),
@@ -319,10 +323,22 @@ export async function GET() {
     // Activity feed
     const recentActivity = buildActivityFeed(recentTickets).slice(0, 10);
 
+    // Escalated tickets summary for dashboard
+    const escalatedSummary = escalatedTickets.map((t) => ({
+      referenceNumber: t.referenceNumber,
+      title: t.title,
+      priority: t.priority,
+      status: t.status,
+      contactName: t.contactName,
+      agency: t.assignedAgency?.code || 'Unassigned',
+      escalatedAt: t.escalatedAt || t.createdAt,
+    }));
+
     const metrics: DGDashboardMetrics = {
       liveInquiries,
       activeCases,
       pendingApprovals,
+      escalatedCount: ts.escalated,
       pipelineValue,
       responseRate,
       conversionRate,
@@ -331,6 +347,7 @@ export async function GET() {
       agencyScorecard,
       alerts,
       recentActivity,
+      escalatedTickets: escalatedSummary,
     };
 
     // Flag if data is empty so the client can decide to use mock fallback

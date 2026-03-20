@@ -55,6 +55,7 @@ export default defineType({
     defineField({ name: 'satisfactionComment', title: 'Satisfaction Comment', type: 'text' }),
     defineField({ name: 'documents', title: 'Attached Documents', type: 'array', of: [{ type: 'file' }] }),
     defineField({ name: 'isEscalated', title: 'Escalated', type: 'boolean', initialValue: false }),
+    defineField({ name: 'escalatedAt', title: 'Escalated At', type: 'datetime' }),
     defineField({ name: 'createdAt', title: 'Created At', type: 'datetime' }),
     defineField({ name: 'resolvedAt', title: 'Resolved At', type: 'datetime' }),
     defineField({ name: 'closedAt', title: 'Closed At', type: 'datetime' }),

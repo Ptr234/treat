@@ -4,7 +4,7 @@ import { TICKET_BY_REFERENCE_QUERY, TICKET_MESSAGES_QUERY } from '@/lib/sanity-q
 import { apiSuccess, apiError, validateBody } from '@/lib/api-utils';
 import { ticketUpdateSchema, publicTicketUpdateSchema } from '@/lib/validations';
 import { requireAdmin } from '@/lib/auth';
-import { sendTicketStatusEmail } from '@/lib/email';
+import { sendTicketStatusEmail, sendEscalationNotificationEmail } from '@/lib/email';
 import type { SanityTicket, SanityTicketMessage } from '@/types/sanity';
 
 export async function GET(
@@ -71,11 +71,32 @@ export async function PATCH(
       }
 
       const pubPatch: Record<string, unknown> = {};
-      if (pubData.isEscalated) pubPatch.isEscalated = true;
+      if (pubData.isEscalated && !ticket.isEscalated) {
+        pubPatch.isEscalated = true;
+        pubPatch.escalatedAt = new Date().toISOString();
+        // Boost priority if still medium
+        if (ticket.priority === 'medium' || ticket.priority === 'low') {
+          pubPatch.priority = 'high';
+        }
+      }
       if (pubData.satisfactionRating !== undefined) pubPatch.satisfactionRating = pubData.satisfactionRating;
       if (pubData.satisfactionComment !== undefined) pubPatch.satisfactionComment = pubData.satisfactionComment;
 
       await serverClient.patch(ticket._id).set(pubPatch).commit();
+
+      // Notify admins of escalation (fire-and-forget)
+      if (pubPatch.isEscalated) {
+        sendEscalationNotificationEmail({
+          referenceNumber: ticket.referenceNumber,
+          contactName: ticket.contactName,
+          contactEmail: ticket.contactEmail,
+          title: ticket.title,
+          description: ticket.description,
+          priority: (pubPatch.priority as string) || ticket.priority,
+          slaHours: ticket.slaDeadlineHours ?? 4,
+        }).catch((err) => console.error('[PATCH /api/tickets] escalation email failed:', err));
+      }
+
       return apiSuccess({ _id: ticket._id, ...pubPatch });
     }
 
@@ -93,7 +114,12 @@ export async function PATCH(
     if (data.status !== undefined) patch.status = data.status;
     if (data.priority !== undefined) patch.priority = data.priority;
     if (data.assignee !== undefined) patch.assignee = data.assignee;
-    if (data.isEscalated !== undefined) patch.isEscalated = data.isEscalated;
+    if (data.isEscalated !== undefined) {
+      patch.isEscalated = data.isEscalated;
+      if (data.isEscalated && !ticket.isEscalated) {
+        patch.escalatedAt = new Date().toISOString();
+      }
+    }
     if (data.satisfactionRating !== undefined) patch.satisfactionRating = data.satisfactionRating;
     if (data.satisfactionComment !== undefined) patch.satisfactionComment = data.satisfactionComment;
     if (data.assignedAgency !== undefined) {

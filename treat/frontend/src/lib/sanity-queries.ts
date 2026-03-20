@@ -183,6 +183,15 @@ export const DASHBOARD_VIP_TICKETS_QUERY = `
   }
 `;
 
+// Active escalated tickets for dashboard
+export const DASHBOARD_ESCALATED_TICKETS_QUERY = `
+  *[_type == "ticket" && isEscalated == true && status in ["NEW", "ASSIGNED", "IN_PROGRESS", "PENDING_EXTERNAL"]] | order(escalatedAt desc) [0...10] {
+    _id, referenceNumber, title, priority, status,
+    contactName, contactEmail, slaDeadlineAt, escalatedAt, createdAt,
+    assignedAgency->{ name, code }
+  }
+`;
+
 // Tickets grouped by agency for scorecard
 export const DASHBOARD_AGENCY_TICKETS_QUERY = `
   *[_type == "agency"] | order(name asc) {
@@ -227,6 +236,21 @@ export const INVESTOR_BY_EMAIL_QUERY = `
     investmentAmount, timeHorizon, riskTolerance, primarySector,
     secondarySectors, specificInterests, capitalSource, timeframe,
     supportNeeded, status, createdAt
+  }
+`;
+
+// ===================== DOWNLOADABLE RESOURCES =====================
+export const DOWNLOADABLE_RESOURCES_QUERY = `
+  *[_type == "downloadableResource" && isPublished == true] | order(category asc, sortOrder asc) {
+    _id, title, description, category, fileType, sortOrder,
+    file { asset->{ url, size, mimeType } }
+  }
+`;
+
+export const DOWNLOADABLE_RESOURCES_BY_CATEGORY_QUERY = `
+  *[_type == "downloadableResource" && isPublished == true && category == $category] | order(sortOrder asc) {
+    _id, title, description, category, fileType, sortOrder,
+    file { asset->{ url, size, mimeType } }
   }
 `;
 

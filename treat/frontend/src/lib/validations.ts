@@ -60,6 +60,7 @@ export const createTicketSchema = z.object({
   sector: z.string().max(100).optional().default(''),
   investmentSize: z.string().max(50).optional().default(''),
   documents: z.array(sanityFileRefSchema).max(5).optional().default([]),
+  isEscalated: z.boolean().optional().default(false),
 });
 
 export const ticketUpdateSchema = z

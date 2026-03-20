@@ -55,17 +55,17 @@ export default function LeafletMap({ projects, selectedProject, onSelectProject,
     <MapContainer
       center={center}
       zoom={7}
-      style={{ width: '100%', background: '#0a0a0a' }}
-      className="rounded-lg h-[400px] sm:h-[500px] lg:h-[700px]"
+      style={{ width: '100%', background: '#f5f5f5' }}
+      className="rounded-lg h-[55vh] sm:h-[500px] lg:h-[700px]"
     >
       <TileLayer
         attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
       <FitBounds projects={projects} />
       {projects.map((project) => {
         const isSelected = selectedProject === project.id;
-        const radius = Math.max(6, Math.min(22, project.investmentValue / 5000000));
+        const radius = Math.max(10, Math.min(26, project.investmentValue / 5000000));
         const color = getSectorColor(project.sector);
 
         return (
@@ -76,7 +76,7 @@ export default function LeafletMap({ projects, selectedProject, onSelectProject,
             pathOptions={{
               fillColor: color,
               fillOpacity: isSelected ? 1 : 0.7,
-              color: isSelected ? '#FBBF24' : '#000',
+              color: isSelected ? '#b45309' : '#fff',
               weight: isSelected ? 3 : 1,
             }}
             eventHandlers={{

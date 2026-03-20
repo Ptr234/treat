@@ -162,7 +162,8 @@ function ChatbotPageInner() {
           contactEmail: escalationData.email,
           contactName: escalationData.name,
           contactPhone: escalationData.phone || '',
-          priority: 'medium',
+          priority: 'high',
+          isEscalated: true,
         }),
       });
 

@@ -66,7 +66,7 @@ export default function HomePage() {
     <div className="min-h-screen">
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative flex flex-col min-h-screen overflow-hidden">
         <div className="absolute inset-0">
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -80,91 +80,93 @@ export default function HomePage() {
           }}></div>
         </div>
 
-        <div className="relative z-10 text-center text-white max-w-6xl mx-auto px-4">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center text-white max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div>
-            <h1 className="mb-8 leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              <span className="block text-white text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-medium tracking-wide uppercase mb-3" style={{ letterSpacing: '0.15em' }}>
+            <h1 className="mb-4 sm:mb-8 leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+              <span className="block text-white text-lg xs:text-xl sm:text-3xl md:text-5xl lg:text-6xl font-medium tracking-wide uppercase mb-2 sm:mb-3" style={{ letterSpacing: '0.15em' }}>
                 Uganda Investment
               </span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300 text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black italic tracking-tight drop-shadow-lg">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300 text-[2rem] xs:text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tight drop-shadow-lg">
                 Excellence Hub
               </span>
             </h1>
           </div>
 
-          <p className="text-lg md:text-xl lg:text-2xl text-neutral-200 mb-10 max-w-3xl mx-auto leading-relaxed font-light tracking-wide" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+          <p className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-neutral-200 mb-6 sm:mb-10 max-w-3xl mx-auto leading-relaxed font-light tracking-wide" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
             Expert investment advisory services with government backing. Unlock Uganda&apos;s <span className="text-yellow-400 font-semibold">$49.5B+</span> investment opportunities through our comprehensive facilitation platform.
           </p>
 
           {/* Hero CTAs — AI Assistant First */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <button
-              onClick={() => openAssistant()}
-              className="group inline-flex items-center px-8 py-4 bg-yellow-500 text-black font-bold rounded-lg transition-all duration-300 hover:bg-yellow-400 hover:shadow-xl hover:shadow-yellow-500/20 text-lg"
-            >
-              <ChatBubbleLeftRightIcon className="w-6 h-6 mr-2" />
-              Ask the AI Assistant
-              <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <Link
-              href="/investments/onboarding"
-              className="group inline-flex items-center px-8 py-4 bg-white text-black font-semibold rounded-lg transition-all duration-300 hover:bg-neutral-100 hover:shadow-xl"
-              prefetch={true}
-            >
-              Start Investment Journey
-              <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
+          <div className="flex flex-col gap-3 sm:gap-4 items-center w-full">
+            <div className="flex flex-col xs:flex-row gap-3 w-full xs:w-auto justify-center">
+              <button
+                onClick={() => openAssistant()}
+                className="group inline-flex items-center justify-center px-4 xs:px-5 sm:px-8 py-3 sm:py-4 bg-yellow-500 text-black font-bold rounded-lg transition-all duration-300 hover:bg-yellow-400 hover:shadow-xl hover:shadow-yellow-500/20 text-sm xs:text-base sm:text-lg"
+              >
+                <ChatBubbleLeftRightIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 flex-shrink-0" />
+                Ask the AI Assistant
+                <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+              </button>
+              <Link
+                href="/investments/onboarding"
+                className="group inline-flex items-center justify-center px-4 xs:px-5 sm:px-8 py-3 sm:py-4 bg-white text-black font-semibold rounded-lg transition-all duration-300 hover:bg-neutral-100 hover:shadow-xl text-sm xs:text-base sm:text-lg"
+                prefetch={true}
+              >
+                Start Investment Journey
+                <ArrowRightIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+              </Link>
+            </div>
             <Link
               href="/tools/roi-calculator"
-              className="group inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-lg transition-all duration-300 hover:bg-white hover:text-black hover:shadow-xl"
+              className="group inline-flex items-center justify-center px-4 py-2 xs:px-5 xs:py-3 sm:px-8 sm:py-4 border border-white/60 xs:border-2 xs:border-white text-white font-semibold rounded-lg transition-all duration-300 hover:bg-white hover:text-black hover:shadow-xl text-xs xs:text-sm sm:text-lg"
               prefetch={true}
             >
               Calculate Returns
-              <CalculatorIcon className="w-5 h-5 ml-2 transition-transform" />
+              <CalculatorIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-transform flex-shrink-0" />
             </Link>
           </div>
         </div>
 
-        {/* Stats Banner */}
-        <div className="absolute bottom-0 left-0 right-0">
+        {/* Stats Banner — in document flow, no overlap */}
+        <div className="relative z-10">
           <div className="bg-white/95 backdrop-blur-sm border-t border-neutral-200">
-            <div className="max-w-7xl mx-auto px-4 py-6">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-                <div className="space-y-2">
-                  <div className="text-2xl md:text-3xl font-bold text-neutral-900">
+            <div className="max-w-7xl mx-auto px-3 xs:px-4 py-3 xs:py-4 sm:py-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-8 text-center">
+                <div className="space-y-0.5 sm:space-y-2">
+                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
                     {liveStats.investments.toLocaleString()}+
                   </div>
-                  <div className="text-sm text-neutral-600 font-medium uppercase tracking-wide">
+                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
                     Licensed Projects
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-2xl md:text-3xl font-bold text-neutral-900">
+                <div className="space-y-0.5 sm:space-y-2">
+                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
                     {liveStats.satisfaction.toFixed(0)}%
                   </div>
-                  <div className="text-sm text-neutral-600 font-medium uppercase tracking-wide">
+                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
                     Success Rate
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-2xl md:text-3xl font-bold text-neutral-900">
+                <div className="space-y-0.5 sm:space-y-2">
+                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
                     ${liveStats.fdi.toFixed(1)}B+
                   </div>
-                  <div className="text-sm text-neutral-600 font-medium uppercase tracking-wide">
+                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
                     FDI Facilitated
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="text-2xl md:text-3xl font-bold text-neutral-900">
+                <div className="space-y-0.5 sm:space-y-2">
+                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
                     {liveStats.sectors}
                   </div>
-                  <div className="text-sm text-neutral-600 font-medium uppercase tracking-wide">
+                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
                     Key Sectors
                   </div>
                 </div>
               </div>
-              <div className="text-center mt-4">
-                <p className="text-xs text-neutral-500">
+              <div className="text-center mt-2 sm:mt-4">
+                <p className="text-[10px] sm:text-xs text-neutral-500">
                   Data: January 1991 — December 2025 | Source: Uganda Investment Authority
                 </p>
               </div>
@@ -234,7 +236,7 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-6">
                 About Uganda Investment Authority
               </h2>
 
@@ -282,7 +284,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
               Professional Investment Services
             </h2>
             <p className="text-lg text-neutral-600 max-w-3xl mx-auto mb-8">
@@ -351,23 +353,23 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-20 bg-black">
         <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
             Ready to Invest in Uganda?
           </h2>
-          <p className="text-xl text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-xl text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
             Join 9,922+ successful investors who have discovered Uganda&apos;s potential. Start your investment journey today with professional guidance and government support.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
               onClick={() => openAssistant()}
-              className="inline-flex items-center px-8 py-4 bg-yellow-500 text-black font-bold rounded-lg transition-all duration-300 hover:bg-yellow-400 hover:shadow-xl"
+              className="inline-flex items-center justify-center px-5 sm:px-8 py-3 sm:py-4 bg-yellow-500 text-black font-bold rounded-lg transition-all duration-300 hover:bg-yellow-400 hover:shadow-xl text-base sm:text-lg"
             >
-              <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2" />
+              <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2 flex-shrink-0" />
               Ask the AI Assistant
             </button>
             <Link
               href="/investments/onboarding"
-              className="inline-flex items-center px-8 py-4 bg-white text-neutral-900 font-semibold rounded-lg transition-colors hover:bg-neutral-100"
+              className="inline-flex items-center justify-center px-5 sm:px-8 py-3 sm:py-4 bg-white text-neutral-900 font-semibold rounded-lg transition-colors hover:bg-neutral-100 text-base sm:text-lg"
             >
               Start Investment Journey
               <ArrowRightIcon className="w-5 h-5 ml-2" />

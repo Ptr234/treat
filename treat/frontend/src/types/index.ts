@@ -597,10 +597,21 @@ export interface ProjectFilter {
 // Module 7: DG Live Dashboard
 // ============================================
 
+export interface EscalatedTicketSummary {
+  referenceNumber: string;
+  title: string;
+  priority: string;
+  status: string;
+  contactName: string;
+  agency: string;
+  escalatedAt: string;
+}
+
 export interface DGDashboardMetrics {
   liveInquiries: number;
   activeCases: number;
   pendingApprovals: number;
+  escalatedCount?: number;
   pipelineValue: number;
   responseRate: number;
   conversionRate: number;
@@ -609,6 +620,7 @@ export interface DGDashboardMetrics {
   agencyScorecard: AgencyScore[];
   alerts: DGAlert[];
   recentActivity: DGActivity[];
+  escalatedTickets?: EscalatedTicketSummary[];
 }
 
 export interface AgencyScore {
