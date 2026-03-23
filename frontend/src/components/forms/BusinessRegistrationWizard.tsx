@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { apiFetch } from '@/lib/api-client';
 
 interface BusinessData {
   // Step 1: Business Type
@@ -317,20 +318,43 @@ export default function BusinessRegistrationWizard() {
     }
   };
 
+  const [submitResult, setSubmitResult] = useState<{ referenceNumber: string } | null>(null);
+
   const handleSubmit = async () => {
     if (!validateStep(5)) return;
-    
+
     setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate reference number
-      const referenceNumber = `BRW-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
-      
-      // Show success message (you would integrate with your notification system)
-      alert(`Registration wizard completed successfully!\n\nReference Number: ${referenceNumber}\n\nNext steps:\n1. Prepare required documents\n2. Visit respective authorities\n3. Pay required fees\n4. Track your applications`);
-      
+      // Submit as a support ticket with business registration details
+      const ticketPayload = {
+        title: `Business Registration: ${businessData.businessName}`,
+        description: [
+          `Business Type: ${businessData.businessType}`,
+          `Structure: ${businessData.businessStructure}`,
+          `Sector: ${businessData.sector}`,
+          `Location: ${businessData.location}`,
+          `Initial Capital: UGX ${parseFloat(businessData.initialCapital).toLocaleString()}`,
+          `Projected Turnover: UGX ${parseFloat(businessData.projectedTurnover).toLocaleString()}`,
+          `Owners: ${businessData.owners.map(o => `${o.name} (${o.nationality}, ${o.percentage}%)`).join('; ')}`,
+          `Estimated Cost: UGX ${businessData.estimatedCost.toLocaleString()}`,
+          `Estimated Timeframe: ${businessData.timeframe}`,
+        ].join('\n'),
+        category: 'application_support',
+        priority: 'medium',
+        contactEmail: businessData.owners[0]?.name ? '' : '',
+        contactName: businessData.owners[0]?.name || 'Business Registrant',
+        sector: businessData.sector,
+      };
+
+      const res = await apiFetch<{ data: { referenceNumber: string } }>('/api/tickets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ticketPayload),
+      });
+
+      const refNumber = res?.data?.referenceNumber || `BRW-${Date.now()}`;
+      setSubmitResult({ referenceNumber: refNumber });
+
       // Reset form
       setCurrentStep(1);
       setBusinessData({
@@ -347,9 +371,9 @@ export default function BusinessRegistrationWizard() {
         estimatedCost: 0,
         timeframe: ''
       });
-      
+
     } catch {
-      alert('An error occurred. Please try again.');
+      setErrors({ submit: 'An error occurred. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
@@ -747,6 +771,32 @@ export default function BusinessRegistrationWizard() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
+      {/* Success Banner */}
+      {submitResult && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
+          <h4 className="text-lg font-semibold text-green-800">Registration Submitted Successfully!</h4>
+          <p className="text-green-700 mt-1">
+            Reference Number: <strong>{submitResult.referenceNumber}</strong>
+          </p>
+          <p className="text-green-600 text-sm mt-2">
+            Next steps: Prepare required documents, visit respective authorities, pay fees, and track your application.
+          </p>
+          <button
+            onClick={() => setSubmitResult(null)}
+            className="mt-2 text-sm text-green-700 underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Submit Error */}
+      {errors.submit && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-700">{errors.submit}</p>
+        </div>
+      )}
+
       {/* Progress Bar */}
       <div className="mb-4 sm:mb-6 lg:mb-8">
         <div className="overflow-x-auto">

@@ -23,6 +23,11 @@ public class AdminUser
 
     public bool IsActive { get; set; } = true;
 
+    [MaxLength(200)]
+    public string? PasswordResetToken { get; set; }
+
+    public DateTimeOffset? PasswordResetExpiresAt { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

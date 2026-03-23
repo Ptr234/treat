@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OscApi.Common;
@@ -14,16 +15,19 @@ public class AuthController : ControllerBase
     private readonly OscDbContext _db;
     private readonly JwtService _jwt;
     private readonly PasswordService _password;
+    private readonly EmailService _email;
     private readonly IWebHostEnvironment _env;
 
-    public AuthController(OscDbContext db, JwtService jwt, PasswordService password, IWebHostEnvironment env)
+    public AuthController(OscDbContext db, JwtService jwt, PasswordService password, EmailService email, IWebHostEnvironment env)
     {
         _db = db;
         _jwt = jwt;
         _password = password;
+        _email = email;
         _env = env;
     }
 
+    /// <summary>Login with email and password.</summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
@@ -43,6 +47,7 @@ public class AuthController : ControllerBase
             admin.Id.ToString(), admin.Email, admin.Name, admin.Role)));
     }
 
+    /// <summary>Authenticate via Google OAuth.</summary>
     [HttpPost("google")]
     public async Task<IActionResult> GoogleAuth([FromBody] GoogleAuthRequest request)
     {
@@ -74,6 +79,7 @@ public class AuthController : ControllerBase
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, role, payload.Picture)));
     }
 
+    /// <summary>Logout (clear session cookie).</summary>
     [HttpPost("logout")]
     public IActionResult Logout()
     {
@@ -81,6 +87,7 @@ public class AuthController : ControllerBase
         return Ok(new ApiResponse(true));
     }
 
+    /// <summary>Get current authenticated user.</summary>
     [HttpGet("me")]
     public IActionResult Me()
     {
@@ -102,6 +109,7 @@ public class AuthController : ControllerBase
         )));
     }
 
+    /// <summary>Update profile (admin only).</summary>
     [HttpPatch("profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest request)
     {
@@ -136,5 +144,49 @@ public class AuthController : ControllerBase
 
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
             admin.Id.ToString(), admin.Email, admin.Name, admin.Role)));
+    }
+
+    /// <summary>Request a password reset link via email.</summary>
+    [HttpPost("password-reset")]
+    public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequest request)
+    {
+        // Always return success to prevent email enumeration
+        var admin = await _db.AdminUsers
+            .FirstOrDefaultAsync(a => a.Email == request.Email.ToLowerInvariant() && a.IsActive);
+
+        if (admin is not null)
+        {
+            var resetToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            admin.PasswordResetToken = resetToken;
+            admin.PasswordResetExpiresAt = DateTimeOffset.UtcNow.AddHours(1);
+            admin.UpdatedAt = DateTimeOffset.UtcNow;
+            await _db.SaveChangesAsync();
+
+            _ = _email.SendPasswordResetAsync(admin.Email, admin.Name, resetToken);
+        }
+
+        return Ok(new ApiResponse(true, "If the email exists, a reset link has been sent"));
+    }
+
+    /// <summary>Verify a password reset token and set a new password.</summary>
+    [HttpPost("password-reset/verify")]
+    public async Task<IActionResult> VerifyPasswordReset([FromBody] PasswordResetVerifyRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
+            return BadRequest(new ApiResponse(false, "Password must be at least 8 characters"));
+
+        var admin = await _db.AdminUsers
+            .FirstOrDefaultAsync(a => a.PasswordResetToken == request.Token && a.IsActive);
+
+        if (admin is null || admin.PasswordResetExpiresAt is null || admin.PasswordResetExpiresAt < DateTimeOffset.UtcNow)
+            return BadRequest(new ApiResponse(false, "Invalid or expired reset token"));
+
+        admin.PasswordHash = _password.HashPassword(request.NewPassword);
+        admin.PasswordResetToken = null;
+        admin.PasswordResetExpiresAt = null;
+        admin.UpdatedAt = DateTimeOffset.UtcNow;
+        await _db.SaveChangesAsync();
+
+        return Ok(new ApiResponse(true, "Password has been reset successfully"));
     }
 }

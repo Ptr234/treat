@@ -11,6 +11,33 @@ services:
       - "5432:5432"
     volumes:
       - osc_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: osc-backend
+    restart: unless-stopped
+    ports:
+      - "5082:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=postgres;Database=osc_dev;Username=postgres;Password=postgres"
+      Jwt__Secret: "dev-only-secret-change-in-production-minimum-32-chars"
+      Jwt__ExpiryHours: "24"
+      Cors__AllowedOrigins: "http://localhost:3000,http://localhost:3001"
+      SiteUrl: "http://localhost:3000"
+    volumes:
+      - osc_uploads:/app/uploads
 
 volumes:
   osc_pgdata:
+  osc_uploads:

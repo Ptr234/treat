@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OscApi.Common;
@@ -10,26 +11,22 @@ namespace OscApi.Controllers;
 
 [ApiController]
 [Route("api/messages")]
+[Authorize(Policy = "AdminOnly")]
 public class MessagesController : ControllerBase
 {
     private readonly OscDbContext _db;
-    private readonly JwtService _jwt;
 
-    public MessagesController(OscDbContext db, JwtService jwt)
+    public MessagesController(OscDbContext db)
     {
         _db = db;
-        _jwt = jwt;
     }
 
+    /// <summary>Get messages (optionally filtered by channel).</summary>
     [HttpGet]
     public async Task<IActionResult> GetMessages([FromQuery] string? channel)
     {
-        if (!IsAdmin(out var claims))
-            return Unauthorized(new ApiResponse(false, "Admin access required"));
-
         if (string.IsNullOrEmpty(channel))
         {
-            // Return list of channels
             var channels = await _db.AgencyMessages
                 .GroupBy(m => m.Channel)
                 .Select(g => new
@@ -55,14 +52,13 @@ public class MessagesController : ControllerBase
         return Ok(new ApiResponse<object>(true, messages));
     }
 
+    /// <summary>Send a message to a channel.</summary>
     [HttpPost]
     public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
     {
-        if (!IsAdmin(out var claims))
-            return Unauthorized(new ApiResponse(false, "Admin access required"));
-
-        var name = claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown";
-        var email = claims.FirstOrDefault(c => c.Type == "email" || c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+        var name = User.FindFirst("name")?.Value ?? "Unknown";
+        var email = User.FindFirst("email")?.Value
+            ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
 
         var message = new AgencyMessage
         {
@@ -80,17 +76,5 @@ public class MessagesController : ControllerBase
         {
             message.Content, message.SenderName, message.SentAt
         }));
-    }
-
-    private bool IsAdmin(out System.Security.Claims.Claim[] claims)
-    {
-        claims = Array.Empty<System.Security.Claims.Claim>();
-        var token = Request.Cookies["osc-session"];
-        if (string.IsNullOrEmpty(token)) return false;
-        var principal = _jwt.ValidateToken(token);
-        if (principal is null) return false;
-        claims = principal.Claims.ToArray();
-        return claims.Any(c =>
-            c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "admin");
     }
 }

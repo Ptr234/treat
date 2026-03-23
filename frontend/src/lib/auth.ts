@@ -4,9 +4,12 @@ import { NextRequest } from 'next/server';
 // ── JWT secret (must be set in env) ─────────────────────────────────
 
 function getJwtSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET || '';
+  const secret = process.env.JWT_SECRET;
   if (!secret) {
-    console.warn('[auth] JWT_SECRET not set — falling back to empty secret');
+    throw new Error(
+      '[auth] JWT_SECRET environment variable is not set. ' +
+      'Set it in .env.local (minimum 32 characters).'
+    );
   }
   return new TextEncoder().encode(secret);
 }

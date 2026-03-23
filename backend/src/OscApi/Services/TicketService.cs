@@ -1,33 +1,25 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OscApi.Common;
 using OscApi.Data;
-using OscApi.Dtos.Common;
 using OscApi.Dtos.Tickets;
 using OscApi.Models;
 
-namespace OscApi.Controllers;
+namespace OscApi.Services;
 
-[ApiController]
-[Route("api/tickets")]
-public class TicketsController : ControllerBase
+public class TicketService : ITicketService
 {
     private readonly OscDbContext _db;
     private readonly EmailService _email;
     private readonly ReferenceNumberGenerator _refGen;
 
-    public TicketsController(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen)
+    public TicketService(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen)
     {
         _db = db;
         _email = email;
         _refGen = refGen;
     }
 
-    /// <summary>List all tickets (admin only).</summary>
-    [HttpGet]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> ListTickets([FromQuery] int from = 0, [FromQuery] int to = 50)
+    public async Task<object> ListAsync(int from, int to)
     {
         var total = await _db.Tickets.CountAsync();
         var tickets = await _db.Tickets
@@ -42,12 +34,10 @@ public class TicketsController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(new ApiResponse<object>(true, new { tickets, total }));
+        return new { tickets, total };
     }
 
-    /// <summary>Create a new support ticket.</summary>
-    [HttpPost]
-    public async Task<IActionResult> CreateTicket([FromBody] CreateTicketRequest request)
+    public async Task<object> CreateAsync(CreateTicketRequest request)
     {
         var category = Enum.Parse<TicketCategory>(ToPascalCase(request.Category), true);
         var priority = Enum.Parse<TicketPriority>(request.Priority ?? "medium", true);
@@ -78,30 +68,21 @@ public class TicketsController : ControllerBase
         _ = _email.SendTicketConfirmationAsync(
             ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, ticket.Title);
 
-        return Created($"/api/tickets/{refNumber}", new ApiResponse<object>(true, new
-        {
-            ticket.ReferenceNumber, ticket.Title, ticket.Status, ticket.SlaDeadlineAt
-        }));
+        return new { ticket.ReferenceNumber, ticket.Title, ticket.Status, ticket.SlaDeadlineAt };
     }
 
-    /// <summary>Get a ticket by reference number.</summary>
-    [HttpGet("{refNumber}")]
-    public async Task<IActionResult> GetTicket(string refNumber, [FromQuery] string? email)
+    public async Task<object?> GetByRefAsync(string refNumber, string? email, bool isAdmin)
     {
         var ticket = await _db.Tickets
             .Include(t => t.Messages.OrderBy(m => m.SentAt))
             .FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
 
-        if (ticket is null)
-            return NotFound(new ApiResponse(false, "Ticket not found"));
+        if (ticket is null) return null;
 
-        var isAdmin = User.IsInRole("admin");
-
-        // Public access requires email verification
         if (!isAdmin)
         {
             if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail)
-                return StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+                return null;
         }
 
         var messages = ticket.Messages
@@ -109,7 +90,7 @@ public class TicketsController : ControllerBase
             .Select(m => new { m.Content, m.AuthorName, m.AuthorRole, m.AuthorEmail, m.IsInternal, m.SentAt })
             .ToList();
 
-        return Ok(new ApiResponse<object>(true, new
+        return new
         {
             ticket.ReferenceNumber, ticket.Title, ticket.Description,
             ticket.Category, ticket.Priority, ticket.Status,
@@ -121,16 +102,13 @@ public class TicketsController : ControllerBase
             ticket.IsEscalated, ticket.EscalatedAt,
             ticket.CreatedAt, ticket.ResolvedAt, ticket.ClosedAt,
             messages
-        }));
+        };
     }
 
-    /// <summary>Update a ticket (admin only).</summary>
-    [HttpPatch("{refNumber}")]
-    [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> UpdateTicket(string refNumber, [FromBody] UpdateTicketRequest request)
+    public async Task<object?> UpdateAsync(string refNumber, UpdateTicketRequest request)
     {
         var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
-        if (ticket is null) return NotFound(new ApiResponse(false, "Ticket not found"));
+        if (ticket is null) return null;
 
         if (request.Status is not null)
         {
@@ -139,16 +117,12 @@ public class TicketsController : ControllerBase
             if (ticket.Status == TicketStatus.Closed) ticket.ClosedAt = DateTimeOffset.UtcNow;
         }
 
-        if (request.Priority is not null)
-            ticket.Priority = Enum.Parse<TicketPriority>(request.Priority, true);
-        if (request.Assignee is not null)
-            ticket.Assignee = request.Assignee;
-        if (request.AssignedAgencyCode is not null)
-            ticket.AssignedAgencyCode = request.AssignedAgencyCode;
-        if (request.SatisfactionRating is not null)
-            ticket.SatisfactionRating = request.SatisfactionRating;
-        if (request.SatisfactionComment is not null)
-            ticket.SatisfactionComment = request.SatisfactionComment;
+        if (request.Priority is not null) ticket.Priority = Enum.Parse<TicketPriority>(request.Priority, true);
+        if (request.Assignee is not null) ticket.Assignee = request.Assignee;
+        if (request.AssignedAgencyCode is not null) ticket.AssignedAgencyCode = request.AssignedAgencyCode;
+        if (request.SatisfactionRating is not null) ticket.SatisfactionRating = request.SatisfactionRating;
+        if (request.SatisfactionComment is not null) ticket.SatisfactionComment = request.SatisfactionComment;
+
         if (request.IsEscalated == true && !ticket.IsEscalated)
         {
             ticket.IsEscalated = true;
@@ -162,36 +136,30 @@ public class TicketsController : ControllerBase
             _ = _email.SendTicketStatusUpdateAsync(
                 ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, request.Status);
 
-        return Ok(new ApiResponse<object>(true, new { ticket.ReferenceNumber, ticket.Status }));
+        return new { ticket.ReferenceNumber, ticket.Status };
     }
 
-    /// <summary>Get messages for a ticket.</summary>
-    [HttpGet("{refNumber}/messages")]
-    public async Task<IActionResult> GetMessages(string refNumber, [FromQuery] string? email)
+    public async Task<object?> GetMessagesAsync(string refNumber, string? email, bool isAdmin)
     {
         var ticket = await _db.Tickets
             .Include(t => t.Messages.OrderBy(m => m.SentAt))
             .FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
 
-        if (ticket is null) return NotFound(new ApiResponse(false, "Ticket not found"));
+        if (ticket is null) return null;
 
-        var isAdmin = User.IsInRole("admin");
         if (!isAdmin && (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail))
-            return StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+            return null;
 
-        var messages = ticket.Messages
+        return ticket.Messages
             .Where(m => isAdmin || !m.IsInternal)
-            .Select(m => new { m.Content, m.AuthorName, m.AuthorRole, m.AuthorEmail, m.IsInternal, m.SentAt });
-
-        return Ok(new ApiResponse<object>(true, messages));
+            .Select(m => new { m.Content, m.AuthorName, m.AuthorRole, m.AuthorEmail, m.IsInternal, m.SentAt })
+            .ToList();
     }
 
-    /// <summary>Post a message to a ticket.</summary>
-    [HttpPost("{refNumber}/messages")]
-    public async Task<IActionResult> PostMessage(string refNumber, [FromBody] TicketMessageRequest request)
+    public async Task<object?> PostMessageAsync(string refNumber, TicketMessageRequest request)
     {
         var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
-        if (ticket is null) return NotFound(new ApiResponse(false, "Ticket not found"));
+        if (ticket is null) return null;
 
         var message = new TicketMessage
         {
@@ -206,15 +174,9 @@ public class TicketsController : ControllerBase
         _db.TicketMessages.Add(message);
         await _db.SaveChangesAsync();
 
-        return Created($"/api/tickets/{refNumber}/messages", new ApiResponse<object>(true, new
-        {
-            message.Content, message.AuthorName, message.AuthorRole, message.SentAt
-        }));
+        return new { message.Content, message.AuthorName, message.AuthorRole, message.SentAt };
     }
 
-    private static string ToPascalCase(string snakeCase)
-    {
-        return string.Join("", snakeCase.Split('_').Select(s =>
-            s.Length > 0 ? char.ToUpper(s[0]) + s[1..] : s));
-    }
+    private static string ToPascalCase(string snakeCase) =>
+        string.Join("", snakeCase.Split('_').Select(s => s.Length > 0 ? char.ToUpper(s[0]) + s[1..] : s));
 }

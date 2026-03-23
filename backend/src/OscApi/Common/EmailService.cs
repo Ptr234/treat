@@ -83,6 +83,25 @@ public class EmailService
             """);
     }
 
+    public async Task SendPasswordResetAsync(string toEmail, string name, string resetToken)
+    {
+        await SendAsync(toEmail, "Password Reset — OSC Digital Tool",
+            $"""
+            Dear {name},
+
+            A password reset has been requested for your account.
+
+            Reset Token: {resetToken}
+
+            Reset your password at: {_siteUrl}/auth/reset-password?token={Uri.EscapeDataString(resetToken)}
+
+            This link expires in 1 hour. If you did not request this, ignore this email.
+
+            Regards,
+            Uganda Investment Authority — One Stop Centre
+            """);
+    }
+
     private async Task SendAsync(string to, string subject, string textBody)
     {
         if (_client is null)

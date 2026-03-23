@@ -1,63 +1,142 @@
-name: Deploy Next.js to GitHub Pages
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "ci-${{ github.ref }}"
+  cancel-in-progress: true
 
 jobs:
-  build:
+  backend:
+    name: Backend (Build & Verify)
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: osc_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore src/OscApi/OscApi.csproj
+
+    - name: Build
+      run: dotnet build src/OscApi/OscApi.csproj -c Release --no-restore
+
+    - name: Verify EF migrations
+      run: |
+        dotnet tool install --global dotnet-ef
+        dotnet ef migrations list --project src/OscApi/OscApi.csproj
+      env:
+        ConnectionStrings__DefaultConnection: "Host=localhost;Database=osc_test;Username=postgres;Password=postgres"
+
+  frontend:
+    name: Frontend (Build & Lint)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: package-lock.json
-        
+        cache-dependency-path: frontend/package-lock.json
+
     - name: Install dependencies
       run: npm ci
-        
+
     - name: Run type check
       run: npm run type-check
-        
+
     - name: Run linting
       run: npm run lint
-        
+
     - name: Build application
       run: npm run build
-        
+      env:
+        NEXT_PUBLIC_SANITY_PROJECT_ID: placeholder
+        JWT_SECRET: ci-test-secret-minimum-32-characters-long
+
+  deploy-frontend:
+    name: Deploy Frontend
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: frontend
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build application
+      run: npm run build
+      env:
+        NEXT_PUBLIC_SANITY_PROJECT_ID: placeholder
+        JWT_SECRET: ci-build-secret-minimum-32-characters-long
+
     - name: Setup Pages
       uses: actions/configure-pages@v5
       with:
         static_site_generator: next
-        
+
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: out
+        path: frontend/out
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

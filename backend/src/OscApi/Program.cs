@@ -20,7 +20,9 @@ builder.Host.UseSerilog();
 // Database
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrEmpty(connString))
-    connString = "Host=localhost;Database=osc_dev;Username=postgres;Password=postgres";
+    throw new InvalidOperationException(
+        "ConnectionStrings:DefaultConnection is not configured. " +
+        "Set it in appsettings.Development.json or via environment variable.");
 
 var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(connString);
 dataSourceBuilder.EnableDynamicJson();
@@ -48,9 +50,22 @@ builder.Services.AddSingleton<EmailService>();
 builder.Services.AddScoped<ReferenceNumberGenerator>();
 builder.Services.AddHttpClient<GroqClient>();
 
+// Business services
+builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.TicketService>();
+builder.Services.AddScoped<OscApi.Services.IInvestorService, OscApi.Services.InvestorService>();
+
 // Validation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
+
+// Authentication (cookie-based JWT)
+builder.Services.AddAuthentication("OscCookie")
+    .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, OscApi.Middleware.CookieJwtAuthHandler>(
+        "OscCookie", null);
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
+});
 
 // Controllers + Swagger
 builder.Services.AddControllers()
@@ -63,7 +78,11 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "OSC Digital Tool API", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "OSC Digital Tool API", Version = "v1",
+        Description = "Uganda Investment Authority OneStop Centre backend API. Authenticated via osc-session cookie (JWT)." });
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
 });
 
 // Rate limiting
@@ -84,6 +103,7 @@ var app = builder.Build();
 
 // Middleware pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ValidationExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -92,6 +112,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
 

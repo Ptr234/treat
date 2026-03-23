@@ -1,6 +1,6 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using OscApi.Common;
 using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Models;
@@ -9,22 +9,20 @@ namespace OscApi.Controllers;
 
 [ApiController]
 [Route("api/dashboard")]
+[Authorize(Policy = "AdminOnly")]
 public class DashboardController : ControllerBase
 {
     private readonly OscDbContext _db;
-    private readonly JwtService _jwt;
 
-    public DashboardController(OscDbContext db, JwtService jwt)
+    public DashboardController(OscDbContext db)
     {
         _db = db;
-        _jwt = jwt;
     }
 
+    /// <summary>Get dashboard KPIs and metrics.</summary>
     [HttpGet]
     public async Task<IActionResult> GetDashboard()
     {
-        if (!IsAdmin()) return Unauthorized(new ApiResponse(false, "Admin access required"));
-
         var now = DateTimeOffset.UtcNow;
         var thirtyDaysAgo = now.AddDays(-30);
 
@@ -71,6 +69,7 @@ public class DashboardController : ControllerBase
         }));
     }
 
+    /// <summary>Get chat enquiry data (stats, list, session).</summary>
     [HttpGet("enquiries")]
     public async Task<IActionResult> GetEnquiries(
         [FromQuery] string action = "list",
@@ -78,8 +77,6 @@ public class DashboardController : ControllerBase
         [FromQuery] int to = 50,
         [FromQuery] string? sessionId = null)
     {
-        if (!IsAdmin()) return Unauthorized(new ApiResponse(false, "Admin access required"));
-
         if (action == "stats")
         {
             var total = await _db.ChatEnquiries.CountAsync();
@@ -120,14 +117,4 @@ public class DashboardController : ControllerBase
 
         return Ok(new ApiResponse<object>(true, new { enquiries, total = total2 }));
     }
-
-    private bool IsAdmin()
-    {
-        var token = Request.Cookies["osc-session"];
-        if (string.IsNullOrEmpty(token)) return false;
-        var principal = _jwt.ValidateToken(token);
-        return principal?.Claims.Any(c =>
-            c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "admin") ?? false;
-    }
-
 }
