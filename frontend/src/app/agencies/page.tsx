@@ -20,11 +20,13 @@ const CATEGORY_CONFIG: Record<string, {
   heading: string;
   subtitle: string;
 }> = {
+  // Uganda flag palette: Black (bg), Yellow/Gold (#FFD700), Red (#CE1126)
+  // Categories rotate between yellow-accent and red-accent
   investment: {
     icon: <Landmark className="w-5 h-5" />,
     accent: 'text-yellow-400',
     bg: 'bg-yellow-500/5',
-    border: 'border-yellow-500/20',
+    border: 'border-yellow-600/25',
     badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
     heading: 'Investment & Finance',
     subtitle: 'Capital markets, investment licensing, and financial facilitation',
@@ -33,107 +35,107 @@ const CATEGORY_CONFIG: Record<string, {
     icon: <Building2 className="w-5 h-5" />,
     accent: 'text-red-400',
     bg: 'bg-red-500/5',
-    border: 'border-red-500/20',
+    border: 'border-red-600/25',
     badge: 'bg-red-500/15 text-red-400 border-red-500/30',
     heading: 'Business Registration',
     subtitle: 'Company formation, business names, and licensing',
   },
   taxation: {
     icon: <Shield className="w-5 h-5" />,
-    accent: 'text-amber-400',
-    bg: 'bg-amber-500/5',
-    border: 'border-amber-500/20',
-    badge: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+    accent: 'text-yellow-400',
+    bg: 'bg-yellow-500/5',
+    border: 'border-yellow-600/25',
+    badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
     heading: 'Taxation & Revenue',
     subtitle: 'Tax registration, TIN issuance, and compliance',
   },
   immigration: {
     icon: <Globe className="w-5 h-5" />,
-    accent: 'text-blue-400',
-    bg: 'bg-blue-500/5',
-    border: 'border-blue-500/20',
-    badge: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+    accent: 'text-red-400',
+    bg: 'bg-red-500/5',
+    border: 'border-red-600/25',
+    badge: 'bg-red-500/15 text-red-400 border-red-500/30',
     heading: 'Immigration & Citizenship',
     subtitle: 'Work permits, visas, and citizenship services',
   },
   environment: {
     icon: <Leaf className="w-5 h-5" />,
-    accent: 'text-emerald-400',
-    bg: 'bg-emerald-500/5',
-    border: 'border-emerald-500/20',
-    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    accent: 'text-yellow-400',
+    bg: 'bg-yellow-500/5',
+    border: 'border-yellow-600/25',
+    badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
     heading: 'Environment & Conservation',
     subtitle: 'Environmental impact assessments and compliance',
   },
   standards: {
     icon: <Star className="w-5 h-5" />,
-    accent: 'text-violet-400',
-    bg: 'bg-violet-500/5',
-    border: 'border-violet-500/20',
-    badge: 'bg-violet-500/15 text-violet-400 border-violet-500/30',
+    accent: 'text-red-400',
+    bg: 'bg-red-500/5',
+    border: 'border-red-600/25',
+    badge: 'bg-red-500/15 text-red-400 border-red-500/30',
     heading: 'Standards & Quality',
     subtitle: 'Product standards, quality assurance, and certification',
   },
   infrastructure: {
     icon: <Zap className="w-5 h-5" />,
-    accent: 'text-orange-400',
-    bg: 'bg-orange-500/5',
-    border: 'border-orange-500/20',
-    badge: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+    accent: 'text-yellow-400',
+    bg: 'bg-yellow-500/5',
+    border: 'border-yellow-600/25',
+    badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
     heading: 'Infrastructure & Utilities',
     subtitle: 'Electricity, water, and essential services connections',
   },
   lands: {
     icon: <MapPin className="w-5 h-5" />,
-    accent: 'text-teal-400',
-    bg: 'bg-teal-500/5',
-    border: 'border-teal-500/20',
-    badge: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
+    accent: 'text-red-400',
+    bg: 'bg-red-500/5',
+    border: 'border-red-600/25',
+    badge: 'bg-red-500/15 text-red-400 border-red-500/30',
     heading: 'Land & Housing',
     subtitle: 'Land titles, surveys, and property registration',
   },
   social_security: {
     icon: <Users className="w-5 h-5" />,
-    accent: 'text-pink-400',
-    bg: 'bg-pink-500/5',
-    border: 'border-pink-500/20',
-    badge: 'bg-pink-500/15 text-pink-400 border-pink-500/30',
+    accent: 'text-yellow-400',
+    bg: 'bg-yellow-500/5',
+    border: 'border-yellow-600/25',
+    badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
     heading: 'Social Security & Labour',
     subtitle: 'Employee registration, contributions, and compliance',
   },
   finance: {
     icon: <Landmark className="w-5 h-5" />,
-    accent: 'text-yellow-400',
-    bg: 'bg-yellow-500/5',
-    border: 'border-yellow-500/20',
-    badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+    accent: 'text-red-400',
+    bg: 'bg-red-500/5',
+    border: 'border-red-600/25',
+    badge: 'bg-red-500/15 text-red-400 border-red-500/30',
     heading: 'Capital Markets',
     subtitle: 'Securities regulation and market oversight',
   },
   tourism: {
     icon: <Globe className="w-5 h-5" />,
-    accent: 'text-cyan-400',
-    bg: 'bg-cyan-500/5',
-    border: 'border-cyan-500/20',
-    badge: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+    accent: 'text-yellow-400',
+    bg: 'bg-yellow-500/5',
+    border: 'border-yellow-600/25',
+    badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
     heading: 'Tourism',
     subtitle: 'Tourism promotion and operator licensing',
   },
   employers: {
     icon: <Users className="w-5 h-5" />,
-    accent: 'text-indigo-400',
-    bg: 'bg-indigo-500/5',
-    border: 'border-indigo-500/20',
-    badge: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+    accent: 'text-red-400',
+    bg: 'bg-red-500/5',
+    border: 'border-red-600/25',
+    badge: 'bg-red-500/15 text-red-400 border-red-500/30',
     heading: 'Employers & Workforce',
     subtitle: 'Labour relations, skills development, and compliance',
   },
   conservation: {
     icon: <Leaf className="w-5 h-5" />,
-    accent: 'text-emerald-400',
-    bg: 'bg-emerald-500/5',
-    border: 'border-emerald-500/20',
-    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+    accent: 'text-yellow-400',
+    bg: 'bg-yellow-500/5',
+    border: 'border-yellow-600/25',
+    badge: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
     heading: 'Conservation',
     subtitle: 'Wildlife protection and conservation initiatives',
   },
@@ -167,7 +169,7 @@ function SpotlightCard({ agency, index }: { agency: AgencyContact; index: number
       {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-800 group-hover:from-neutral-800 transition-colors duration-500" />
       <div className={`absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 -translate-y-1/3 translate-x-1/3 bg-gradient-to-br ${
-        index === 0 ? 'from-yellow-400 to-red-500' : index === 1 ? 'from-red-400 to-red-600' : 'from-amber-400 to-yellow-600'
+        index === 0 ? 'from-yellow-500 to-red-600' : index === 1 ? 'from-red-500 to-red-700' : 'from-yellow-400 to-yellow-600'
       }`} />
 
       <div className="relative p-6 flex-1 flex flex-col">
@@ -366,8 +368,8 @@ function CompactAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: Return
       href={`/agencies/${agency.id}`}
       className={`group relative rounded-2xl border border-neutral-800 bg-neutral-900 hover:border-yellow-500/50 hover:bg-neutral-900/80 transition-all duration-300 overflow-hidden flex flex-col`}
     >
-      {/* Accent top stripe */}
-      <div className={`h-1 ${cfg.bg.replace('/5', '/40')}`} style={{ background: `linear-gradient(to right, ${cfg.accent.includes('yellow') ? '#facc15' : cfg.accent.includes('red') ? '#f87171' : cfg.accent.includes('amber') ? '#fbbf24' : cfg.accent.includes('blue') ? '#60a5fa' : cfg.accent.includes('emerald') ? '#34d399' : cfg.accent.includes('violet') ? '#a78bfa' : cfg.accent.includes('orange') ? '#fb923c' : cfg.accent.includes('teal') ? '#2dd4bf' : cfg.accent.includes('pink') ? '#f472b6' : cfg.accent.includes('cyan') ? '#22d3ee' : cfg.accent.includes('indigo') ? '#818cf8' : '#facc15'}20, transparent)` }} />
+      {/* Uganda flag accent stripe */}
+      <div className={`h-1 ${cfg.accent.includes('yellow') ? 'bg-gradient-to-r from-yellow-500/60 to-transparent' : 'bg-gradient-to-r from-red-500/60 to-transparent'}`} />
 
       <div className="p-5 flex-1 flex flex-col">
         {/* Header */}
@@ -440,12 +442,12 @@ function QuickStats() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
       {[
-        { label: 'Total Agencies', value: ugandaAgencies.length, accent: 'text-yellow-400' },
-        { label: 'Categories', value: categoryCount, accent: 'text-red-400' },
-        { label: 'High Priority', value: highPriority, accent: 'text-red-500' },
-        { label: 'With Appointments', value: ugandaAgencies.filter(a => a.hasAppointmentBooking).length, accent: 'text-yellow-500' },
+        { label: 'Total Agencies', value: ugandaAgencies.length, accent: 'text-yellow-400', borderColor: 'border-yellow-600/20' },
+        { label: 'Categories', value: categoryCount, accent: 'text-red-400', borderColor: 'border-red-600/20' },
+        { label: 'High Priority', value: highPriority, accent: 'text-red-500', borderColor: 'border-red-600/20' },
+        { label: 'With Appointments', value: ugandaAgencies.filter(a => a.hasAppointmentBooking).length, accent: 'text-yellow-500', borderColor: 'border-yellow-600/20' },
       ].map((stat, i) => (
-        <div key={i} className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 text-center">
+        <div key={i} className={`bg-neutral-900 border ${stat.borderColor} rounded-xl p-4 text-center`}>
           <p className={`text-2xl font-black ${stat.accent}`}>{stat.value}</p>
           <p className="text-[11px] text-neutral-500 mt-0.5">{stat.label}</p>
         </div>
