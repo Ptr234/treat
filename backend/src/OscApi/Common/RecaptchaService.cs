@@ -48,7 +48,7 @@ public class RecaptchaService
 
             if (result is null || !result.Success)
             {
-                _logger.LogWarning("reCAPTCHA verification failed: {Errors}", result?.ErrorCodes);
+                _logger.LogWarning("reCAPTCHA verification failed: {Errors}", (object?)(result?.ErrorCodes));
                 return false;
             }
 

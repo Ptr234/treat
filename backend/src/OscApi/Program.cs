@@ -153,13 +153,35 @@ app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
 
-// Auto-migrate in development
+// Auto-migrate and seed in development
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<OscDbContext>();
-    try { db.Database.Migrate(); }
-    catch { /* DB not configured — using InMemory */ }
+    try
+    {
+        db.Database.Migrate();
+
+        // Seed default admin if not exists
+        if (!db.AdminUsers.Any(a => a.Email == "admin@uia.go.ug"))
+        {
+            var pw = scope.ServiceProvider.GetRequiredService<PasswordService>();
+            db.AdminUsers.Add(new OscApi.Models.AdminUser
+            {
+                Name = "OSC Administrator",
+                Email = "admin@uia.go.ug",
+                PasswordHash = pw.HashPassword("Admin@2026!"),
+                Role = "admin",
+                IsActive = true,
+            });
+            db.SaveChanges();
+            Log.Information("Default admin user seeded: admin@uia.go.ug");
+        }
+    }
+    catch (Exception ex)
+    {
+        Log.Warning(ex, "Database migration/seed skipped");
+    }
 }
 
 app.Run();

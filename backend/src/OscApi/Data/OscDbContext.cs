@@ -134,16 +134,6 @@ public class OscDbContext : DbContext
             e.Property(a => a.Status).HasConversion<string>();
         });
 
-        // Seed default admin user (password: Admin@2026!)
-        // BCrypt hash generated with workFactor 12
-        modelBuilder.Entity<AdminUser>().HasData(new AdminUser
-        {
-            Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-            Name = "OSC Administrator",
-            Email = "admin@uia.go.ug",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@2026!", workFactor: 12),
-            Role = "admin",
-            IsActive = true,
-        });
+        // Admin seeding handled in Program.cs (upsert-style) to avoid migration conflicts
     }
 }
