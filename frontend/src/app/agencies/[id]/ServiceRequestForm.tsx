@@ -6,10 +6,11 @@ import { apiFetch } from '@/lib/api-client';
 interface ServiceRequestFormProps {
   agencyName: string;
   agencyCode: string;
+  agencyEmail?: string;
   services: string[];
 }
 
-export default function ServiceRequestForm({ agencyName, agencyCode, services }: ServiceRequestFormProps) {
+export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail, services }: ServiceRequestFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string; ref?: string } | null>(null);
 
@@ -26,6 +27,7 @@ export default function ServiceRequestForm({ agencyName, agencyCode, services }:
         body: JSON.stringify({
           agencyCode,
           agencyName,
+          agencyEmail: agencyEmail || null,
           name: formData.get('name'),
           email: formData.get('email'),
           serviceType: formData.get('service'),

@@ -45,7 +45,8 @@ public class ContactService : IContactService
 
         _ = _email.SendContactNotificationToAgencyAsync(
             inquiry.AgencyCode, inquiry.AgencyName, inquiry.ReferenceNumber,
-            inquiry.ContactName, inquiry.ContactEmail, inquiry.Subject, inquiry.Message);
+            inquiry.ContactName, inquiry.ContactEmail, inquiry.Subject, inquiry.Message,
+            request.AgencyEmail);
 
         return new ContactInquiryResponse(
             refNumber, inquiry.AgencyCode, inquiry.ContactName,
@@ -89,7 +90,8 @@ public class ContactService : IContactService
             appointment.ContactName, appointment.ContactEmail, appointment.ContactPhone,
             appointment.ServiceType, appointment.Purpose,
             appointment.PreferredDate.ToString("dd MMM yyyy"), appointment.PreferredTime,
-            appointment.DurationMinutes, appointment.MeetingType.ToString());
+            appointment.DurationMinutes, appointment.MeetingType.ToString(),
+            request.AgencyEmail);
 
         return new AppointmentResponse(
             refNumber, appointment.AgencyCode, appointment.ContactName,

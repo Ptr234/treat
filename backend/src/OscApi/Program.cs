@@ -9,6 +9,18 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Sentry error tracking (optional — skipped if DSN not configured)
+var sentryDsn = builder.Configuration["Sentry:Dsn"];
+if (!string.IsNullOrEmpty(sentryDsn))
+{
+    builder.WebHost.UseSentry(o =>
+    {
+        o.Dsn = sentryDsn;
+        o.TracesSampleRate = 0.2;
+        o.Environment = builder.Environment.EnvironmentName;
+    });
+}
+
 // Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)

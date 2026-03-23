@@ -100,6 +100,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
         body: JSON.stringify({
           agencyCode: agency.acronym,
           agencyName: agency.name,
+          agencyEmail: agency.contact.email,
           name: appointmentData.name,
           email: appointmentData.email,
           phone: appointmentData.phone,

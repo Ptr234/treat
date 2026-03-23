@@ -52,6 +52,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
         body: JSON.stringify({
           agencyCode: agency.acronym,
           agencyName: agency.name,
+          agencyEmail: agency.contact.email,
           name: formData.name,
           email: formData.email,
           phone: formData.phone,

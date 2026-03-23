@@ -15,6 +15,7 @@ public class ContactServiceTests
 
     private static CreateContactInquiryRequest ValidInquiry() => new(
         AgencyCode: "UIA", AgencyName: "Uganda Investment Authority",
+        AgencyEmail: "info@ugandainvestment.go.ug",
         Name: "Jane Doe", Email: "jane@example.com", Phone: "+256700111222",
         Company: "TestCo", ServiceType: "Investment Facilitation",
         Subject: "Inquiry about investing", Message: "I want to invest in agriculture",
@@ -23,6 +24,7 @@ public class ContactServiceTests
 
     private static CreateAppointmentRequest ValidAppointment() => new(
         AgencyCode: "URSB", AgencyName: "Uganda Registration Services Bureau",
+        AgencyEmail: "ursb@ursb.go.ug",
         Name: "John Doe", Email: "john@example.com", Phone: "+256700333444",
         Company: null, ServiceType: "Company Registration",
         Purpose: "Register my new company", Duration: 60,

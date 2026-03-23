@@ -3,6 +3,7 @@ namespace OscApi.Dtos.Contact;
 public record CreateContactInquiryRequest(
     string AgencyCode,
     string AgencyName,
+    string? AgencyEmail,
     string Name,
     string Email,
     string Phone,
@@ -16,6 +17,7 @@ public record CreateContactInquiryRequest(
 public record CreateAppointmentRequest(
     string AgencyCode,
     string AgencyName,
+    string? AgencyEmail,
     string Name,
     string Email,
     string Phone,
