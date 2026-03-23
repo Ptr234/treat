@@ -17,6 +17,7 @@ import {
   ArrowUpTrayIcon
 } from '@heroicons/react/24/outline';
 import { TicketCategory, TicketPriority } from '@/types';
+import { apiFetch } from '@/lib/api-client';
 
 interface UploadedFile {
   name: string;
@@ -190,6 +191,7 @@ export default function CreateTicketPage() {
       const response = await fetch('/api/upload/', {
         method: 'POST',
         body,
+        credentials: 'include',
       });
 
       const result = await response.json();
@@ -272,15 +274,12 @@ export default function CreateTicketPage() {
           ...(documents.length > 0 ? { documents } : {}),
         };
 
-        const response = await fetch('/api/tickets/', {
+        const result = await apiFetch<{ referenceNumber: string }>('/api/tickets/', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(ticketData),
         });
 
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
+        if (!result.success) {
           alert(result.error || 'Failed to create ticket. Please try again.');
           return;
         }

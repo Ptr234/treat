@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { SupportTicket } from '@/types';
+import { apiFetch } from '@/lib/api-client';
 
 interface SanityTicketRow {
   _id: string;
@@ -56,15 +57,14 @@ export function useTickets(): UseTicketsReturn {
 
   const fetchTickets = useCallback(async () => {
     try {
-      const res = await fetch('/api/tickets?from=0&to=100', { cache: 'no-store' });
-      if (!res.ok) throw new Error(`API returned ${res.status}`);
-
-      const json = await res.json();
+      const json = await apiFetch<{ tickets: SanityTicketRow[]; total: number }>('/api/tickets?from=0&to=100');
       if (!json.success) throw new Error(json.error || 'Unknown error');
 
-      const tickets: SanityTicketRow[] = json.data ?? [];
+      // ASP.NET returns { tickets, total }; Next.js returns array directly
+      const raw = json.data;
+      const tickets: SanityTicketRow[] = Array.isArray(raw) ? raw : (raw?.tickets ?? []);
       setData(tickets.map(mapToSupportTicket));
-      setTotal(json.meta?.total ?? tickets.length);
+      setTotal(raw && 'total' in raw ? raw.total : tickets.length);
       setError(null);
     } catch (err) {
       console.error('[useTickets] fetch failed:', err);

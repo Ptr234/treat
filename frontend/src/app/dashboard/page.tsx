@@ -24,6 +24,7 @@ import {
   SignalIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { apiFetch } from '@/lib/api-client';
 
 type AlertFilter = 'all' | 'critical' | 'high' | 'medium';
 type ScorecardSortKey = 'score' | 'activeCases' | 'resolvedToday' | 'slaCompliance' | 'acronym';
@@ -121,18 +122,16 @@ export default function DashboardPage() {
     if (!actionInput.trim()) return;
     setActionLoading(true);
     try {
-      const res = await fetch(`/api/tickets/${actionInput.trim()}`, {
+      const data = await apiFetch(`/api/tickets/${actionInput.trim()}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isEscalated: true, priority: 'critical' }),
       });
-      if (res.ok) {
+      if (data.success) {
         setActionSuccess(`Ticket ${actionInput.trim()} flagged as priority case`);
         setActionModal(null);
         setActionInput('');
         refresh();
       } else {
-        const data = await res.json();
         setActionSuccess(`Error: ${data.error || 'Failed to flag ticket'}`);
       }
     } catch {
@@ -146,16 +145,15 @@ export default function DashboardPage() {
     if (!actionInput.trim()) return;
     setActionLoading(true);
     try {
-      const res = await fetch('/api/messages/', {
+      const result = await apiFetch('/api/messages/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel: 'general',
           content: actionInput.trim(),
           senderAgencyCode: 'UIA',
         }),
       });
-      if (res.ok) {
+      if (result.success) {
         setActionSuccess('Team message sent successfully');
         setActionModal(null);
         setActionInput('');
@@ -198,16 +196,15 @@ export default function DashboardPage() {
     if (!actionInput.trim()) return;
     setActionLoading(true);
     try {
-      const res = await fetch('/api/messages/', {
+      const result = await apiFetch('/api/messages/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel: 'general',
           content: `Review Scheduled: ${actionInput.trim()}\n\nRequested by Director General on ${new Date().toLocaleDateString('en-GB')}`,
           senderAgencyCode: 'UIA',
         }),
       });
-      if (res.ok) {
+      if (result.success) {
         setActionSuccess('Review scheduled and team notified');
         setActionModal(null);
         setActionInput('');

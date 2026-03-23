@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import type { User } from '@/types';
+import { apiFetch } from '@/lib/api-client';
 
 interface AuthState {
   user: User | null;
@@ -20,6 +21,22 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/** Normalize auth responses from both Next.js and ASP.NET backends */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractUser(data: any): User | null {
+  if (!data) return null;
+  // ASP.NET returns { id, email, name, role, picture }
+  // Next.js  returns { user: { id, email, name, role, picture } }
+  const u = data.user ?? data;
+  if (!u?.email) return null;
+  return {
+    id: u.id ?? u.sub, name: u.name, email: u.email, role: u.role,
+    picture: u.picture, isVerified: true,
+    createdAt: u.createdAt ?? new Date().toISOString(),
+    updatedAt: u.updatedAt ?? new Date().toISOString(),
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -31,16 +48,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ── Check existing session on mount ────────────────────────────────
   const checkSession = useCallback(async () => {
     try {
-      const res = await fetch('/api/auth/me/');
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.data?.user) {
-          setState({
-            user: json.data.user,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
+      const json = await apiFetch('/api/auth/me');
+      if (json.success && json.data) {
+        const user = extractUser(json.data);
+        if (user) {
+          setState({ user, isAuthenticated: true, isLoading: false, error: null });
           return;
         }
       }
@@ -58,61 +70,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
 
-    const res = await fetch('/api/auth/login/', {
+    const json = await apiFetch('/api/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
-    const json = await res.json();
-
-    if (!res.ok || !json.success) {
+    if (!json.success) {
       setState(s => ({ ...s, isLoading: false }));
       throw new Error(json.error || 'Login failed');
     }
 
-    setState({
-      user: json.data.user,
-      isAuthenticated: true,
-      isLoading: false,
-      error: null,
-    });
+    const user = extractUser(json.data);
+    setState({ user, isAuthenticated: true, isLoading: false, error: null });
   }, []);
 
   // ── Login with Google credential ──────────────────────────────────
   const loginWithGoogle = useCallback(async (credential: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
 
-    const res = await fetch('/api/auth/google/', {
+    const json = await apiFetch('/api/auth/google', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential }),
+      body: JSON.stringify({ idToken: credential }),
     });
 
-    const json = await res.json();
-
-    if (!res.ok || !json.success) {
+    if (!json.success) {
       setState(s => ({ ...s, isLoading: false }));
       throw new Error(json.error || 'Google login failed');
     }
 
-    setState({
-      user: json.data.user,
-      isAuthenticated: true,
-      isLoading: false,
-      error: null,
-    });
+    const user = extractUser(json.data);
+    setState({ user, isAuthenticated: true, isLoading: false, error: null });
   }, []);
 
   // ── Logout via API ─────────────────────────────────────────────────
   const logout = useCallback(async () => {
-    await fetch('/api/auth/logout/', { method: 'POST' });
-    setState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
-    });
+    await apiFetch('/api/auth/logout', { method: 'POST' });
+    setState({ user: null, isAuthenticated: false, isLoading: false, error: null });
   }, []);
 
   const clearError = useCallback(() => setState(s => ({ ...s, error: null })), []);

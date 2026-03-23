@@ -2,7 +2,7 @@ import { chatKnowledgeBase } from '@/data/mock/chat-kb';
 import type { ChatLanguage, ChatKBEntry } from '@/types';
 
 function getChatbotBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || '';
+  return process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '';
 }
 
 // ===================== MULTILINGUAL KEYWORD MAP =====================
@@ -300,6 +300,7 @@ function logEnquiry(
   // Fire-and-forget — don't block the chat response
   fetch(`${baseUrl}/api/chatbot/log`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       sessionId,
@@ -335,6 +336,7 @@ export async function sendChatMessage(
     const baseUrl = getChatbotBaseUrl();
     const res = await fetch(`${baseUrl}/api/chatbot`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         message,
@@ -346,10 +348,13 @@ export async function sendChatMessage(
 
     const data = await res.json();
 
-    if (res.ok && data.success && data.response) {
+    // ASP.NET returns { success, data: { response, sentiment } }
+    // Next.js returns  { success, response, sentiment }
+    const chatData = data.data ?? data;
+    if (res.ok && data.success && (chatData.response || data.response)) {
       const result: ChatResponse = {
-        response: data.response,
-        sentiment: data.sentiment,
+        response: chatData.response ?? data.response,
+        sentiment: chatData.sentiment ?? data.sentiment,
       };
       logEnquiry(sessionId, userInfo, message, result.response, language, result.sentiment, 'ai');
       return result;

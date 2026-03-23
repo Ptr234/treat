@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { mockDashboardMetrics } from '@/data/mock/dashboard';
 import type { DGDashboardMetrics } from '@/types';
+import { apiFetch } from '@/lib/api-client';
 
 export type RefreshInterval = 30_000 | 60_000 | 300_000;
 
@@ -59,13 +60,10 @@ export function useDashboard() {
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const res = await fetch('/api/dashboard', { cache: 'no-store' });
-      if (!res.ok) throw new Error(`API returned ${res.status}`);
-
-      const json = await res.json();
+      const json = await apiFetch<DGDashboardMetrics & { isEmpty?: boolean; kpis?: Record<string, number> }>('/api/dashboard');
       if (!json.success) throw new Error(json.error || 'Unknown error');
 
-      if (json.isEmpty) {
+      if (!json.data || json.data.isEmpty) {
         setState((prev) => ({
           ...prev,
           prevMetrics: prev.metrics,
@@ -79,7 +77,9 @@ export function useDashboard() {
         return;
       }
 
-      const incoming = json.data as DGDashboardMetrics;
+      // Normalize: ASP.NET nests KPIs under .kpis; Next.js puts them at top level
+      const raw = json.data!;
+      const incoming = (raw.kpis ? { ...raw, ...raw.kpis } : raw) as DGDashboardMetrics;
       setState((prev) => ({
         ...prev,
         prevMetrics: prev.metrics,

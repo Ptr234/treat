@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { apiFetch } from '@/lib/api-client';
 import {
   ChatBubbleLeftRightIcon,
   ArrowPathIcon,
@@ -90,9 +91,8 @@ export default function EnquiriesPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch('/api/dashboard/enquiries?action=stats');
-      const json = await res.json();
-      if (json.success) setStats(json.data);
+      const json = await apiFetch<EnquiryStats>('/api/dashboard/enquiries?action=stats');
+      if (json.success) setStats(json.data as EnquiryStats);
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }
@@ -103,11 +103,10 @@ export default function EnquiriesPage() {
     try {
       const from = pageNum * PAGE_SIZE;
       const to = from + PAGE_SIZE;
-      const res = await fetch(`/api/dashboard/enquiries?from=${from}&to=${to}`);
-      const json = await res.json();
+      const json = await apiFetch<Enquiry[]>(`/api/dashboard/enquiries?from=${from}&to=${to}`);
       if (json.success) {
-        setEnquiries(json.data);
-        setTotal(json.total);
+        setEnquiries(json.data as Enquiry[]);
+        setTotal((json as unknown as { total: number }).total ?? 0);
       }
     } catch (err) {
       console.error('Failed to fetch enquiries:', err);
@@ -120,9 +119,8 @@ export default function EnquiriesPage() {
     setSessionLoading(true);
     setSelectedSession(sessionId);
     try {
-      const res = await fetch(`/api/dashboard/enquiries?action=session&sessionId=${encodeURIComponent(sessionId)}`);
-      const json = await res.json();
-      if (json.success) setSessionMessages(json.data);
+      const json = await apiFetch<Enquiry[]>(`/api/dashboard/enquiries?action=session&sessionId=${encodeURIComponent(sessionId)}`);
+      if (json.success) setSessionMessages(json.data as Enquiry[]);
     } catch (err) {
       console.error('Failed to fetch session:', err);
     } finally {

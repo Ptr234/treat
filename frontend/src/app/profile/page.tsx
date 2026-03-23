@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiFetch } from '@/lib/api-client';
 import {
   UserCircleIcon,
   LockClosedIcon,
@@ -77,13 +78,11 @@ export default function ProfilePage() {
     setSaving(true);
     setProfileError('');
     try {
-      const res = await fetch('/api/auth/profile', {
+      const json = await apiFetch('/api/auth/profile', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: trimmed }),
       });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
+      if (!json.success) {
         setProfileError(json.error || 'Failed to update name');
         return;
       }
@@ -114,13 +113,11 @@ export default function ProfilePage() {
 
     setPasswordSaving(true);
     try {
-      const res = await fetch('/api/auth/profile', {
+      const json = await apiFetch('/api/auth/profile', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({ password: newPassword }),
       });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
+      if (!json.success) {
         setPasswordError(json.error || 'Failed to change password');
         return;
       }

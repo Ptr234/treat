@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InvestmentData } from '../../types';
 import { useNotification } from '../../contexts/NotificationContext';
+import { apiFetch } from '@/lib/api-client';
 
 export default function InvestmentOnboardingWizard() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -89,28 +90,25 @@ export default function InvestmentOnboardingWizard() {
   const submitApplication = async () => {
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/investors/', {
+      const json = await apiFetch<{ referenceNumber: string; existing: boolean }>('/api/investors/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(investmentData),
       });
 
-      const json = await res.json();
-
-      if (!res.ok || !json.success) {
+      if (!json.success) {
         throw new Error(json.error || 'Submission failed');
       }
 
-      setSubmitResult({ referenceNumber: json.data.referenceNumber, existing: json.data.existing });
+      setSubmitResult({ referenceNumber: json.data!.referenceNumber, existing: json.data!.existing });
 
       addNotification({
         type: 'success',
-        title: json.data.existing
+        title: json.data!.existing
           ? 'Profile Already Exists'
           : 'Application Submitted Successfully!',
-        message: json.data.existing
-          ? `We already have your profile on file (${json.data.referenceNumber}). Our team will be in touch.`
-          : `Your investor reference is ${json.data.referenceNumber}. Our investment team will contact you within 24 hours.`,
+        message: json.data!.existing
+          ? `We already have your profile on file (${json.data!.referenceNumber}). Our team will be in touch.`
+          : `Your investor reference is ${json.data!.referenceNumber}. Our investment team will contact you within 24 hours.`,
       });
     } catch (err) {
       addNotification({

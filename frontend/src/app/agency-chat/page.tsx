@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { apiFetch } from '@/lib/api-client';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -208,10 +209,8 @@ export default function AgencyChatPage() {
 
   const fetchChannels = useCallback(async () => {
     try {
-      const res = await fetch('/api/messages/');
-      if (!res.ok) return;
-      const json = await res.json();
-      if (json.success) {
+      const json = await apiFetch<{ channels: string[]; tickets: Ticket[] }>('/api/messages/');
+      if (json.success && json.data) {
         setChannels(json.data.channels ?? []);
         setTickets(json.data.tickets ?? []);
       }
@@ -229,11 +228,9 @@ export default function AgencyChatPage() {
   const fetchMessages = useCallback(async () => {
     try {
       setLoadingMessages(true);
-      const res = await fetch(`/api/messages/?channel=${encodeURIComponent(activeChannel)}`);
-      if (!res.ok) return;
-      const json = await res.json();
+      const json = await apiFetch<Message[]>(`/api/messages/?channel=${encodeURIComponent(activeChannel)}`);
       if (json.success) {
-        const fetched: Message[] = json.data ?? [];
+        const fetched: Message[] = (json.data as Message[]) ?? [];
         setMessages(fetched);
 
         // Track channel message counts for unread
@@ -335,9 +332,8 @@ export default function AgencyChatPage() {
     setSending(true);
     setSendError(null);
     try {
-      const res = await fetch('/api/messages/', {
+      const json = await apiFetch('/api/messages/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           channel: activeChannel,
           content: messageContent,
@@ -347,8 +343,7 @@ export default function AgencyChatPage() {
             : {}),
         }),
       });
-      const json = await res.json();
-      if (!res.ok || !json.success) {
+      if (!json.success) {
         // Rollback optimistic
         setMessages((prev) => prev.filter((m) => m._id !== optimisticId));
         setNewMessage(savedMessage);
@@ -390,7 +385,7 @@ export default function AgencyChatPage() {
       for (const file of toUpload) {
         const formData = new FormData();
         formData.append('file', file);
-        const res = await fetch('/api/upload/', { method: 'POST', body: formData });
+        const res = await fetch('/api/upload/', { method: 'POST', body: formData, credentials: 'include' });
         if (!res.ok) continue;
         const json = await res.json();
         if (json.success) {

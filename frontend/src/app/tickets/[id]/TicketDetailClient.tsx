@@ -13,6 +13,7 @@ import {
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
+import { apiFetch } from '@/lib/api-client';
 
 // --- Types matching Sanity API response ---
 
@@ -110,18 +111,18 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(
+        const json = await apiFetch<TicketData>(
           `/api/tickets/${ticketId}?email=${encodeURIComponent(email)}`
         );
-        const json = await res.json();
 
-        if (!res.ok) {
-          if (json.code === 'EMAIL_MISMATCH') {
+        if (!json.success) {
+          const errLower = (json.error || '').toLowerCase();
+          if (errLower.includes('email') && errLower.includes('mismatch')) {
             setNeedsVerification(true);
             setError(
               'Email does not match. Please enter the email used when submitting the inquiry.'
             );
-          } else if (json.code === 'NOT_FOUND') {
+          } else if (errLower.includes('not found')) {
             setError('Ticket not found. Please check the reference number.');
           } else {
             setError(json.error || 'Failed to load ticket');
@@ -129,9 +130,9 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
           return;
         }
 
-        setTicket(json.data);
-        setRating(json.data.satisfactionRating || 0);
-        setEscalated(json.data.isEscalated);
+        setTicket(json.data as TicketData);
+        setRating((json.data as TicketData).satisfactionRating || 0);
+        setEscalated((json.data as TicketData).isEscalated);
         setNeedsVerification(false);
       } catch {
         setError('Network error. Please try again.');
@@ -169,16 +170,15 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
     setIsSubmittingComment(true);
     setCommentSuccess(false);
     try {
-      const res = await fetch(`/api/tickets/${ticketId}/messages`, {
+      const res = await apiFetch(`/api/tickets/${ticketId}/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: comment.trim(),
           authorName: ticket.contactName,
           authorEmail: emailParam,
         }),
       });
-      if (res.ok) {
+      if (res.success) {
         setComment('');
         setCommentSuccess(true);
         fetchTicket(emailParam);
@@ -195,12 +195,11 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
     if (!ticket || !emailParam) return;
     setIsSubmittingRating(true);
     try {
-      const res = await fetch(`/api/tickets/${ticketId}`, {
+      const res = await apiFetch(`/api/tickets/${ticketId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailParam, satisfactionRating: newRating }),
       });
-      if (res.ok) setRating(newRating);
+      if (res.success) setRating(newRating);
     } catch {
       /* silently handled */
     } finally {
@@ -212,12 +211,11 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
     if (!ticket || !emailParam || escalated) return;
     setIsEscalating(true);
     try {
-      const res = await fetch(`/api/tickets/${ticketId}`, {
+      const res = await apiFetch(`/api/tickets/${ticketId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailParam, isEscalated: true }),
       });
-      if (res.ok) setEscalated(true);
+      if (res.success) setEscalated(true);
     } catch {
       /* silently handled */
     } finally {

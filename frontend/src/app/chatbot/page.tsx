@@ -23,6 +23,7 @@ import LanguageSelector from '@/components/chatbot/LanguageSelector';
 import type { ChatLanguage } from '@/types';
 import { useChatEngine } from '@/hooks/useChatEngine';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
+import { apiFetch } from '@/lib/api-client';
 
 const quickTopics = [
   { label: 'Investment Procedures', desc: 'How to invest in Uganda', icon: '📋' },
@@ -152,9 +153,8 @@ function ChatbotPageInner() {
     setIsEscalating(true);
 
     try {
-      const res = await fetch('/api/tickets', {
+      const result = await apiFetch<{ referenceNumber: string }>('/api/tickets', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: `Chat Escalation: ${escalationData.issue.slice(0, 80)}`,
           description: escalationData.issue,
@@ -168,9 +168,8 @@ function ChatbotPageInner() {
       });
 
       let refNumber: string;
-      if (res.ok) {
-        const data = await res.json();
-        refNumber = data.referenceNumber;
+      if (result.success && result.data) {
+        refNumber = result.data.referenceNumber;
       } else {
         refNumber = `ESC-${Date.now().toString(36).toUpperCase()}`;
       }
