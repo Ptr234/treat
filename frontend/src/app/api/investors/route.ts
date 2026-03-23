@@ -1,5 +1,9 @@
+/**
+ * Sanity-only fallback for investor profiles.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET instead.
+ */
 import { NextRequest } from 'next/server';
-import { serverClient } from '@/lib/sanity-client';
+import { getWriteClient } from '@/lib/sanity-client';
 import {
   INVESTOR_COUNT_BY_YEAR_QUERY,
   INVESTOR_REF_EXISTS_QUERY,
@@ -16,11 +20,11 @@ async function generateInvestorRef(): Promise<string> {
   const pattern = `INV-${year}-*`;
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const count = await serverClient.fetch<number>(INVESTOR_COUNT_BY_YEAR_QUERY, { pattern });
+    const count = await getWriteClient().fetch<number>(INVESTOR_COUNT_BY_YEAR_QUERY, { pattern });
     const seq = count + 1 + attempt;
     const ref = `INV-${year}-${String(seq).padStart(4, '0')}`;
 
-    const exists = await serverClient.fetch<boolean>(INVESTOR_REF_EXISTS_QUERY, { ref });
+    const exists = await getWriteClient().fetch<boolean>(INVESTOR_REF_EXISTS_QUERY, { ref });
     if (!exists) return ref;
   }
 
@@ -38,7 +42,7 @@ export async function POST(request: NextRequest) {
     const email = data.email.toLowerCase().trim();
 
     // Check if investor with this email already exists
-    const existing = await serverClient.fetch(INVESTOR_BY_EMAIL_QUERY, { email });
+    const existing = await getWriteClient().fetch(INVESTOR_BY_EMAIL_QUERY, { email });
     if (existing) {
       return apiSuccess(
         { referenceNumber: existing.referenceNumber, investorId: existing._id, existing: true },
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     const referenceNumber = await generateInvestorRef();
 
-    const profile = await serverClient.create({
+    const profile = await getWriteClient().create({
       _type: 'investorProfile',
       referenceNumber,
       name: sanitizeString(data.name),

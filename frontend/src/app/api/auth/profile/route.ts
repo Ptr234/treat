@@ -1,5 +1,9 @@
+/**
+ * Sanity-only fallback for admin profile update.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET AuthController instead.
+ */
 import { NextRequest, NextResponse } from 'next/server';
-import { serverClient } from '@/lib/sanity-client';
+import { getWriteClient } from '@/lib/sanity-client';
 import {
   requireAdmin,
   verifyPassword,
@@ -47,7 +51,7 @@ export async function PATCH(request: NextRequest) {
       }
 
       // Fetch current hash from Sanity
-      const stored = await serverClient.fetch<{ passwordHash: string } | null>(
+      const stored = await getWriteClient().fetch<{ passwordHash: string } | null>(
         `*[_type == "adminUser" && _id == $id][0]{ passwordHash }`,
         { id: admin.sub }
       );
@@ -65,7 +69,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Apply patch to Sanity
-    await serverClient.patch(admin.sub).set(patch).commit();
+    await getWriteClient().patch(admin.sub).set(patch).commit();
 
     // If name changed, re-issue JWT with updated name
     const updatedName = patch.name || admin.name;

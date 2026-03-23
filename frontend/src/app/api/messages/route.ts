@@ -1,5 +1,9 @@
+/**
+ * Sanity-only fallback for agency messaging.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET instead.
+ */
 import { NextRequest } from 'next/server';
-import { client, serverClient } from '@/lib/sanity-client';
+import { client, getWriteClient } from '@/lib/sanity-client';
 import { apiSuccess, apiError } from '@/lib/api-utils';
 import { requireAdmin } from '@/lib/auth';
 
@@ -66,7 +70,7 @@ export async function POST(request: NextRequest) {
       return apiError('Channel and content are required', 400, 'VALIDATION_ERROR');
     }
 
-    const doc = await serverClient.create({
+    const doc = await getWriteClient().create({
       _type: 'agencyMessage',
       channel,
       content,

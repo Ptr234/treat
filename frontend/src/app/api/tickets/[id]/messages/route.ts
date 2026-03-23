@@ -1,5 +1,9 @@
+/**
+ * Sanity-only fallback for ticket messages.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET instead.
+ */
 import { NextRequest } from 'next/server';
-import { client, serverClient } from '@/lib/sanity-client';
+import { client, getWriteClient } from '@/lib/sanity-client';
 import { TICKET_BY_REFERENCE_QUERY, TICKET_MESSAGES_QUERY } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody, sanitizeString } from '@/lib/api-utils';
 import { ticketMessageSchema, publicCommentSchema } from '@/lib/validations';
@@ -52,7 +56,7 @@ export async function POST(
       const [data, err] = await validateBody(request, ticketMessageSchema);
       if (err) return err;
 
-      const doc = await serverClient.create({
+      const doc = await getWriteClient().create({
         _type: 'ticketMessage',
         ticket: { _type: 'reference', _ref: ticket._id },
         content: sanitizeString(data.content),
@@ -74,7 +78,7 @@ export async function POST(
       return apiError('Email does not match ticket contact', 403, 'EMAIL_MISMATCH');
     }
 
-    const doc = await serverClient.create({
+    const doc = await getWriteClient().create({
       _type: 'ticketMessage',
       ticket: { _type: 'reference', _ref: ticket._id },
       content: sanitizeString(data.content),

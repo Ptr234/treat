@@ -7,11 +7,6 @@ import { Search, TrendingUp, Clock, DollarSign, MessageCircle, Globe, X, ArrowRi
 import staticData from '@/data/investment-opportunities.json';
 import type { InvestmentOpportunity } from '@/types';
 
-// Data is passed as prop from a server wrapper, or loaded from static JSON as client fallback
-interface InvestmentOpportunitiesProps {
-  initialData?: InvestmentOpportunity[];
-}
-
 const opportunitiesData = staticData as unknown as InvestmentOpportunity[];
 
 // 3 creative card styles rotating across the grid
@@ -78,11 +73,11 @@ const cardThemes = [
   },
 ];
 
-const InvestmentOpportunities = ({ initialData }: InvestmentOpportunitiesProps = {}) => {
+const InvestmentOpportunities = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const opportunities = initialData ?? opportunitiesData;
+  const opportunities = opportunitiesData;
 
   const categories = useMemo(() => {
     const cats = [...new Set(opportunities.map(o => o.category))];

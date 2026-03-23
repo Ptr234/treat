@@ -1,5 +1,9 @@
+/**
+ * Sanity-only fallback for ticket detail/update.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET instead.
+ */
 import { NextRequest } from 'next/server';
-import { client, serverClient } from '@/lib/sanity-client';
+import { client, getWriteClient } from '@/lib/sanity-client';
 import { TICKET_BY_REFERENCE_QUERY, TICKET_MESSAGES_QUERY } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateBody } from '@/lib/api-utils';
 import { ticketUpdateSchema, publicTicketUpdateSchema } from '@/lib/validations';
@@ -82,7 +86,7 @@ export async function PATCH(
       if (pubData.satisfactionRating !== undefined) pubPatch.satisfactionRating = pubData.satisfactionRating;
       if (pubData.satisfactionComment !== undefined) pubPatch.satisfactionComment = pubData.satisfactionComment;
 
-      await serverClient.patch(ticket._id).set(pubPatch).commit();
+      await getWriteClient().patch(ticket._id).set(pubPatch).commit();
 
       // Notify admins of escalation (fire-and-forget)
       if (pubPatch.isEscalated) {
@@ -131,7 +135,7 @@ export async function PATCH(
     if (data.status === 'RESOLVED') patch.resolvedAt = now;
     if (data.status === 'CLOSED') patch.closedAt = now;
 
-    const updated = await serverClient.patch(ticket._id).set(patch).commit();
+    const updated = await getWriteClient().patch(ticket._id).set(patch).commit();
 
     // Send email notification on status changes (fire-and-forget)
     if (data.status && data.status !== ticket.status) {

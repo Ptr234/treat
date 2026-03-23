@@ -752,6 +752,46 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ── Content Management ─────────────────────────────────── */}
+        <div className="mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Content Management (Sanity CMS)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link href="/dashboard/events" className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow border border-gray-100 group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                  <CalendarIcon className="w-5 h-5 text-red-700" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Events</h3>
+                  <p className="text-xs text-gray-500">Forums, summits, webinars</p>
+                </div>
+              </div>
+            </Link>
+            <Link href="/dashboard/agencies" className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow border border-gray-100 group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <UserGroupIcon className="w-5 h-5 text-green-700" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Agencies</h3>
+                  <p className="text-xs text-gray-500">Agency details, contacts, SLA</p>
+                </div>
+              </div>
+            </Link>
+            <Link href="/dashboard/downloads" className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow border border-gray-100 group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                  <DocumentTextIcon className="w-5 h-5 text-purple-700" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Downloads</h3>
+                  <p className="text-xs text-gray-500">Forms, guides, resources</p>
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+
         {/* ── Chat Enquiries Link ─────────────────────────────────── */}
         <Link
           href="/dashboard/enquiries"

@@ -1,5 +1,9 @@
+/**
+ * Sanity-only fallback for chatbot logging.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET ChatbotController instead.
+ */
 import { NextRequest, NextResponse } from 'next/server';
-import { serverClient } from '@/lib/sanity-client';
+import { getWriteClient } from '@/lib/sanity-client';
 import { validateBody, sanitizeString } from '@/lib/api-utils';
 import { chatLogSchema } from '@/lib/validations';
 
@@ -38,7 +42,7 @@ export async function POST(request: NextRequest) {
   if (err) return err;
 
   try {
-    await serverClient.create({
+    await getWriteClient().create({
       _type: 'chatEnquiry',
       sessionId: sanitizeString(data.sessionId),
       userName: data.userName ? sanitizeString(data.userName) : undefined,

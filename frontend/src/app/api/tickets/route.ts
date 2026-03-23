@@ -1,5 +1,10 @@
+/**
+ * Sanity-only fallback for ticket CRUD.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes /api/tickets to ASP.NET instead.
+ * This route is only active in Sanity-only mode (no backend connected).
+ */
 import { NextRequest } from 'next/server';
-import { client, serverClient } from '@/lib/sanity-client';
+import { client, getWriteClient } from '@/lib/sanity-client';
 import {
   TICKETS_ADMIN_QUERY,
   TICKETS_TOTAL_COUNT_QUERY,
@@ -35,11 +40,11 @@ async function generateRefNumber(): Promise<string> {
   const pattern = `UIA-${year}-*`;
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const count = await serverClient.fetch<number>(TICKET_COUNT_BY_YEAR_QUERY, { pattern });
+    const count = await getWriteClient().fetch<number>(TICKET_COUNT_BY_YEAR_QUERY, { pattern });
     const seq = count + 1 + attempt; // offset by attempt to avoid same collision
     const ref = `UIA-${year}-${String(seq).padStart(4, '0')}`;
 
-    const exists = await serverClient.fetch<boolean>(TICKET_REF_EXISTS_QUERY, { ref });
+    const exists = await getWriteClient().fetch<boolean>(TICKET_REF_EXISTS_QUERY, { ref });
     if (!exists) return ref;
   }
 
@@ -66,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     const referenceNumber = await generateRefNumber();
 
-    const ticket = await serverClient.create({
+    const ticket = await getWriteClient().create({
       _type: 'ticket',
       referenceNumber,
       title: sanitizeString(data.title),

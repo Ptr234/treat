@@ -1,5 +1,9 @@
+/**
+ * Sanity-only fallback for admin login.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET AuthController instead.
+ */
 import { NextRequest, NextResponse } from 'next/server';
-import { serverClient } from '@/lib/sanity-client';
+import { getWriteClient } from '@/lib/sanity-client';
 import { verifyPassword, createToken, COOKIE_NAME, sessionCookieOptions } from '@/lib/auth';
 import { apiError } from '@/lib/api-utils';
 
@@ -22,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Look up admin user in Sanity
-    const admin = await serverClient.fetch<SanityAdmin | null>(
+    const admin = await getWriteClient().fetch<SanityAdmin | null>(
       `*[_type == "adminUser" && email == $email && isActive == true][0]{
         _id, name, email, passwordHash, role, isActive
       }`,

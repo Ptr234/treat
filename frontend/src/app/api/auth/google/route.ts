@@ -1,6 +1,10 @@
+/**
+ * Sanity-only fallback for Google OAuth login.
+ * When NEXT_PUBLIC_BACKEND_URL is set, apiFetch() routes to ASP.NET AuthController instead.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
-import { serverClient } from '@/lib/sanity-client';
+import { getWriteClient } from '@/lib/sanity-client';
 import { createToken, COOKIE_NAME, sessionCookieOptions } from '@/lib/auth';
 import { apiError } from '@/lib/api-utils';
 
@@ -47,7 +51,7 @@ export async function POST(request: NextRequest) {
     const googlePicture = typeof payload.picture === 'string' ? payload.picture : undefined;
 
     // Check if this email belongs to an admin in Sanity
-    const admin = await serverClient.fetch<SanityAdmin | null>(
+    const admin = await getWriteClient().fetch<SanityAdmin | null>(
       `*[_type == "adminUser" && email == $email && isActive == true][0]{
         _id, name, email, role, isActive
       }`,
