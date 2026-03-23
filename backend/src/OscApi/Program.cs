@@ -49,6 +49,18 @@ builder.Services.AddSingleton<PasswordService>();
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddScoped<ReferenceNumberGenerator>();
 builder.Services.AddHttpClient<GroqClient>();
+builder.Services.AddHttpClient<RecaptchaService>();
+
+// Redis cache (optional — falls back to in-memory if not configured)
+var redisConn = builder.Configuration.GetConnectionString("Redis");
+if (!string.IsNullOrEmpty(redisConn))
+{
+    builder.Services.AddStackExchangeRedisCache(options => options.Configuration = redisConn);
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
 
 // Business services
 builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.TicketService>();
@@ -89,6 +101,8 @@ builder.Services.AddSwaggerGen(c =>
 // Rate limiting
 builder.Services.AddRateLimiter(options =>
 {
+    options.RejectionStatusCode = 429;
+
     options.AddPolicy("chatbot", httpContext =>
         RateLimitPartition.GetSlidingWindowLimiter(
             httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -97,6 +111,27 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 20,
                 Window = TimeSpan.FromMinutes(1),
                 SegmentsPerWindow = 4,
+            }));
+
+    // Public form submissions: 10 per minute per IP
+    options.AddPolicy("public-form", httpContext =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 4,
+            }));
+
+    // Password reset: 3 per 15 minutes per IP
+    options.AddPolicy("password-reset", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 3,
+                Window = TimeSpan.FromMinutes(15),
             }));
 });
 

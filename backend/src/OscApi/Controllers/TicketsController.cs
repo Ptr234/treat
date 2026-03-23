@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using OscApi.Common;
 using OscApi.Data;
@@ -47,6 +48,7 @@ public class TicketsController : ControllerBase
 
     /// <summary>Create a new support ticket.</summary>
     [HttpPost]
+    [EnableRateLimiting("public-form")]
     public async Task<IActionResult> CreateTicket([FromBody] CreateTicketRequest request)
     {
         var category = Enum.Parse<TicketCategory>(ToPascalCase(request.Category), true);

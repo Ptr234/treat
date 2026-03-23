@@ -17,6 +17,31 @@ public class OscDbContext : DbContext
     public DbSet<ContactInquiry> ContactInquiries => Set<ContactInquiry>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
 
+    public override int SaveChanges()
+    {
+        SetUpdatedTimestamps();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        SetUpdatedTimestamps();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void SetUpdatedTimestamps()
+    {
+        var entries = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified);
+
+        foreach (var entry in entries)
+        {
+            var prop = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "UpdatedAt");
+            if (prop is not null)
+                prop.CurrentValue = DateTimeOffset.UtcNow;
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

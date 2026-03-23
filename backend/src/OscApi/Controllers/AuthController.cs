@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using OscApi.Common;
 using OscApi.Data;
@@ -148,6 +149,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Request a password reset link via email.</summary>
     [HttpPost("password-reset")]
+    [EnableRateLimiting("password-reset")]
     public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequest request)
     {
         // Always return success to prevent email enumeration
@@ -170,6 +172,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Verify a password reset token and set a new password.</summary>
     [HttpPost("password-reset/verify")]
+    [EnableRateLimiting("password-reset")]
     public async Task<IActionResult> VerifyPasswordReset([FromBody] PasswordResetVerifyRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)

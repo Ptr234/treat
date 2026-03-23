@@ -58,4 +58,5 @@ public class InvestorProfile
     public InvestorStatus Status { get; set; } = InvestorStatus.New;
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

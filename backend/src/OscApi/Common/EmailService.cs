@@ -22,103 +22,49 @@ public class EmailService
 
     public async Task SendTicketConfirmationAsync(string toEmail, string contactName, string referenceNumber, string title)
     {
+        var trackUrl = $"{_siteUrl}/tickets/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}";
         await SendAsync(toEmail, $"Ticket {referenceNumber} Received",
-            $"""
-            Dear {contactName},
-
-            Your inquiry has been received and assigned reference number {referenceNumber}.
-
-            Subject: {title}
-
-            Track your ticket at: {_siteUrl}/tickets/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}
-
-            Regards,
-            Uganda Investment Authority — One Stop Centre
-            """);
+            htmlBody: EmailTemplates.TicketConfirmation(contactName, referenceNumber, title, trackUrl),
+            textBody: $"Dear {contactName},\n\nYour inquiry has been received.\nReference: {referenceNumber}\nSubject: {title}\nTrack: {trackUrl}");
     }
 
     public async Task SendTicketStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string newStatus)
     {
+        var trackUrl = $"{_siteUrl}/tickets/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}";
         await SendAsync(toEmail, $"Ticket {referenceNumber} — Status Update",
-            $"""
-            Dear {contactName},
-
-            Your ticket {referenceNumber} has been updated to: {newStatus}
-
-            View details: {_siteUrl}/tickets/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}
-
-            Regards,
-            Uganda Investment Authority — One Stop Centre
-            """);
+            htmlBody: EmailTemplates.TicketStatusUpdate(contactName, referenceNumber, newStatus, trackUrl),
+            textBody: $"Dear {contactName},\n\nTicket {referenceNumber} updated to: {newStatus}\nView: {trackUrl}");
     }
 
     public async Task SendEscalationNotificationAsync(string referenceNumber, string title, string contactName)
     {
+        var dashboardUrl = $"{_siteUrl}/dashboard";
         await SendAsync(_adminEmail, $"ESCALATION: Ticket {referenceNumber}",
-            $"""
-            A ticket has been escalated by the investor.
-
-            Reference: {referenceNumber}
-            Subject: {title}
-            Investor: {contactName}
-
-            Review: {_siteUrl}/dashboard
-            """);
+            htmlBody: EmailTemplates.EscalationNotification(referenceNumber, title, contactName, dashboardUrl),
+            textBody: $"Ticket escalated.\nRef: {referenceNumber}\nSubject: {title}\nInvestor: {contactName}\nReview: {dashboardUrl}");
     }
 
     public async Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber)
     {
         await SendAsync(toEmail, "Welcome to Uganda Investment Authority",
-            $"""
-            Dear {name},
-
-            Welcome! Your investor profile has been created.
-
-            Reference Number: {referenceNumber}
-
-            You can use this reference number to track your interactions with UIA.
-
-            Regards,
-            Uganda Investment Authority — One Stop Centre
-            """);
+            htmlBody: EmailTemplates.InvestorWelcome(name, referenceNumber),
+            textBody: $"Dear {name},\n\nWelcome! Your investor profile has been created.\nReference: {referenceNumber}");
     }
 
     public async Task SendPasswordResetAsync(string toEmail, string name, string resetToken)
     {
+        var resetUrl = $"{_siteUrl}/auth/reset-password?token={Uri.EscapeDataString(resetToken)}";
         await SendAsync(toEmail, "Password Reset — OSC Digital Tool",
-            $"""
-            Dear {name},
-
-            A password reset has been requested for your account.
-
-            Reset Token: {resetToken}
-
-            Reset your password at: {_siteUrl}/auth/reset-password?token={Uri.EscapeDataString(resetToken)}
-
-            This link expires in 1 hour. If you did not request this, ignore this email.
-
-            Regards,
-            Uganda Investment Authority — One Stop Centre
-            """);
+            htmlBody: EmailTemplates.PasswordReset(name, resetUrl),
+            textBody: $"Dear {name},\n\nReset your password: {resetUrl}\n\nExpires in 1 hour.");
     }
 
     public async Task SendContactConfirmationAsync(
         string toEmail, string name, string referenceNumber, string agencyName, string subject)
     {
         await SendAsync(toEmail, $"Inquiry {referenceNumber} Received — {agencyName}",
-            $"""
-            Dear {name},
-
-            Your inquiry to {agencyName} has been received.
-
-            Reference Number: {referenceNumber}
-            Subject: {subject}
-
-            The agency will respond within 24-48 hours. You can track your inquiry using the reference number above.
-
-            Regards,
-            Uganda Investment Authority — One Stop Centre
-            """);
+            htmlBody: EmailTemplates.ContactConfirmation(name, referenceNumber, agencyName, subject),
+            textBody: $"Dear {name},\n\nInquiry to {agencyName} received.\nRef: {referenceNumber}\nSubject: {subject}");
     }
 
     public async Task SendContactNotificationToAgencyAsync(
@@ -126,19 +72,7 @@ public class EmailService
         string contactName, string contactEmail, string subject, string message)
     {
         await SendAsync(_adminEmail, $"New Inquiry {referenceNumber} for {agencyCode}",
-            $"""
-            A new inquiry has been submitted via the OneStop Centre portal.
-
-            Reference: {referenceNumber}
-            Agency: {agencyName} ({agencyCode})
-            From: {contactName} ({contactEmail})
-            Subject: {subject}
-
-            Message:
-            {message}
-
-            Review at: {_siteUrl}/dashboard
-            """);
+            textBody: $"New inquiry via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nFrom: {contactName} ({contactEmail})\nSubject: {subject}\n\nMessage:\n{message}\n\nReview: {_siteUrl}/dashboard");
     }
 
     public async Task SendAppointmentConfirmationAsync(
@@ -146,20 +80,8 @@ public class EmailService
         string agencyName, string date, string time)
     {
         await SendAsync(toEmail, $"Appointment Request {referenceNumber} — {agencyName}",
-            $"""
-            Dear {name},
-
-            Your appointment request with {agencyName} has been received.
-
-            Reference Number: {referenceNumber}
-            Preferred Date: {date}
-            Preferred Time: {time}
-
-            The agency will confirm or propose an alternative within 24 hours.
-
-            Regards,
-            Uganda Investment Authority — One Stop Centre
-            """);
+            htmlBody: EmailTemplates.AppointmentConfirmation(name, referenceNumber, agencyName, date, time),
+            textBody: $"Dear {name},\n\nAppointment request with {agencyName} received.\nRef: {referenceNumber}\nDate: {date} at {time}");
     }
 
     public async Task SendAppointmentNotificationToAgencyAsync(
@@ -169,28 +91,10 @@ public class EmailService
         int durationMinutes, string meetingType)
     {
         await SendAsync(_adminEmail, $"Appointment Request {referenceNumber} for {agencyCode}",
-            $"""
-            A new appointment request has been submitted via the OneStop Centre portal.
-
-            Reference: {referenceNumber}
-            Agency: {agencyName} ({agencyCode})
-
-            Contact:
-            - Name: {contactName}
-            - Email: {contactEmail}
-            - Phone: {contactPhone}
-
-            Service: {serviceType}
-            Purpose: {purpose}
-            Date: {date} at {time}
-            Duration: {durationMinutes} minutes
-            Type: {meetingType}
-
-            Review at: {_siteUrl}/dashboard
-            """);
+            textBody: $"Appointment request via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nContact: {contactName} ({contactEmail}, {contactPhone})\nService: {serviceType}\nPurpose: {purpose}\nDate: {date} at {time}\nDuration: {durationMinutes}min ({meetingType})\n\nReview: {_siteUrl}/dashboard");
     }
 
-    private async Task SendAsync(string to, string subject, string textBody)
+    private async Task SendAsync(string to, string subject, string? textBody = null, string? htmlBody = null)
     {
         if (_client is null)
         {
@@ -206,6 +110,7 @@ public class EmailService
                 To = to,
                 Subject = subject,
                 TextBody = textBody,
+                HtmlBody = htmlBody,
             };
             await _client.SendMessageAsync(message);
         }

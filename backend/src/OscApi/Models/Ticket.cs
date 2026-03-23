@@ -58,6 +58,7 @@ public class Ticket
     public DateTimeOffset? EscalatedAt { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? ResolvedAt { get; set; }
     public DateTimeOffset? ClosedAt { get; set; }
 
