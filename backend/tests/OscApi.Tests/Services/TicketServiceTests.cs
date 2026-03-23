@@ -13,7 +13,8 @@ public class TicketServiceTests
         var db = TestDbFactory.Create(dbName);
         var email = MockEmailService.Create();
         var refGen = new ReferenceNumberGenerator(db);
-        return new TicketService(db, email, refGen);
+        var settings = new MockSettingsService();
+        return new TicketService(db, email, refGen, settings);
     }
 
     [Fact]
