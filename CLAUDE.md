@@ -1,25 +1,40 @@
 # CLAUDE Project Directives
 
-This document outlines the core principles and guidelines for developing the Uganda Investment Portal project using Gemini. Adherence to these directives is mandatory to maintain code quality, consistency, and project integrity.
+This document outlines the core principles and guidelines for developing the Uganda OneStop Centre (OSC) Digital Tool — a hybrid monorepo with a Next.js frontend and ASP.NET Web API backend.
+
+## Repository Structure
+```
+/
+├── frontend/    ← Next.js 15 + Vercel (production app)
+├── backend/     ← ASP.NET Web API (planned)
+├── shared/      ← Shared types/contracts (planned)
+├── CLAUDE.md
+├── PROGRESS.md
+└── .gitignore
+```
 
 ## Core Philosophy
 - **Systematic Implementation**: Build the application "Brick by Brick." Each component and feature must be fully implemented, tested, and verified before moving to the next. Do not make assumptions; validate every step.
 - **Cultural Relevance**: All design, content, and functionality must be tailored to the Ugandan context. Conduct thorough research to ensure cultural sensitivity and appropriateness.
+- **Hybrid Architecture**: Frontend stays on Vercel (Next.js SSR). Backend migrates incrementally to ASP.NET Web API for features requiring a real database (auth, tickets, messaging, analytics). Sanity CMS remains for content (agencies, events, investment descriptions, downloadable resources).
 
 ## Agent & Tooling
-- **LLM**: For all LLM queries in this app, we use OpenAI's GPT-4o.
+- **Chatbot LLM**: Groq API with LLaMA 3.3 70B for the investor chatbot.
+- **CMS**: Sanity.io for content management.
+- **Email**: Postmark for transactional email.
 
 ## Development Workflow
-1.  **Initial Setup**: Configure and validate the entire development environment (Next.js, TypeScript, ESLint, Tailwind CSS) before writing any application code.
-2.  **Routing**: Implement and verify all internal navigation. Ensure all links, buttons, and interactive elements route to the correct pages. Create any necessary placeholder pages.
-3.  **Documentation**: Maintain a factual and up-to-date log of all development activities in the `PROGRESS.md` file.
+1.  **Frontend**: All frontend work lives in `/frontend/`. Run `npm run dev` from that directory.
+2.  **Backend**: ASP.NET Web API will live in `/backend/`. (Planned — not yet scaffolded.)
+3.  **Routing**: Implement and verify all internal navigation. Ensure all links, buttons, and interactive elements route to the correct pages.
+4.  **Documentation**: Maintain a factual and up-to-date log of all development activities in `PROGRESS.md`.
 
 ## Code Quality & Conventions
-- **Framework**: Next.js with TypeScript.
-- **Styling**: Tailwind CSS.
-- **Modules**: Use ES modules (`import`/`export`).
+- **Frontend**: Next.js 15 with TypeScript, Tailwind CSS, App Router.
+- **Backend**: ASP.NET Web API with C# (planned).
+- **Modules**: Use ES modules (`import`/`export`) in frontend.
 - **Branding**: Strictly adhere to the brand color palette: dark green, light green, white, and black.
-- **Imagery**: Use sample images that are relevant to the Ugandan context. For placeholders, use creative shapes such as organic curves or geometric patterns.
+- **Imagery**: Use sample images relevant to the Ugandan context.
 
 ## Testing & Verification
 - **Zero Errors**: The codebase must be free of ESLint, TypeScript, and browser console errors.
@@ -33,9 +48,7 @@ This document outlines the core principles and guidelines for developing the Uga
 
 ## Critical Reminders
 - **No Assumptions**: Always verify component integrations, routes, and links.
-- **Completeness**: Avoid placeholde
-
-rs (except for images). All features must be fully functional.
+- **Completeness**: Avoid placeholders (except for images). All features must be fully functional.
 - **User-Centric**: Design and build with the end-user (investors and business owners in Uganda) in mind.
 
 ## 🔒 Security Best Practices
