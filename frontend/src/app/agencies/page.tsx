@@ -152,6 +152,13 @@ function getCfg(category: string): typeof DEFAULT_CONFIG {
    Large horizontal cards with full details
    ──────────────────────────────────────────────────────── */
 
+// Spotlight bg — each of the 3 featured cards gets a distinct Uganda flag bg
+const SPOTLIGHT_BG = [
+  'bg-gradient-to-br from-yellow-950/70 via-neutral-900 to-neutral-950', // UIA — gold tint
+  'bg-gradient-to-br from-red-950/60 via-neutral-900 to-neutral-950',    // URSB — red tint
+  'bg-gradient-to-br from-neutral-950 via-neutral-900 to-yellow-950/40', // URA — dark with gold edge
+] as const;
+
 function SpotlightCard({ agency, index }: { agency: AgencyContact; index: number }) {
   const cfg = getCfg(agency.category);
   const layouts = [
@@ -167,7 +174,7 @@ function SpotlightCard({ agency, index }: { agency: AgencyContact; index: number
       className={`group relative overflow-hidden rounded-2xl border-2 ${cfg.border} hover:border-yellow-500 transition-all duration-500 ${layouts[index]} flex flex-col`}
     >
       {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-800 group-hover:from-neutral-800 transition-colors duration-500" />
+      <div className={`absolute inset-0 ${SPOTLIGHT_BG[index] || SPOTLIGHT_BG[0]} group-hover:opacity-90 transition-opacity duration-500`} />
       <div className={`absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 -translate-y-1/3 translate-x-1/3 bg-gradient-to-br ${
         index === 0 ? 'from-yellow-500 to-red-600' : index === 1 ? 'from-red-500 to-red-700' : 'from-yellow-400 to-yellow-600'
       }`} />
@@ -282,8 +289,10 @@ function SingleAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: ReturnT
     }));
   };
 
+  const cardBg = getCardBg(agency.id);
+
   return (
-    <div className={`rounded-2xl border ${cfg.border} ${cfg.bg} overflow-hidden`}>
+    <div className={`rounded-2xl border ${cardBg} overflow-hidden`}>
       <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6">
         {/* Left — info */}
         <div className="flex-1">
@@ -355,6 +364,36 @@ function SingleAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: ReturnT
    Compact Agency Card — Used in multi-agency categories
    ──────────────────────────────────────────────────────── */
 
+// Card bg styles — each card gets a unique Uganda flag–inspired background
+const CARD_BG_STYLES = [
+  // Black-dominant
+  'bg-neutral-900 border-neutral-800',
+  'bg-gradient-to-br from-neutral-900 to-neutral-950 border-neutral-700',
+  // Yellow-tinted
+  'bg-gradient-to-br from-yellow-950/80 to-neutral-900 border-yellow-800/30',
+  'bg-gradient-to-br from-neutral-900 to-yellow-950/60 border-yellow-700/20',
+  'bg-gradient-to-br from-yellow-900/30 to-neutral-950 border-yellow-600/25',
+  // Red-tinted
+  'bg-gradient-to-br from-red-950/70 to-neutral-900 border-red-800/30',
+  'bg-gradient-to-br from-neutral-900 to-red-950/50 border-red-700/20',
+  'bg-gradient-to-br from-red-900/25 to-neutral-950 border-red-600/25',
+  // Mixed
+  'bg-gradient-to-br from-yellow-950/50 to-red-950/30 border-yellow-700/20',
+  'bg-gradient-to-br from-red-950/40 to-yellow-950/30 border-red-700/20',
+  'bg-gradient-to-br from-neutral-950 via-yellow-950/20 to-neutral-900 border-yellow-800/15',
+  'bg-gradient-to-br from-neutral-950 via-red-950/20 to-neutral-900 border-red-800/15',
+] as const;
+
+function getCardBg(id: string): string {
+  // Hash the id to get a deterministic but varied index
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash) + id.charCodeAt(i);
+    hash |= 0;
+  }
+  return CARD_BG_STYLES[Math.abs(hash) % CARD_BG_STYLES.length]!;
+}
+
 function CompactAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: ReturnType<typeof getCfg> }) {
   const openAssistant = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -363,10 +402,12 @@ function CompactAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: Return
     }));
   };
 
+  const cardBg = getCardBg(agency.id);
+
   return (
     <Link
       href={`/agencies/${agency.id}`}
-      className={`group relative rounded-2xl border border-neutral-800 bg-neutral-900 hover:border-yellow-500/50 hover:bg-neutral-900/80 transition-all duration-300 overflow-hidden flex flex-col`}
+      className={`group relative rounded-2xl border ${cardBg} hover:border-yellow-500/50 transition-all duration-300 overflow-hidden flex flex-col`}
     >
       {/* Uganda flag accent stripe */}
       <div className={`h-1 ${cfg.accent.includes('yellow') ? 'bg-gradient-to-r from-yellow-500/60 to-transparent' : 'bg-gradient-to-r from-red-500/60 to-transparent'}`} />
@@ -423,7 +464,7 @@ function CompactAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: Return
             onClick={openAssistant}
             className="text-[11px] px-2.5 py-1 rounded-lg bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 transition-colors font-medium"
           >
-            Ask AI
+            Ask Assistant
           </button>
         </div>
       </div>
