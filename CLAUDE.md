@@ -6,8 +6,8 @@ This document outlines the core principles and guidelines for developing the Uga
 ```
 /
 ├── frontend/    ← Next.js 15 + Vercel (production app)
-├── backend/     ← ASP.NET Web API (planned)
-├── shared/      ← Shared types/contracts (planned)
+├── backend/     ← ASP.NET Web API + PostgreSQL
+├── shared/      ← Shared types/contracts
 ├── CLAUDE.md
 ├── PROGRESS.md
 └── .gitignore
@@ -25,15 +25,15 @@ This document outlines the core principles and guidelines for developing the Uga
 
 ## Development Workflow
 1.  **Frontend**: All frontend work lives in `/frontend/`. Run `npm run dev` from that directory.
-2.  **Backend**: ASP.NET Web API will live in `/backend/`. (Planned — not yet scaffolded.)
+2.  **Backend**: ASP.NET Web API lives in `/backend/`. Run `dotnet run` from `backend/src/OscApi/`.
 3.  **Routing**: Implement and verify all internal navigation. Ensure all links, buttons, and interactive elements route to the correct pages.
 4.  **Documentation**: Maintain a factual and up-to-date log of all development activities in `PROGRESS.md`.
 
 ## Code Quality & Conventions
 - **Frontend**: Next.js 15 with TypeScript, Tailwind CSS, App Router.
-- **Backend**: ASP.NET Web API with C# (planned).
+- **Backend**: ASP.NET Web API with C#, PostgreSQL, EF Core.
 - **Modules**: Use ES modules (`import`/`export`) in frontend.
-- **Branding**: Strictly adhere to the brand color palette: dark green, light green, white, and black.
+- **Branding**: Strictly adhere to the Uganda flag color palette: black, yellow (gold #FFD700), red (#CE1126), and white.
 - **Imagery**: Use sample images relevant to the Ugandan context.
 
 ## Testing & Verification
