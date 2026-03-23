@@ -18,14 +18,15 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Database
-builder.Services.AddDbContext<OscDbContext>(options =>
-{
-    var conn = builder.Configuration.GetConnectionString("DefaultConnection");
-    if (!string.IsNullOrEmpty(conn))
-        options.UseNpgsql(conn);
-    else
-        options.UseNpgsql("Host=localhost;Database=osc_dev;Username=postgres;Password=postgres");
-});
+var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+if (string.IsNullOrEmpty(connString))
+    connString = "Host=localhost;Database=osc_dev;Username=postgres;Password=postgres";
+
+var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(connString);
+dataSourceBuilder.EnableDynamicJson();
+var dataSource = dataSourceBuilder.Build();
+
+builder.Services.AddDbContext<OscDbContext>(options => options.UseNpgsql(dataSource));
 
 // CORS
 var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"]?.Split(',') ?? ["http://localhost:3000"];
