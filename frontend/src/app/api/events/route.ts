@@ -13,7 +13,7 @@ export async function GET() {
     return apiSuccess(events);
   } catch (error) {
     console.error('[GET /api/events]', error);
-    return apiError('Failed to fetch events');
+    return apiSuccess([]); // graceful fallback
   }
 }
 

@@ -1,11 +1,16 @@
 import { NextRequest } from 'next/server';
-import { client } from '@/lib/sanity-client';
+import { client, canWriteToSanity } from '@/lib/sanity-client';
 import { PROJECTS_QUERY, PROJECTS_BY_SECTOR_QUERY, PROJECTS_MAP_QUERY } from '@/lib/sanity-queries';
 import { apiSuccess, apiError, validateSearchParams } from '@/lib/api-utils';
 import { projectsQuerySchema } from '@/lib/validations';
 import type { SanityLicenseProject } from '@/types/sanity';
 
 export async function GET(request: NextRequest) {
+  // Return empty array if Sanity is not configured
+  if (!canWriteToSanity && !process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
+    return apiSuccess([], { total: 0 });
+  }
+
   try {
     const [params, err] = validateSearchParams(request, projectsQuerySchema);
     if (err) return err;
@@ -27,6 +32,7 @@ export async function GET(request: NextRequest) {
     return apiSuccess(projects, { total: projects.length });
   } catch (error) {
     console.error('[GET /api/projects]', error);
-    return apiError('Failed to fetch projects');
+    // Graceful degradation: return empty array instead of 500
+    return apiSuccess([], { total: 0 });
   }
 }

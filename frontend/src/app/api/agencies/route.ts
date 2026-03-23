@@ -13,7 +13,7 @@ export async function GET() {
     return apiSuccess(agencies);
   } catch (error) {
     console.error('[GET /api/agencies]', error);
-    return apiError('Failed to fetch agencies');
+    return apiSuccess([]); // graceful fallback
   }
 }
 

@@ -13,7 +13,7 @@ export async function GET() {
     return apiSuccess(resources);
   } catch (error) {
     console.error('[GET /api/downloads]', error);
-    return apiError('Failed to fetch downloads');
+    return apiSuccess([]); // graceful fallback
   }
 }
 
