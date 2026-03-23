@@ -36,12 +36,26 @@ public class EmailService
             textBody: $"Dear {contactName},\n\nTicket {referenceNumber} updated to: {newStatus}\nView: {trackUrl}");
     }
 
-    public async Task SendEscalationNotificationAsync(string referenceNumber, string title, string contactName)
+    public async Task SendEscalationNotificationAsync(
+        string referenceNumber, string title, string contactName,
+        string[]? additionalRecipients = null, string? customMessage = null)
     {
         var dashboardUrl = $"{_siteUrl}/dashboard";
-        await SendAsync(_adminEmail, $"ESCALATION: Ticket {referenceNumber}",
-            htmlBody: EmailTemplates.EscalationNotification(referenceNumber, title, contactName, dashboardUrl),
-            textBody: $"Ticket escalated.\nRef: {referenceNumber}\nSubject: {title}\nInvestor: {contactName}\nReview: {dashboardUrl}");
+        var subject = $"ESCALATION: Ticket {referenceNumber}";
+        var html = EmailTemplates.EscalationNotification(referenceNumber, title, contactName, dashboardUrl, customMessage);
+        var text = $"Ticket escalated.\nRef: {referenceNumber}\nSubject: {title}\nInvestor: {contactName}\n{customMessage}\nReview: {dashboardUrl}";
+
+        // Send to default admin
+        await SendAsync(_adminEmail, subject, htmlBody: html, textBody: text);
+
+        // Send to all configured escalation recipients
+        if (additionalRecipients is not null)
+        {
+            foreach (var recipient in additionalRecipients.Where(e => !string.IsNullOrEmpty(e) && e != _adminEmail))
+            {
+                await SendAsync(recipient, subject, htmlBody: html, textBody: text);
+            }
+        }
     }
 
     public async Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber)

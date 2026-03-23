@@ -11,11 +11,13 @@ public class TicketService : ITicketService
     private readonly OscDbContext _db;
     private readonly EmailService _email;
     private readonly ReferenceNumberGenerator _refGen;
+    private readonly ISettingsService _settings;
 
-    public TicketService(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen)
+    public TicketService(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen, ISettingsService settings)
     {
         _db = db;
         _email = email;
+        _settings = settings;
         _refGen = refGen;
     }
 
@@ -127,7 +129,14 @@ public class TicketService : ITicketService
         {
             ticket.IsEscalated = true;
             ticket.EscalatedAt = DateTimeOffset.UtcNow;
-            _ = _email.SendEscalationNotificationAsync(ticket.ReferenceNumber, ticket.Title, ticket.ContactName);
+
+            var escalationEmails = await _settings.GetEscalationEmailsAsync();
+            var customMessage = await _settings.GetAsync(SettingsService.EscalationMessageKey);
+
+            _ = _email.SendEscalationNotificationAsync(
+                ticket.ReferenceNumber, ticket.Title, ticket.ContactName,
+                escalationEmails.Length > 0 ? escalationEmails : null,
+                string.IsNullOrEmpty(customMessage) ? null : customMessage);
         }
 
         await _db.SaveChangesAsync();

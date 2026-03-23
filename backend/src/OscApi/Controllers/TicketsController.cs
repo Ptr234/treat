@@ -7,6 +7,7 @@ using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Dtos.Tickets;
 using OscApi.Models;
+using OscApi.Services;
 
 namespace OscApi.Controllers;
 
@@ -17,12 +18,14 @@ public class TicketsController : ControllerBase
     private readonly OscDbContext _db;
     private readonly EmailService _email;
     private readonly ReferenceNumberGenerator _refGen;
+    private readonly ISettingsService _settings;
 
-    public TicketsController(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen)
+    public TicketsController(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen, ISettingsService settings)
     {
         _db = db;
         _email = email;
         _refGen = refGen;
+        _settings = settings;
     }
 
     /// <summary>List all tickets (admin only).</summary>
@@ -155,7 +158,20 @@ public class TicketsController : ControllerBase
         {
             ticket.IsEscalated = true;
             ticket.EscalatedAt = DateTimeOffset.UtcNow;
-            _ = _email.SendEscalationNotificationAsync(ticket.ReferenceNumber, ticket.Title, ticket.ContactName);
+
+            // Read configured escalation settings
+            var escalationEmails = await _settings.GetEscalationEmailsAsync();
+            var defaultAssignee = await _settings.GetAsync(Services.SettingsService.EscalationDefaultAssigneeKey);
+            var customMessage = await _settings.GetAsync(Services.SettingsService.EscalationMessageKey);
+
+            // Auto-assign default escalation officer if configured and no assignee set
+            if (!string.IsNullOrEmpty(defaultAssignee) && string.IsNullOrEmpty(ticket.Assignee))
+                ticket.Assignee = defaultAssignee;
+
+            _ = _email.SendEscalationNotificationAsync(
+                ticket.ReferenceNumber, ticket.Title, ticket.ContactName,
+                escalationEmails.Length > 0 ? escalationEmails : null,
+                string.IsNullOrEmpty(customMessage) ? null : customMessage);
         }
 
         await _db.SaveChangesAsync();

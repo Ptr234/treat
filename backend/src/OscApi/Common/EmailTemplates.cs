@@ -102,7 +102,7 @@ public static class EmailTemplates
             <p style="color:#333;line-height:1.6;">The agency will confirm or propose an alternative within 24 hours.</p>
             """);
 
-    public static string EscalationNotification(string refNumber, string title, string contactName, string dashboardUrl) =>
+    public static string EscalationNotification(string refNumber, string title, string contactName, string dashboardUrl, string? customMessage = null) =>
         Wrap("Ticket Escalation Alert", $"""
             <p style="color:#333;line-height:1.6;">A ticket has been escalated by the investor.</p>
             <div style="background:#fef2f2;border-left:4px solid #ef4444;padding:12px 16px;margin:16px 0;">
@@ -110,6 +110,7 @@ public static class EmailTemplates
               <p style="margin:4px 0 0;color:#555;">Subject: {title}</p>
               <p style="margin:4px 0 0;color:#555;">Investor: {contactName}</p>
             </div>
+            {(string.IsNullOrEmpty(customMessage) ? "" : $"<p style=\"color:#333;line-height:1.6;margin:16px 0;padding:12px;background:#fff7ed;border-radius:6px;\">{customMessage}</p>")}
             <p style="margin:24px 0 0;">
               <a href="{dashboardUrl}" style="display:inline-block;background:#ef4444;color:#fff;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">Review Now</a>
             </p>

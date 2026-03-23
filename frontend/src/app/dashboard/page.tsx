@@ -13,6 +13,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
+  Cog6ToothIcon,
   FlagIcon,
   DocumentTextIcon,
   CalendarIcon,
@@ -763,6 +764,25 @@ export default function DashboardPage() {
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Chat Enquiries</h3>
                 <p className="text-sm text-gray-500">View AI chatbot conversations, user details, and sentiment analytics</p>
+              </div>
+            </div>
+            <ArrowUpIcon className="w-5 h-5 text-gray-400 rotate-90 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* ── Settings Link ──────────────────────────────────────── */}
+        <Link
+          href="/dashboard/settings"
+          className="block bg-white rounded-xl shadow-sm p-6 mb-8 hover:shadow-md transition-shadow border border-gray-100 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center group-hover:bg-neutral-200 transition-colors">
+                <Cog6ToothIcon className="w-6 h-6 text-neutral-700" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Escalation Settings</h3>
+                <p className="text-sm text-gray-500">Configure escalation email recipients, default assignee, and notification messages</p>
               </div>
             </div>
             <ArrowUpIcon className="w-5 h-5 text-gray-400 rotate-90 group-hover:translate-x-1 transition-transform" />

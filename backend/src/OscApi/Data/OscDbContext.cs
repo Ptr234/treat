@@ -16,6 +16,7 @@ public class OscDbContext : DbContext
     public DbSet<ChatEnquiry> ChatEnquiries => Set<ChatEnquiry>();
     public DbSet<ContactInquiry> ContactInquiries => Set<ContactInquiry>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     public override int SaveChanges()
     {

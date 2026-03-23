@@ -22,6 +22,7 @@ const MIGRATED_PREFIXES = [
   '/api/upload',
   '/api/health',
   '/api/contact',
+  '/api/settings',
 ];
 
 function resolveUrl(path: string): string {
