@@ -14,6 +14,8 @@ public class OscDbContext : DbContext
     public DbSet<InvestorProfile> InvestorProfiles => Set<InvestorProfile>();
     public DbSet<AgencyMessage> AgencyMessages => Set<AgencyMessage>();
     public DbSet<ChatEnquiry> ChatEnquiries => Set<ChatEnquiry>();
+    public DbSet<ContactInquiry> ContactInquiries => Set<ContactInquiry>();
+    public DbSet<Appointment> Appointments => Set<Appointment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -85,6 +87,26 @@ public class OscDbContext : DbContext
             e.Property(c => c.Language).HasConversion<string>();
             e.Property(c => c.Sentiment).HasConversion<string>();
             e.Property(c => c.Tier).HasConversion<string>();
+        });
+
+        // ContactInquiry
+        modelBuilder.Entity<ContactInquiry>(e =>
+        {
+            e.HasIndex(i => i.ReferenceNumber).IsUnique();
+            e.HasIndex(i => i.AgencyCode);
+            e.HasIndex(i => i.ContactEmail);
+            e.Property(i => i.Urgency).HasConversion<string>();
+            e.Property(i => i.Status).HasConversion<string>();
+        });
+
+        // Appointment
+        modelBuilder.Entity<Appointment>(e =>
+        {
+            e.HasIndex(a => a.ReferenceNumber).IsUnique();
+            e.HasIndex(a => a.AgencyCode);
+            e.HasIndex(a => a.ContactEmail);
+            e.Property(a => a.MeetingType).HasConversion<string>();
+            e.Property(a => a.Status).HasConversion<string>();
         });
 
         // Seed default admin user (password: Admin@2026!)

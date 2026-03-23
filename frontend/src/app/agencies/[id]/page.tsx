@@ -246,7 +246,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
             {/* Service Request Form */}
             <section>
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Request a Service</h2>
-              <ServiceRequestForm agencyName={agency.name} services={agency.services} />
+              <ServiceRequestForm agencyName={agency.name} agencyCode={agency.acronym} services={agency.services} />
             </section>
           </div>
         </div>

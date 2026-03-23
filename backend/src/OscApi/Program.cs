@@ -53,6 +53,7 @@ builder.Services.AddHttpClient<GroqClient>();
 // Business services
 builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.TicketService>();
 builder.Services.AddScoped<OscApi.Services.IInvestorService, OscApi.Services.InvestorService>();
+builder.Services.AddScoped<OscApi.Services.IContactService, OscApi.Services.ContactService>();
 
 // Validation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

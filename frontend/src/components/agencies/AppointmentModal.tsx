@@ -11,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { AgencyContact } from '@/data/agencies';
 import { useNotification } from '@/contexts/NotificationContext';
+import { apiFetch } from '@/lib/api-client';
 
 interface AppointmentModalProps {
   agency: AgencyContact;
@@ -94,47 +95,31 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
     setIsSubmitting(true);
 
     try {
-      const appointmentDetails = `
-APPOINTMENT REQUEST - ${agency.acronym}
+      const res = await apiFetch<{ referenceNumber: string }>('/api/contact/appointments', {
+        method: 'POST',
+        body: JSON.stringify({
+          agencyCode: agency.acronym,
+          agencyName: agency.name,
+          name: appointmentData.name,
+          email: appointmentData.email,
+          phone: appointmentData.phone,
+          company: appointmentData.company || null,
+          serviceType: appointmentData.serviceType,
+          purpose: appointmentData.purpose,
+          duration: parseInt(appointmentData.duration),
+          meetingType: appointmentData.meetingType,
+          preferredDate: appointmentData.preferredDate,
+          preferredTime: appointmentData.preferredTime,
+          alternativeDate: appointmentData.alternativeDate || null,
+          alternativeTime: appointmentData.alternativeTime || null,
+          specialRequirements: appointmentData.specialRequirements || null,
+        }),
+      });
 
-Personal Information:
-Name: ${appointmentData.name}
-Email: ${appointmentData.email}
-Phone: ${appointmentData.phone}
-Company: ${appointmentData.company || 'N/A'}
-
-Service Details:
-Service Type: ${appointmentData.serviceType}
-Purpose: ${appointmentData.purpose}
-Expected Duration: ${appointmentData.duration} minutes
-Meeting Type: ${appointmentData.meetingType.charAt(0).toUpperCase() + appointmentData.meetingType.slice(1)}
-
-Preferred Schedule:
-First Choice: ${appointmentData.preferredDate} at ${appointmentData.preferredTime}
-Alternative: ${appointmentData.alternativeDate ? `${appointmentData.alternativeDate} at ${appointmentData.alternativeTime}` : 'No alternative provided'}
-
-Special Requirements:
-${appointmentData.specialRequirements || 'None'}
-
-This appointment request was submitted through the OneStopCentre Uganda portal.
-
-Please confirm the appointment by replying to this email with:
-- Confirmed date and time
-- Meeting location (if in-person) or meeting link (if virtual)
-- Any documents to bring
-- Contact person details
-
-Thank you.`;
-
-      const subject = `Appointment Request - ${appointmentData.serviceType} - ${appointmentData.name}`;
-      const mailtoUrl = `mailto:${agency.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(appointmentDetails)}`;
-
-      window.open(mailtoUrl, '_blank');
-
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!res.success) throw new Error(res.error);
 
       showNotification(
-        `Your appointment request has been sent to ${agency.acronym}. They will contact you within 24 hours to confirm the details.`,
+        `Your appointment request has been submitted to ${agency.acronym} (Ref: ${res.data?.referenceNumber}). You will receive a confirmation email shortly.`,
         'success',
         'Appointment Request Sent'
       );

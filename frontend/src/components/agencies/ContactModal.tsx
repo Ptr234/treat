@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, PaperAirplaneIcon, DocumentArrowUpIcon } from '@heroicons/react/24/outline';
 import { AgencyContact } from '@/data/agencies';
 import { useNotification } from '@/contexts/NotificationContext';
+import { apiFetch } from '@/lib/api-client';
 
 interface ContactModalProps {
   agency: AgencyContact;
@@ -46,25 +47,26 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
     setIsSubmitting(true);
 
     try {
-      // Save inquiry to localStorage (in-platform, no external redirect)
-      const inquiry = {
-        agency: agency.acronym,
-        agencyName: agency.name,
-        ...formData,
-        attachmentNames: attachments.map(f => f.name),
-        timestamp: new Date().toISOString(),
-        status: 'pending'
-      };
+      const res = await apiFetch<{ referenceNumber: string }>('/api/contact/inquiries', {
+        method: 'POST',
+        body: JSON.stringify({
+          agencyCode: agency.acronym,
+          agencyName: agency.name,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company || null,
+          serviceType: formData.serviceType,
+          subject: formData.subject,
+          message: formData.message,
+          urgency: formData.urgency,
+        }),
+      });
 
-      const existing = localStorage.getItem('agencyInquiries');
-      const inquiries = existing ? JSON.parse(existing) : [];
-      inquiries.push(inquiry);
-      localStorage.setItem('agencyInquiries', JSON.stringify(inquiries));
-
-      await new Promise(resolve => setTimeout(resolve, 800));
+      if (!res.success) throw new Error(res.error);
 
       showNotification(
-        `Your inquiry has been submitted to ${agency.acronym}. Our team will respond within 24-48 hours.`,
+        `Your inquiry has been submitted to ${agency.acronym} (Ref: ${res.data?.referenceNumber}). You will receive a confirmation email shortly.`,
         'success',
         'Inquiry Submitted'
       );

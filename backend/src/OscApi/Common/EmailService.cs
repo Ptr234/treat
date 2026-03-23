@@ -102,6 +102,94 @@ public class EmailService
             """);
     }
 
+    public async Task SendContactConfirmationAsync(
+        string toEmail, string name, string referenceNumber, string agencyName, string subject)
+    {
+        await SendAsync(toEmail, $"Inquiry {referenceNumber} Received — {agencyName}",
+            $"""
+            Dear {name},
+
+            Your inquiry to {agencyName} has been received.
+
+            Reference Number: {referenceNumber}
+            Subject: {subject}
+
+            The agency will respond within 24-48 hours. You can track your inquiry using the reference number above.
+
+            Regards,
+            Uganda Investment Authority — One Stop Centre
+            """);
+    }
+
+    public async Task SendContactNotificationToAgencyAsync(
+        string agencyCode, string agencyName, string referenceNumber,
+        string contactName, string contactEmail, string subject, string message)
+    {
+        await SendAsync(_adminEmail, $"New Inquiry {referenceNumber} for {agencyCode}",
+            $"""
+            A new inquiry has been submitted via the OneStop Centre portal.
+
+            Reference: {referenceNumber}
+            Agency: {agencyName} ({agencyCode})
+            From: {contactName} ({contactEmail})
+            Subject: {subject}
+
+            Message:
+            {message}
+
+            Review at: {_siteUrl}/dashboard
+            """);
+    }
+
+    public async Task SendAppointmentConfirmationAsync(
+        string toEmail, string name, string referenceNumber,
+        string agencyName, string date, string time)
+    {
+        await SendAsync(toEmail, $"Appointment Request {referenceNumber} — {agencyName}",
+            $"""
+            Dear {name},
+
+            Your appointment request with {agencyName} has been received.
+
+            Reference Number: {referenceNumber}
+            Preferred Date: {date}
+            Preferred Time: {time}
+
+            The agency will confirm or propose an alternative within 24 hours.
+
+            Regards,
+            Uganda Investment Authority — One Stop Centre
+            """);
+    }
+
+    public async Task SendAppointmentNotificationToAgencyAsync(
+        string agencyCode, string agencyName, string referenceNumber,
+        string contactName, string contactEmail, string contactPhone,
+        string serviceType, string purpose, string date, string time,
+        int durationMinutes, string meetingType)
+    {
+        await SendAsync(_adminEmail, $"Appointment Request {referenceNumber} for {agencyCode}",
+            $"""
+            A new appointment request has been submitted via the OneStop Centre portal.
+
+            Reference: {referenceNumber}
+            Agency: {agencyName} ({agencyCode})
+
+            Contact:
+            - Name: {contactName}
+            - Email: {contactEmail}
+            - Phone: {contactPhone}
+
+            Service: {serviceType}
+            Purpose: {purpose}
+            Date: {date} at {time}
+            Duration: {durationMinutes} minutes
+            Type: {meetingType}
+
+            Review at: {_siteUrl}/dashboard
+            """);
+    }
+
     private async Task SendAsync(string to, string subject, string textBody)
     {
         if (_client is null)
