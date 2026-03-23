@@ -134,8 +134,27 @@ public class AuthController : ControllerBase
         if (!string.IsNullOrWhiteSpace(request.Name))
             admin.Name = request.Name;
 
-        if (!string.IsNullOrWhiteSpace(request.Password))
-            admin.PasswordHash = _password.HashPassword(request.Password);
+        if (!string.IsNullOrWhiteSpace(request.NewPassword))
+        {
+            // Require current password verification
+            if (string.IsNullOrWhiteSpace(request.CurrentPassword))
+                return BadRequest(new ApiResponse(false, "Current password is required to set a new password"));
+
+            if (admin.PasswordHash is null || !_password.VerifyPassword(request.CurrentPassword, admin.PasswordHash))
+                return BadRequest(new ApiResponse(false, "Current password is incorrect"));
+
+            // Enforce password policy
+            if (request.NewPassword.Length < 8)
+                return BadRequest(new ApiResponse(false, "New password must be at least 8 characters"));
+
+            if (!request.NewPassword.Any(char.IsUpper) || !request.NewPassword.Any(char.IsDigit))
+                return BadRequest(new ApiResponse(false, "New password must contain at least one uppercase letter and one digit"));
+
+            if (request.NewPassword == request.CurrentPassword)
+                return BadRequest(new ApiResponse(false, "New password must be different from current password"));
+
+            admin.PasswordHash = _password.HashPassword(request.NewPassword);
+        }
 
         admin.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync();
