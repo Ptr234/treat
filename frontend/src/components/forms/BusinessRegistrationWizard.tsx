@@ -341,18 +341,18 @@ export default function BusinessRegistrationWizard() {
         ].join('\n'),
         category: 'application_support',
         priority: 'medium',
-        contactEmail: businessData.owners[0]?.name ? '' : '',
+        contactEmail: 'registration@oscdigitaltool.com',
         contactName: businessData.owners[0]?.name || 'Business Registrant',
         sector: businessData.sector,
       };
 
-      const res = await apiFetch<{ data: { referenceNumber: string } }>('/api/tickets', {
+      const res = await apiFetch<{ referenceNumber: string }>('/api/tickets', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(ticketPayload),
       });
 
-      const refNumber = res?.data?.referenceNumber || `BRW-${Date.now()}`;
+      if (!res.success) throw new Error(res.error);
+      const refNumber = res.data?.referenceNumber || `BRW-${Date.now()}`;
       setSubmitResult({ referenceNumber: refNumber });
 
       // Reset form

@@ -104,6 +104,7 @@ const Header: React.FC = () => {
   return (
     <>
       <motion.header
+        role="banner"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className="fixed top-0 left-0 right-0 z-50"
@@ -173,7 +174,7 @@ const Header: React.FC = () => {
             </motion.div>
 
             {/* Desktop Navigation — Flat, No Dropdowns */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav aria-label="Main navigation" className="hidden lg:flex items-center space-x-1">
               {navigationItems.map((item) => {
                 if (item.highlight) {
                   return (
@@ -312,7 +313,9 @@ const Header: React.FC = () => {
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="lg:hidden p-2 text-white/90 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-xl border border-transparent hover:border-yellow-500/20 transition-all duration-200"
-                aria-label="Toggle menu"
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
               >
                 {isMenuOpen ? (
                   <XMarkIcon className="w-6 h-6" />
@@ -326,7 +329,10 @@ const Header: React.FC = () => {
           {/* Mobile Menu — Single-Level, No Dropdowns */}
           <AnimatePresence>
             {isMenuOpen && (
-              <motion.div
+              <motion.nav
+                id="mobile-menu"
+                role="navigation"
+                aria-label="Mobile navigation"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
@@ -374,7 +380,7 @@ const Header: React.FC = () => {
                     </motion.div>
                   )}
                 </div>
-              </motion.div>
+              </motion.nav>
             )}
           </AnimatePresence>
         </div>

@@ -2,22 +2,16 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, Clock, DollarSign, AlertCircle, Phone, Mail, Globe, MapPin, Users, FileText, Download } from 'lucide-react';
-import opportunitiesData from '@/data/investment-opportunities.json';
+import { getInvestmentById, getInvestmentIds } from '@/lib/investments';
 import InvestmentDetailClient from './InvestmentDetailClient';
 
 export async function generateStaticParams() {
-  return opportunitiesData.map((opportunity) => ({
-    id: opportunity.id.toString(),
-  }));
+  return getInvestmentIds();
 }
-
-const getOpportunityData = (id: string) => {
-  return opportunitiesData.find(opp => opp.id === parseInt(id));
-};
 
 export default async function InvestmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const opportunity = getOpportunityData(id);
+  const opportunity = await getInvestmentById(id);
 
   if (!opportunity) {
     return (

@@ -17,9 +17,16 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Skip to main content link — visible on focus for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-yellow-500 focus:text-black focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
       <NewsBar />
       <Header />
-      <main className="flex-1 pt-24 md:pt-28">
+      <main id="main-content" role="main" className="flex-1 pt-24 md:pt-28" tabIndex={-1}>
         {children}
       </main>
       <Footer />

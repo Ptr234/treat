@@ -57,7 +57,7 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      <footer className="bg-black text-white relative">
+      <footer role="contentinfo" aria-label="Site footer" className="bg-black text-white relative">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-black via-yellow-500 to-red-500"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
