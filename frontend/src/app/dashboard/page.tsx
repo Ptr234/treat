@@ -792,6 +792,63 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ── Contact Inquiries Link ────────────────────────────── */}
+        <Link
+          href="/dashboard/inquiries"
+          className="block bg-white rounded-xl shadow-sm p-6 mb-8 hover:shadow-md transition-shadow border border-gray-100 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                <DocumentTextIcon className="w-6 h-6 text-red-700" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Contact Inquiries</h3>
+                <p className="text-sm text-gray-500">View all contact form submissions and support requests by agency</p>
+              </div>
+            </div>
+            <ArrowUpIcon className="w-5 h-5 text-gray-400 rotate-90 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* ── Appointments Link ────────────────────────────────── */}
+        <Link
+          href="/dashboard/appointments"
+          className="block bg-white rounded-xl shadow-sm p-6 mb-8 hover:shadow-md transition-shadow border border-gray-100 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                <CalendarIcon className="w-6 h-6 text-green-700" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Appointments</h3>
+                <p className="text-sm text-gray-500">View scheduled meetings, event registrations, and appointment requests</p>
+              </div>
+            </div>
+            <ArrowUpIcon className="w-5 h-5 text-gray-400 rotate-90 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* ── Investor Pipeline Link ───────────────────────────── */}
+        <Link
+          href="/dashboard/investors"
+          className="block bg-white rounded-xl shadow-sm p-6 mb-8 hover:shadow-md transition-shadow border border-gray-100 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
+                <ArrowTrendingUpIcon className="w-6 h-6 text-yellow-700" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Investor Pipeline</h3>
+                <p className="text-sm text-gray-500">Manage registered investors — view profiles, update status, track pipeline</p>
+              </div>
+            </div>
+            <ArrowUpIcon className="w-5 h-5 text-gray-400 rotate-90 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
         {/* ── Chat Enquiries Link ─────────────────────────────────── */}
         <Link
           href="/dashboard/enquiries"

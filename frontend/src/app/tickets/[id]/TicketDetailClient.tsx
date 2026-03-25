@@ -491,6 +491,9 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
               )}
             </div>
 
+            {/* Documents */}
+            <TicketDocuments ticketId={ticketId} emailParam={emailParam} />
+
             {/* Add Comment */}
             {!isResolved && (
               <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -688,6 +691,65 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
             )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ========== TICKET DOCUMENTS COMPONENT ==========
+
+interface TicketDocument {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  storageUrl: string;
+  uploadedAt: string;
+}
+
+function TicketDocuments({ ticketId, emailParam }: { ticketId: string; emailParam: string | null }) {
+  const [docs, setDocs] = useState<TicketDocument[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchDocs = useCallback(async () => {
+    if (!emailParam) { setLoading(false); return; }
+    const query = emailParam ? `?email=${encodeURIComponent(emailParam)}` : '';
+    const res = await apiFetch<TicketDocument[]>(`/api/tickets/${ticketId}/documents${query}`);
+    if (res.success && res.data) setDocs(res.data);
+    setLoading(false);
+  }, [ticketId, emailParam]);
+
+  useEffect(() => { fetchDocs(); }, [fetchDocs]);
+
+  if (loading) return null;
+  if (docs.length === 0) return null;
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Attached Documents</h3>
+      <div className="space-y-2">
+        {docs.map((doc) => (
+          <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex items-center gap-3 min-w-0">
+              <svg className="w-5 h-5 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{doc.fileName}</p>
+                <p className="text-xs text-gray-500">{doc.mimeType} &middot; {new Date(doc.uploadedAt).toLocaleDateString('en-UG')}</p>
+              </div>
+            </div>
+            {doc.storageUrl && (
+              <a
+                href={doc.storageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-yellow-700 hover:text-yellow-600 font-medium flex-shrink-0 ml-2"
+              >
+                Download
+              </a>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
