@@ -17,6 +17,7 @@ public class OscDbContext : DbContext
     public DbSet<ContactInquiry> ContactInquiries => Set<ContactInquiry>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<AnalyticsEvent> AnalyticsEvents => Set<AnalyticsEvent>();
 
     public override int SaveChanges()
     {
@@ -133,6 +134,13 @@ public class OscDbContext : DbContext
             e.HasIndex(a => a.ContactEmail);
             e.Property(a => a.MeetingType).HasConversion<string>();
             e.Property(a => a.Status).HasConversion<string>();
+        });
+
+        // AnalyticsEvent
+        modelBuilder.Entity<AnalyticsEvent>(e =>
+        {
+            e.HasIndex(a => new { a.EventType, a.CreatedAt });
+            e.HasIndex(a => a.CreatedAt);
         });
 
         // Admin seeding handled in Program.cs (upsert-style) to avoid migration conflicts

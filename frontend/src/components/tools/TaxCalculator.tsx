@@ -246,6 +246,9 @@ export default function TaxCalculator() {
   const handleCalculate = () => {
     const calculation = calculateTax();
     setResults(calculation);
+    import('@/lib/track').then(({ trackEvent }) =>
+      trackEvent('tool_usage', 'tax-calculator', { sector: investmentSector })
+    );
   };
 
   return (

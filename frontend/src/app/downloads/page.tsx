@@ -124,6 +124,9 @@ export default function DownloadsPage() {
   };
 
   const handleDownload = (resource: SanityDownloadableResource) => {
+    import('@/lib/track').then(({ trackEvent }) =>
+      trackEvent('download', resource.title, { category: resource.category })
+    );
     if (resource.file?.asset?.url) {
       const link = document.createElement('a');
       link.href = resource.file.asset.url;

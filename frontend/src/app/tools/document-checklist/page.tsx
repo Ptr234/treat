@@ -118,6 +118,9 @@ export default function DocumentChecklistPage() {
   };
 
   const downloadChecklist = () => {
+    import('@/lib/track').then(({ trackEvent }) =>
+      trackEvent('tool_usage', 'document-checklist')
+    );
     let content = 'DOCUMENT CHECKLIST FOR BUSINESS REGISTRATION IN UGANDA\n';
     content += '='.repeat(60) + '\n\n';
     content += `Generated: ${new Date().toLocaleString()}\n\n`;

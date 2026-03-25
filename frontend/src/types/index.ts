@@ -621,6 +621,17 @@ export interface DGDashboardMetrics {
   alerts: DGAlert[];
   recentActivity: DGActivity[];
   escalatedTickets?: EscalatedTicketSummary[];
+  // Extended KPIs from backend
+  totalInquiries?: number;
+  totalAppointments?: number;
+  recentInquiries?: number;
+  recentAppointments?: number;
+  chatEscalations?: number;
+  totalMessages?: number;
+  recentMessages?: number;
+  toolUsageCount?: number;
+  downloadCount?: number;
+  searchCount?: number;
 }
 
 export interface AgencyScore {

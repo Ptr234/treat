@@ -792,6 +792,29 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ── Engagement Stats ──────────────────────────────────── */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Platform Engagement (Last 30 Days)</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[
+              { label: 'Inquiries', value: metrics.totalInquiries ?? 0, recent: metrics.recentInquiries, color: 'text-red-600' },
+              { label: 'Appointments', value: metrics.totalAppointments ?? 0, recent: metrics.recentAppointments, color: 'text-green-600' },
+              { label: 'Escalations', value: metrics.chatEscalations ?? 0, color: 'text-orange-600' },
+              { label: 'Messages', value: metrics.totalMessages ?? 0, recent: metrics.recentMessages, color: 'text-blue-600' },
+              { label: 'Tool Uses', value: metrics.toolUsageCount ?? 0, color: 'text-yellow-600' },
+              { label: 'Downloads', value: metrics.downloadCount ?? 0, color: 'text-neutral-700' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center p-3 rounded-lg bg-gray-50">
+                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+                <p className="text-xs text-gray-500 mt-1">{stat.label}</p>
+                {stat.recent !== undefined && stat.recent > 0 && (
+                  <p className="text-xs text-green-600 mt-0.5">+{stat.recent} this month</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ── Contact Inquiries Link ────────────────────────────── */}
         <Link
           href="/dashboard/inquiries"

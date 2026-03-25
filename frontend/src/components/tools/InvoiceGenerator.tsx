@@ -242,6 +242,9 @@ export default function InvoiceGenerator() {
       alert('Please fix all errors before generating PDF');
       return;
     }
+    import('@/lib/track').then(({ trackEvent }) =>
+      trackEvent('tool_usage', 'invoice-generator')
+    );
 
     try {
       // Simulate PDF generation with enhanced functionality

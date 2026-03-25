@@ -57,15 +57,52 @@ public class DashboardController : ControllerBase
         var totalInvestors = await _db.InvestorProfiles.CountAsync();
         var totalChatSessions = await _db.ChatEnquiries.Select(c => c.SessionId).Distinct().CountAsync();
 
+        // Contact & appointment counts
+        var totalInquiries = await _db.ContactInquiries.CountAsync();
+        var totalAppointments = await _db.Appointments.CountAsync();
+        var recentInquiries = await _db.ContactInquiries.CountAsync(i => i.CreatedAt >= thirtyDaysAgo);
+        var recentAppointments = await _db.Appointments.CountAsync(a => a.CreatedAt >= thirtyDaysAgo);
+
+        // Escalation count (from chatbot)
+        var chatEscalations = await _db.ChatEnquiries.CountAsync(c => c.Tier == ChatTier.Escalation);
+
+        // Message volume
+        var totalMessages = await _db.TicketMessages.CountAsync();
+        var recentMessages = await _db.TicketMessages.CountAsync(m => m.SentAt >= thirtyDaysAgo);
+
+        // Analytics events (tool usage, downloads)
+        var toolUsageCount = await _db.AnalyticsEvents.CountAsync(e => e.EventType == "tool_usage");
+        var downloadCount = await _db.AnalyticsEvents.CountAsync(e => e.EventType == "download");
+        var searchCount = await _db.AnalyticsEvents.CountAsync(e => e.EventType == "search");
+
+        var toolBreakdown = await _db.AnalyticsEvents
+            .Where(e => e.EventType == "tool_usage")
+            .GroupBy(e => e.EventName)
+            .Select(g => new { Tool = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var topDownloads = await _db.AnalyticsEvents
+            .Where(e => e.EventType == "download")
+            .GroupBy(e => e.EventName)
+            .Select(g => new { Resource = g.Key, Count = g.Count() })
+            .OrderByDescending(g => g.Count)
+            .Take(10)
+            .ToListAsync();
+
         return Ok(new ApiResponse<object>(true, new
         {
             kpis = new
             {
                 totalTickets, openTickets, resolvedTickets, escalatedTickets,
-                slaBreached, avgRating, recentTickets, totalInvestors, totalChatSessions
+                slaBreached, avgRating, recentTickets, totalInvestors, totalChatSessions,
+                totalInquiries, totalAppointments, recentInquiries, recentAppointments,
+                chatEscalations, totalMessages, recentMessages,
+                toolUsageCount, downloadCount, searchCount,
             },
             ticketsByCategory,
             ticketsByStatus,
+            toolBreakdown,
+            topDownloads,
         }));
     }
 

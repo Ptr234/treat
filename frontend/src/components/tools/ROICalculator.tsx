@@ -196,6 +196,9 @@ export default function ROICalculator() {
 
   const calculateROI = () => {
     calculateROIWithData(investment);
+    import('@/lib/track').then(({ trackEvent }) =>
+      trackEvent('tool_usage', 'roi-calculator', { sector: investment.sector })
+    );
   };
 
   return (
