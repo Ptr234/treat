@@ -101,14 +101,16 @@ export default function GoogleSignInButton({
       },
     });
 
+    // Use container width so button fits in both login page and chat widget
+    const containerWidth = Math.min(buttonRef.current.offsetWidth || 300, 400);
     window.google.accounts.id.renderButton(buttonRef.current, {
       type: 'standard',
       theme: 'outline',
       size: 'large',
-      width: 400,
+      width: containerWidth,
       text: 'signin_with',
       shape: 'rectangular',
-      logo_alignment: 'left',
+      logo_alignment: 'center',
     });
   }, [scriptLoaded, clientId, loginWithGoogle]);
 
@@ -141,7 +143,7 @@ export default function GoogleSignInButton({
       )}
       <div
         ref={buttonRef}
-        className={`${disabled || loading ? 'opacity-50 pointer-events-none' : ''} flex justify-center [&>div]:w-full`}
+        className={`${disabled || loading ? 'opacity-50 pointer-events-none' : ''} flex justify-center [&>div]:w-full [&_iframe]:!w-full`}
       />
       {!scriptLoaded && clientId && (
         <div className="flex items-center justify-center py-2.5">
