@@ -10,6 +10,7 @@ public class GroqClient
     private readonly HttpClient _http;
     private readonly string _model;
     private readonly ILogger<GroqClient> _logger;
+    private readonly bool _isConfigured;
 
     public GroqClient(HttpClient http, IConfiguration config, ILogger<GroqClient> logger)
     {
@@ -17,14 +18,26 @@ public class GroqClient
         _logger = logger;
         _model = config["Groq:Model"] ?? "llama-3.3-70b-versatile";
 
-        var apiKey = config["Groq:ApiKey"]
-            ?? throw new InvalidOperationException("Groq:ApiKey is not configured");
+        var apiKey = config["Groq:ApiKey"];
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            _logger.LogWarning("Groq:ApiKey is not configured — chatbot AI will be unavailable");
+            _isConfigured = false;
+            return;
+        }
+
+        _isConfigured = true;
         _http.BaseAddress = new Uri("https://api.groq.com/openai/v1/");
         _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
     }
 
+    public bool IsConfigured => _isConfigured;
+
     public async Task<string> ChatAsync(List<ChatMessage> messages, double temperature = 0.7, int maxTokens = 1024)
     {
+        if (!_isConfigured)
+            throw new InvalidOperationException("Groq API key is not configured");
+
         var payload = new
         {
             model = _model,

@@ -37,6 +37,11 @@ public class ChatbotController : ControllerBase
 
         messages.Add(new GroqClient.ChatMessage("user", request.Message));
 
+        if (!_groq.IsConfigured)
+        {
+            return StatusCode(503, new { success = false, error = "Chatbot AI is not configured", code = "NOT_CONFIGURED" });
+        }
+
         try
         {
             var response = await _groq.ChatAsync(messages);

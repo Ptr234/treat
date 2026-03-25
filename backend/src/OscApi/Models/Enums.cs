@@ -55,7 +55,8 @@ public enum ChatTier
 {
     Ai,
     Kb,
-    Suggestions
+    Suggestions,
+    Escalation
 }
 
 public enum InvestorType

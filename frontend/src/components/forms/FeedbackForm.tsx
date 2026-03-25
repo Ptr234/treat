@@ -102,17 +102,30 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
 
   const submitFeedback = async () => {
     setIsSubmitting(true);
-    
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      const { apiFetch } = await import('@/lib/api-client');
+      const res = await apiFetch('/api/contact/inquiries', {
+        method: 'POST',
+        body: JSON.stringify({
+          fullName: feedbackData.anonymous ? 'Anonymous' : feedbackData.contactInfo.name,
+          email: feedbackData.anonymous ? 'anonymous@feedback.local' : feedbackData.contactInfo.email,
+          phone: feedbackData.contactInfo.phone || undefined,
+          agency: 'UIA',
+          subject: `[${feedbackData.category}] ${feedbackData.subject}`,
+          message: `Rating: ${feedbackData.rating}/5\n\n${feedbackData.message}${context ? `\n\nContext: ${context}` : ''}`,
+          urgency: 'normal',
+        }),
+      });
+
+      if (!res.success) throw new Error(res.error || 'Submission failed');
+
       showNotification(
         'Thank you for your feedback! We appreciate your input and will review it carefully.',
         'success',
         'Feedback Submitted'
       );
-      
+
       // Reset form
       setFeedbackData({
         rating: 0,
@@ -124,7 +137,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
         anonymous: false
       });
       setCurrentStep(1);
-      
+
       if (onClose) {
         onClose();
       }

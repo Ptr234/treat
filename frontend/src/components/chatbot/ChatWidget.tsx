@@ -600,7 +600,7 @@ export default function ChatWidget() {
         </AnimatePresence>
 
         <span className="hidden sm:inline text-sm font-bold">
-          {isOpen ? '' : 'Ask AI'}
+          {isOpen ? '' : 'Ask Assistant'}
         </span>
 
         {!isOpen && (

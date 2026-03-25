@@ -56,29 +56,41 @@ export default function EventDetailClient({ event: initialEvent, eventId: _event
     });
   };
 
-  const handleRegistration = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    const registrations = JSON.parse(localStorage.getItem('eventRegistrations') || '[]');
-    registrations.push({
-      eventId: event.id,
-      ...formData,
-      registeredAt: new Date().toISOString()
-    });
-    localStorage.setItem('eventRegistrations', JSON.stringify(registrations));
+    try {
+      const { apiFetch } = await import('@/lib/api-client');
+      const res = await apiFetch('/api/contact/appointments', {
+        method: 'POST',
+        body: JSON.stringify({
+          fullName: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          agency: 'UIA',
+          subject: `Event Registration: ${event.title}`,
+          message: `Organization: ${formData.organization}\nEvent: ${event.title}\nDate: ${event.date}`,
+          date: event.date,
+          time: event.time || '09:00',
+          duration: 60,
+          meetingType: event.isVirtual ? 'virtual' : 'in-person',
+        }),
+      });
 
-    setRegistrationStatus('success');
+      if (!res.success) throw new Error(res.error || 'Registration failed');
 
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      organization: ''
-    });
-
-    setTimeout(() => {
-      setRegistrationStatus('idle');
-    }, 5000);
+      setRegistrationStatus('success');
+      setFormData({ name: '', email: '', phone: '', organization: '' });
+      setTimeout(() => setRegistrationStatus('idle'), 5000);
+    } catch {
+      setRegistrationStatus('error');
+      setTimeout(() => setRegistrationStatus('idle'), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const registrationPercentage = (event.registered / event.capacity) * 100;
@@ -394,9 +406,10 @@ export default function EventDetailClient({ event: initialEvent, eventId: _event
 
                   <button
                     type="submit"
-                    className="w-full px-4 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors duration-200"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors duration-200"
                   >
-                    Register Now
+                    {isSubmitting ? 'Registering...' : 'Register Now'}
                   </button>
                 </form>
               </motion.div>

@@ -56,6 +56,15 @@ function ChatbotPageInner() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const searchParams = useSearchParams();
 
+  // Load user info from localStorage (set by ChatWidget pre-chat form or escalation form)
+  const getUserInfo = useCallback(() => {
+    try {
+      const raw = localStorage.getItem('uia-chat-user-info');
+      if (raw) return JSON.parse(raw);
+    } catch { /* ignore */ }
+    return {};
+  }, []);
+
   const voice = useVoiceInput(language);
 
   // Auto-open escalation from ?escalate=true
@@ -123,7 +132,7 @@ function ChatbotPageInner() {
       textareaRef.current.style.height = 'auto';
     }
 
-    await sendMessage(messageContent, language);
+    await sendMessage(messageContent, language, getUserInfo());
 
     requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -180,10 +189,39 @@ function ChatbotPageInner() {
       // Actually, the simplest approach: just send the issue as a user message.
       // Let's not overcomplicate — just show the ref number in a follow-up.
 
-      // For now: show escalation confirmation by sending a message
+      // Save escalation user info so future messages are logged with identity
+      const escalationUserInfo = {
+        name: escalationData.name,
+        email: escalationData.email,
+        phone: escalationData.phone,
+      };
+      try {
+        localStorage.setItem('uia-chat-user-info', JSON.stringify(escalationUserInfo));
+      } catch { /* ignore */ }
+
+      // Log escalation with distinct tier so admin can filter in dashboard
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '';
+      fetch(`${baseUrl}/api/chatbot/log`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: `escalation-${Date.now().toString(36)}`,
+          userName: escalationData.name,
+          userEmail: escalationData.email,
+          userPhone: escalationData.phone,
+          userMessage: escalationData.issue,
+          botResponse: `Escalation ticket created: ${refNumber}`,
+          language,
+          sentiment: 'negative',
+          tier: 'escalation',
+        }),
+      }).catch(() => {});
+
       await sendMessage(
         `I just submitted an escalation request. My reference number is ${refNumber}. Please confirm.`,
         language,
+        escalationUserInfo,
       );
     } catch (error) {
       console.error('Escalation failed:', error);

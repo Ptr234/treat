@@ -278,6 +278,32 @@ const TOPIC_SUGGESTIONS: Record<ChatLanguage, string> = {
     "Simu: +256-414-301000 | Barua pepe: info@ugandainvest.go.ug",
 };
 
+// ===================== LOCAL SENTIMENT ANALYSIS =====================
+// Lightweight keyword-based sentiment for Tier 2/3 where Groq isn't available.
+
+const NEGATIVE_SIGNALS = [
+  'frustrated', 'frustrating', 'angry', 'terrible', 'horrible', 'worst',
+  'useless', 'broken', 'not working', 'doesn\'t work', 'waste', 'scam',
+  'nobody', 'no one', 'ignored', 'disappointed', 'unacceptable', 'ridiculous',
+  'complaint', 'complain', 'urgent', 'emergency', 'stuck', 'help me',
+  'impossible', 'can\'t get', 'still waiting', 'no response', 'never',
+];
+
+const POSITIVE_SIGNALS = [
+  'thank', 'thanks', 'great', 'excellent', 'perfect', 'helpful', 'appreciate',
+  'wonderful', 'good job', 'well done', 'amazing', 'love', 'fantastic',
+];
+
+function detectLocalSentiment(message: string): 'positive' | 'neutral' | 'negative' {
+  const lower = message.toLowerCase();
+  const negScore = NEGATIVE_SIGNALS.filter(w => lower.includes(w)).length;
+  const posScore = POSITIVE_SIGNALS.filter(w => lower.includes(w)).length;
+
+  if (negScore >= 2 || (negScore >= 1 && posScore === 0 && lower.includes('!'))) return 'negative';
+  if (posScore >= 1 && negScore === 0) return 'positive';
+  return 'neutral';
+}
+
 // ===================== ENQUIRY LOGGING =====================
 
 export interface ChatUserInfo {
@@ -294,7 +320,7 @@ function logEnquiry(
   botResponse: string,
   language: ChatLanguage,
   sentiment: string | undefined,
-  tier: 'ai' | 'kb' | 'suggestions',
+  tier: 'ai' | 'kb' | 'suggestions' | 'escalation',
 ) {
   const baseUrl = getChatbotBaseUrl();
   // Fire-and-forget — don't block the chat response
@@ -371,16 +397,19 @@ export async function sendChatMessage(
     console.error('[chatbot] Network error, falling back to local KB:', error);
   }
 
+  // Detect sentiment locally for Tier 2/3 (no Groq available)
+  const localSentiment = detectLocalSentiment(message);
+
   // Tier 2: Local KB keyword match (with multilingual expansion)
   const kbAnswer = findKBAnswer(message);
   if (kbAnswer) {
     const response = kbAnswer + (KB_DISCLAIMER[language] || KB_DISCLAIMER.en);
-    logEnquiry(sessionId, userInfo, message, response, language, undefined, 'kb');
-    return { response };
+    logEnquiry(sessionId, userInfo, message, response, language, localSentiment, 'kb');
+    return { response, sentiment: localSentiment };
   }
 
   // Tier 3: Show available topics in the user's language
   const response = TOPIC_SUGGESTIONS[language] || TOPIC_SUGGESTIONS.en;
-  logEnquiry(sessionId, userInfo, message, response, language, undefined, 'suggestions');
-  return { response };
+  logEnquiry(sessionId, userInfo, message, response, language, localSentiment, 'suggestions');
+  return { response, sentiment: localSentiment };
 }

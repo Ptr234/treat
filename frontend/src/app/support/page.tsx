@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { MessageSquare, Phone, Mail, MapPin } from 'lucide-react';
+import { apiFetch } from '@/lib/api-client';
 
 export default function SupportPage() {
   const [formData, setFormData] = useState({
@@ -43,11 +44,33 @@ export default function SupportPage() {
     return !newErrors.fullName && !newErrors.email && !newErrors.message;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (!validateForm()) {
+      showToast('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await apiFetch('/api/contact/inquiries', {
+        method: 'POST',
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone || undefined,
+          agency: 'UIA',
+          subject: formData.category || 'General Inquiry',
+          message: formData.message,
+          urgency: 'normal',
+        }),
+      });
+
+      if (!res.success) throw new Error(res.error || 'Submission failed');
+
       showToast('Your message has been submitted. Our team will respond within 24 hours.', 'success');
-      // Reset form
       setFormData({
         fullName: '',
         email: '',
@@ -56,13 +79,11 @@ export default function SupportPage() {
         message: '',
         agreedToFollowUp: false
       });
-      setErrors({
-        fullName: false,
-        email: false,
-        message: false
-      });
-    } else {
-      showToast('Please fill in all required fields.', 'error');
+      setErrors({ fullName: false, email: false, message: false });
+    } catch {
+      showToast('Failed to submit your message. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -200,7 +221,7 @@ export default function SupportPage() {
                 href={channel.href}
                 target={channel.href.startsWith('http') ? '_blank' : undefined}
                 rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="inline-block bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
+                className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
               >
                 {channel.action}
               </Link>
@@ -225,7 +246,7 @@ export default function SupportPage() {
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className={`w-full px-3 py-2 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black`}
+                      className={`w-full px-3 py-2 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black`}
                       placeholder="Your full name"
                     />
                     {errors.fullName && (
@@ -240,7 +261,7 @@ export default function SupportPage() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black`}
+                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black`}
                       placeholder="your.email@example.com"
                     />
                     {errors.email && (
@@ -255,7 +276,7 @@ export default function SupportPage() {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black"
                       placeholder="+256 700 000 000"
                     />
                   </div>
@@ -266,7 +287,7 @@ export default function SupportPage() {
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black"
                     >
                       <option value="">Select a category</option>
                       <option value="business-registration">Business Registration</option>
@@ -288,7 +309,7 @@ export default function SupportPage() {
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       rows={8}
-                      className={`w-full px-3 py-2 border ${errors.message ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-black`}
+                      className={`w-full px-3 py-2 border ${errors.message ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black`}
                       placeholder="Please describe your question or issue in detail..."
                     />
                     {errors.message && (
@@ -310,9 +331,10 @@ export default function SupportPage() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+                    disabled={isSubmitting}
+                    className="w-full bg-yellow-600 text-black py-3 rounded-lg font-semibold hover:bg-yellow-700 disabled:opacity-50 transition-colors"
                   >
-                    Send Message
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
                   </button>
                 </div>
               </div>
@@ -328,7 +350,7 @@ export default function SupportPage() {
           <div className="space-y-8">
             {faqCategories.map((category, categoryIndex) => (
               <div key={categoryIndex} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-primary-50 to-primary-100 px-6 py-4 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 px-6 py-4 border-b border-gray-200">
                   <h3 className="text-xl font-bold text-gray-900">{category.title}</h3>
                 </div>
                 <div className="p-6">

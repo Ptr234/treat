@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { client, canWriteToSanity } from '@/lib/sanity-client';
 import { PROJECTS_QUERY, PROJECTS_BY_SECTOR_QUERY, PROJECTS_MAP_QUERY } from '@/lib/sanity-queries';
-import { apiSuccess, apiError, validateSearchParams } from '@/lib/api-utils';
+import { apiSuccess, validateSearchParams } from '@/lib/api-utils';
 import { projectsQuerySchema } from '@/lib/validations';
 import type { SanityLicenseProject } from '@/types/sanity';
 
