@@ -276,112 +276,204 @@ export default function InvoiceGenerator() {
   const generatePDFContent = (): string => {
     const selectedAgency = agencyOptions.find(a => a.key === invoiceData.selectedAgency);
     const totals = calculateInvoiceTotal();
+    const invoiceDate = new Date(invoiceData.invoiceDate).toLocaleDateString('en-UG', { day: 'numeric', month: 'long', year: 'numeric' });
+    const dueDate = new Date(invoiceData.dueDate).toLocaleDateString('en-UG', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    return `
-<!DOCTYPE html>
-<html>
+    return `<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Invoice ${invoiceData.invoiceNumber}</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-        .invoice-details { display: flex; justify-content: space-between; margin-bottom: 30px; }
-        .client-info, .agency-info { width: 45%; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .totals { margin-top: 20px; text-align: right; }
-        .total-row { font-weight: bold; font-size: 1.2em; }
-        .notes { margin-top: 30px; padding: 15px; background-color: #f9f9f9; border-left: 4px solid #333; }
-    </style>
+<meta charset="UTF-8">
+<title>Invoice ${invoiceData.invoiceNumber}</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: #1a1a1a; background: #fff; }
+  .page { max-width: 800px; margin: 0 auto; padding: 40px 48px; }
+
+  /* Header band — Uganda flag colors */
+  .flag-band { display: flex; height: 6px; }
+  .flag-band span { flex: 1; }
+  .flag-black { background: #000; }
+  .flag-yellow { background: #FFD700; }
+  .flag-red { background: #CE1126; }
+
+  .header { display: flex; justify-content: space-between; align-items: flex-start; padding: 32px 0 24px; border-bottom: 2px solid #000; }
+  .header-left h1 { font-size: 32px; font-weight: 800; letter-spacing: 2px; color: #000; }
+  .header-left p { font-size: 13px; color: #666; margin-top: 4px; }
+  .header-right { text-align: right; }
+  .header-right .inv-num { font-size: 22px; font-weight: 700; color: #000; }
+  .header-right .inv-date { font-size: 13px; color: #666; margin-top: 4px; }
+
+  .parties { display: flex; justify-content: space-between; margin: 32px 0; gap: 40px; }
+  .party { flex: 1; }
+  .party-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #999; font-weight: 600; margin-bottom: 8px; }
+  .party-name { font-size: 16px; font-weight: 700; color: #000; margin-bottom: 4px; }
+  .party-detail { font-size: 13px; color: #444; line-height: 1.6; }
+
+  .meta-bar { display: flex; gap: 24px; margin-bottom: 28px; padding: 14px 20px; background: #f7f7f7; border-radius: 6px; }
+  .meta-item { flex: 1; }
+  .meta-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #999; font-weight: 600; }
+  .meta-value { font-size: 14px; font-weight: 600; color: #000; margin-top: 2px; }
+
+  table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+  thead th { background: #000; color: #FFD700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; padding: 12px 14px; text-align: left; font-weight: 600; }
+  thead th:last-child { text-align: right; }
+  tbody td { padding: 14px; font-size: 13px; border-bottom: 1px solid #eee; color: #333; }
+  tbody td:last-child { text-align: right; font-weight: 600; }
+  tbody tr:nth-child(even) { background: #fafafa; }
+  tbody tr:hover { background: #fffbe6; }
+
+  .totals-section { display: flex; justify-content: flex-end; margin-top: 0; }
+  .totals-box { width: 320px; }
+  .totals-row { display: flex; justify-content: space-between; padding: 8px 14px; font-size: 13px; color: #555; }
+  .totals-row.discount { color: #CE1126; }
+  .totals-row.grand { background: #000; color: #FFD700; font-size: 18px; font-weight: 800; padding: 14px; margin-top: 4px; border-radius: 0 0 6px 6px; }
+
+  .notes-section { margin-top: 32px; padding: 20px; background: #fafafa; border-left: 4px solid #FFD700; border-radius: 0 6px 6px 0; }
+  .notes-section h4 { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 8px; font-weight: 600; }
+  .notes-section p { font-size: 13px; color: #444; line-height: 1.6; }
+
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; }
+  .footer p { font-size: 11px; color: #999; line-height: 1.8; }
+  .footer strong { color: #666; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 24px 36px; }
+  }
+</style>
 </head>
 <body>
-    <div class="header">
-        <h1>INVOICE</h1>
-        <h2>${invoiceData.invoiceNumber}</h2>
-        <p>Generated on ${new Date().toLocaleDateString()}</p>
-    </div>
+<div class="page">
+  <div class="flag-band">
+    <span class="flag-black"></span>
+    <span class="flag-yellow"></span>
+    <span class="flag-red"></span>
+    <span class="flag-black"></span>
+    <span class="flag-yellow"></span>
+    <span class="flag-red"></span>
+  </div>
 
-    <div class="invoice-details">
-        <div class="agency-info">
-            <h3>From:</h3>
-            <p><strong>${selectedAgency?.name}</strong></p>
-            <p>Government of Uganda</p>
-            <p>Official Invoice</p>
-        </div>
-        <div class="client-info">
-            <h3>To:</h3>
-            <p><strong>${invoiceData.clientName}</strong></p>
-            <p>${invoiceData.clientEmail}</p>
-            <p>${invoiceData.clientPhone}</p>
-            ${invoiceData.clientAddress ? `<p>${invoiceData.clientAddress}</p>` : ''}
-            ${invoiceData.clientTin ? `<p>TIN: ${invoiceData.clientTin}</p>` : ''}
-        </div>
+  <div class="header">
+    <div class="header-left">
+      <h1>INVOICE</h1>
+      <p>${selectedAgency?.name || 'Uganda Investment Authority'} &mdash; Government of Uganda</p>
     </div>
-
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-        <p><strong>Invoice Date:</strong> ${invoiceData.invoiceDate}</p>
-        <p><strong>Due Date:</strong> ${invoiceData.dueDate}</p>
+    <div class="header-right">
+      <div class="inv-num">${invoiceData.invoiceNumber}</div>
+      <div class="inv-date">Issued ${invoiceDate}</div>
     </div>
+  </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Description</th>
-                <th>Qty</th>
-                <th>Unit Price</th>
-                <th>Discount</th>
-                <th>Tax Rate</th>
-                <th>Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${invoiceData.items.map(item => {
-              const itemTotal = calculateItemTotal(item);
-              return `
-                <tr>
-                    <td>${item.description}</td>
-                    <td>${item.quantity}</td>
-                    <td>UGX ${item.unitPrice.toLocaleString()}</td>
-                    <td>${item.discount || 0}%</td>
-                    <td>${item.taxRate}%</td>
-                    <td>UGX ${itemTotal.total.toLocaleString()}</td>
-                </tr>
-              `;
-            }).join('')}
-        </tbody>
-    </table>
-
-    <div class="totals">
-        <p>Subtotal: UGX ${totals.subtotal.toLocaleString()}</p>
-        ${totals.totalItemDiscounts > 0 ? `<p>Item Discounts: -UGX ${totals.totalItemDiscounts.toLocaleString()}</p>` : ''}
-        ${totals.generalDiscountAmount > 0 ? `<p>General Discount (${invoiceData.generalDiscount}%): -UGX ${totals.generalDiscountAmount.toLocaleString()}</p>` : ''}
-        <p>Total Tax: UGX ${totals.totalTax.toLocaleString()}</p>
-        ${totals.lateFeeAmount > 0 ? `<p>Late Fee (${invoiceData.lateFee}%): UGX ${totals.lateFeeAmount.toLocaleString()}</p>` : ''}
-        <p class="total-row">TOTAL: UGX ${totals.total.toLocaleString()}</p>
+  <div class="parties">
+    <div class="party">
+      <div class="party-label">From</div>
+      <div class="party-name">${selectedAgency?.name || 'UIA'}</div>
+      <div class="party-detail">
+        Uganda Investment Authority<br>
+        Twed Plaza, Plot 22B Lumumba Avenue<br>
+        P.O. Box 7418, Kampala, Uganda<br>
+        Tel: +256 414 301 000
+      </div>
     </div>
-
-    ${invoiceData.notes ? `
-    <div class="notes">
-        <h4>Notes:</h4>
-        <p>${invoiceData.notes}</p>
+    <div class="party">
+      <div class="party-label">Bill To</div>
+      <div class="party-name">${invoiceData.clientName}</div>
+      <div class="party-detail">
+        ${invoiceData.clientEmail}<br>
+        ${invoiceData.clientPhone}
+        ${invoiceData.clientAddress ? `<br>${invoiceData.clientAddress}` : ''}
+        ${invoiceData.clientTin ? `<br>TIN: ${invoiceData.clientTin}` : ''}
+      </div>
     </div>
-    ` : ''}
+  </div>
 
-    ${invoiceData.terms ? `
-    <div class="notes">
-        <h4>Terms & Conditions:</h4>
-        <p>${invoiceData.terms}</p>
+  <div class="meta-bar">
+    <div class="meta-item">
+      <div class="meta-label">Invoice Date</div>
+      <div class="meta-value">${invoiceDate}</div>
     </div>
-    ` : ''}
+    <div class="meta-item">
+      <div class="meta-label">Due Date</div>
+      <div class="meta-value">${dueDate}</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Currency</div>
+      <div class="meta-value">UGX</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Status</div>
+      <div class="meta-value">${new Date(invoiceData.dueDate) < new Date() ? 'OVERDUE' : 'DUE'}</div>
+    </div>
+  </div>
 
-    <div style="margin-top: 40px; text-align: center; color: #666; font-size: 0.9em;">
-        <p>This is an official invoice generated by Uganda OneStopCentre</p>
-        <p>For inquiries, please contact the issuing agency directly</p>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:5%">#</th>
+        <th style="width:35%">Description</th>
+        <th style="width:10%">Qty</th>
+        <th style="width:15%">Unit Price</th>
+        <th style="width:10%">Disc.</th>
+        <th style="width:10%">Tax</th>
+        <th style="width:15%">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${invoiceData.items.map((item, i) => {
+        const itemTotal = calculateItemTotal(item);
+        return `<tr>
+          <td>${i + 1}</td>
+          <td>${item.description}</td>
+          <td>${item.quantity}</td>
+          <td>UGX ${item.unitPrice.toLocaleString()}</td>
+          <td>${item.discount || 0}%</td>
+          <td>${item.taxRate}%</td>
+          <td>UGX ${itemTotal.total.toLocaleString()}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+
+  <div class="totals-section">
+    <div class="totals-box">
+      <div class="totals-row"><span>Subtotal</span><span>UGX ${totals.subtotal.toLocaleString()}</span></div>
+      ${totals.totalItemDiscounts > 0 ? `<div class="totals-row discount"><span>Item Discounts</span><span>-UGX ${totals.totalItemDiscounts.toLocaleString()}</span></div>` : ''}
+      ${totals.generalDiscountAmount > 0 ? `<div class="totals-row discount"><span>Discount (${invoiceData.generalDiscount}%)</span><span>-UGX ${totals.generalDiscountAmount.toLocaleString()}</span></div>` : ''}
+      <div class="totals-row"><span>Tax</span><span>UGX ${totals.totalTax.toLocaleString()}</span></div>
+      ${totals.lateFeeAmount > 0 ? `<div class="totals-row"><span>Late Fee (${invoiceData.lateFee}%)</span><span>UGX ${totals.lateFeeAmount.toLocaleString()}</span></div>` : ''}
+      <div class="totals-row grand"><span>TOTAL DUE</span><span>UGX ${totals.total.toLocaleString()}</span></div>
     </div>
+  </div>
+
+  ${invoiceData.notes ? `
+  <div class="notes-section">
+    <h4>Notes</h4>
+    <p>${invoiceData.notes}</p>
+  </div>` : ''}
+
+  ${invoiceData.terms ? `
+  <div class="notes-section" style="margin-top: 16px; border-left-color: #CE1126;">
+    <h4>Terms &amp; Conditions</h4>
+    <p>${invoiceData.terms}</p>
+  </div>` : ''}
+
+  <div class="footer">
+    <div class="flag-band" style="margin-bottom: 16px;">
+      <span class="flag-black"></span>
+      <span class="flag-yellow"></span>
+      <span class="flag-red"></span>
+      <span class="flag-black"></span>
+      <span class="flag-yellow"></span>
+      <span class="flag-red"></span>
+    </div>
+    <p><strong>Uganda OneStopCentre</strong> &mdash; Official Invoice Document</p>
+    <p>For inquiries contact the issuing agency or visit onestopcentre.go.ug</p>
+    <p>Generated on ${new Date().toLocaleDateString('en-UG', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+  </div>
+</div>
 </body>
-</html>
-    `.trim();
+</html>`.trim();
   };
 
   const totals = calculateInvoiceTotal();
