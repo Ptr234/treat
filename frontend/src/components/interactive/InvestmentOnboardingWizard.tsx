@@ -1,14 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InvestmentData } from '../../types';
 import { useNotification } from '../../contexts/NotificationContext';
 import { apiFetch } from '@/lib/api-client';
+import { useFormDraft } from '@/hooks/useFormDraft';
+
+type InvestmentDraft = InvestmentData & { _step?: number };
 
 export default function InvestmentOnboardingWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const { addNotification } = useNotification();
+  const { loadedDraft, draftLoaded, saveDraft, clearDraft } = useFormDraft<InvestmentDraft>('investor_onboarding');
+  const draftApplied = useRef(false);
   const [investmentData, setInvestmentData] = useState<InvestmentData>({
     // Step 1: Investment Profile
     investorType: '', 
@@ -40,6 +45,26 @@ export default function InvestmentOnboardingWizard() {
   });
 
   const totalSteps = 5;
+
+  // Restore a previously saved draft once (signed-in users, resumable across devices).
+  useEffect(() => {
+    if (draftApplied.current || !loadedDraft) return;
+    draftApplied.current = true;
+    const { _step, ...rest } = loadedDraft;
+    setInvestmentData(prev => ({ ...prev, ...rest }));
+    if (_step && _step >= 1 && _step <= totalSteps) setCurrentStep(_step);
+    addNotification({
+      type: 'info',
+      title: 'Draft restored',
+      message: 'We brought back your saved progress — continue where you left off.',
+    });
+  }, [loadedDraft, addNotification]);
+
+  // Auto-save progress (debounced) after the initial draft has been read.
+  useEffect(() => {
+    if (!draftLoaded) return;
+    saveDraft({ ...investmentData, _step: currentStep });
+  }, [investmentData, currentStep, draftLoaded, saveDraft]);
 
   const updateData = (field: keyof InvestmentData, value: string) => {
     setInvestmentData(prev => ({
@@ -100,6 +125,7 @@ export default function InvestmentOnboardingWizard() {
       }
 
       setSubmitResult({ referenceNumber: json.data!.referenceNumber, existing: json.data!.existing });
+      clearDraft();
 
       addNotification({
         type: 'success',

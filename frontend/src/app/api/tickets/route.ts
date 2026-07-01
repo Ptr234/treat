@@ -14,9 +14,15 @@ import {
 import { apiSuccess, apiError, validateBody, validateSearchParams, sanitizeString } from '@/lib/api-utils';
 import { createTicketSchema, paginationSchema, SLA_HOURS } from '@/lib/validations';
 import { sendTicketConfirmationEmail, sendEscalationNotificationEmail } from '@/lib/email';
+import { requireAdmin } from '@/lib/auth';
 import type { SanityTicket } from '@/types/sanity';
 
 export async function GET(request: NextRequest) {
+  // Admin-only: returns the full ticket list with investor contact details.
+  // Public users track a single ticket via GET /api/tickets/[id]?email=…
+  const admin = await requireAdmin(request);
+  if (!admin) return apiError('Admin access required', 401, 'UNAUTHORIZED');
+
   try {
     const [params, err] = validateSearchParams(request, paginationSchema);
     if (err) return err;

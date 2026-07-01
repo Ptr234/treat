@@ -6,6 +6,7 @@ using OscApi.Common;
 using OscApi.Data;
 using OscApi.Dtos.Auth;
 using OscApi.Dtos.Common;
+using OscApi.Models;
 
 namespace OscApi.Controllers;
 
@@ -28,24 +29,67 @@ public class AuthController : ControllerBase
         _env = env;
     }
 
-    /// <summary>Login with email and password.</summary>
+    /// <summary>Login with email and password (admins and regular users).</summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        var admin = await _db.AdminUsers
-            .FirstOrDefaultAsync(a => a.Email == request.Email.ToLowerInvariant() && a.IsActive);
+        var email = request.Email.ToLowerInvariant();
 
-        if (admin is null || admin.PasswordHash is null)
+        // Admins first.
+        var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email && a.IsActive);
+        if (admin is not null)
+        {
+            if (admin.PasswordHash is null || !_password.VerifyPassword(request.Password, admin.PasswordHash))
+                return Unauthorized(new ApiResponse(false, "Invalid credentials"));
+
+            var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
+            Response.Cookies.Append("osc-session", adminToken, _jwt.GetCookieOptions(_env.IsProduction()));
+            return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
+                admin.Id.ToString(), admin.Email, admin.Name, admin.Role)));
+        }
+
+        // Regular users.
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
+        if (user is null || user.PasswordHash is null || !_password.VerifyPassword(request.Password, user.PasswordHash))
             return Unauthorized(new ApiResponse(false, "Invalid credentials"));
 
-        if (!_password.VerifyPassword(request.Password, admin.PasswordHash))
-            return Unauthorized(new ApiResponse(false, "Invalid credentials"));
-
-        var token = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
+        var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
-
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
-            admin.Id.ToString(), admin.Email, admin.Name, admin.Role)));
+            user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture)));
+    }
+
+    /// <summary>Register a new regular-user account (email + password).</summary>
+    [HttpPost("signup")]
+    [EnableRateLimiting("public-form")]
+    public async Task<IActionResult> Signup([FromBody] SignupRequest request)
+    {
+        var email = request.Email.ToLowerInvariant().Trim();
+
+        if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(request.Password))
+            return BadRequest(new ApiResponse(false, "Name, email and password are required"));
+
+        if (request.Password.Length < 8 || !request.Password.Any(char.IsUpper) || !request.Password.Any(char.IsDigit))
+            return BadRequest(new ApiResponse(false, "Password must be at least 8 characters and include an uppercase letter and a digit"));
+
+        // Email must be unique across admins and users.
+        if (await _db.AdminUsers.AnyAsync(a => a.Email == email) || await _db.Users.AnyAsync(u => u.Email == email))
+            return Conflict(new ApiResponse(false, "An account with this email already exists"));
+
+        var user = new User
+        {
+            Name = request.Name.Trim(),
+            Email = email,
+            PasswordHash = _password.HashPassword(request.Password),
+            Role = "user",
+        };
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role);
+        Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
+        return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
+            user.Id.ToString(), user.Email, user.Name, user.Role)));
     }
 
     /// <summary>Authenticate via Google OAuth.</summary>
@@ -70,9 +114,42 @@ public class AuthController : ControllerBase
         var email = payload.Email.ToLowerInvariant();
         var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email && a.IsActive);
 
-        var role = admin is not null ? admin.Role : "user";
-        var name = admin?.Name ?? payload.Name ?? email;
-        var id = admin?.Id.ToString() ?? payload.Subject;
+        string role, name, id;
+        if (admin is not null)
+        {
+            role = admin.Role;
+            name = admin.Name;
+            id = admin.Id.ToString();
+        }
+        else
+        {
+            // Upsert a persistent regular-user record so the account is stable
+            // across logins/devices (drafts and submissions can be tied to it).
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user is null)
+            {
+                user = new User
+                {
+                    Email = email,
+                    Name = payload.Name ?? email,
+                    Role = "user",
+                    GoogleSubject = payload.Subject,
+                    Picture = payload.Picture,
+                };
+                _db.Users.Add(user);
+            }
+            else
+            {
+                user.GoogleSubject = payload.Subject;
+                if (!string.IsNullOrEmpty(payload.Picture)) user.Picture = payload.Picture;
+                if (string.IsNullOrWhiteSpace(user.Name) && payload.Name is not null) user.Name = payload.Name;
+            }
+            await _db.SaveChangesAsync();
+
+            role = user.Role;
+            name = user.Name;
+            id = user.Id.ToString();
+        }
 
         var token = _jwt.CreateToken(id, email, name, role, payload.Picture);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
@@ -110,7 +187,7 @@ public class AuthController : ControllerBase
         )));
     }
 
-    /// <summary>Update profile (admin only).</summary>
+    /// <summary>Update the signed-in account's profile (admins and regular users).</summary>
     [HttpPatch("profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest request)
     {
@@ -122,48 +199,66 @@ public class AuthController : ControllerBase
         if (principal is null)
             return Unauthorized(new ApiResponse(false, "Invalid token"));
 
-        var role = principal.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
-        if (role != "admin")
-            return StatusCode(403, new ApiResponse(false, "Admin access required"));
+        var role = principal.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "user";
+        var userIdStr = principal.Claims.First(c => c.Type == "sub" || c.Type == System.Security.Claims.ClaimTypes.NameIdentifier).Value;
+        if (!Guid.TryParse(userIdStr, out var userId))
+            return BadRequest(new ApiResponse(false, "Profile is not available for this account"));
 
-        var userId = principal.Claims.First(c => c.Type == "sub" || c.Type == System.Security.Claims.ClaimTypes.NameIdentifier).Value;
-        var admin = await _db.AdminUsers.FindAsync(Guid.Parse(userId));
-        if (admin is null)
-            return NotFound(new ApiResponse(false, "Admin not found"));
+        // Resolve the underlying account (admin or regular user).
+        var admin = role == "admin" ? await _db.AdminUsers.FindAsync(userId) : null;
+        var user = role != "admin" ? await _db.Users.FindAsync(userId) : null;
+        if (admin is null && user is null)
+            return NotFound(new ApiResponse(false, "Account not found"));
+
+        var newName = admin?.Name ?? user!.Name;
+        var currentHash = admin?.PasswordHash ?? user?.PasswordHash;
+        var newHash = currentHash;
 
         if (!string.IsNullOrWhiteSpace(request.Name))
-            admin.Name = request.Name;
+            newName = request.Name.Trim();
 
         if (!string.IsNullOrWhiteSpace(request.NewPassword))
         {
-            // Require current password verification
-            if (string.IsNullOrWhiteSpace(request.CurrentPassword))
-                return BadRequest(new ApiResponse(false, "Current password is required to set a new password"));
+            // If the account already has a password, require the current one.
+            // (Google-only accounts may set their first password without it.)
+            if (currentHash is not null)
+            {
+                if (string.IsNullOrWhiteSpace(request.CurrentPassword) || !_password.VerifyPassword(request.CurrentPassword, currentHash))
+                    return BadRequest(new ApiResponse(false, "Current password is incorrect"));
 
-            if (admin.PasswordHash is null || !_password.VerifyPassword(request.CurrentPassword, admin.PasswordHash))
-                return BadRequest(new ApiResponse(false, "Current password is incorrect"));
+                if (request.NewPassword == request.CurrentPassword)
+                    return BadRequest(new ApiResponse(false, "New password must be different from current password"));
+            }
 
-            // Enforce password policy
-            if (request.NewPassword.Length < 8)
-                return BadRequest(new ApiResponse(false, "New password must be at least 8 characters"));
+            if (request.NewPassword.Length < 8 || !request.NewPassword.Any(char.IsUpper) || !request.NewPassword.Any(char.IsDigit))
+                return BadRequest(new ApiResponse(false, "New password must be at least 8 characters and include an uppercase letter and a digit"));
 
-            if (!request.NewPassword.Any(char.IsUpper) || !request.NewPassword.Any(char.IsDigit))
-                return BadRequest(new ApiResponse(false, "New password must contain at least one uppercase letter and one digit"));
-
-            if (request.NewPassword == request.CurrentPassword)
-                return BadRequest(new ApiResponse(false, "New password must be different from current password"));
-
-            admin.PasswordHash = _password.HashPassword(request.NewPassword);
+            newHash = _password.HashPassword(request.NewPassword);
         }
 
-        admin.UpdatedAt = DateTimeOffset.UtcNow;
+        string id, email, name, finalRole;
+        string? picture = null;
+        if (admin is not null)
+        {
+            admin.Name = newName;
+            admin.PasswordHash = newHash;
+            admin.UpdatedAt = DateTimeOffset.UtcNow;
+            (id, email, name, finalRole) = (admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
+        }
+        else
+        {
+            user!.Name = newName;
+            user.PasswordHash = newHash;
+            user.UpdatedAt = DateTimeOffset.UtcNow;
+            (id, email, name, finalRole, picture) = (user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture);
+        }
+
         await _db.SaveChangesAsync();
 
-        var newToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
+        var newToken = _jwt.CreateToken(id, email, name, finalRole, picture);
         Response.Cookies.Append("osc-session", newToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
-        return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
-            admin.Id.ToString(), admin.Email, admin.Name, admin.Role)));
+        return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, finalRole, picture)));
     }
 
     /// <summary>Request a password reset link via email.</summary>

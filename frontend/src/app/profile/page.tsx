@@ -13,8 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function ProfilePage() {
-  const { isAuthenticated, user, refreshUser } = useAuth();
-  const isAdmin = isAuthenticated && user?.role === 'admin';
+  const { isAuthenticated, user, isLoading: authLoading, refreshUser } = useAuth();
 
   // Edit mode
   const [isEditing, setIsEditing] = useState(false);
@@ -32,7 +31,21 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
-  if (!isAdmin) {
+  // While the session is resolving, show a loader rather than flashing the
+  // "sign in" screen to a user who is actually authenticated.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Loading your profile…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Any signed-in account (admins and regular users) can view their profile.
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">

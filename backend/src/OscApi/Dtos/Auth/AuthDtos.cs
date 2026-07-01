@@ -2,6 +2,8 @@ namespace OscApi.Dtos.Auth;
 
 public record LoginRequest(string Email, string Password);
 
+public record SignupRequest(string Name, string Email, string Password);
+
 public record GoogleAuthRequest(string IdToken);
 
 public record ProfileUpdateRequest(string? Name, string? CurrentPassword, string? NewPassword);

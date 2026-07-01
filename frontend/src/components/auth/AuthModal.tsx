@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from './LoginForm';
+import UserAuthForm from './UserAuthForm';
 import GoogleSignInButton from './GoogleSignInButton';
 import { XMarkIcon, ShieldCheckIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
@@ -65,6 +66,14 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
                   {googleError}
                 </div>
               )}
+
+              <div className="flex items-center my-5">
+                <div className="flex-1 border-t border-gray-300" />
+                <span className="px-3 text-sm text-gray-500">or</span>
+                <div className="flex-1 border-t border-gray-300" />
+              </div>
+
+              <UserAuthForm onSuccess={onClose} />
             </>
           ) : (
             /* ─── Admin mode: Google + Email/Password ─── */

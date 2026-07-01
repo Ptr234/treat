@@ -10,12 +10,18 @@ public class JwtService
     private readonly string _secret;
     private readonly int _expiryHours;
     private readonly string _issuer;
+    private readonly bool _secureCookies;
 
     public JwtService(IConfiguration config)
     {
         _secret = config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT:Secret is not configured");
         _expiryHours = int.Parse(config["Jwt:ExpiryHours"] ?? "24");
         _issuer = config["Jwt:Issuer"] ?? "osc-api";
+        // The session cookie is only marked Secure when the site is actually
+        // served over HTTPS. Keying off the environment name would set Secure
+        // for a Production build served over plain http (e.g. a LAN address),
+        // which silently breaks login because the browser won't send the cookie.
+        _secureCookies = (config["SiteUrl"] ?? "").StartsWith("https", StringComparison.OrdinalIgnoreCase);
     }
 
     public string CreateToken(string userId, string email, string name, string role, string? picture = null)
@@ -28,7 +34,11 @@ public class JwtService
             new(JwtRegisteredClaimNames.Sub, userId),
             new(JwtRegisteredClaimNames.Email, email),
             new("name", name),
+            // ClaimTypes.Role (a long Microsoft URI) is what ASP.NET authorization
+            // reads; the short "role" claim is what the Next.js middleware and
+            // client read. Emit both so the same token works on both tiers.
             new(ClaimTypes.Role, role),
+            new("role", role),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
@@ -71,10 +81,12 @@ public class JwtService
         }
     }
 
-    public CookieOptions GetCookieOptions(bool isProduction) => new()
+    // The bool parameter is retained for call-site compatibility but the Secure
+    // flag is derived from the configured SiteUrl scheme (see constructor).
+    public CookieOptions GetCookieOptions(bool isProduction = false) => new()
     {
         HttpOnly = true,
-        Secure = isProduction,
+        Secure = _secureCookies,
         SameSite = SameSiteMode.Lax,
         MaxAge = TimeSpan.FromHours(_expiryHours),
         Path = "/",

@@ -166,8 +166,9 @@ app.UseAuthorization();
 app.UseRateLimiter();
 app.MapControllers();
 
-// Auto-migrate and seed in development
-if (app.Environment.IsDevelopment())
+// Auto-migrate and seed on startup. Always in Development; in other environments
+// when RunMigrationsOnStartup is enabled (used by the self-hosted single-instance server).
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("RunMigrationsOnStartup"))
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<OscDbContext>();
@@ -198,3 +199,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+
+// Exposed so the test project can spin up the app via WebApplicationFactory<Program>.
+public partial class Program { }

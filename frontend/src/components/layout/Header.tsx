@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   UserIcon,
   ArrowRightOnRectangleIcon,
+  Squares2X2Icon,
   MagnifyingGlassIcon,
   Bars3Icon,
   XMarkIcon,
@@ -267,6 +268,15 @@ const Header: React.FC = () => {
                   <div className="absolute right-0 top-full mt-3 w-56 max-w-[90vw] bg-black/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-neutral-700 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50" style={{
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 215, 0, 0.1)'
                   }}>
+                    <Link
+                      href="/account"
+                      className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300"
+                    >
+                      <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center">
+                        <Squares2X2Icon className="w-4 h-4 text-yellow-400" />
+                      </div>
+                      <span className="ml-3">My Submissions</span>
+                    </Link>
                     <Link
                       href="/profile"
                       className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300"

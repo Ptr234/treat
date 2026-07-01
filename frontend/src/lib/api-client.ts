@@ -14,6 +14,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? '';
 // Add routes here as they are migrated.
 const MIGRATED_PREFIXES = [
   '/api/auth/',
+  '/api/me',
   '/api/tickets',
   '/api/dashboard',
   '/api/chatbot',

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth';
 import { client } from '@/lib/sanity-client';
 import {
   CHAT_ENQUIRIES_QUERY,
@@ -8,6 +9,12 @@ import {
 } from '@/lib/sanity-queries';
 
 export async function GET(request: NextRequest) {
+  // Admin-only: exposes chatbot enquiry conversations and contact details.
+  const admin = await requireAdmin(request);
+  if (!admin) {
+    return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const action = searchParams.get('action') || 'list';
 

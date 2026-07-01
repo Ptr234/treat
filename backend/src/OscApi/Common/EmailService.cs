@@ -1,10 +1,13 @@
-using PostmarkDotNet;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 
 namespace OscApi.Common;
 
 public class EmailService
 {
-    private readonly PostmarkClient? _client;
+    private static readonly HttpClient Http = new();
+    private readonly string? _apiKey;
     private readonly string _fromAddress;
     private readonly string _adminEmail;
     private readonly string _siteUrl;
@@ -13,10 +16,9 @@ public class EmailService
     public EmailService(IConfiguration config, ILogger<EmailService> logger)
     {
         _logger = logger;
-        var token = config["Postmark:ServerToken"];
-        _client = string.IsNullOrEmpty(token) ? null : new PostmarkClient(token);
-        _fromAddress = config["Postmark:FromAddress"] ?? "notifications@www.oscdigitaltool.com";
-        _adminEmail = config["Postmark:AdminEmail"] ?? _fromAddress;
+        _apiKey = config["Resend:ApiKey"];
+        _fromAddress = config["Resend:FromAddress"] ?? "notifications@oscdigitaltool.com";
+        _adminEmail = config["Resend:AdminEmail"] ?? _fromAddress;
         _siteUrl = config["SiteUrl"] ?? "https://www.oscdigitaltool.com";
     }
 
@@ -123,23 +125,35 @@ public class EmailService
 
     private async Task SendAsync(string to, string subject, string? textBody = null, string? htmlBody = null)
     {
-        if (_client is null)
+        if (string.IsNullOrEmpty(_apiKey))
         {
-            _logger.LogWarning("Postmark not configured — email to {To} skipped: {Subject}", to, subject);
+            _logger.LogWarning("Resend not configured — email to {To} skipped: {Subject}", to, subject);
             return;
         }
 
         try
         {
-            var message = new PostmarkMessage
+            var payload = new Dictionary<string, object?>
             {
-                From = _fromAddress,
-                To = to,
-                Subject = subject,
-                TextBody = textBody,
-                HtmlBody = htmlBody,
+                ["from"] = _fromAddress,
+                ["to"] = new[] { to },
+                ["subject"] = subject,
             };
-            await _client.SendMessageAsync(message);
+            if (!string.IsNullOrEmpty(htmlBody)) payload["html"] = htmlBody;
+            if (!string.IsNullOrEmpty(textBody)) payload["text"] = textBody;
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var response = await Http.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync();
+                _logger.LogError("Resend API error sending to {To}: {Status} {Body}",
+                    to, response.StatusCode, body);
+            }
         }
         catch (Exception ex)
         {

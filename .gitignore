@@ -10,8 +10,12 @@ node_modules/
 
 # Environment files (secrets must NEVER be committed)
 .env
+.env.*
+!.env.example
 .env.local
 .env.*.local
+.env.production
+.env.vercel*
 
 # Build outputs
 .next/
@@ -29,6 +33,10 @@ frontend/node_modules/
 **/obj/
 backend/*.user
 backend/.vs/
+# Backend secret configs (never commit real secrets)
+appsettings.Production.json
+appsettings.Local.json
+appsettings.*.local.json
 
 # IDE
 .DS_Store
@@ -53,3 +61,9 @@ next-env.d.ts
 # Misc
 *.pem
 coverage/
+
+# Test artifacts
+test-results/
+playwright-report/
+blob-report/
+.playwright/

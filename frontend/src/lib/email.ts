@@ -1,14 +1,14 @@
-import * as postmark from 'postmark';
+import { Resend } from 'resend';
 
-// Lazy-init Postmark client (no crash if POSTMARK_SERVER_TOKEN is missing)
-let client: postmark.ServerClient | null = null;
-function getPostmark(): postmark.ServerClient | null {
-  if (!process.env.POSTMARK_SERVER_TOKEN) return null;
-  if (!client) client = new postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN);
+// Lazy-init Resend client (no crash if RESEND_API_KEY is missing)
+let client: Resend | null = null;
+function getResend(): Resend | null {
+  if (!process.env.RESEND_API_KEY) return null;
+  if (!client) client = new Resend(process.env.RESEND_API_KEY);
   return client;
 }
 
-const FROM_ADDRESS = process.env.EMAIL_FROM || 'notifications@www.oscdigitaltool.com';
+const FROM_ADDRESS = process.env.EMAIL_FROM || 'notifications@oscdigitaltool.com';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://frontend-beast4.vercel.app';
 
 // ── Status labels for emails ─────────────────────────────────────────
@@ -32,19 +32,19 @@ export async function sendTicketConfirmationEmail(opts: {
   category: string;
   slaHours: number;
 }) {
-  const pm = getPostmark();
-  if (!pm) {
-    console.warn('[email] POSTMARK_SERVER_TOKEN not set — skipping ticket confirmation email');
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY not set — skipping ticket confirmation email');
     return;
   }
 
   const trackingUrl = `${SITE_URL}/tickets/${opts.referenceNumber}?email=${encodeURIComponent(opts.to)}`;
 
-  await pm.sendEmail({
-    From: FROM_ADDRESS,
-    To: opts.to,
-    Subject: `Inquiry Received — ${opts.referenceNumber}`,
-    HtmlBody: `
+  await resend.emails.send({
+    from: FROM_ADDRESS,
+    to: opts.to,
+    subject: `Inquiry Received — ${opts.referenceNumber}`,
+    html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #1a1a1a; padding: 24px; text-align: center;">
           <h1 style="color: #facc15; margin: 0; font-size: 20px;">Uganda Investment Authority</h1>
@@ -86,7 +86,6 @@ export async function sendTicketConfirmationEmail(opts: {
         </div>
       </div>
     `,
-    MessageStream: 'outbound',
   });
 }
 
@@ -99,9 +98,9 @@ export async function sendTicketStatusEmail(opts: {
   title: string;
   newStatus: string;
 }) {
-  const pm = getPostmark();
-  if (!pm) {
-    console.warn('[email] POSTMARK_SERVER_TOKEN not set — skipping status email');
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY not set — skipping status email');
     return;
   }
 
@@ -109,11 +108,11 @@ export async function sendTicketStatusEmail(opts: {
   const trackingUrl = `${SITE_URL}/tickets/${opts.referenceNumber}?email=${encodeURIComponent(opts.to)}`;
   const isResolved = opts.newStatus === 'RESOLVED' || opts.newStatus === 'CLOSED';
 
-  await pm.sendEmail({
-    From: FROM_ADDRESS,
-    To: opts.to,
-    Subject: `${opts.referenceNumber} — Status Update: ${statusLabel}`,
-    HtmlBody: `
+  await resend.emails.send({
+    from: FROM_ADDRESS,
+    to: opts.to,
+    subject: `${opts.referenceNumber} — Status Update: ${statusLabel}`,
+    html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #1a1a1a; padding: 24px; text-align: center;">
           <h1 style="color: #facc15; margin: 0; font-size: 20px;">Uganda Investment Authority</h1>
@@ -139,7 +138,6 @@ export async function sendTicketStatusEmail(opts: {
         </div>
       </div>
     `,
-    MessageStream: 'outbound',
   });
 }
 
@@ -156,9 +154,9 @@ export async function sendEscalationNotificationEmail(opts: {
   priority: string;
   slaHours: number;
 }) {
-  const pm = getPostmark();
-  if (!pm) {
-    console.warn('[email] POSTMARK_SERVER_TOKEN not set — skipping escalation notification email');
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY not set — skipping escalation notification email');
     return;
   }
 
@@ -171,11 +169,11 @@ export async function sendEscalationNotificationEmail(opts: {
   };
   const color = priorityColors[opts.priority] || '#ca8a04';
 
-  await pm.sendEmail({
-    From: FROM_ADDRESS,
-    To: ADMIN_EMAIL,
-    Subject: `[ESCALATION] ${opts.referenceNumber} — ${opts.title}`,
-    HtmlBody: `
+  await resend.emails.send({
+    from: FROM_ADDRESS,
+    to: ADMIN_EMAIL,
+    subject: `[ESCALATION] ${opts.referenceNumber} — ${opts.title}`,
+    html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #1a1a1a; padding: 24px; text-align: center;">
           <h1 style="color: #facc15; margin: 0; font-size: 20px;">Uganda Investment Authority</h1>
@@ -222,7 +220,6 @@ export async function sendEscalationNotificationEmail(opts: {
         </div>
       </div>
     `,
-    MessageStream: 'outbound',
   });
 }
 
@@ -235,17 +232,17 @@ export async function sendInvestorWelcomeEmail(opts: {
   primarySector: string;
   investmentAmount: string;
 }) {
-  const pm = getPostmark();
-  if (!pm) {
-    console.warn('[email] POSTMARK_SERVER_TOKEN not set — skipping investor welcome email');
+  const resend = getResend();
+  if (!resend) {
+    console.warn('[email] RESEND_API_KEY not set — skipping investor welcome email');
     return;
   }
 
-  await pm.sendEmail({
-    From: FROM_ADDRESS,
-    To: opts.to,
-    Subject: `Welcome to UIA OneStop Centre — ${opts.referenceNumber}`,
-    HtmlBody: `
+  await resend.emails.send({
+    from: FROM_ADDRESS,
+    to: opts.to,
+    subject: `Welcome to UIA OneStop Centre — ${opts.referenceNumber}`,
+    html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #1a1a1a; padding: 24px; text-align: center;">
           <h1 style="color: #facc15; margin: 0; font-size: 20px;">Uganda Investment Authority</h1>
@@ -287,6 +284,5 @@ export async function sendInvestorWelcomeEmail(opts: {
         </div>
       </div>
     `,
-    MessageStream: 'outbound',
   });
 }

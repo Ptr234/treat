@@ -13,6 +13,7 @@ interface AuthState {
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
   loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
@@ -84,6 +85,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setState({ user, isAuthenticated: true, isLoading: false, error: null });
   }, []);
 
+  // ── Sign up (email + password) ─────────────────────────────────────
+  const signup = useCallback(async (name: string, email: string, password: string) => {
+    setState(s => ({ ...s, isLoading: true, error: null }));
+
+    const json = await apiFetch('/api/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (!json.success) {
+      setState(s => ({ ...s, isLoading: false }));
+      throw new Error(json.error || 'Sign up failed');
+    }
+
+    const user = extractUser(json.data);
+    setState({ user, isAuthenticated: true, isLoading: false, error: null });
+  }, []);
+
   // ── Login with Google credential ──────────────────────────────────
   const loginWithGoogle = useCallback(async (credential: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
@@ -113,6 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthContextType = {
     ...state,
     login,
+    signup,
     loginWithGoogle,
     logout,
     clearError,

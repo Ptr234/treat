@@ -308,3 +308,13 @@ export const CHAT_SESSION_MESSAGES_QUERY = `
     userMessage, botResponse, language, sentiment, tier, createdAt
   }
 `;
+
+// ── Homepage sector cards (CMS-managed image cards) ──────────────────
+export const HOMEPAGE_SECTORS_QUERY = `
+  *[_type == "homepageSector" && isPublished == true] | order(order asc) {
+    "title": title,
+    "blurb": blurb,
+    "image": image.asset->url,
+    "link": coalesce(link, "/investments")
+  }
+`;

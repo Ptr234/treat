@@ -8,6 +8,8 @@ public class OscDbContext : DbContext
     public OscDbContext(DbContextOptions<OscDbContext> options) : base(options) { }
 
     public DbSet<AdminUser> AdminUsers => Set<AdminUser>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<FormDraft> FormDrafts => Set<FormDraft>();
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
     public DbSet<TicketDocument> TicketDocuments => Set<TicketDocument>();
@@ -52,6 +54,18 @@ public class OscDbContext : DbContext
         modelBuilder.Entity<AdminUser>(e =>
         {
             e.HasIndex(u => u.Email).IsUnique();
+        });
+
+        // User (regular end users / investors)
+        modelBuilder.Entity<User>(e =>
+        {
+            e.HasIndex(u => u.Email).IsUnique();
+        });
+
+        // FormDraft — one draft per (user, form type)
+        modelBuilder.Entity<FormDraft>(e =>
+        {
+            e.HasIndex(d => new { d.UserEmail, d.FormType }).IsUnique();
         });
 
         // Ticket

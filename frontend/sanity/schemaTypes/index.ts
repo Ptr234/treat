@@ -12,8 +12,10 @@ import investorProfile from './investorProfile';
 import chatEnquiry from './chatEnquiry';
 import investmentOpportunity from './investmentOpportunity';
 import downloadableResource from './downloadableResource';
+import homepageSector from './homepageSector';
 
 export const schemaTypes = [
+  homepageSector,
   event,
   licenseProject,
   agency,

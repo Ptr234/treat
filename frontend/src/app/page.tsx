@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Reveal } from '@/components/ui/Reveal';
 import {
   ArrowRightIcon,
   DocumentTextIcon,
@@ -12,91 +12,151 @@ import {
   RocketLaunchIcon,
   ShieldCheckIcon,
   ChartBarIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
 
+// ── Priority investment sectors (image-forward showcase) ──────────────
+// Built-in defaults, used until Homepage Sector Cards are created in Sanity.
+type Sector = { title: string; blurb: string; image: string; link?: string };
+
+const DEFAULT_SECTORS: Sector[] = [
+  {
+    title: 'Agriculture & Agro-Processing',
+    blurb: 'Coffee, tea, dairy and value-added processing across fertile highlands.',
+    image: '/images/uganda-pearl-africa.jpg',
+  },
+  {
+    title: 'Tourism & Hospitality',
+    blurb: 'The Pearl of Africa — gorillas, the Nile, lakes and national parks.',
+    image: '/images/lake-bunyonyi-uganda.jpg',
+  },
+  {
+    title: 'Infrastructure & Real Estate',
+    blurb: 'Roads, industrial parks, housing and large-scale urban development.',
+    image: '/images/Infrastucture.webp',
+  },
+  {
+    title: 'ICT & Innovation',
+    blurb: 'A fast-growing digital economy and a young, tech-ready workforce.',
+    image: '/images/uganda-kampala-city-view.webp',
+  },
+  {
+    title: 'Manufacturing & Industry',
+    blurb: 'Import substitution and export-ready manufacturing with tax incentives.',
+    image: '/images/uganda-background.jpeg',
+  },
+  {
+    title: 'Energy & Minerals',
+    blurb: 'Oil & gas, hydropower, renewables and an expanding mining sector.',
+    image: '/images/Tourism.webp',
+  },
+];
+
+// ── Partner government institutions (trust strip) ─────────────────────
+const AGENCY_LOGOS = [
+  { name: 'Uganda Investment Authority', src: '/images/logos/UIA%20logo.png' },
+  { name: 'Uganda Revenue Authority', src: '/images/logos/URA%20logo.png' },
+  { name: 'Uganda Registration Services Bureau', src: '/images/logos/URSB%20logo.png' },
+  { name: 'Bank of Uganda', src: '/images/logos/BOU.jpeg' },
+  { name: 'National Environment Management Authority', src: '/images/logos/NEMA.png' },
+  { name: 'National Social Security Fund', src: '/images/logos/NSSF%20logo.png' },
+  { name: 'Kampala Capital City Authority', src: '/images/logos/kcca.png' },
+  { name: 'Electricity Regulatory Authority', src: '/images/logos/ERA-logo.png' },
+  { name: 'Uganda Communications Commission', src: '/images/logos/UCC%20logo.png' },
+  { name: 'Capital Markets Authority', src: '/images/logos/CMA%20logo.png' },
+  { name: 'Uganda Tourism Board', src: '/images/logos/UTB.png' },
+  { name: 'Petroleum Authority of Uganda', src: '/images/logos/PAU.png' },
+];
+
+const SERVICES = [
+  { icon: RocketLaunchIcon, title: 'Investment Facilitation', description: 'End-to-end facilitation from project conception to implementation, with government support and regulatory guidance.' },
+  { icon: DocumentTextIcon, title: 'Business Registration', description: 'Company formation and registration through URSB with streamlined, single-window processing.' },
+  { icon: CalculatorIcon, title: 'Tax & Compliance', description: 'Tax registration, URA compliance and ongoing advisory tailored to your sector and incentives.' },
+  { icon: ChartBarIcon, title: 'ROI Analysis', description: 'Professional return-on-investment modelling with Uganda-specific market and sector data.' },
+  { icon: HandRaisedIcon, title: 'Investment Aftercare', description: 'Ongoing support, aftercare and government liaison for sustainable, long-term growth.' },
+  { icon: ShieldCheckIcon, title: 'Regulatory Compliance', description: "Expert guidance through Uganda's regulatory landscape with full compliance assurance." },
+];
+
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [liveStats, setLiveStats] = useState({
-    fdi: 49.5,
-    investments: 9922,
-    satisfaction: 98,
-    sectors: 8
-  });
+  const [liveStats, setLiveStats] = useState({ fdi: 49.5, investments: 9922, satisfaction: 98, sectors: 8 });
+  const [sectors, setSectors] = useState<Sector[]>(DEFAULT_SECTORS);
+
+  // Pull CMS-managed sector cards from Sanity; keep built-in defaults otherwise.
+  useEffect(() => {
+    let active = true;
+    fetch('/api/homepage/sectors')
+      .then((r) => r.json())
+      .then((json) => {
+        if (active && json?.success && Array.isArray(json.data) && json.data.length > 0) {
+          setSectors(json.data as Sector[]);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-
     const interval = setInterval(() => {
       setLiveStats(prev => ({
         fdi: Math.max(49.4, Math.min(49.6, prev.fdi + (Math.random() - 0.5) * 0.01)),
         investments: prev.investments + Math.floor(Math.random() * 2),
         satisfaction: Math.max(97, Math.min(99, prev.satisfaction + (Math.random() - 0.5) * 0.1)),
-        sectors: prev.sectors
+        sectors: prev.sectors,
       }));
     }, 3000);
-
-    return () => {
-      clearTimeout(loadingTimer);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   const openAssistant = (message?: string) => {
-    document.dispatchEvent(new CustomEvent('openChatWidget', {
-      detail: message ? { message } : undefined
-    }));
+    document.dispatchEvent(new CustomEvent('openChatWidget', { detail: message ? { message } : undefined }));
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner size="xl" color="yellow" className="mb-6" />
-          <h2 className="text-2xl font-bold text-white mb-2">Uganda Investment Portal</h2>
-          <p className="text-neutral-300">Loading excellence...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen">
-
-      {/* Hero Section */}
+      {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="relative flex flex-col min-h-screen overflow-hidden">
         <div className="absolute inset-0">
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: 'url(/images/Pride.webp)'
-            }}
+          <Image
+            src="/images/Pride.webp"
+            alt="Uganda — the Pearl of Africa"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/75 to-black/85"></div>
-          <div className="absolute inset-0 opacity-[0.03]" style={{
-            backgroundImage: 'radial-gradient(circle at 25% 25%, #FFD700 0%, transparent 25%), radial-gradient(circle at 75% 75%, #CE1126 0%, transparent 25%)'
-          }}></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/70 to-black/90" />
+          <div
+            className="absolute inset-0 opacity-[0.06]"
+            style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, #FFD700 0%, transparent 30%), radial-gradient(circle at 80% 80%, #CE1126 0%, transparent 30%)' }}
+          />
         </div>
 
         <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center text-white max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
-          <div>
-            <h1 className="mb-4 sm:mb-8 leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
-              <span className="block text-white text-lg xs:text-xl sm:text-3xl md:text-5xl lg:text-6xl font-medium tracking-wide uppercase mb-2 sm:mb-3" style={{ letterSpacing: '0.15em' }}>
-                Uganda Investment
-              </span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300 text-[2rem] xs:text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tight drop-shadow-lg">
-                Excellence Hub
-              </span>
-            </h1>
-          </div>
+          <Reveal className="flex flex-col items-center w-full" y={36}>
+          {/* Eyebrow */}
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full border border-yellow-400/40 bg-yellow-400/10 text-yellow-300 text-xs sm:text-sm font-medium tracking-wide uppercase backdrop-blur-sm">
+            <CheckBadgeIcon className="w-4 h-4" />
+            Uganda Investment Authority · OneStop Centre
+          </span>
 
-          <p className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-neutral-200 mb-6 sm:mb-10 max-w-3xl mx-auto leading-relaxed font-light tracking-wide" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            Expert investment advisory services with government backing. Unlock Uganda&apos;s <span className="text-yellow-400 font-semibold">$49.5B+</span> investment opportunities through our comprehensive facilitation platform.
+          <h1 className="mb-5 sm:mb-7 leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <span className="block text-white text-lg xs:text-xl sm:text-3xl md:text-5xl lg:text-6xl font-medium tracking-wide uppercase mb-2 sm:mb-3" style={{ letterSpacing: '0.15em' }}>
+              Uganda Investment
+            </span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300 text-[2rem] xs:text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black italic tracking-tight drop-shadow-lg">
+              Excellence Hub
+            </span>
+          </h1>
+
+          <p className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-neutral-200 mb-7 sm:mb-10 max-w-3xl mx-auto leading-relaxed font-light tracking-wide" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            Government-backed investment advisory under one roof. Unlock Uganda&apos;s{' '}
+            <span className="text-yellow-400 font-semibold">$49.5B+</span> in opportunities through a single, streamlined facilitation platform.
           </p>
 
-          {/* Hero CTAs — AI Assistant First */}
+          {/* CTAs */}
           <div className="flex flex-col gap-3 sm:gap-4 items-center w-full">
             <div className="flex flex-col xs:flex-row gap-3 w-full xs:w-auto justify-center">
               <button
@@ -125,45 +185,25 @@ export default function HomePage() {
               <CalculatorIcon className="w-4 h-4 sm:w-5 sm:h-5 ml-2 transition-transform flex-shrink-0" />
             </Link>
           </div>
+          </Reveal>
         </div>
 
-        {/* Stats Banner — in document flow, no overlap */}
+        {/* Stats banner */}
         <div className="relative z-10">
           <div className="bg-white/95 backdrop-blur-sm border-t border-neutral-200">
             <div className="max-w-7xl mx-auto px-3 xs:px-4 py-3 xs:py-4 sm:py-6">
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-8 text-center">
-                <div className="space-y-0.5 sm:space-y-2">
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
-                    {liveStats.investments.toLocaleString()}+
+                {[
+                  { value: `${liveStats.investments.toLocaleString()}+`, label: 'Licensed Projects' },
+                  { value: `${liveStats.satisfaction.toFixed(0)}%`, label: 'Success Rate' },
+                  { value: `$${liveStats.fdi.toFixed(1)}B+`, label: 'FDI Facilitated' },
+                  { value: `${liveStats.sectors}`, label: 'Key Sectors' },
+                ].map((s) => (
+                  <div key={s.label} className="space-y-0.5 sm:space-y-2">
+                    <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">{s.value}</div>
+                    <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">{s.label}</div>
                   </div>
-                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
-                    Licensed Projects
-                  </div>
-                </div>
-                <div className="space-y-0.5 sm:space-y-2">
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
-                    {liveStats.satisfaction.toFixed(0)}%
-                  </div>
-                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
-                    Success Rate
-                  </div>
-                </div>
-                <div className="space-y-0.5 sm:space-y-2">
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
-                    ${liveStats.fdi.toFixed(1)}B+
-                  </div>
-                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
-                    FDI Facilitated
-                  </div>
-                </div>
-                <div className="space-y-0.5 sm:space-y-2">
-                  <div className="text-lg sm:text-2xl md:text-3xl font-bold text-neutral-900">
-                    {liveStats.sectors}
-                  </div>
-                  <div className="text-[11px] sm:text-sm text-neutral-600 font-medium uppercase tracking-wide">
-                    Key Sectors
-                  </div>
-                </div>
+                ))}
               </div>
               <div className="text-center mt-2 sm:mt-4">
                 <p className="text-[10px] sm:text-xs text-neutral-500">
@@ -175,20 +215,159 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI Investment Advisor Section */}
-      <section className="py-16 bg-black">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* ── Agency trust strip ────────────────────────────────────── */}
+      <section className="py-12 bg-white border-b border-neutral-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-neutral-500 mb-8">
+            Backed by Uganda&apos;s leading government institutions
+          </p>
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-8 items-center">
+            {AGENCY_LOGOS.map((logo) => (
+              <div key={logo.name} className="relative h-12 sm:h-14 opacity-90 hover:opacity-100 hover:scale-105 transition-all duration-300">
+                <Image
+                  src={logo.src}
+                  alt={logo.name}
+                  fill
+                  sizes="160px"
+                  className="object-contain"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── About ─────────────────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            <Reveal>
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-2xl shadow-2xl">
+                <Image
+                  src="/images/uganda-flag-city.jpg"
+                  alt="Uganda Investment Authority — OneStop Centre"
+                  width={640}
+                  height={460}
+                  className="w-full h-auto object-cover"
+                  priority
+                />
+                <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl" />
+              </div>
+              {/* Floating accent badge */}
+              <div className="absolute -bottom-5 -right-3 sm:-right-5 bg-black text-white rounded-xl shadow-xl px-5 py-4 border border-yellow-500/30">
+                <div className="text-2xl font-black text-yellow-400">16+</div>
+                <div className="text-xs text-neutral-300 uppercase tracking-wide">Agencies, One Roof</div>
+              </div>
+            </div>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+            <div>
+              <span className="inline-block text-yellow-600 font-semibold text-sm uppercase tracking-[0.18em] mb-3">Who we are</span>
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-6">
+                About Uganda Investment Authority
+              </h2>
+              <p className="text-lg text-neutral-600 mb-6 leading-relaxed">
+                Uganda&apos;s premier investment facilitation centre, bringing together more than sixteen government agencies in a single portal. With government backing and deep market knowledge, we turn investment challenges into sustainable opportunities.
+              </p>
+              <p className="text-lg text-neutral-600 mb-8 leading-relaxed">
+                Our expert team provides end-to-end support — from first consultation to project implementation — ensuring optimal returns in Uganda&apos;s fastest-growing sectors.
+              </p>
+
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                {[
+                  { v: '1.25M+', l: 'Jobs Created', c: 'border-yellow-500' },
+                  { v: '6.3%', l: 'GDP Growth', c: 'border-red-500' },
+                  { v: '$61B', l: 'GDP (2024)', c: 'border-yellow-500' },
+                  { v: '11', l: 'Industrial Parks', c: 'border-red-500' },
+                ].map((s) => (
+                  <div key={s.l} className={`border-l-4 ${s.c} pl-4`}>
+                    <div className="text-2xl font-bold text-neutral-900">{s.v}</div>
+                    <div className="text-sm text-neutral-600">{s.l}</div>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                href="/about"
+                className="inline-flex items-center px-6 py-3 bg-black text-white font-medium rounded-lg transition-colors hover:bg-neutral-800"
+              >
+                Learn More
+                <ArrowRightIcon className="w-4 h-4 ml-2" aria-hidden="true" />
+              </Link>
+            </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Priority sectors (image cards) ────────────────────────── */}
+      <section className="py-20 bg-neutral-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center mb-14">
+            <span className="inline-block text-yellow-600 font-semibold text-sm uppercase tracking-[0.18em] mb-3">Where to invest</span>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-4">Priority Investment Sectors</h2>
+            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+              High-growth sectors backed by incentives, infrastructure and a strategic position at the heart of East Africa.
+            </p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sectors.map((sector, i) => (
+              <Reveal key={sector.title} delay={i * 0.07} className="h-full">
+              <Link
+                href={sector.link || '/investments'}
+                className="group relative overflow-hidden rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 h-72 block"
+              >
+                <Image
+                  src={sector.image}
+                  alt={sector.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-xl font-bold text-white mb-2">{sector.title}</h3>
+                  <p className="text-sm text-neutral-200 leading-relaxed mb-3 line-clamp-2">{sector.blurb}</p>
+                  <span className="inline-flex items-center text-yellow-400 text-sm font-semibold opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+                    Explore opportunities
+                    <ArrowRightIcon className="w-4 h-4 ml-1.5" />
+                  </span>
+                </div>
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </Link>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link
+              href="/investments"
+              className="inline-flex items-center px-6 py-3 bg-black text-white font-medium rounded-lg transition-colors hover:bg-neutral-800"
+            >
+              Explore All Investments
+              <ArrowRightIcon className="w-4 h-4 ml-2" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── AI Investment Advisor ─────────────────────────────────── */}
+      <section className="py-20 bg-black relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <Image src="/images/uganda-kampala-city-view.webp" alt="" fill sizes="100vw" className="object-cover" />
+        </div>
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="w-16 h-16 bg-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <ChatBubbleLeftRightIcon className="w-8 h-8 text-yellow-400" />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Your AI Investment Advisor
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Your AI Investment Advisor</h2>
           <p className="text-lg text-neutral-300 mb-8 max-w-2xl mx-auto">
-            Get instant answers about investing in Uganda — business registration, tax incentives, sector opportunities, and more.
+            Get instant answers about investing in Uganda — business registration, tax incentives, sector opportunities and more.
           </p>
 
-          {/* Quick Topic Pills */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {[
               { label: 'Bankable Projects', query: 'What are the current bankable investment projects in Uganda?' },
@@ -216,148 +395,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About Section */}
+      {/* ── Services ──────────────────────────────────────────────── */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-
-            <div className="relative">
-              <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <Image
-                  src="/images/uganda-flag-city.jpg"
-                  alt="Uganda Investment Authority - One Stop Centre"
-                  width={600}
-                  height={400}
-                  className="w-full h-auto object-cover"
-                  priority
-                  loading="eager"
-                />
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-6">
-                About Uganda Investment Authority
-              </h2>
-
-              <p className="text-lg text-neutral-600 mb-6 leading-relaxed">
-                Uganda&apos;s premier investment facilitation center, strategically positioned to unlock the country&apos;s vast economic potential. With government backing and comprehensive market knowledge, we transform investment challenges into sustainable opportunities.
-              </p>
-              <p className="text-lg text-neutral-600 mb-8 leading-relaxed">
-                Our expert team provides end-to-end investment support, from initial consultation to project implementation, ensuring optimal returns in Uganda&apos;s fastest-growing sectors.
-              </p>
-
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="border-l-4 border-yellow-500 pl-4">
-                  <div className="text-2xl font-bold text-neutral-900">1.25M+</div>
-                  <div className="text-sm text-neutral-600">Jobs Created</div>
-                </div>
-                <div className="border-l-4 border-red-500 pl-4">
-                  <div className="text-2xl font-bold text-neutral-900">6.3%</div>
-                  <div className="text-sm text-neutral-600">GDP Growth</div>
-                </div>
-                <div className="border-l-4 border-yellow-500 pl-4">
-                  <div className="text-2xl font-bold text-neutral-900">$61B</div>
-                  <div className="text-sm text-neutral-600">GDP (2024)</div>
-                </div>
-                <div className="border-l-4 border-red-500 pl-4">
-                  <div className="text-2xl font-bold text-neutral-900">11</div>
-                  <div className="text-sm text-neutral-600">Industrial Parks</div>
-                </div>
-              </div>
-
-              <Link
-                href="/about"
-                className="inline-flex items-center px-6 py-3 bg-black text-white font-medium rounded-lg transition-colors hover:bg-neutral-800"
-                aria-label="Learn more about Uganda Investment Portal"
-              >
-                Learn More
-                <ArrowRightIcon className="w-4 h-4 ml-2" aria-hidden="true" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <section className="py-20 bg-neutral-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          <div className="text-center mb-16">
-            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
-              Professional Investment Services
-            </h2>
+          <Reveal className="text-center mb-16">
+            <span className="inline-block text-yellow-600 font-semibold text-sm uppercase tracking-[0.18em] mb-3">What we do</span>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-4">Professional Investment Services</h2>
             <p className="text-lg text-neutral-600 max-w-3xl mx-auto mb-8">
-              Comprehensive investment facilitation and business support services backed by government expertise and regulatory knowledge.
+              Comprehensive facilitation and business support, backed by government expertise and regulatory knowledge.
             </p>
             <Link
               href="/services"
               className="inline-flex items-center px-6 py-3 bg-black text-white font-medium rounded-lg transition-colors hover:bg-neutral-800"
-              aria-label="View all investment services offered"
             >
               View All Services
               <ArrowRightIcon className="w-4 h-4 ml-2" aria-hidden="true" />
             </Link>
-          </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: RocketLaunchIcon,
-                title: "Investment Facilitation",
-                description: "Complete investment facilitation services from project conception to implementation, with government support and regulatory guidance."
-              },
-              {
-                icon: DocumentTextIcon,
-                title: "Business Registration",
-                description: "Complete business registration and company formation services through URSB with streamlined processing."
-              },
-              {
-                icon: CalculatorIcon,
-                title: "Tax & Compliance",
-                description: "Comprehensive tax registration, URA compliance, and ongoing tax advisory services."
-              },
-              {
-                icon: ChartBarIcon,
-                title: "ROI Analysis",
-                description: "Professional return on investment analysis with Uganda-specific market data and sector performance metrics."
-              },
-              {
-                icon: HandRaisedIcon,
-                title: "Investment Support",
-                description: "Ongoing investment support, aftercare services, and government liaison for sustainable business growth."
-              },
-              {
-                icon: ShieldCheckIcon,
-                title: "Regulatory Compliance",
-                description: "Expert guidance through Uganda's regulatory landscape with full compliance assurance and legal support."
-              }
-            ].map((service, index) => (
+            {SERVICES.map((service, i) => (
+              <Reveal key={service.title} delay={i * 0.06} className="h-full">
               <div
-                key={index}
-                className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-sm border border-neutral-200 hover:shadow-md hover:border-yellow-400/50 transition-all duration-300"
+                className="group bg-white p-6 lg:p-8 rounded-2xl shadow-sm border border-neutral-200 hover:shadow-lg hover:border-yellow-400/60 hover:-translate-y-1 transition-all duration-300 h-full"
               >
-                <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center mb-6">
+                <div className="w-12 h-12 bg-yellow-50 group-hover:bg-yellow-100 rounded-xl flex items-center justify-center mb-6 transition-colors">
                   <service.icon className="w-6 h-6 text-yellow-600" />
                 </div>
-                <h3 className="text-xl font-semibold text-neutral-900 mb-4">{service.title}</h3>
-                <p className="text-neutral-600 leading-relaxed">
-                  {service.description}
-                </p>
+                <h3 className="text-xl font-semibold text-neutral-900 mb-3">{service.title}</h3>
+                <p className="text-neutral-600 leading-relaxed">{service.description}</p>
               </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-black">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Invest in Uganda?
-          </h2>
-          <p className="text-base sm:text-xl text-neutral-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Join 9,922+ successful investors who have discovered Uganda&apos;s potential. Start your investment journey today with professional guidance and government support.
+      {/* ── CTA ───────────────────────────────────────────────────── */}
+      <section className="relative py-24 overflow-hidden">
+        <div className="absolute inset-0">
+          <Image src="/images/uganda-business-bg.jpeg" alt="" fill sizes="100vw" className="object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/85 to-black/80" />
+          <div
+            className="absolute inset-0 opacity-[0.08]"
+            style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, #FFD700 0%, transparent 45%), radial-gradient(circle at 90% 100%, #CE1126 0%, transparent 40%)' }}
+          />
+        </div>
+        <Reveal className="relative max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">Ready to Invest in Uganda?</h2>
+          <p className="text-base sm:text-xl text-neutral-200 mb-8 max-w-3xl mx-auto leading-relaxed">
+            Join {liveStats.investments.toLocaleString()}+ successful investors who have discovered Uganda&apos;s potential. Start your journey today with professional guidance and government support.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <button
@@ -375,7 +462,7 @@ export default function HomePage() {
               <ArrowRightIcon className="w-5 h-5 ml-2" />
             </Link>
           </div>
-        </div>
+        </Reveal>
       </section>
     </div>
   );

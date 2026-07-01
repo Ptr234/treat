@@ -80,7 +80,7 @@ function formatLastUpdated(date: Date | null): string {
 // ── Component ────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const isAdmin = isAuthenticated && user?.role === 'admin';
   const [alertFilter, setAlertFilter] = useState<AlertFilter>('all');
   const [acknowledgedAlerts, setAcknowledgedAlerts] = useState<Set<string>>(new Set());
@@ -257,6 +257,19 @@ export default function DashboardPage() {
   }, [metrics?.agencyScorecard, scorecardSort, scorecardDir]);
 
   // ── Guards ─────────────────────────────────────────────────────────
+
+  // While the session is being verified, show a loader instead of briefly
+  // flashing the "access denied" screen to an admin who is in fact authorized.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600 font-medium">Verifying access…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return (

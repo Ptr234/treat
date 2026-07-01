@@ -1,4 +1,5 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth';
 import { client } from '@/lib/sanity-client';
 import {
   DASHBOARD_TICKET_STATS_QUERY,
@@ -256,7 +257,14 @@ function buildActivityFeed(tickets: RawTicket[]): DGActivity[] {
 
 // ── GET handler ─────────────────────────────────────────────────────
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Admin-only: this endpoint exposes operational KPIs, agency scorecards,
+  // and escalated tickets with investor contact details.
+  const admin = await requireAdmin(request);
+  if (!admin) {
+    return NextResponse.json({ success: false, error: 'Admin access required' }, { status: 401 });
+  }
+
   try {
     const [ticketStats, recentTickets, slaTickets, vipTickets, escalatedTickets, agencyStats, pipeline, analytics] =
       await Promise.all([

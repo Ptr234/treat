@@ -60,10 +60,13 @@ export function useDashboard() {
 
   const fetchDashboard = useCallback(async () => {
     try {
-      const json = await apiFetch<DGDashboardMetrics & { isEmpty?: boolean; kpis?: Record<string, number> }>('/api/dashboard');
+      const json = await apiFetch<DGDashboardMetrics & { kpis?: Record<string, number> }>('/api/dashboard');
       if (!json.success) throw new Error(json.error || 'Unknown error');
 
-      if (!json.data || json.data.isEmpty) {
+      // Only fall back to mock when the API returned no payload at all. An empty
+      // (zeroed) dataset is still real, live data and must be shown honestly —
+      // never substitute fabricated KPIs for a genuinely empty system.
+      if (!json.data) {
         setState((prev) => ({
           ...prev,
           prevMetrics: prev.metrics,
@@ -78,7 +81,7 @@ export function useDashboard() {
       }
 
       // Normalize: ASP.NET nests KPIs under .kpis; Next.js puts them at top level
-      const raw = json.data!;
+      const raw = json.data;
       const incoming = (raw.kpis ? { ...raw, ...raw.kpis } : raw) as DGDashboardMetrics;
       setState((prev) => ({
         ...prev,
