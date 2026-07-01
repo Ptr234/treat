@@ -24,6 +24,9 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   SignalIcon,
+  Squares2X2Icon,
+  TicketIcon,
+  MapIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
@@ -474,6 +477,27 @@ export default function DashboardPage() {
 
               <span className="text-xs text-gray-400">Updated {formatLastUpdated(lastUpdated)}</span>
             </div>
+          </div>
+        </div>
+
+        {/* ── Quick Links ────────────────────────────────────────── */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-3">
+            {[
+              { label: 'Dashboard', href: '/dashboard', icon: Squares2X2Icon },
+              { label: 'Agency Chat', href: '/agency-chat', icon: ChatBubbleLeftRightIcon },
+              { label: 'Tickets', href: '/tickets', icon: TicketIcon },
+              { label: 'Projects', href: '/projects', icon: MapIcon },
+            ].map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-lg border border-gray-200 shadow-sm text-sm font-semibold text-gray-700 hover:border-yellow-400 hover:text-yellow-700 hover:shadow-md transition-all"
+              >
+                <l.icon className="w-4 h-4" />
+                {l.label}
+              </Link>
+            ))}
           </div>
         </div>
 
