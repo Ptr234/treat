@@ -32,7 +32,8 @@ const statusColors = {
 };
 
 export function EventCard({ event, index = 0 }: EventCardProps) {
-  const registrationPercentage = (event.registered / event.capacity) * 100;
+  const hasCapacity = event.capacity > 0;
+  const registrationPercentage = hasCapacity ? (event.registered / event.capacity) * 100 : 0;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -112,7 +113,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
                 <span>
                   {formatDate(event.date)}
                   {event.endDate && event.endDate !== event.date && ` - ${formatDate(event.endDate)}`}
-                  {' • '}{event.time}
+                  {event.time && <> • {event.time}</>}
                 </span>
               </div>
 
@@ -129,25 +130,29 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
                 </span>
               </div>
 
-              {/* Registration Progress */}
-              <div className="flex items-center text-sm text-neutral-700">
-                <UserGroupIcon className="w-5 h-5 mr-2 text-neutral-600" />
-                <span>{event.registered} / {event.capacity} registered</span>
-              </div>
+              {/* Registration Progress — only when capacity is tracked */}
+              {hasCapacity && (
+                <div className="flex items-center text-sm text-neutral-700">
+                  <UserGroupIcon className="w-5 h-5 mr-2 text-neutral-600" />
+                  <span>{event.registered} / {event.capacity} registered</span>
+                </div>
+              )}
             </div>
 
-            {/* Progress Bar */}
-            <div className="mb-4">
-              <div className="w-full bg-neutral-200 rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-yellow-500 to-yellow-400 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(registrationPercentage, 100)}%` }}
-                />
+            {/* Progress Bar — only when capacity is tracked */}
+            {hasCapacity && (
+              <div className="mb-4">
+                <div className="w-full bg-neutral-200 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-yellow-500 to-yellow-400 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(registrationPercentage, 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">
+                  {registrationPercentage >= 90 ? 'Nearly Full!' : `${Math.round(registrationPercentage)}% capacity`}
+                </p>
               </div>
-              <p className="text-xs text-neutral-500 mt-1">
-                {registrationPercentage >= 90 ? 'Nearly Full!' : `${Math.round(registrationPercentage)}% capacity`}
-              </p>
-            </div>
+            )}
 
             {/* CTA Button */}
             <button

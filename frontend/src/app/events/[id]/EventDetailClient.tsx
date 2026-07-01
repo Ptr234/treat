@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   CalendarIcon,
@@ -20,17 +19,10 @@ import { CalendarExport } from '@/components/events/CalendarExport';
 import type { InvestmentEvent } from '@/types';
 
 interface EventDetailClientProps {
-  event: InvestmentEvent | null;
-  eventId: string;
+  event: InvestmentEvent;
 }
 
-export default function EventDetailClient({ event: initialEvent, eventId: _eventId }: EventDetailClientProps) {
-  // Event data provided by server component (Sanity fetch in Plan 03)
-  const [event] = useState<InvestmentEvent | null>(initialEvent);
-
-  if (!event) {
-    notFound();
-  }
+export default function EventDetailClient({ event }: EventDetailClientProps) {
   const [registrationStatus, setRegistrationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
     name: '',
@@ -93,7 +85,8 @@ export default function EventDetailClient({ event: initialEvent, eventId: _event
     }
   };
 
-  const registrationPercentage = (event.registered / event.capacity) * 100;
+  const hasCapacity = event.capacity > 0;
+  const registrationPercentage = hasCapacity ? (event.registered / event.capacity) * 100 : 0;
   const isUpcoming = event.status === 'upcoming' || event.status === 'ongoing';
 
   const categoryColors: Record<string, string> = {
@@ -176,9 +169,11 @@ export default function EventDetailClient({ event: initialEvent, eventId: _event
                         <> to {formatDate(event.endDate)}</>
                       )}
                     </p>
-                    <p className="text-neutral-600 text-sm mt-1">
-                      Starts at {event.time} EAT
-                    </p>
+                    {event.time && (
+                      <p className="text-neutral-600 text-sm mt-1">
+                        Starts at {event.time} EAT
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -212,24 +207,28 @@ export default function EventDetailClient({ event: initialEvent, eventId: _event
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <UserGroupIcon className="w-6 h-6 text-yellow-700 flex-shrink-0 mt-1" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-neutral-900 mb-2">Registration</h3>
-                    <p className="text-neutral-700 mb-3">
-                      {event.registered} of {event.capacity} spots filled
-                    </p>
-                    <div className="w-full bg-neutral-200 rounded-full h-3 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-yellow-600 to-yellow-500 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(registrationPercentage, 100)}%` }}
-                      />
+                {hasCapacity && (
+                  <div className="flex items-start gap-4">
+                    <UserGroupIcon className="w-6 h-6 text-yellow-700 flex-shrink-0 mt-1" />
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-neutral-900 mb-2">Registration</h3>
+                      <p className="text-neutral-700 mb-3">
+                        {event.registered} of {event.capacity} spots filled
+                      </p>
+                      <div className="w-full bg-neutral-200 rounded-full h-3 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-yellow-600 to-yellow-500 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${Math.min(registrationPercentage, 100)}%` }}
+                        />
+                      </div>
+                      {event.registrationDeadline && (
+                        <p className="text-sm text-neutral-600 mt-2">
+                          Registration deadline: {formatDate(event.registrationDeadline)}
+                        </p>
+                      )}
                     </div>
-                    <p className="text-sm text-neutral-600 mt-2">
-                      Registration deadline: {formatDate(event.registrationDeadline)}
-                    </p>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="mt-8 pt-8 border-t border-neutral-200">

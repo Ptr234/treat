@@ -1,11 +1,13 @@
-import { mockEvents } from '@/data/mock/events';
+import { notFound } from 'next/navigation';
+import { client } from '@/lib/sanity-client';
+import { EVENT_BY_ID_OR_SLUG_QUERY } from '@/lib/sanity-queries';
+import { mapSanityEvent } from '@/lib/event-format';
+import type { SanityEvent } from '@/types/sanity';
 import EventDetailClient from './EventDetailClient';
 
-export function generateStaticParams() {
-  return mockEvents.map((event) => ({
-    id: event.id,
-  }));
-}
+// Events are CMS-managed, so render on demand and revalidate hourly rather than
+// pre-generating a fixed set of static params.
+export const revalidate = 3600;
 
 interface EventDetailPageProps {
   params: Promise<{ id: string }>;
@@ -13,7 +15,17 @@ interface EventDetailPageProps {
 
 export default async function EventDetailPage({ params }: EventDetailPageProps) {
   const { id } = await params;
-  const initialEvent = mockEvents.find(e => e.id === id) || null;
 
-  return <EventDetailClient event={initialEvent} eventId={id} />;
+  let sanityEvent: SanityEvent | null = null;
+  try {
+    sanityEvent = await client.fetch<SanityEvent | null>(EVENT_BY_ID_OR_SLUG_QUERY, { id });
+  } catch {
+    sanityEvent = null;
+  }
+
+  if (!sanityEvent) {
+    notFound();
+  }
+
+  return <EventDetailClient event={mapSanityEvent(sanityEvent)} />;
 }

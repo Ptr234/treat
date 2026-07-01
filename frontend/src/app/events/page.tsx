@@ -14,24 +14,21 @@ import { useEvents } from '@/hooks/useEvents';
 import { EventCategory, EventStatus } from '@/types';
 
 export default function EventsPage() {
-  const { data: events } = useEvents();
+  const { data: events, loading } = useEvents();
   const [selectedCategory, setSelectedCategory] = useState<EventCategory | 'all'>('all');
   const [selectedStatus, setSelectedStatus] = useState<EventStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showPastEvents, setShowPastEvents] = useState(false);
 
-  // Calculate stats
+  // Calculate stats. These are derived purely from event dates/counts so they
+  // stay meaningful regardless of which optional fields the CMS populates.
   const stats = useMemo(() => {
-    const upcomingEvents = events.filter(e => e.status === 'upcoming' || e.status === 'ongoing');
-    const totalRegistrations = events.reduce((sum, e) => sum + e.registered, 0);
-    const uniqueCountries = new Set(
-      events.flatMap(e => e.speakers.map(s => s.organization))
-    ).size;
-
+    const upcomingCount = events.filter(e => e.status === 'upcoming' || e.status === 'ongoing').length;
+    const pastCount = events.filter(e => e.status === 'completed' || e.status === 'cancelled').length;
     return {
-      upcomingCount: upcomingEvents.length,
-      totalRegistrations,
-      countriesRepresented: uniqueCountries
+      upcomingCount,
+      totalCount: events.length,
+      pastCount,
     };
   }, [events]);
 
@@ -126,18 +123,18 @@ export default function EventsPage() {
               <UserGroupIcon className="w-8 h-8 text-yellow-700" />
               <div className="text-left">
                 <div className="text-2xl font-bold text-neutral-900">
-                  {stats.totalRegistrations.toLocaleString()}+
+                  {stats.totalCount}
                 </div>
-                <div className="text-sm text-neutral-600">Total Registrations</div>
+                <div className="text-sm text-neutral-600">Total Events</div>
               </div>
             </div>
             <div className="flex items-center justify-center gap-3">
               <MapPinIcon className="w-8 h-8 text-yellow-700" />
               <div className="text-left">
                 <div className="text-2xl font-bold text-neutral-900">
-                  {stats.countriesRepresented}+
+                  {stats.pastCount}
                 </div>
-                <div className="text-sm text-neutral-600">Organizations Represented</div>
+                <div className="text-sm text-neutral-600">Past Events</div>
               </div>
             </div>
           </div>
@@ -204,7 +201,12 @@ export default function EventsPage() {
             Upcoming Events
           </h2>
 
-          {upcomingEvents.length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-neutral-600 font-medium">Loading events…</p>
+            </div>
+          ) : upcomingEvents.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {upcomingEvents.map((event, index) => (
                 <EventCard key={event.id} event={event} index={index} />
