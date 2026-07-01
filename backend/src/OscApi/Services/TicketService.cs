@@ -47,7 +47,7 @@ public class TicketService : ITicketService
     {
         var category = Enum.Parse<TicketCategory>(ToPascalCase(request.Category), true);
         var priority = Enum.Parse<TicketPriority>(request.Priority ?? "medium", true);
-        var (slaHours, slaDeadline) = SlaCalculator.Compute(category);
+        var (slaHours, slaDeadline) = SlaCalculator.Compute(category, priority);
         var refNumber = await _refGen.GenerateTicketReferenceAsync();
 
         var ticket = new Ticket
@@ -138,19 +138,8 @@ public class TicketService : ITicketService
         if (request.SatisfactionRating is not null) ticket.SatisfactionRating = request.SatisfactionRating;
         if (request.SatisfactionComment is not null) ticket.SatisfactionComment = request.SatisfactionComment;
 
-        if (request.IsEscalated == true && !ticket.IsEscalated)
-        {
-            ticket.IsEscalated = true;
-            ticket.EscalatedAt = DateTimeOffset.UtcNow;
-
-            var escalationEmails = await _settings.GetEscalationEmailsAsync();
-            var customMessage = await _settings.GetAsync(SettingsService.EscalationMessageKey);
-
-            _ = _email.SendEscalationNotificationAsync(
-                ticket.ReferenceNumber, ticket.Title, ticket.ContactName,
-                escalationEmails.Length > 0 ? escalationEmails : null,
-                string.IsNullOrEmpty(customMessage) ? null : customMessage);
-        }
+        if (request.IsEscalated == true)
+            await EscalateAndNotifyAsync(ticket);
 
         await _db.SaveChangesAsync();
 
@@ -185,25 +174,97 @@ public class TicketService : ITicketService
             .ToList();
     }
 
-    public async Task<object?> PostMessageAsync(string refNumber, TicketMessageRequest request)
+    public async Task<object?> PostStaffMessageAsync(string refNumber, string content, string authorName, string? authorEmail, bool isInternal, string? agencyScope = null)
     {
         var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
         if (ticket is null) return null;
+        if (!string.IsNullOrEmpty(agencyScope) && ticket.AssignedAgencyCode != agencyScope)
+            return null; // out of the officer's agency scope
 
         var message = new TicketMessage
         {
             TicketId = ticket.Id,
-            Content = SanitizeHelper.StripHtml(request.Content),
-            AuthorName = SanitizeHelper.StripHtml(request.AuthorName),
-            AuthorRole = Enum.Parse<AuthorRole>(request.AuthorRole, true),
-            AuthorEmail = request.AuthorEmail,
-            IsInternal = request.IsInternal,
+            Content = SanitizeHelper.StripHtml(content),
+            AuthorName = SanitizeHelper.StripHtml(authorName),
+            AuthorRole = AuthorRole.Officer, // trusted from the session, never the client
+            AuthorEmail = authorEmail,
+            IsInternal = isInternal,
+        };
+
+        _db.TicketMessages.Add(message);
+        await _db.SaveChangesAsync();
+
+        return new { message.Content, message.AuthorName, message.AuthorRole, message.IsInternal, message.SentAt };
+    }
+
+    public async Task<object?> PostPublicCommentAsync(string refNumber, string content, string authorName, string email)
+    {
+        var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
+        if (ticket is null) return null;
+
+        // Ownership check: only the person who filed the ticket may comment on it.
+        if (string.IsNullOrWhiteSpace(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail)
+            return null;
+
+        var message = new TicketMessage
+        {
+            TicketId = ticket.Id,
+            Content = SanitizeHelper.StripHtml(content),
+            AuthorName = SanitizeHelper.StripHtml(authorName),
+            AuthorRole = AuthorRole.Investor, // public callers are always investors
+            AuthorEmail = ticket.ContactEmail,
+            IsInternal = false, // public callers can never post internal notes
         };
 
         _db.TicketMessages.Add(message);
         await _db.SaveChangesAsync();
 
         return new { message.Content, message.AuthorName, message.AuthorRole, message.SentAt };
+    }
+
+    public async Task<object?> PublicUpdateAsync(string refNumber, PublicTicketUpdateRequest request)
+    {
+        var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
+        if (ticket is null) return null;
+
+        // Ownership check by email — the only authorization the public side has.
+        if (string.IsNullOrWhiteSpace(request.Email) || request.Email.ToLowerInvariant().Trim() != ticket.ContactEmail)
+            return null;
+
+        if (request.IsEscalated == true)
+            await EscalateAndNotifyAsync(ticket);
+
+        if (request.SatisfactionRating.HasValue)
+        {
+            // Ratings only make sense once the case is resolved/closed.
+            if (ticket.Status is not (TicketStatus.Resolved or TicketStatus.Closed))
+                return null;
+            if (request.SatisfactionRating < 1 || request.SatisfactionRating > 5)
+                return null;
+            ticket.SatisfactionRating = request.SatisfactionRating;
+            if (request.SatisfactionComment is not null)
+                ticket.SatisfactionComment = SanitizeHelper.StripHtml(request.SatisfactionComment);
+        }
+
+        await _db.SaveChangesAsync();
+        return new { ticket.ReferenceNumber, ticket.IsEscalated, ticket.SatisfactionRating };
+    }
+
+    /// <summary>Mark a ticket escalated (idempotent) and fire the escalation notification email.</summary>
+    private async Task EscalateAndNotifyAsync(Ticket ticket)
+    {
+        if (ticket.IsEscalated) return;
+
+        ticket.IsEscalated = true;
+        ticket.EscalatedAt = DateTimeOffset.UtcNow;
+
+        var escalationEmails = await _settings.GetEscalationEmailsAsync();
+        var customMessage = await _settings.GetAsync(SettingsService.EscalationMessageKey);
+
+        _ = _email.SendEscalationNotificationAsync(
+            ticket.ReferenceNumber, ticket.Title, ticket.ContactName,
+            escalationEmails.Length > 0 ? escalationEmails : null,
+            string.IsNullOrEmpty(customMessage) ? null : customMessage);
     }
 
     private static string ToPascalCase(string snakeCase) =>

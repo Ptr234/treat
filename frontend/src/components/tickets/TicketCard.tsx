@@ -46,7 +46,7 @@ export default function TicketCard({ ticket }: TicketCardProps) {
     });
   };
 
-  const ticketNumber = ticket.id.replace('TKT-', '#TK-');
+  const ticketNumber = ticket.id;
 
   return (
     <Link href={`/tickets/${ticket.id}/`}>

@@ -69,6 +69,48 @@ public class TicketScopingTests
     }
 
     [Fact]
+    public async Task PublicUpdate_EscalatesOnlyWithMatchingEmail()
+    {
+        var db = TestDbFactory.Create();
+        var svc = CreateService(db);
+        var created = await svc.CreateAsync(new CreateTicketRequest(
+            "T", "d", "general_inquiry", "medium", "owner@example.com", "Owner",
+            null, null, null, null, false));
+        var reference = RefOf(created);
+
+        // Wrong email cannot escalate.
+        Assert.Null(await svc.PublicUpdateAsync(reference,
+            new PublicTicketUpdateRequest("intruder@evil.com", IsEscalated: true, null, null)));
+
+        // Owner can escalate.
+        var ok = await svc.PublicUpdateAsync(reference,
+            new PublicTicketUpdateRequest("owner@example.com", IsEscalated: true, null, null));
+        Assert.NotNull(ok);
+    }
+
+    [Fact]
+    public async Task PublicUpdate_RatingRequiresResolvedTicket()
+    {
+        var db = TestDbFactory.Create();
+        var svc = CreateService(db);
+        var created = await svc.CreateAsync(new CreateTicketRequest(
+            "T", "d", "general_inquiry", "medium", "owner@example.com", "Owner",
+            null, null, null, null, false));
+        var reference = RefOf(created);
+
+        // A brand-new ticket cannot be rated.
+        Assert.Null(await svc.PublicUpdateAsync(reference,
+            new PublicTicketUpdateRequest("owner@example.com", null, SatisfactionRating: 5, null)));
+
+        // Once resolved, the owner can rate it.
+        await svc.UpdateAsync(reference,
+            new UpdateTicketRequest("resolved", null, null, null, null, null, null));
+        var ok = await svc.PublicUpdateAsync(reference,
+            new PublicTicketUpdateRequest("owner@example.com", null, SatisfactionRating: 5, "Great"));
+        Assert.NotNull(ok);
+    }
+
+    [Fact]
     public async Task GetByRefAsync_StaffScoped_HidesOtherAgencies()
     {
         var db = TestDbFactory.Create();

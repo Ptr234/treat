@@ -14,9 +14,25 @@ public static class SlaCalculator
         [TicketCategory.Vip] = 1,
     };
 
-    public static (int Hours, DateTimeOffset Deadline) Compute(TicketCategory category)
+    // A high urgency can only tighten the deadline, never loosen the category's.
+    private static readonly Dictionary<TicketPriority, int> PriorityCeilingHours = new()
     {
-        var hours = SlaHours.GetValueOrDefault(category, 24);
+        [TicketPriority.Critical] = 2,
+        [TicketPriority.High] = 8,
+        [TicketPriority.Medium] = 24,
+        [TicketPriority.Low] = 48,
+    };
+
+    /// <summary>
+    /// Compute the SLA window as the stricter of the category's baseline and the
+    /// priority ceiling, so e.g. a critical-priority ticket is always ≤ 2h even
+    /// in an otherwise 24h category.
+    /// </summary>
+    public static (int Hours, DateTimeOffset Deadline) Compute(TicketCategory category, TicketPriority priority = TicketPriority.Medium)
+    {
+        var baseHours = SlaHours.GetValueOrDefault(category, 24);
+        var ceiling = PriorityCeilingHours.GetValueOrDefault(priority, 24);
+        var hours = Math.Min(baseHours, ceiling);
         return (hours, DateTimeOffset.UtcNow.AddHours(hours));
     }
 }

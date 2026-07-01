@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { apiFetch } from '@/lib/api-client';
+import { useAuth } from '@/contexts/AuthContext';
 import { normalizeStatus, normalizePriority, normalizeCategory, normalizeAuthorRole } from '@/lib/ticket-format';
 
 // --- Types matching Sanity API response ---
@@ -90,6 +91,11 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
   const searchParams = useSearchParams();
   const emailParam = searchParams.get('email');
 
+  // Back-office staff view tickets through their session — no email gate. Only
+  // the public (investors) must prove ownership with the filing email.
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const isStaff = isAuthenticated && ['admin', 'dg', 'agency_officer'].includes(user?.role ?? '');
+
   const [ticket, setTicket] = useState<TicketData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,6 +103,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
   const [verifyEmail, setVerifyEmail] = useState('');
 
   const [comment, setComment] = useState('');
+  const [isInternalNote, setIsInternalNote] = useState(false);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentSuccess, setCommentSuccess] = useState(false);
 
@@ -107,22 +114,25 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   // --- Data fetching ---
 
+  // Staff fetch by session (email = null); the public pass their filing email.
   const fetchTicket = useCallback(
-    async (email: string) => {
+    async (email: string | null) => {
       setLoading(true);
       setError(null);
       try {
-        const json = await apiFetch<TicketData>(
-          `/api/tickets/${ticketId}?email=${encodeURIComponent(email)}`
-        );
+        const url = email
+          ? `/api/tickets/${ticketId}?email=${encodeURIComponent(email)}`
+          : `/api/tickets/${ticketId}`;
+        const json = await apiFetch<TicketData>(url);
 
         if (!json.success) {
           const errLower = (json.error || '').toLowerCase();
-          if (errLower.includes('email') && errLower.includes('mismatch')) {
+          if (!email && !isStaff) {
+            // No session and no email — ask the public visitor to verify.
             setNeedsVerification(true);
-            setError(
-              'Email does not match. Please enter the email used when submitting the inquiry.'
-            );
+          } else if (errLower.includes('email') || errLower.includes('match')) {
+            setNeedsVerification(true);
+            setError('Email does not match. Please enter the email used when submitting the inquiry.');
           } else if (errLower.includes('not found')) {
             setError('Ticket not found. Please check the reference number.');
           } else {
@@ -156,17 +166,21 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
         setLoading(false);
       }
     },
-    [ticketId]
+    [ticketId, isStaff]
   );
 
   useEffect(() => {
-    if (!emailParam) {
+    // Wait for the session to resolve so we don't flash the email gate at staff.
+    if (authLoading) return;
+    if (isStaff) {
+      fetchTicket(null);
+    } else if (emailParam) {
+      fetchTicket(emailParam);
+    } else {
       setNeedsVerification(true);
       setLoading(false);
-      return;
     }
-    fetchTicket(emailParam);
-  }, [emailParam, fetchTicket]);
+  }, [authLoading, isStaff, emailParam, fetchTicket]);
 
   // --- Handlers ---
 
@@ -181,23 +195,33 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim() || !ticket || !emailParam) return;
+    if (!comment.trim() || !ticket) return;
+    // Public users need the filing email; staff post via session.
+    if (!isStaff && !emailParam) return;
 
     setIsSubmittingComment(true);
     setCommentSuccess(false);
     try {
-      const res = await apiFetch(`/api/tickets/${ticketId}/messages`, {
-        method: 'POST',
-        body: JSON.stringify({
-          content: comment.trim(),
-          authorName: ticket.contactName,
-          authorEmail: emailParam,
-        }),
-      });
+      // Staff post to the authenticated officer endpoint (role/identity from the
+      // session); the public post to the ownership-checked comments endpoint.
+      const res = isStaff
+        ? await apiFetch(`/api/tickets/${ticketId}/messages`, {
+            method: 'POST',
+            body: JSON.stringify({ content: comment.trim(), isInternal: isInternalNote }),
+          })
+        : await apiFetch(`/api/tickets/${ticketId}/comments`, {
+            method: 'POST',
+            body: JSON.stringify({
+              content: comment.trim(),
+              authorName: ticket.contactName,
+              authorEmail: emailParam,
+            }),
+          });
       if (res.success) {
         setComment('');
+        setIsInternalNote(false);
         setCommentSuccess(true);
-        fetchTicket(emailParam);
+        fetchTicket(isStaff ? null : emailParam);
         setTimeout(() => setCommentSuccess(false), 3000);
       }
     } catch {
@@ -208,13 +232,20 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
   };
 
   const handleRatingSubmit = async (newRating: number) => {
-    if (!ticket || !emailParam) return;
+    if (!ticket) return;
+    if (!isStaff && !emailParam) return;
     setIsSubmittingRating(true);
     try {
-      const res = await apiFetch(`/api/tickets/${ticketId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ email: emailParam, satisfactionRating: newRating }),
-      });
+      // Staff use the privileged update; the public use the email-gated endpoint.
+      const res = isStaff
+        ? await apiFetch(`/api/tickets/${ticketId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ satisfactionRating: newRating }),
+          })
+        : await apiFetch(`/api/tickets/${ticketId}/public`, {
+            method: 'PATCH',
+            body: JSON.stringify({ email: emailParam, satisfactionRating: newRating }),
+          });
       if (res.success) setRating(newRating);
     } catch {
       /* silently handled */
@@ -224,13 +255,19 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
   };
 
   const handleEscalation = async () => {
-    if (!ticket || !emailParam || escalated) return;
+    if (!ticket || escalated) return;
+    if (!isStaff && !emailParam) return;
     setIsEscalating(true);
     try {
-      const res = await apiFetch(`/api/tickets/${ticketId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ email: emailParam, isEscalated: true }),
-      });
+      const res = isStaff
+        ? await apiFetch(`/api/tickets/${ticketId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ isEscalated: true }),
+          })
+        : await apiFetch(`/api/tickets/${ticketId}/public`, {
+            method: 'PATCH',
+            body: JSON.stringify({ email: emailParam, isEscalated: true }),
+          });
       if (res.success) setEscalated(true);
     } catch {
       /* silently handled */
@@ -508,7 +545,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
             </div>
 
             {/* Documents */}
-            <TicketDocuments ticketId={ticketId} emailParam={emailParam} />
+            <TicketDocuments ticketId={ticketId} emailParam={emailParam} isStaff={isStaff} />
 
             {/* Add Comment */}
             {!isResolved && (
@@ -531,6 +568,17 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent mb-3"
                   />
+                  {isStaff && (
+                    <label className="flex items-center gap-2 mb-3 text-sm text-gray-700">
+                      <input
+                        type="checkbox"
+                        checked={isInternalNote}
+                        onChange={(e) => setIsInternalNote(e.target.checked)}
+                        className="rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
+                      />
+                      Internal note (not visible to the investor)
+                    </label>
+                  )}
                   <button
                     type="submit"
                     disabled={!comment.trim() || isSubmittingComment}
@@ -722,17 +770,18 @@ interface TicketDocument {
   uploadedAt: string;
 }
 
-function TicketDocuments({ ticketId, emailParam }: { ticketId: string; emailParam: string | null }) {
+function TicketDocuments({ ticketId, emailParam, isStaff }: { ticketId: string; emailParam: string | null; isStaff: boolean }) {
   const [docs, setDocs] = useState<TicketDocument[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDocs = useCallback(async () => {
-    if (!emailParam) { setLoading(false); return; }
-    const query = emailParam ? `?email=${encodeURIComponent(emailParam)}` : '';
+    // Staff read via session; the public need their filing email.
+    if (!isStaff && !emailParam) { setLoading(false); return; }
+    const query = !isStaff && emailParam ? `?email=${encodeURIComponent(emailParam)}` : '';
     const res = await apiFetch<TicketDocument[]>(`/api/tickets/${ticketId}/documents${query}`);
     if (res.success && res.data) setDocs(res.data);
     setLoading(false);
-  }, [ticketId, emailParam]);
+  }, [ticketId, emailParam, isStaff]);
 
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
 

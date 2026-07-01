@@ -146,7 +146,7 @@ public class TicketServiceTests
     }
 
     [Fact]
-    public async Task PostMessageAsync_AddsMessage()
+    public async Task PostStaffMessageAsync_AddsOfficerMessage()
     {
         var dbName = Guid.NewGuid().ToString();
         var svc = CreateService(dbName);
@@ -157,12 +157,29 @@ public class TicketServiceTests
         var db = TestDbFactory.Create(dbName);
         var ticket = db.Tickets.First();
 
-        var result = await svc.PostMessageAsync(ticket.ReferenceNumber,
-            new TicketMessageRequest("Hello", "Admin", "Officer", "admin@test.com", false));
-
+        var result = await svc.PostStaffMessageAsync(ticket.ReferenceNumber,
+            "Internal note", "Admin", "admin@test.com", isInternal: true);
         Assert.NotNull(result);
 
-        var messages = await svc.GetMessagesAsync(ticket.ReferenceNumber, null, true);
+        var messages = await svc.GetMessagesAsync(ticket.ReferenceNumber, null, isStaff: true);
         Assert.NotNull(messages);
+    }
+
+    [Fact]
+    public async Task PostPublicComment_RequiresMatchingEmail()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+
+        await svc.CreateAsync(new CreateTicketRequest("T1", "D1", "general_inquiry", "low",
+            "owner@b.com", "Owner", null, null, null, null, false));
+
+        var db = TestDbFactory.Create(dbName);
+        var reference = db.Tickets.First().ReferenceNumber;
+
+        // Wrong email is rejected; the owner's email is accepted and forces the investor role.
+        Assert.Null(await svc.PostPublicCommentAsync(reference, "Hi", "Owner", "intruder@evil.com"));
+        var ok = await svc.PostPublicCommentAsync(reference, "Any update?", "Owner", "OWNER@b.com");
+        Assert.NotNull(ok);
     }
 }

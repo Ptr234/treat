@@ -39,6 +39,12 @@ public record TicketMessageRequest(
     bool IsInternal = false
 );
 
+/// <summary>Staff reply. Author identity + role come from the session, not the body.</summary>
+public record StaffMessageRequest(
+    string Content,
+    bool IsInternal = false
+);
+
 public record PublicCommentRequest(
     string Content,
     string AuthorName,

@@ -95,12 +95,48 @@ public class TicketsController : ControllerBase
         return Ok(new ApiResponse<object>(true, result));
     }
 
-    /// <summary>Post a message to a ticket.</summary>
+    /// <summary>Post a staff reply (officer). Identity and role come from the session.</summary>
     [HttpPost("{refNumber}/messages")]
-    public async Task<IActionResult> PostMessage(string refNumber, [FromBody] TicketMessageRequest request)
+    [Authorize(Policy = Roles.StaffPolicy)]
+    public async Task<IActionResult> PostStaffMessage(string refNumber, [FromBody] StaffMessageRequest request)
     {
-        var result = await _tickets.PostMessageAsync(refNumber, request);
+        if (string.IsNullOrWhiteSpace(request.Content))
+            return BadRequest(new ApiResponse(false, "Message content is required"));
+
+        var scope = ResolveAgencyScope(out var misconfigured);
+        if (misconfigured) return Forbid();
+
+        var name = User.FindFirst("name")?.Value ?? "UIA Officer";
+        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+            ?? User.FindFirst("email")?.Value;
+
+        var result = await _tickets.PostStaffMessageAsync(refNumber, request.Content, name, email, request.IsInternal, scope);
         if (result is null) return NotFound(new ApiResponse(false, "Ticket not found"));
         return Created("", new ApiResponse<object>(true, result));
+    }
+
+    /// <summary>Post a public reply (investor). Requires the email used to file the ticket.</summary>
+    [HttpPost("{refNumber}/comments")]
+    [EnableRateLimiting("public-form")]
+    public async Task<IActionResult> PostPublicComment(string refNumber, [FromBody] PublicCommentRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Content))
+            return BadRequest(new ApiResponse(false, "Comment content is required"));
+
+        var result = await _tickets.PostPublicCommentAsync(refNumber, request.Content, request.AuthorName, request.AuthorEmail);
+        // A null result means the ticket is missing or the email doesn't match; a
+        // single 403 avoids leaking which tickets exist.
+        if (result is null) return StatusCode(403, new ApiResponse(false, "Ticket not found or email does not match"));
+        return Created("", new ApiResponse<object>(true, result));
+    }
+
+    /// <summary>Public self-service update (escalate / rate), gated by the filer's email.</summary>
+    [HttpPatch("{refNumber}/public")]
+    [EnableRateLimiting("public-form")]
+    public async Task<IActionResult> PublicUpdate(string refNumber, [FromBody] PublicTicketUpdateRequest request)
+    {
+        var result = await _tickets.PublicUpdateAsync(refNumber, request);
+        if (result is null) return StatusCode(403, new ApiResponse(false, "Not permitted, or the action is not available for this ticket"));
+        return Ok(new ApiResponse<object>(true, result));
     }
 }

@@ -11,14 +11,26 @@ namespace OscApi.Controllers;
 public class DocumentsController : ControllerBase
 {
     private readonly OscDbContext _db;
-    private readonly JwtService _jwt;
     private readonly IWebHostEnvironment _env;
 
-    public DocumentsController(OscDbContext db, JwtService jwt, IWebHostEnvironment env)
+    public DocumentsController(OscDbContext db, IWebHostEnvironment env)
     {
         _db = db;
-        _jwt = jwt;
         _env = env;
+    }
+
+    /// <summary>
+    /// The agency an agency_officer is scoped to (null for admin-level staff and
+    /// for non-staff callers). Set <paramref name="misconfigured"/> when an
+    /// officer has no agency configured.
+    /// </summary>
+    private string? AgencyScope(out bool misconfigured)
+    {
+        misconfigured = false;
+        if (!User.IsAgencyOfficer()) return null;
+        var code = User.GetAgencyCode();
+        if (string.IsNullOrEmpty(code)) misconfigured = true;
+        return code;
     }
 
     /// <summary>List documents attached to a ticket.</summary>
@@ -32,11 +44,18 @@ public class DocumentsController : ControllerBase
         if (ticket is null)
             return NotFound(new ApiResponse(false, "Ticket not found"));
 
-        var isAdmin = IsAdmin();
-        if (!isAdmin)
+        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        if (!isStaff)
         {
             if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail)
                 return StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+        }
+        else
+        {
+            var scope = AgencyScope(out var misconfigured);
+            if (misconfigured) return Forbid();
+            if (!string.IsNullOrEmpty(scope) && ticket.AssignedAgencyCode != scope)
+                return NotFound(new ApiResponse(false, "Ticket not found"));
         }
 
         var docs = ticket.Documents
@@ -46,11 +65,11 @@ public class DocumentsController : ControllerBase
         return Ok(new ApiResponse<object>(true, docs));
     }
 
-    /// <summary>Delete a document from a ticket (admin only).</summary>
+    /// <summary>Delete a document from a ticket (admin-level staff only).</summary>
     [HttpDelete("{documentId:guid}")]
     public async Task<IActionResult> DeleteDocument(string refNumber, Guid documentId)
     {
-        if (!IsAdmin()) return Unauthorized(new ApiResponse(false, "Admin access required"));
+        if (!User.IsAdminLevel()) return Unauthorized(new ApiResponse(false, "Admin access required"));
 
         var doc = await _db.TicketDocuments
             .Include(d => d.Ticket)
@@ -68,14 +87,5 @@ public class DocumentsController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Ok(new ApiResponse(true));
-    }
-
-    private bool IsAdmin()
-    {
-        var token = Request.Cookies["osc-session"];
-        if (string.IsNullOrEmpty(token)) return false;
-        var principal = _jwt.ValidateToken(token);
-        return principal?.Claims.Any(c =>
-            c.Type == System.Security.Claims.ClaimTypes.Role && c.Value == "admin") ?? false;
     }
 }
