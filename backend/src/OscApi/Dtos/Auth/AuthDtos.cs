@@ -1,6 +1,18 @@
 namespace OscApi.Dtos.Auth;
 
-public record LoginRequest(string Email, string Password);
+public record LoginRequest(string Email, string Password, string? MfaCode = null);
+
+/// <summary>Returned by login when the admin has MFA enabled and no valid code was supplied yet.</summary>
+public record MfaChallengeResponse(bool MfaRequired = true);
+
+/// <summary>Returned by the enrol endpoint: the shared secret and its otpauth QR URI.</summary>
+public record MfaEnrollResponse(string Secret, string OtpauthUri);
+
+public record MfaVerifyRequest(string Code);
+
+public record MfaDisableRequest(string Password, string Code);
+
+public record MfaStatusResponse(bool Enabled);
 
 public record SignupRequest(string Name, string Email, string Password);
 

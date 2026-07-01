@@ -62,6 +62,7 @@ builder.Services.AddCors(options =>
 // Core services
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddSingleton<PasswordService>();
+builder.Services.AddSingleton<TotpService>();
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddScoped<ReferenceNumberGenerator>();
 builder.Services.AddHttpClient<GroqClient>();

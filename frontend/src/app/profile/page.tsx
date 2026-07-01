@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api-client';
@@ -10,6 +10,7 @@ import {
   ShieldCheckIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
+  DevicePhoneMobileIcon,
 } from '@heroicons/react/24/outline';
 
 export default function ProfilePage() {
@@ -30,6 +31,110 @@ export default function ProfilePage() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+
+  // Multi-factor authentication (admins only)
+  const isAdmin = user?.role === 'admin';
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaStatusLoaded, setMfaStatusLoaded] = useState(false);
+  const [enroll, setEnroll] = useState<{ secret: string; otpauthUri: string } | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+  const [mfaBusy, setMfaBusy] = useState(false);
+  const [mfaError, setMfaError] = useState('');
+  const [mfaSuccess, setMfaSuccess] = useState('');
+  const [secretCopied, setSecretCopied] = useState(false);
+  // Disable-MFA form
+  const [showDisable, setShowDisable] = useState(false);
+  const [disablePassword, setDisablePassword] = useState('');
+  const [disableCode, setDisableCode] = useState('');
+
+  const loadMfaStatus = useCallback(async () => {
+    const res = await apiFetch<{ enabled: boolean }>('/api/auth/mfa/status');
+    if (res.success && res.data) setMfaEnabled(res.data.enabled);
+    setMfaStatusLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isAdmin) loadMfaStatus();
+  }, [isAdmin, loadMfaStatus]);
+
+  const handleStartEnroll = async () => {
+    setMfaError('');
+    setMfaSuccess('');
+    setMfaBusy(true);
+    try {
+      const res = await apiFetch<{ secret: string; otpauthUri: string }>('/api/auth/mfa/enroll', { method: 'POST' });
+      if (!res.success || !res.data) {
+        setMfaError(res.error || 'Could not start enrolment');
+        return;
+      }
+      setEnroll(res.data);
+      setMfaCode('');
+    } catch {
+      setMfaError('Network error — please try again');
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleVerifyEnroll = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMfaError('');
+    setMfaBusy(true);
+    try {
+      const res = await apiFetch('/api/auth/mfa/verify', {
+        method: 'POST',
+        body: JSON.stringify({ code: mfaCode.trim() }),
+      });
+      if (!res.success) {
+        setMfaError(res.error || 'Invalid authentication code');
+        return;
+      }
+      setMfaEnabled(true);
+      setEnroll(null);
+      setMfaCode('');
+      setMfaSuccess('Two-factor authentication is now enabled.');
+      setTimeout(() => setMfaSuccess(''), 4000);
+    } catch {
+      setMfaError('Network error — please try again');
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleDisableMfa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMfaError('');
+    setMfaBusy(true);
+    try {
+      const res = await apiFetch('/api/auth/mfa/disable', {
+        method: 'POST',
+        body: JSON.stringify({ password: disablePassword, code: disableCode.trim() }),
+      });
+      if (!res.success) {
+        setMfaError(res.error || 'Could not disable MFA');
+        return;
+      }
+      setMfaEnabled(false);
+      setShowDisable(false);
+      setDisablePassword('');
+      setDisableCode('');
+      setMfaSuccess('Two-factor authentication has been disabled.');
+      setTimeout(() => setMfaSuccess(''), 4000);
+    } catch {
+      setMfaError('Network error — please try again');
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const copySecret = async () => {
+    if (!enroll) return;
+    try {
+      await navigator.clipboard.writeText(enroll.secret);
+      setSecretCopied(true);
+      setTimeout(() => setSecretCopied(false), 2000);
+    } catch { /* clipboard unavailable */ }
+  };
 
   // While the session is resolving, show a loader rather than flashing the
   // "sign in" screen to a user who is actually authenticated.
@@ -366,6 +471,169 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Two-factor authentication (admins only) */}
+        {isAdmin && (
+          <div className="bg-white rounded-xl shadow-soft overflow-hidden mb-6">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <DevicePhoneMobileIcon className="w-5 h-5 text-gray-500" />
+                Two-Factor Authentication
+              </h2>
+              {mfaStatusLoaded && (
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                    mfaEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {mfaEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+              )}
+            </div>
+            <div className="p-6">
+              {mfaSuccess && (
+                <div className="flex items-center gap-2 p-3 mb-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                  <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
+                  {mfaSuccess}
+                </div>
+              )}
+              {mfaError && (
+                <div className="flex items-center gap-2 p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                  <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
+                  {mfaError}
+                </div>
+              )}
+
+              {!mfaStatusLoaded ? (
+                <p className="text-sm text-gray-500">Loading…</p>
+              ) : mfaEnabled ? (
+                showDisable ? (
+                  <form onSubmit={handleDisableMfa} className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Confirm your password and a current authentication code to turn off two-factor authentication.
+                    </p>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                      <input
+                        type="password"
+                        value={disablePassword}
+                        onChange={(e) => setDisablePassword(e.target.value)}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Authentication Code</label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={disableCode}
+                        onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, ''))}
+                        required
+                        className="w-40 px-3 py-2 border border-gray-300 rounded-lg tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        placeholder="000000"
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-1">
+                      <button
+                        type="submit"
+                        disabled={mfaBusy || disableCode.length !== 6}
+                        className="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                      >
+                        {mfaBusy ? 'Disabling…' : 'Disable 2FA'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setShowDisable(false); setDisablePassword(''); setDisableCode(''); setMfaError(''); }}
+                        disabled={mfaBusy}
+                        className="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600">
+                      Your account is protected with an authenticator app. A code is required each time you sign in.
+                    </p>
+                    <button
+                      onClick={() => { setShowDisable(true); setMfaError(''); setMfaSuccess(''); }}
+                      className="text-sm font-medium text-red-600 hover:text-red-700"
+                    >
+                      Disable two-factor authentication
+                    </button>
+                  </div>
+                )
+              ) : enroll ? (
+                <form onSubmit={handleVerifyEnroll} className="space-y-4">
+                  <ol className="text-sm text-gray-600 list-decimal list-inside space-y-1">
+                    <li>Open your authenticator app (Google Authenticator, Authy, Microsoft Authenticator…).</li>
+                    <li>Add an account and enter this setup key manually:</li>
+                  </ol>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg font-mono text-sm text-gray-900 break-all tracking-wider">
+                      {enroll.secret.replace(/(.{4})/g, '$1 ').trim()}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={copySecret}
+                      className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                    >
+                      {secretCopied ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Enter the 6-digit code to confirm
+                    </label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      autoFocus
+                      value={mfaCode}
+                      onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                      className="w-40 px-3 py-2 border border-gray-300 rounded-lg tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      placeholder="000000"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-1">
+                    <button
+                      type="submit"
+                      disabled={mfaBusy || mfaCode.length !== 6}
+                      className="px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                    >
+                      {mfaBusy ? 'Verifying…' : 'Verify & Enable'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setEnroll(null); setMfaCode(''); setMfaError(''); }}
+                      disabled={mfaBusy}
+                      className="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-600">
+                    Add an extra layer of security by requiring a time-based code from an authenticator app at sign-in.
+                  </p>
+                  <button
+                    onClick={handleStartEnroll}
+                    disabled={mfaBusy}
+                    className="px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                  >
+                    {mfaBusy ? 'Starting…' : 'Enable two-factor authentication'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Quick links */}
         <div className="bg-white rounded-xl shadow-soft p-6">

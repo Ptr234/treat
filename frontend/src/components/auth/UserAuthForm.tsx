@@ -28,7 +28,11 @@ export default function UserAuthForm({ onSuccess }: UserAuthFormProps) {
       if (mode === 'signup') {
         await signup(name.trim(), email.trim(), password);
       } else {
-        await login(email.trim(), password);
+        const result = await login(email.trim(), password);
+        if (result?.mfaRequired) {
+          setError('This account uses two-factor authentication. Please sign in via the Admin sign-in.');
+          return;
+        }
       }
       onSuccess();
     } catch (err) {

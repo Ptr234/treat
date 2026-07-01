@@ -12,7 +12,7 @@ interface AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, mfaCode?: string) => Promise<{ mfaRequired?: boolean }>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -68,12 +68,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [checkSession]);
 
   // ── Login via API ──────────────────────────────────────────────────
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, mfaCode?: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
 
     const json = await apiFetch('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, mfaCode }),
     });
 
     if (!json.success) {
@@ -81,8 +81,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(json.error || 'Login failed');
     }
 
+    // The admin has MFA enabled: the password was accepted but a TOTP code is
+    // still required. Signal the caller to collect the code (no session yet).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((json.data as any)?.mfaRequired) {
+      setState(s => ({ ...s, isLoading: false }));
+      return { mfaRequired: true };
+    }
+
     const user = extractUser(json.data);
     setState({ user, isAuthenticated: true, isLoading: false, error: null });
+    return {};
   }, []);
 
   // ── Sign up (email + password) ─────────────────────────────────────

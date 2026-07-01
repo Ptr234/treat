@@ -18,14 +18,16 @@ public class AuthController : ControllerBase
     private readonly JwtService _jwt;
     private readonly PasswordService _password;
     private readonly EmailService _email;
+    private readonly TotpService _totp;
     private readonly IWebHostEnvironment _env;
 
-    public AuthController(OscDbContext db, JwtService jwt, PasswordService password, EmailService email, IWebHostEnvironment env)
+    public AuthController(OscDbContext db, JwtService jwt, PasswordService password, EmailService email, TotpService totp, IWebHostEnvironment env)
     {
         _db = db;
         _jwt = jwt;
         _password = password;
         _email = email;
+        _totp = totp;
         _env = env;
     }
 
@@ -62,6 +64,23 @@ public class AuthController : ControllerBase
             {
                 await AuditAsync(email, admin.Role, "auth.login.failed", "Invalid password", 401);
                 return Unauthorized(new ApiResponse(false, "Invalid credentials"));
+            }
+
+            // Multi-factor: password is correct, but if the admin enrolled in TOTP
+            // a valid code is required before a session is issued.
+            if (admin.MfaEnabled)
+            {
+                if (string.IsNullOrWhiteSpace(request.MfaCode))
+                {
+                    await AuditAsync(admin.Email, admin.Role, "auth.login.mfa_required", "Password OK, awaiting TOTP", 200);
+                    return Ok(new ApiResponse<MfaChallengeResponse>(true, new MfaChallengeResponse()));
+                }
+
+                if (!_totp.Verify(admin.MfaSecret, request.MfaCode))
+                {
+                    await AuditAsync(admin.Email, admin.Role, "auth.login.failed", "Invalid MFA code", 401);
+                    return Unauthorized(new ApiResponse(false, "Invalid authentication code"));
+                }
             }
 
             var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
@@ -286,6 +305,97 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("osc-session", newToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, finalRole, picture)));
+    }
+
+    /// <summary>Resolve the signed-in admin from the session cookie, or null.</summary>
+    private async Task<AdminUser?> ResolveAdminAsync()
+    {
+        var token = Request.Cookies["osc-session"];
+        if (string.IsNullOrEmpty(token)) return null;
+
+        var principal = _jwt.ValidateToken(token);
+        if (principal is null) return null;
+
+        var role = principal.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+        if (role != "admin") return null;
+
+        var idStr = principal.Claims.First(c => c.Type == "sub" || c.Type == System.Security.Claims.ClaimTypes.NameIdentifier).Value;
+        return Guid.TryParse(idStr, out var id) ? await _db.AdminUsers.FindAsync(id) : null;
+    }
+
+    /// <summary>Whether the signed-in admin currently has TOTP enabled.</summary>
+    [HttpGet("mfa/status")]
+    public async Task<IActionResult> MfaStatus()
+    {
+        var admin = await ResolveAdminAsync();
+        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(admin.MfaEnabled)));
+    }
+
+    /// <summary>
+    /// Begin TOTP enrolment: generate a fresh secret (stored but not yet active) and
+    /// return it with an otpauth URI for the authenticator app / QR code. Requires the
+    /// admin to confirm with <c>mfa/verify</c> before MFA takes effect.
+    /// </summary>
+    [HttpPost("mfa/enroll")]
+    public async Task<IActionResult> MfaEnroll()
+    {
+        var admin = await ResolveAdminAsync();
+        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        if (admin.MfaEnabled)
+            return BadRequest(new ApiResponse(false, "MFA is already enabled. Disable it first to re-enrol."));
+
+        var secret = _totp.GenerateSecret();
+        admin.MfaSecret = secret;
+        admin.UpdatedAt = DateTimeOffset.UtcNow;
+        await _db.SaveChangesAsync();
+
+        var uri = _totp.BuildOtpauthUri(admin.Email, secret);
+        return Ok(new ApiResponse<MfaEnrollResponse>(true, new MfaEnrollResponse(secret, uri)));
+    }
+
+    /// <summary>Confirm enrolment by verifying a code against the pending secret, activating MFA.</summary>
+    [HttpPost("mfa/verify")]
+    public async Task<IActionResult> MfaVerify([FromBody] MfaVerifyRequest request)
+    {
+        var admin = await ResolveAdminAsync();
+        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        if (string.IsNullOrWhiteSpace(admin.MfaSecret))
+            return BadRequest(new ApiResponse(false, "Start enrolment first"));
+
+        if (!_totp.Verify(admin.MfaSecret, request.Code))
+            return BadRequest(new ApiResponse(false, "Invalid authentication code"));
+
+        admin.MfaEnabled = true;
+        admin.UpdatedAt = DateTimeOffset.UtcNow;
+        await _db.SaveChangesAsync();
+        await AuditAsync(admin.Email, admin.Role, "auth.mfa.enabled", "TOTP enabled", 200);
+
+        return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(true)));
+    }
+
+    /// <summary>Disable MFA. Requires the current password and a valid TOTP code.</summary>
+    [HttpPost("mfa/disable")]
+    public async Task<IActionResult> MfaDisable([FromBody] MfaDisableRequest request)
+    {
+        var admin = await ResolveAdminAsync();
+        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        if (!admin.MfaEnabled)
+            return BadRequest(new ApiResponse(false, "MFA is not enabled"));
+
+        if (admin.PasswordHash is null || !_password.VerifyPassword(request.Password, admin.PasswordHash))
+            return BadRequest(new ApiResponse(false, "Current password is incorrect"));
+
+        if (!_totp.Verify(admin.MfaSecret, request.Code))
+            return BadRequest(new ApiResponse(false, "Invalid authentication code"));
+
+        admin.MfaEnabled = false;
+        admin.MfaSecret = null;
+        admin.UpdatedAt = DateTimeOffset.UtcNow;
+        await _db.SaveChangesAsync();
+        await AuditAsync(admin.Email, admin.Role, "auth.mfa.disabled", "TOTP disabled", 200);
+
+        return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(false)));
     }
 
     /// <summary>Request a password reset link via email.</summary>
