@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, User } from 'lucide-react';
 import type { ChatMessage as ChatMessageType } from '@/types';
@@ -8,9 +9,44 @@ interface ChatMessageProps {
   message: ChatMessageType;
 }
 
+// Reveals text word-by-word for a "typing" effect. Runs once per message
+// (guarded by a ref) so re-renders don't restart it; messages that aren't
+// flagged `animate` render their full content immediately.
+function useTypewriter(content: string, enabled: boolean): { text: string; done: boolean } {
+  const [text, setText] = useState(enabled ? '' : content);
+  const [done, setDone] = useState(!enabled);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    if (!enabled || startedRef.current) return;
+    startedRef.current = true;
+
+    // Split into tokens that keep whitespace, so joining a prefix rebuilds
+    // the text exactly (word, space, word, …).
+    const tokens = content.split(/(\s+)/);
+    let i = 0;
+    const timer = setInterval(() => {
+      i += 1;
+      setText(tokens.slice(0, i).join(''));
+      if (i >= tokens.length) {
+        clearInterval(timer);
+        setDone(true);
+      }
+    }, 28); // ~28ms per token
+
+    return () => clearInterval(timer);
+  }, [content, enabled]);
+
+  return { text, done };
+}
+
 export default function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const isSystem = message.role === 'system';
+  const { text: typedContent, done: typingDone } = useTypewriter(
+    message.content,
+    !isUser && !isSystem && Boolean(message.animate),
+  );
 
   const formatTimestamp = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -94,7 +130,15 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               : 'text-white'
           }`}
         >
-          {message.content}
+          {isUser ? message.content : typedContent}
+          {!isUser && !typingDone && (
+            <motion.span
+              aria-hidden="true"
+              className="inline-block w-[2px] h-4 -mb-0.5 ml-0.5 bg-yellow-500 align-middle"
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ duration: 0.9, repeat: Infinity }}
+            />
+          )}
         </div>
         <p className="text-[11px] text-neutral-700 mt-1.5">
           {formatTimestamp(message.timestamp)}

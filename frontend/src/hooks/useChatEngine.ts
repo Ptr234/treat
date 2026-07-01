@@ -7,6 +7,20 @@ import type { ChatUserInfo } from '@/lib/chatbot-service';
 
 const STORAGE_KEY = 'uia-chat-messages';
 const SESSION_KEY = 'uia-chat-session-id';
+
+/**
+ * Strip Markdown formatting from assistant text so it reads cleanly as plain
+ * text (the chat renders raw text, so `**bold**` would otherwise show literal
+ * asterisks). Handles both AI output and our hardcoded topic/escalation copy.
+ */
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/\*\*([\s\S]+?)\*\*/g, '$1')        // **bold** -> bold
+    .replace(/__([\s\S]+?)__/g, '$1')            // __bold__ -> bold
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')     // [text](url) -> text
+    .replace(/`([^`]+)`/g, '$1')                 // `code` -> code
+    .replace(/\*\*/g, '');                        // any stray ** markers
+}
 const MAX_PERSISTED = 50;
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -35,6 +49,9 @@ function persistMessages(messages: ChatMessage[]) {
     const toStore: StoredChat = {
       messages: messages
         .filter(m => m.role !== 'system')
+        // Drop the transient typing-animation flag so restored history renders
+        // instantly instead of re-typing itself out on every page load.
+        .map(({ animate: _animate, ...m }) => m)
         .slice(-MAX_PERSISTED),
       timestamp: Date.now(),
     };
@@ -131,9 +148,10 @@ export function useChatEngine(): ChatEngineResult {
       const assistantMessage: ChatMessage = {
         id: `msg-${Date.now()}-assistant`,
         role: 'assistant',
-        content: response,
+        content: stripMarkdown(response),
         timestamp: new Date().toISOString(),
         sentiment,
+        animate: true, // reveal word-by-word (typing effect)
       };
 
       setMessages(prev => {
@@ -145,9 +163,10 @@ export function useChatEngine(): ChatEngineResult {
           updated.push({
             id: `msg-${Date.now()}-suggest`,
             role: 'assistant',
-            content:
+            content: stripMarkdown(
               'It seems like you might need more personalized help. Would you like to **escalate this to an investment officer** who can assist you directly?\n\n' +
               'You can use the "Escalate to Officer" button, or visit the [full chat page](/chatbot?escalate=true) to submit your details.',
+            ),
             timestamp: new Date().toISOString(),
           });
         }

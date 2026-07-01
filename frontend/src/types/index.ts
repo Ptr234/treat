@@ -373,6 +373,9 @@ export interface ChatMessage {
   language?: ChatLanguage;
   sentiment?: 'positive' | 'neutral' | 'negative';
   escalated?: boolean;
+  /** When true, the assistant message reveals word-by-word (typing effect).
+   *  Transient — stripped before persisting so restored history renders instantly. */
+  animate?: boolean;
 }
 
 export type ChatLanguage = 'en' | 'fr' | 'ar' | 'zh' | 'sw';

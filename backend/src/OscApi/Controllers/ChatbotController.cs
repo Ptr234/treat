@@ -115,7 +115,14 @@ public class ChatbotController : ControllerBase
             - Standards certification by UNBS (Uganda National Bureau of Standards)
 
             Always be helpful, professional, and accurate. If unsure, recommend contacting
-            the relevant agency directly. End each response with [SENTIMENT:positive],
+            the relevant agency directly.
+
+            Formatting: reply in plain text only. Do NOT use any Markdown — no asterisks
+            for bold or italics (** or *), no backticks, no headings, and no markdown link
+            syntax. Write in plain sentences and paragraphs; if you need a list, use a
+            simple hyphen at the start of the line.
+
+            End each response with [SENTIMENT:positive],
             [SENTIMENT:neutral], or [SENTIMENT:negative] based on the user's apparent mood.
             """;
     }
