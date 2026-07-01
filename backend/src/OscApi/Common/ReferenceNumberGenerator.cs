@@ -14,45 +14,34 @@ public class ReferenceNumberGenerator
 
     public async Task<string> GenerateTicketReferenceAsync()
     {
-        var year = DateTime.UtcNow.Year;
-        var prefix = $"UIA-{year}-";
-
-        var lastRef = await _db.Tickets
-            .Where(t => t.ReferenceNumber.StartsWith(prefix))
-            .OrderByDescending(t => t.ReferenceNumber)
-            .Select(t => t.ReferenceNumber)
-            .FirstOrDefaultAsync();
-
-        var nextNumber = 1;
-        if (lastRef is not null)
-        {
-            var numPart = lastRef.Replace(prefix, "");
-            if (int.TryParse(numPart, out var parsed))
-                nextNumber = parsed + 1;
-        }
-
-        return $"{prefix}{nextNumber:D4}";
+        var prefix = $"UIA-{DateTime.UtcNow.Year}-";
+        var next = await NextNumberAsync(_db.Tickets.Select(t => t.ReferenceNumber), prefix);
+        return $"{prefix}{next:D4}";
     }
 
     public async Task<string> GenerateInvestorReferenceAsync()
     {
-        var year = DateTime.UtcNow.Year;
-        var prefix = $"INV-{year}-";
+        var prefix = $"INV-{DateTime.UtcNow.Year}-";
+        var next = await NextNumberAsync(_db.InvestorProfiles.Select(i => i.ReferenceNumber), prefix);
+        return $"{prefix}{next:D4}";
+    }
 
-        var lastRef = await _db.InvestorProfiles
-            .Where(i => i.ReferenceNumber.StartsWith(prefix))
-            .OrderByDescending(i => i.ReferenceNumber)
-            .Select(i => i.ReferenceNumber)
-            .FirstOrDefaultAsync();
-
-        var nextNumber = 1;
-        if (lastRef is not null)
-        {
-            var numPart = lastRef.Replace(prefix, "");
-            if (int.TryParse(numPart, out var parsed))
-                nextNumber = parsed + 1;
-        }
-
-        return $"{prefix}{nextNumber:D4}";
+    /// <summary>
+    /// Compute the next sequence number for a reference prefix. Fetches only the
+    /// references matching the prefix (a LIKE on the DB) and takes the numeric MAX of
+    /// their suffixes in memory. Parsing the suffix as an int — rather than ordering
+    /// the strings — keeps this correct past 9999, where "UIA-2026-10000" sorts
+    /// *below* "UIA-2026-9999" as text. Provider-agnostic (works on Postgres and the
+    /// in-memory test provider). Callers must persist under
+    /// <see cref="DbRetry.SaveWithUniqueReferenceAsync"/> to survive the race where
+    /// two requests read the same MAX concurrently.
+    /// </summary>
+    private static async Task<int> NextNumberAsync(IQueryable<string> references, string prefix)
+    {
+        var matching = await references.Where(r => r.StartsWith(prefix)).ToListAsync();
+        return matching
+            .Select(r => int.TryParse(r.Substring(prefix.Length), out var n) ? n : 0)
+            .DefaultIfEmpty(0)
+            .Max() + 1;
     }
 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminLevel, isStaff } from '@/lib/roles';
 import {
   UserIcon,
   ArrowRightOnRectangleIcon,
@@ -119,12 +120,12 @@ const Header: React.FC = () => {
             <Link href="/projects" className="text-xs font-medium text-gray-600 hover:text-black transition-colors">
               Projects Map
             </Link>
-            {isAuthenticated && (user?.role === 'admin') && (
+            {isAuthenticated && isStaff(user?.role) && (
               <Link href="/tickets" className="text-xs font-medium text-gray-600 hover:text-black transition-colors">
                 Issue Tracking
               </Link>
             )}
-            {isAuthenticated && (user?.role === 'admin') && (
+            {isAuthenticated && isAdminLevel(user?.role) && (
               <Link href="/agency-chat" className="text-xs font-medium text-gray-600 hover:text-black transition-colors">
                 Agency Chat
               </Link>
@@ -204,8 +205,8 @@ const Header: React.FC = () => {
               })}
             </nav>
 
-            {/* DG Dashboard — Admin & CEO only */}
-            {isAuthenticated && (user?.role === 'admin') && (
+            {/* DG Dashboard — admin-level (system admin + Director General) */}
+            {isAuthenticated && isAdminLevel(user?.role) && (
               <Link
                 href="/dashboard"
                 className="hidden lg:flex items-center px-3 py-2 text-sm font-medium rounded-xl transition-all duration-300 bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30 hover:text-yellow-200 border border-yellow-500/30"
@@ -271,13 +272,13 @@ const Header: React.FC = () => {
                     {/* Admins manage everything from the DG Dashboard; regular
                         users get their personal submissions view. */}
                     <Link
-                      href={user.role === 'admin' ? '/dashboard' : '/account'}
+                      href={isAdminLevel(user.role) ? '/dashboard' : '/account'}
                       className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300"
                     >
                       <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center">
                         <Squares2X2Icon className="w-4 h-4 text-yellow-400" />
                       </div>
-                      <span className="ml-3">{user.role === 'admin' ? 'DG Dashboard' : 'My Submissions'}</span>
+                      <span className="ml-3">{isAdminLevel(user.role) ? 'DG Dashboard' : 'My Submissions'}</span>
                     </Link>
                     <Link
                       href="/profile"
@@ -375,8 +376,8 @@ const Header: React.FC = () => {
                     </motion.div>
                   ))}
 
-                  {/* DG Dashboard in mobile — Admin & CEO */}
-                  {isAuthenticated && (user?.role === 'admin') && (
+                  {/* DG Dashboard in mobile — admin-level (system admin + Director General) */}
+                  {isAuthenticated && isAdminLevel(user?.role) && (
                     <motion.div
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}

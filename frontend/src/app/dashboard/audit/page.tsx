@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminLevel } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
 import { ArrowPathIcon, ArrowLeftIcon, LockClosedIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
@@ -25,7 +26,7 @@ function statusClass(code: number) {
 
 export default function AuditPage() {
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
-  const isAdmin = isAuthenticated && user?.role === 'admin';
+  const isAdmin = isAuthenticated && isAdminLevel(user?.role);
 
   const [items, setItems] = useState<AuditEntry[]>([]);
   const [total, setTotal] = useState(0);

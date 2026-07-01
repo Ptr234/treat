@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using OscApi.Common;
 using OscApi.Data;
 using OscApi.Dtos.Chatbot;
@@ -23,6 +24,7 @@ public class ChatbotController : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting("chatbot")]
     public async Task<IActionResult> Chat([FromBody] ChatRequest request)
     {
         var systemPrompt = BuildSystemPrompt(request.Language);
@@ -46,12 +48,15 @@ public class ChatbotController : ControllerBase
         {
             var response = await _groq.ChatAsync(messages);
 
-            // Parse sentiment tag if present (e.g., [SENTIMENT:positive])
+            // Parse sentiment tag if present (e.g., [SENTIMENT:positive]). Normalize
+            // to a known lowercase value; anything unexpected from the model is
+            // dropped so downstream ("negative" → escalation) stays consistent.
             string? sentiment = null;
             var sentimentMatch = System.Text.RegularExpressions.Regex.Match(response, @"\[SENTIMENT:(\w+)\]");
             if (sentimentMatch.Success)
             {
-                sentiment = sentimentMatch.Groups[1].Value;
+                var raw = sentimentMatch.Groups[1].Value.ToLowerInvariant();
+                if (raw is "positive" or "neutral" or "negative") sentiment = raw;
                 response = response.Replace(sentimentMatch.Value, "").Trim();
             }
 
@@ -66,8 +71,18 @@ public class ChatbotController : ControllerBase
     }
 
     [HttpPost("log")]
+    [EnableRateLimiting("chatbot")]
     public async Task<IActionResult> LogChat([FromBody] ChatLogRequest request)
     {
+        // Parse enums defensively: language/tier/sentiment arrive from the client
+        // (and sentiment ultimately from the LLM), so an unexpected value must not
+        // 500 and silently drop the enquiry.
+        var language = Enum.TryParse<ChatLanguage>(request.Language, true, out var lang) ? lang : ChatLanguage.En;
+        var tier = Enum.TryParse<ChatTier>(request.Tier, true, out var t) ? t : ChatTier.Ai;
+        ChatSentiment? sentiment =
+            !string.IsNullOrEmpty(request.Sentiment) && Enum.TryParse<ChatSentiment>(request.Sentiment, true, out var s)
+                ? s : null;
+
         var enquiry = new ChatEnquiry
         {
             SessionId = request.SessionId,
@@ -77,9 +92,9 @@ public class ChatbotController : ControllerBase
             UserLocation = request.UserLocation,
             UserMessage = request.UserMessage,
             BotResponse = request.BotResponse,
-            Language = Enum.Parse<ChatLanguage>(request.Language, true),
-            Sentiment = string.IsNullOrEmpty(request.Sentiment) ? null : Enum.Parse<ChatSentiment>(request.Sentiment, true),
-            Tier = Enum.Parse<ChatTier>(request.Tier, true),
+            Language = language,
+            Sentiment = sentiment,
+            Tier = tier,
         };
 
         _db.ChatEnquiries.Add(enquiry);

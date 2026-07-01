@@ -27,9 +27,10 @@ public class InvestorService : IInvestorService
             query = query.Where(i => i.Status == parsed);
 
         var total = await query.CountAsync();
+        var (skip, take) = Pagination.Normalize(from, to);
         var investors = await query
             .OrderByDescending(i => i.CreatedAt)
-            .Skip(from).Take(to - from)
+            .Skip(skip).Take(take)
             .Select(i => new
             {
                 i.ReferenceNumber, i.Name, i.Email, i.Phone, i.Nationality,
@@ -66,11 +67,8 @@ public class InvestorService : IInvestorService
         if (await _db.InvestorProfiles.AnyAsync(i => i.Email == email))
             return (null, "An investor profile with this email already exists");
 
-        var refNumber = await _refGen.GenerateInvestorReferenceAsync();
-
         var profile = new InvestorProfile
         {
-            ReferenceNumber = refNumber,
             Name = SanitizeHelper.StripHtml(request.Name),
             Email = email,
             Phone = request.Phone,
@@ -92,11 +90,14 @@ public class InvestorService : IInvestorService
         };
 
         _db.InvestorProfiles.Add(profile);
-        await _db.SaveChangesAsync();
+        // Assign the reference number and persist with retry, so concurrent
+        // submissions that generate the same number don't 500 (unique violation).
+        await _db.SaveWithUniqueReferenceAsync(async () =>
+            profile.ReferenceNumber = await _refGen.GenerateInvestorReferenceAsync());
 
         _ = _email.SendInvestorWelcomeAsync(profile.Email, profile.Name, profile.ReferenceNumber);
 
-        return (new InvestorResponse(refNumber, profile.Name, profile.Email, profile.Status.ToString()), null);
+        return (new InvestorResponse(profile.ReferenceNumber, profile.Name, profile.Email, profile.Status.ToString()), null);
     }
 
     public async Task<InvestorResponse?> UpdateAsync(string refNumber, UpdateInvestorRequest request)

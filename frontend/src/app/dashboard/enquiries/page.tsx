@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminLevel } from '@/lib/roles';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
 import {
@@ -78,7 +79,7 @@ const PAGE_SIZE = 20;
 
 export default function EnquiriesPage() {
   const { isAuthenticated, user } = useAuth();
-  const isAdmin = isAuthenticated && user?.role === 'admin';
+  const isAdmin = isAuthenticated && isAdminLevel(user?.role);
 
   const [stats, setStats] = useState<EnquiryStats | null>(null);
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);

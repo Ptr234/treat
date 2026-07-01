@@ -68,7 +68,11 @@ builder.Services.AddScoped<ReferenceNumberGenerator>();
 builder.Services.AddHttpClient<GroqClient>();
 builder.Services.AddHttpClient<RecaptchaService>();
 
-// Redis cache (optional — falls back to in-memory if not configured)
+// Redis cache (optional — falls back to in-memory if not configured).
+// NOTE: the rate limiter (below) and this cache are per-process. They are only
+// safe on a single backend instance. Before scaling horizontally, configure the
+// "Redis" connection string so limits/cache are shared across instances —
+// otherwise each instance enforces its own limits (N instances ⇒ N× the cap).
 var redisConn = builder.Configuration.GetConnectionString("Redis");
 if (!string.IsNullOrEmpty(redisConn))
 {
@@ -77,6 +81,9 @@ if (!string.IsNullOrEmpty(redisConn))
 else
 {
     builder.Services.AddDistributedMemoryCache();
+    Log.Warning(
+        "Redis is not configured: distributed cache and rate limiting are in-memory " +
+        "and per-instance. Do NOT run more than one backend instance in this mode.");
 }
 
 // Business services
@@ -188,20 +195,36 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("RunMigr
     {
         db.Database.Migrate();
 
-        // Seed default admin if not exists
+        // Seed default admin if not exists. Never ship a static production
+        // password: in Development a convenience default is used, but outside
+        // Development the password MUST come from configuration (Seed:AdminPassword,
+        // e.g. an env var / user-secret) or seeding is skipped with a warning.
         if (!db.AdminUsers.Any(a => a.Email == "admin@uia.go.ug"))
         {
-            var pw = scope.ServiceProvider.GetRequiredService<PasswordService>();
-            db.AdminUsers.Add(new OscApi.Models.AdminUser
+            var seedPassword = app.Environment.IsDevelopment()
+                ? (app.Configuration["Seed:AdminPassword"] ?? "Admin@2026!")
+                : app.Configuration["Seed:AdminPassword"];
+
+            if (string.IsNullOrWhiteSpace(seedPassword))
             {
-                Name = "OSC Administrator",
-                Email = "admin@uia.go.ug",
-                PasswordHash = pw.HashPassword("Admin@2026!"),
-                Role = "admin",
-                IsActive = true,
-            });
-            db.SaveChanges();
-            Log.Information("Default admin user seeded: admin@uia.go.ug");
+                Log.Warning(
+                    "Admin seed skipped: no admin@uia.go.ug exists and Seed:AdminPassword " +
+                    "is not configured. Set it to seed the initial administrator.");
+            }
+            else
+            {
+                var pw = scope.ServiceProvider.GetRequiredService<PasswordService>();
+                db.AdminUsers.Add(new OscApi.Models.AdminUser
+                {
+                    Name = "OSC Administrator",
+                    Email = "admin@uia.go.ug",
+                    PasswordHash = pw.HashPassword(seedPassword),
+                    Role = "admin",
+                    IsActive = true,
+                });
+                db.SaveChanges();
+                Log.Information("Default admin user seeded: admin@uia.go.ug");
+            }
         }
     }
     catch (Exception ex)

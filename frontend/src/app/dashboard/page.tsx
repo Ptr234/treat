@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminLevel } from '@/lib/roles';
 import { useDashboard, type RefreshInterval } from '@/hooks/useDashboard';
 import type { DGActivity, AlertSeverity } from '@/types';
 import {
@@ -85,7 +86,7 @@ function formatLastUpdated(date: Date | null): string {
 
 export default function DashboardPage() {
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
-  const isAdmin = isAuthenticated && user?.role === 'admin';
+  const isAdmin = isAuthenticated && isAdminLevel(user?.role);
   const [alertFilter, setAlertFilter] = useState<AlertFilter>('all');
   const [acknowledgedAlerts, setAcknowledgedAlerts] = useState<Set<string>>(new Set());
   const {

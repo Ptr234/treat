@@ -251,9 +251,11 @@ public class AuthController : ControllerBase
         if (!Guid.TryParse(userIdStr, out var userId))
             return BadRequest(new ApiResponse(false, "Profile is not available for this account"));
 
-        // Resolve the underlying account (admin or regular user).
-        var admin = role == "admin" ? await _db.AdminUsers.FindAsync(userId) : null;
-        var user = role != "admin" ? await _db.Users.FindAsync(userId) : null;
+        // Resolve the underlying account. All back-office roles (admin, dg,
+        // agency_officer) live in admin_users; everyone else is a regular user.
+        var isBackOffice = Roles.BackOfficeRoles.Contains(role);
+        var admin = isBackOffice ? await _db.AdminUsers.FindAsync(userId) : null;
+        var user = isBackOffice ? null : await _db.Users.FindAsync(userId);
         if (admin is null && user is null)
             return NotFound(new ApiResponse(false, "Account not found"));
 
@@ -309,7 +311,7 @@ public class AuthController : ControllerBase
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, finalRole, picture, agencyCode)));
     }
 
-    /// <summary>Resolve the signed-in admin from the session cookie, or null.</summary>
+    /// <summary>Resolve the signed-in back-office account from the session cookie, or null.</summary>
     private async Task<AdminUser?> ResolveAdminAsync()
     {
         var token = Request.Cookies["osc-session"];
@@ -318,8 +320,10 @@ public class AuthController : ControllerBase
         var principal = _jwt.ValidateToken(token);
         if (principal is null) return null;
 
+        // Any back-office role (admin, dg, agency_officer) has an admin_users record
+        // and may manage its own MFA — not just the literal "admin" role.
         var role = principal.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
-        if (role != "admin") return null;
+        if (!Roles.BackOfficeRoles.Contains(role)) return null;
 
         var idStr = principal.Claims.First(c => c.Type == "sub" || c.Type == System.Security.Claims.ClaimTypes.NameIdentifier).Value;
         return Guid.TryParse(idStr, out var id) ? await _db.AdminUsers.FindAsync(id) : null;

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeftIcon, FunnelIcon, EnvelopeIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminLevel } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
 
 interface ContactInquiry {
@@ -44,9 +45,9 @@ export default function InquiriesPage() {
   const fetchInquiries = useCallback(async () => {
     setLoading(true);
     const query = agencyFilter ? `?from=0&to=100&agencyCode=${agencyFilter}` : '?from=0&to=100';
-    const res = await apiFetch<{ items: ContactInquiry[]; total: number }>(`/api/contact/inquiries${query}`);
+    const res = await apiFetch<{ inquiries: ContactInquiry[]; total: number }>(`/api/contact/inquiries${query}`);
     if (res.success && res.data) {
-      setInquiries(res.data.items || []);
+      setInquiries(res.data.inquiries || []);
       setTotal(res.data.total || 0);
     }
     setLoading(false);
@@ -56,7 +57,7 @@ export default function InquiriesPage() {
     if (isAuthenticated) fetchInquiries();
   }, [isAuthenticated, fetchInquiries]);
 
-  if (!isAuthenticated || user?.role !== 'admin') {
+  if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
         <p className="text-neutral-400">Admin access required.</p>

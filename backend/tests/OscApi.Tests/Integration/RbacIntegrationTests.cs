@@ -108,4 +108,37 @@ public class RbacIntegrationTests : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, (await dg.GetAsync("/api/dashboard")).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await dg.GetAsync("/api/admin/users")).StatusCode);
     }
+
+    [Fact]
+    public async Task DirectorGeneral_CanManageMfaAndProfile()
+    {
+        var admin = await AdminClient(_factory);
+        var dgEmail = $"dg-{Guid.NewGuid():N}@uia.go.ug";
+
+        var create = await admin.PostAsJsonAsync("/api/admin/users", new
+        {
+            name = "Director General", email = dgEmail, password = "Director@2026!", role = "dg",
+        });
+        Assert.Equal(HttpStatusCode.Created, create.StatusCode);
+
+        var dg = _factory.CreateClient();
+        var login = await dg.PostAsJsonAsync("/api/auth/login",
+            new { email = dgEmail, password = "Director@2026!" });
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+
+        // MFA enrolment must be reachable for a dg (previously "admin"-only → 401).
+        var enroll = await dg.PostAsync("/api/auth/mfa/enroll", null);
+        Assert.Equal(HttpStatusCode.OK, enroll.StatusCode);
+        var enrollData = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
+            .RootElement.GetProperty("data");
+        Assert.False(string.IsNullOrWhiteSpace(enrollData.GetProperty("secret").GetString()));
+
+        // Profile update must resolve the dg in admin_users (previously looked up in
+        // the users table → 404). The returned name reflects the change.
+        var profile = await dg.PatchAsJsonAsync("/api/auth/profile", new { name = "DG Renamed" });
+        Assert.Equal(HttpStatusCode.OK, profile.StatusCode);
+        var name = JsonDocument.Parse(await profile.Content.ReadAsStringAsync())
+            .RootElement.GetProperty("data").GetProperty("name").GetString();
+        Assert.Equal("DG Renamed", name);
+    }
 }

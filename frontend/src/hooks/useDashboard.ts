@@ -28,6 +28,56 @@ interface DashboardState {
   refreshInterval: RefreshInterval;
 }
 
+type BackendDashboard = DGDashboardMetrics & { kpis?: Record<string, number> };
+
+/**
+ * Map the ASP.NET dashboard payload (flat KPI counters under `.kpis`) onto the
+ * DGDashboardMetrics shape the UI renders. Derives rates the backend doesn't
+ * expose directly (response rate, SLA compliance, satisfaction) from the raw
+ * counts. The Next.js fallback route already returns the DGDashboardMetrics
+ * shape, so it passes through untouched.
+ */
+function mapBackendMetrics(raw: BackendDashboard): DGDashboardMetrics {
+  if (!raw.kpis) return raw;
+  const k = raw.kpis;
+
+  const openTickets = k.openTickets ?? 0;
+  const totalTickets = k.totalTickets ?? 0;
+  const resolvedTickets = k.resolvedTickets ?? 0;
+  const slaBreached = k.slaBreached ?? 0;
+  const avgRating = k.avgRating ?? 0;
+  const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
+
+  return {
+    liveInquiries: k.recentInquiries ?? k.totalInquiries ?? 0,
+    activeCases: openTickets,
+    pendingApprovals: k.totalAppointments ?? 0,
+    escalatedCount: k.escalatedTickets ?? 0,
+    // No revenue-pipeline source in the backend yet — report 0 rather than NaN.
+    pipelineValue: 0,
+    responseRate: pct(resolvedTickets, totalTickets),
+    conversionRate: 0,
+    slaCompliance: openTickets > 0 ? Math.round((1 - slaBreached / openTickets) * 100) : 100,
+    investorSatisfaction: pct(avgRating, 5),
+    // The backend does not (yet) supply these structured lists; the UI guards
+    // each with `?? []`, so empty is safe and honest (no fabricated rows).
+    agencyScorecard: [],
+    alerts: [],
+    recentActivity: [],
+    // Pass through the extended KPI counters for secondary displays.
+    totalInquiries: k.totalInquiries,
+    totalAppointments: k.totalAppointments,
+    recentInquiries: k.recentInquiries,
+    recentAppointments: k.recentAppointments,
+    chatEscalations: k.chatEscalations,
+    totalMessages: k.totalMessages,
+    recentMessages: k.recentMessages,
+    toolUsageCount: k.toolUsageCount,
+    downloadCount: k.downloadCount,
+    searchCount: k.searchCount,
+  };
+}
+
 function computeDelta(
   current: DGDashboardMetrics,
   prev: DGDashboardMetrics | null,
@@ -80,9 +130,9 @@ export function useDashboard() {
         return;
       }
 
-      // Normalize: ASP.NET nests KPIs under .kpis; Next.js puts them at top level
-      const raw = json.data;
-      const incoming = (raw.kpis ? { ...raw, ...raw.kpis } : raw) as DGDashboardMetrics;
+      // Normalize: ASP.NET nests KPIs under .kpis (mapped/derived here); the
+      // Next.js fallback route already returns the DGDashboardMetrics shape.
+      const incoming = mapBackendMetrics(json.data as BackendDashboard);
       setState((prev) => ({
         ...prev,
         prevMetrics: prev.metrics,

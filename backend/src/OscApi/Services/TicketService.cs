@@ -28,9 +28,10 @@ public class TicketService : ITicketService
             query = query.Where(t => t.AssignedAgencyCode == agencyScope);
 
         var total = await query.CountAsync();
+        var (skip, take) = Pagination.Normalize(from, to);
         var tickets = await query
             .OrderByDescending(t => t.CreatedAt)
-            .Skip(from).Take(to - from)
+            .Skip(skip).Take(take)
             .Select(t => new
             {
                 t.ReferenceNumber, t.Title, t.Category, t.Priority, t.Status,
@@ -46,13 +47,14 @@ public class TicketService : ITicketService
     public async Task<object> CreateAsync(CreateTicketRequest request)
     {
         var category = Enum.Parse<TicketCategory>(ToPascalCase(request.Category), true);
-        var priority = Enum.Parse<TicketPriority>(request.Priority ?? "medium", true);
+        // Treat empty/whitespace priority as the default; an empty string ("") would
+        // otherwise slip past validation and throw in Enum.Parse.
+        var priorityText = string.IsNullOrWhiteSpace(request.Priority) ? "medium" : request.Priority;
+        var priority = Enum.Parse<TicketPriority>(priorityText, true);
         var (slaHours, slaDeadline) = SlaCalculator.Compute(category, priority);
-        var refNumber = await _refGen.GenerateTicketReferenceAsync();
 
         var ticket = new Ticket
         {
-            ReferenceNumber = refNumber,
             Title = SanitizeHelper.StripHtml(request.Title),
             Description = SanitizeHelper.StripHtml(request.Description),
             Category = category,
@@ -69,7 +71,10 @@ public class TicketService : ITicketService
         };
 
         _db.Tickets.Add(ticket);
-        await _db.SaveChangesAsync();
+        // Assign the reference number and persist with retry, so concurrent
+        // submissions that generate the same number don't 500 (unique violation).
+        await _db.SaveWithUniqueReferenceAsync(async () =>
+            ticket.ReferenceNumber = await _refGen.GenerateTicketReferenceAsync());
 
         _ = _email.SendTicketConfirmationAsync(
             ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, ticket.Title);
@@ -138,10 +143,14 @@ public class TicketService : ITicketService
         if (request.SatisfactionRating is not null) ticket.SatisfactionRating = request.SatisfactionRating;
         if (request.SatisfactionComment is not null) ticket.SatisfactionComment = request.SatisfactionComment;
 
-        if (request.IsEscalated == true)
-            await EscalateAndNotifyAsync(ticket);
+        var newlyEscalated = request.IsEscalated == true && MarkEscalated(ticket);
 
         await _db.SaveChangesAsync();
+
+        // Notifications only after the change is committed, so we never email about
+        // an escalation/status that failed to persist.
+        if (newlyEscalated)
+            await SendEscalationEmailAsync(ticket);
 
         if (request.Status is not null)
             _ = _email.SendTicketStatusUpdateAsync(
@@ -231,8 +240,7 @@ public class TicketService : ITicketService
         if (string.IsNullOrWhiteSpace(request.Email) || request.Email.ToLowerInvariant().Trim() != ticket.ContactEmail)
             return null;
 
-        if (request.IsEscalated == true)
-            await EscalateAndNotifyAsync(ticket);
+        var newlyEscalated = request.IsEscalated == true && MarkEscalated(ticket);
 
         if (request.SatisfactionRating.HasValue)
         {
@@ -247,17 +255,28 @@ public class TicketService : ITicketService
         }
 
         await _db.SaveChangesAsync();
+
+        // Notify only after the escalation is committed.
+        if (newlyEscalated)
+            await SendEscalationEmailAsync(ticket);
+
         return new { ticket.ReferenceNumber, ticket.IsEscalated, ticket.SatisfactionRating };
     }
 
-    /// <summary>Mark a ticket escalated (idempotent) and fire the escalation notification email.</summary>
-    private async Task EscalateAndNotifyAsync(Ticket ticket)
+    /// <summary>Mark a ticket escalated (idempotent). Returns true if this call was
+    /// the one that escalated it (so the caller can notify after committing).</summary>
+    private static bool MarkEscalated(Ticket ticket)
     {
-        if (ticket.IsEscalated) return;
-
+        if (ticket.IsEscalated) return false;
         ticket.IsEscalated = true;
         ticket.EscalatedAt = DateTimeOffset.UtcNow;
+        return true;
+    }
 
+    /// <summary>Fire the escalation notification email (best-effort). Call only after
+    /// the escalation has been persisted.</summary>
+    private async Task SendEscalationEmailAsync(Ticket ticket)
+    {
         var escalationEmails = await _settings.GetEscalationEmailsAsync();
         var customMessage = await _settings.GetAsync(SettingsService.EscalationMessageKey);
 

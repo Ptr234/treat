@@ -19,11 +19,8 @@ public class ContactService : IContactService
 
     public async Task<ContactInquiryResponse> CreateInquiryAsync(CreateContactInquiryRequest request)
     {
-        var refNumber = await GenerateRefAsync("INQ");
-
         var inquiry = new ContactInquiry
         {
-            ReferenceNumber = refNumber,
             AgencyCode = SanitizeHelper.StripHtml(request.AgencyCode),
             AgencyName = SanitizeHelper.StripHtml(request.AgencyName),
             ContactName = SanitizeHelper.StripHtml(request.Name),
@@ -37,7 +34,8 @@ public class ContactService : IContactService
         };
 
         _db.ContactInquiries.Add(inquiry);
-        await _db.SaveChangesAsync();
+        await _db.SaveWithUniqueReferenceAsync(async () =>
+            inquiry.ReferenceNumber = await GenerateRefAsync("INQ"));
 
         _ = _email.SendContactConfirmationAsync(
             inquiry.ContactEmail, inquiry.ContactName, inquiry.ReferenceNumber,
@@ -49,17 +47,14 @@ public class ContactService : IContactService
             request.AgencyEmail);
 
         return new ContactInquiryResponse(
-            refNumber, inquiry.AgencyCode, inquiry.ContactName,
+            inquiry.ReferenceNumber, inquiry.AgencyCode, inquiry.ContactName,
             inquiry.Status.ToString(), inquiry.CreatedAt);
     }
 
     public async Task<AppointmentResponse> CreateAppointmentAsync(CreateAppointmentRequest request)
     {
-        var refNumber = await GenerateRefAsync("APT");
-
         var appointment = new Appointment
         {
-            ReferenceNumber = refNumber,
             AgencyCode = SanitizeHelper.StripHtml(request.AgencyCode),
             AgencyName = SanitizeHelper.StripHtml(request.AgencyName),
             ContactName = SanitizeHelper.StripHtml(request.Name),
@@ -78,7 +73,8 @@ public class ContactService : IContactService
         };
 
         _db.Appointments.Add(appointment);
-        await _db.SaveChangesAsync();
+        await _db.SaveWithUniqueReferenceAsync(async () =>
+            appointment.ReferenceNumber = await GenerateRefAsync("APT"));
 
         _ = _email.SendAppointmentConfirmationAsync(
             appointment.ContactEmail, appointment.ContactName, appointment.ReferenceNumber,
@@ -94,7 +90,7 @@ public class ContactService : IContactService
             request.AgencyEmail);
 
         return new AppointmentResponse(
-            refNumber, appointment.AgencyCode, appointment.ContactName,
+            appointment.ReferenceNumber, appointment.AgencyCode, appointment.ContactName,
             appointment.PreferredDate.ToString("yyyy-MM-dd"), appointment.PreferredTime,
             appointment.Status.ToString(), appointment.CreatedAt);
     }
@@ -106,9 +102,10 @@ public class ContactService : IContactService
             query = query.Where(i => i.AgencyCode == agencyCode);
 
         var total = await query.CountAsync();
+        var (skip, take) = Pagination.Normalize(from, to);
         var items = await query
             .OrderByDescending(i => i.CreatedAt)
-            .Skip(from).Take(to - from)
+            .Skip(skip).Take(take)
             .Select(i => new
             {
                 i.ReferenceNumber, i.AgencyCode, i.AgencyName,
@@ -127,9 +124,10 @@ public class ContactService : IContactService
             query = query.Where(a => a.AgencyCode == agencyCode);
 
         var total = await query.CountAsync();
+        var (skip, take) = Pagination.Normalize(from, to);
         var items = await query
             .OrderByDescending(a => a.CreatedAt)
-            .Skip(from).Take(to - from)
+            .Skip(skip).Take(take)
             .Select(a => new
             {
                 a.ReferenceNumber, a.AgencyCode, a.AgencyName,
@@ -144,29 +142,22 @@ public class ContactService : IContactService
 
     private async Task<string> GenerateRefAsync(string prefix)
     {
-        var year = DateTime.UtcNow.Year;
-        var fullPrefix = $"{prefix}-{year}-";
-
-        // Check both tables for the prefix to avoid collisions
-        var lastInq = await _db.ContactInquiries
-            .Where(i => i.ReferenceNumber.StartsWith(fullPrefix))
-            .OrderByDescending(i => i.ReferenceNumber)
-            .Select(i => i.ReferenceNumber)
-            .FirstOrDefaultAsync();
-
-        var lastApt = await _db.Appointments
-            .Where(a => a.ReferenceNumber.StartsWith(fullPrefix))
-            .OrderByDescending(a => a.ReferenceNumber)
-            .Select(a => a.ReferenceNumber)
-            .FirstOrDefaultAsync();
-
-        var maxNum = 0;
-        foreach (var lastRef in new[] { lastInq, lastApt })
-        {
-            if (lastRef is not null && int.TryParse(lastRef.Replace(fullPrefix, ""), out var parsed) && parsed > maxNum)
-                maxNum = parsed;
-        }
-
+        var fullPrefix = $"{prefix}-{DateTime.UtcNow.Year}-";
+        // Take the numeric MAX of the suffix so the sequence stays correct past 9999,
+        // where "…-10000" sorts below "…-9999" as text. Both tables are checked to
+        // keep INQ/APT sequences from ever colliding.
+        var maxNum = Math.Max(
+            await MaxSuffixAsync(_db.ContactInquiries.Select(i => i.ReferenceNumber), fullPrefix),
+            await MaxSuffixAsync(_db.Appointments.Select(a => a.ReferenceNumber), fullPrefix));
         return $"{fullPrefix}{maxNum + 1:D4}";
+    }
+
+    private static async Task<int> MaxSuffixAsync(IQueryable<string> references, string fullPrefix)
+    {
+        var matching = await references.Where(r => r.StartsWith(fullPrefix)).ToListAsync();
+        return matching
+            .Select(r => int.TryParse(r.Substring(fullPrefix.Length), out var n) ? n : 0)
+            .DefaultIfEmpty(0)
+            .Max();
     }
 }

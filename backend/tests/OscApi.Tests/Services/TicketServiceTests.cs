@@ -60,6 +60,50 @@ public class TicketServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_EmptyPriority_DefaultsToMediumWithoutThrowing()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+
+        // An empty priority string slipped past validation and used to throw in
+        // Enum.Parse; it must now default to medium.
+        var req = new CreateTicketRequest("T1", "D1", "general_inquiry", Priority: "",
+            "a@b.com", "A", null, null, null, null, false);
+
+        var result = await svc.CreateAsync(req);
+        Assert.NotNull(result);
+
+        var db = TestDbFactory.Create(dbName);
+        var ticket = db.Tickets.First();
+        Assert.Equal(TicketPriority.Medium, ticket.Priority);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ReferenceSequence_IsCorrectPast9999()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+        var year = DateTime.UtcNow.Year;
+
+        var req = new CreateTicketRequest("T1", "D1", "general_inquiry", "low",
+            "a@b.com", "A", null, null, null, null, false);
+        await svc.CreateAsync(req);
+
+        // Force the latest reference to the 4-digit ceiling. Lexicographic ordering
+        // would then pick "…-9999" over "…-10000"; the numeric max must not.
+        using (var seed = TestDbFactory.Create(dbName))
+        {
+            var t = seed.Tickets.First();
+            t.ReferenceNumber = $"UIA-{year}-9999";
+            seed.SaveChanges();
+        }
+
+        var next = await svc.CreateAsync(req with { Title = "T2" });
+        var nextRef = next.GetType().GetProperty("ReferenceNumber")!.GetValue(next)!.ToString()!;
+        Assert.Equal($"UIA-{year}-10000", nextRef);
+    }
+
+    [Fact]
     public async Task ListAsync_ReturnsTicketsAndTotal()
     {
         var dbName = Guid.NewGuid().ToString();

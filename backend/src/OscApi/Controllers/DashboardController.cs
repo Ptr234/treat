@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OscApi.Common;
 using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Models;
@@ -26,23 +27,33 @@ public class DashboardController : ControllerBase
         var now = DateTimeOffset.UtcNow;
         var thirtyDaysAgo = now.AddDays(-30);
 
-        var totalTickets = await _db.Tickets.CountAsync();
-        var openTickets = await _db.Tickets.CountAsync(t =>
-            t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed);
-        var resolvedTickets = await _db.Tickets.CountAsync(t => t.Status == TicketStatus.Resolved || t.Status == TicketStatus.Closed);
-        var escalatedTickets = await _db.Tickets.CountAsync(t => t.IsEscalated);
+        // Collapse the per-ticket counters into a single aggregate query (SUM(CASE
+        // WHEN …)) instead of ~7 sequential round-trips to the cloud DB. EF Core
+        // does not allow concurrent queries on one DbContext, so fewer queries —
+        // not parallel ones — is the correct optimization here.
+        var ticketStats = await _db.Tickets
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                Total = g.Count(),
+                Open = g.Count(t => t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed),
+                Resolved = g.Count(t => t.Status == TicketStatus.Resolved || t.Status == TicketStatus.Closed),
+                Escalated = g.Count(t => t.IsEscalated),
+                SlaBreached = g.Count(t =>
+                    t.SlaDeadlineAt != null && t.SlaDeadlineAt < now &&
+                    t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed),
+                Recent = g.Count(t => t.CreatedAt >= thirtyDaysAgo),
+                AvgRating = g.Average(t => (double?)t.SatisfactionRating) ?? 0,
+            })
+            .FirstOrDefaultAsync();
 
-        var slaBreached = await _db.Tickets.CountAsync(t =>
-            t.SlaDeadlineAt != null && t.SlaDeadlineAt < now &&
-            t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed);
-
-        var avgRating = await _db.Tickets
-            .Where(t => t.SatisfactionRating != null)
-            .AverageAsync(t => (double?)t.SatisfactionRating) ?? 0;
-
-        var recentTickets = await _db.Tickets
-            .Where(t => t.CreatedAt >= thirtyDaysAgo)
-            .CountAsync();
+        var totalTickets = ticketStats?.Total ?? 0;
+        var openTickets = ticketStats?.Open ?? 0;
+        var resolvedTickets = ticketStats?.Resolved ?? 0;
+        var escalatedTickets = ticketStats?.Escalated ?? 0;
+        var slaBreached = ticketStats?.SlaBreached ?? 0;
+        var avgRating = ticketStats?.AvgRating ?? 0;
+        var recentTickets = ticketStats?.Recent ?? 0;
 
         var ticketsByCategory = await _db.Tickets
             .GroupBy(t => t.Category)
@@ -57,23 +68,44 @@ public class DashboardController : ControllerBase
         var totalInvestors = await _db.InvestorProfiles.CountAsync();
         var totalChatSessions = await _db.ChatEnquiries.Select(c => c.SessionId).Distinct().CountAsync();
 
-        // Contact & appointment counts
-        var totalInquiries = await _db.ContactInquiries.CountAsync();
-        var totalAppointments = await _db.Appointments.CountAsync();
-        var recentInquiries = await _db.ContactInquiries.CountAsync(i => i.CreatedAt >= thirtyDaysAgo);
-        var recentAppointments = await _db.Appointments.CountAsync(a => a.CreatedAt >= thirtyDaysAgo);
+        // Contact & appointment counts — one aggregate query per table.
+        var inquiryStats = await _db.ContactInquiries
+            .GroupBy(_ => 1)
+            .Select(g => new { Total = g.Count(), Recent = g.Count(i => i.CreatedAt >= thirtyDaysAgo) })
+            .FirstOrDefaultAsync();
+        var appointmentStats = await _db.Appointments
+            .GroupBy(_ => 1)
+            .Select(g => new { Total = g.Count(), Recent = g.Count(a => a.CreatedAt >= thirtyDaysAgo) })
+            .FirstOrDefaultAsync();
+        var totalInquiries = inquiryStats?.Total ?? 0;
+        var recentInquiries = inquiryStats?.Recent ?? 0;
+        var totalAppointments = appointmentStats?.Total ?? 0;
+        var recentAppointments = appointmentStats?.Recent ?? 0;
 
         // Escalation count (from chatbot)
         var chatEscalations = await _db.ChatEnquiries.CountAsync(c => c.Tier == ChatTier.Escalation);
 
-        // Message volume
-        var totalMessages = await _db.TicketMessages.CountAsync();
-        var recentMessages = await _db.TicketMessages.CountAsync(m => m.SentAt >= thirtyDaysAgo);
+        // Message volume — single aggregate query.
+        var messageStats = await _db.TicketMessages
+            .GroupBy(_ => 1)
+            .Select(g => new { Total = g.Count(), Recent = g.Count(m => m.SentAt >= thirtyDaysAgo) })
+            .FirstOrDefaultAsync();
+        var totalMessages = messageStats?.Total ?? 0;
+        var recentMessages = messageStats?.Recent ?? 0;
 
-        // Analytics events (tool usage, downloads)
-        var toolUsageCount = await _db.AnalyticsEvents.CountAsync(e => e.EventType == "tool_usage");
-        var downloadCount = await _db.AnalyticsEvents.CountAsync(e => e.EventType == "download");
-        var searchCount = await _db.AnalyticsEvents.CountAsync(e => e.EventType == "search");
+        // Analytics events (tool usage, downloads) — single aggregate query.
+        var analyticsStats = await _db.AnalyticsEvents
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                Tool = g.Count(e => e.EventType == "tool_usage"),
+                Download = g.Count(e => e.EventType == "download"),
+                Search = g.Count(e => e.EventType == "search"),
+            })
+            .FirstOrDefaultAsync();
+        var toolUsageCount = analyticsStats?.Tool ?? 0;
+        var downloadCount = analyticsStats?.Download ?? 0;
+        var searchCount = analyticsStats?.Search ?? 0;
 
         var toolBreakdown = await _db.AnalyticsEvents
             .Where(e => e.EventType == "tool_usage")
@@ -142,9 +174,10 @@ public class DashboardController : ControllerBase
         }
 
         var total2 = await _db.ChatEnquiries.CountAsync();
+        var (skip, take) = Pagination.Normalize(from, to);
         var enquiries = await _db.ChatEnquiries
             .OrderByDescending(c => c.CreatedAt)
-            .Skip(from).Take(to - from)
+            .Skip(skip).Take(take)
             .Select(c => new
             {
                 c.SessionId, c.UserName, c.UserEmail, c.UserMessage, c.BotResponse,

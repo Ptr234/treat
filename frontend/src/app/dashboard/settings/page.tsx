@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeftIcon, Cog6ToothIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdminLevel } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
 
 interface EscalationSettings {
@@ -78,7 +79,7 @@ export default function SettingsPage() {
     }
   };
 
-  if (!isAuthenticated || user?.role !== 'admin') {
+  if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
         <p className="text-neutral-400">Admin access required.</p>
