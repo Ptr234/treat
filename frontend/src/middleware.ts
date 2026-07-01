@@ -18,7 +18,13 @@ async function isValidAdmin(request: NextRequest): Promise<boolean> {
 
   try {
     const { payload } = await jwtVerify(token, getJwtSecret());
-    return payload.role === 'admin';
+    // Accept the short "role" claim (Next.js-issued tokens) or the .NET
+    // ClaimTypes.Role URI (ASP.NET-issued tokens), so a session from either
+    // tier — old or new — authorises correctly.
+    const role =
+      payload.role ??
+      payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    return role === 'admin';
   } catch {
     return false;
   }
