@@ -13,14 +13,25 @@ interface AdminUser {
   role: string;
   isActive: boolean;
   createdAt: string;
+  agencyCode?: string | null;
 }
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: 'Admin',
+  dg: 'Director General',
+  agency_officer: 'Agency Officer',
+  officer: 'Agency Officer', // legacy alias
+};
+
+const roleLabel = (role: string) => ROLE_LABELS[role] ?? role;
 
 export default function UserManagementPage() {
   const { isAuthenticated, user } = useAuth();
+  const isAdminLevel = ['admin', 'dg'].includes(user?.role ?? '');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [createForm, setCreateForm] = useState({ name: '', email: '', password: '', role: 'admin' });
+  const [createForm, setCreateForm] = useState({ name: '', email: '', password: '', role: 'admin', agencyCode: '' });
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -44,7 +55,7 @@ export default function UserManagementPage() {
     });
     if (res.success) {
       setFeedback({ type: 'success', message: `User ${createForm.email} created successfully.` });
-      setCreateForm({ name: '', email: '', password: '', role: 'admin' });
+      setCreateForm({ name: '', email: '', password: '', role: 'admin', agencyCode: '' });
       setShowCreate(false);
       fetchUsers();
     } else {
@@ -77,13 +88,15 @@ export default function UserManagementPage() {
     }
   };
 
-  if (!isAuthenticated || user?.role !== 'admin') {
+  if (!isAuthenticated || !isAdminLevel) {
     return (
       <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
         <p className="text-neutral-400">Admin access required.</p>
       </div>
     );
   }
+
+  const needsAgencyCode = createForm.role === 'agency_officer';
 
   const inputClass = "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent";
 
@@ -139,14 +152,28 @@ export default function UserManagementPage() {
               <div>
                 <label className="block text-sm text-neutral-400 mb-1">Role</label>
                 <select value={createForm.role} onChange={e => setCreateForm(p => ({ ...p, role: e.target.value }))} className={inputClass}>
-                  <option value="admin">Admin</option>
-                  <option value="officer">Officer</option>
+                  <option value="admin">Admin — full access</option>
+                  <option value="dg">Director General — full access</option>
+                  <option value="agency_officer">Agency Officer — scoped to one agency</option>
                 </select>
               </div>
+              {needsAgencyCode && (
+                <div>
+                  <label className="block text-sm text-neutral-400 mb-1">Agency Code (required)</label>
+                  <input
+                    type="text"
+                    value={createForm.agencyCode}
+                    onChange={e => setCreateForm(p => ({ ...p, agencyCode: e.target.value.toUpperCase() }))}
+                    className={inputClass}
+                    placeholder="e.g. UIA, URSB, URA"
+                  />
+                  <p className="text-xs text-neutral-500 mt-1">The officer will only see tickets assigned to this agency.</p>
+                </div>
+              )}
             </div>
             <div className="flex gap-3 justify-end">
               <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-neutral-400 hover:text-white transition-colors">Cancel</button>
-              <button onClick={handleCreate} disabled={saving || !createForm.name || !createForm.email || !createForm.password}
+              <button onClick={handleCreate} disabled={saving || !createForm.name || !createForm.email || !createForm.password || (needsAgencyCode && !createForm.agencyCode.trim())}
                 className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 disabled:opacity-50 transition-colors">
                 {saving ? 'Creating...' : 'Create User'}
               </button>
@@ -173,8 +200,10 @@ export default function UserManagementPage() {
                     <div className="font-semibold flex items-center gap-2">
                       {u.name}
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        u.role === 'admin' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-blue-500/20 text-blue-400'
-                      }`}>{u.role}</span>
+                        u.role === 'admin' || u.role === 'dg' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {roleLabel(u.role)}{u.agencyCode ? ` · ${u.agencyCode}` : ''}
+                      </span>
                       {!u.isActive && <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/20 text-red-400">Inactive</span>}
                     </div>
                     <div className="text-sm text-neutral-500">{u.email}</div>
