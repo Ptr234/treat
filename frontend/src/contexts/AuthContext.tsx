@@ -122,10 +122,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ── Logout via API ─────────────────────────────────────────────────
-  const logout = useCallback(async () => {
-    await apiFetch('/api/auth/logout', { method: 'POST' });
-    setState({ user: null, isAuthenticated: false, isLoading: false, error: null });
+  const logout = useCallback(async (reason?: string) => {
+    try { await apiFetch('/api/auth/logout', { method: 'POST' }); } catch { /* ignore */ }
+    setState({ user: null, isAuthenticated: false, isLoading: false, error: reason ?? null });
   }, []);
+
+  // ── Idle-timeout auto-logout (security) ─────────────────────────────
+  // Signs the user out after a period of inactivity, so an unattended
+  // admin session cannot be picked up by someone else.
+  useEffect(() => {
+    if (!state.isAuthenticated) return;
+    const IDLE_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+    let timer: ReturnType<typeof setTimeout>;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { logout('You were signed out due to inactivity.'); }, IDLE_LIMIT_MS);
+    };
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    events.forEach((e) => window.addEventListener(e, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, reset));
+    };
+  }, [state.isAuthenticated, logout]);
 
   const clearError = useCallback(() => setState(s => ({ ...s, error: null })), []);
 

@@ -26,6 +26,7 @@ const MIGRATED_PREFIXES = [
   '/api/settings',
   '/api/admin',
   '/api/analytics',
+  '/api/audit',
 ];
 
 function resolveUrl(path: string): string {

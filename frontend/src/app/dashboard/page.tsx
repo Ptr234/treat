@@ -27,6 +27,7 @@ import {
   Squares2X2Icon,
   TicketIcon,
   MapIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
@@ -499,6 +500,7 @@ export default function DashboardPage() {
               { label: 'Agency Chat', href: '/agency-chat', icon: ChatBubbleLeftRightIcon },
               { label: 'Tickets', href: '/tickets', icon: TicketIcon },
               { label: 'Projects', href: '/projects', icon: MapIcon },
+              { label: 'Audit Trail', href: '/dashboard/audit', icon: ShieldCheckIcon },
             ].map((l) => (
               <Link
                 key={l.href}
