@@ -9,6 +9,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Enables running as a Windows Service (no-op when launched as a console app),
+// so the backend can be installed via scripts/install-backend-service.ps1.
+builder.Host.UseWindowsService();
+
 // Sentry error tracking (optional — skipped if DSN not configured)
 var sentryDsn = builder.Configuration["Sentry:Dsn"];
 if (!string.IsNullOrEmpty(sentryDsn))
@@ -163,6 +167,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<OscApi.Middleware.AuditMiddleware>();
 app.UseRateLimiter();
 app.MapControllers();
 

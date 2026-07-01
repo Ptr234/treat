@@ -20,6 +20,7 @@ public class OscDbContext : DbContext
     public DbSet<Appointment> Appointments => Set<Appointment>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<AnalyticsEvent> AnalyticsEvents => Set<AnalyticsEvent>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     public override int SaveChanges()
     {
@@ -155,6 +156,13 @@ public class OscDbContext : DbContext
         {
             e.HasIndex(a => new { a.EventType, a.CreatedAt });
             e.HasIndex(a => a.CreatedAt);
+        });
+
+        // AuditLog
+        modelBuilder.Entity<AuditLog>(e =>
+        {
+            e.HasIndex(a => a.Timestamp);
+            e.HasIndex(a => a.ActorEmail);
         });
 
         // Admin seeding handled in Program.cs (upsert-style) to avoid migration conflicts

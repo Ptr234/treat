@@ -29,6 +29,25 @@ public class AuthController : ControllerBase
         _env = env;
     }
 
+    /// <summary>Append a best-effort audit entry (never throws into the request).</summary>
+    private async Task AuditAsync(string email, string role, string action, string? details, int status)
+    {
+        try
+        {
+            _db.AuditLogs.Add(new AuditLog
+            {
+                ActorEmail = email,
+                ActorRole = role,
+                Action = action,
+                Details = details,
+                StatusCode = status,
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            });
+            await _db.SaveChangesAsync();
+        }
+        catch { /* audit is best-effort */ }
+    }
+
     /// <summary>Login with email and password (admins and regular users).</summary>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -40,10 +59,14 @@ public class AuthController : ControllerBase
         if (admin is not null)
         {
             if (admin.PasswordHash is null || !_password.VerifyPassword(request.Password, admin.PasswordHash))
+            {
+                await AuditAsync(email, admin.Role, "auth.login.failed", "Invalid password", 401);
                 return Unauthorized(new ApiResponse(false, "Invalid credentials"));
+            }
 
             var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
             Response.Cookies.Append("osc-session", adminToken, _jwt.GetCookieOptions(_env.IsProduction()));
+            await AuditAsync(admin.Email, admin.Role, "auth.login", "Successful sign-in", 200);
             return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
                 admin.Id.ToString(), admin.Email, admin.Name, admin.Role)));
         }
@@ -51,10 +74,14 @@ public class AuthController : ControllerBase
         // Regular users.
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
         if (user is null || user.PasswordHash is null || !_password.VerifyPassword(request.Password, user.PasswordHash))
+        {
+            await AuditAsync(email, "user", "auth.login.failed", "Invalid credentials", 401);
             return Unauthorized(new ApiResponse(false, "Invalid credentials"));
+        }
 
         var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
+        await AuditAsync(user.Email, user.Role, "auth.login", "Successful sign-in", 200);
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
             user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture)));
     }
