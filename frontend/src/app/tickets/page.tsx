@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function TicketsPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   // Back-office staff (system admin, Director General, agency officers) may use
   // the tracking board; agency officers see only their agency's tickets (scoped
   // server-side). Regular users get the restricted "submit a ticket" view.
@@ -83,6 +83,21 @@ export default function TicketsPage() {
 
     return { total, open, resolved, avgResolutionTime };
   }, [tickets]);
+
+  // While the session check is still in flight we can't yet tell staff from
+  // regular users. Show a neutral loading state instead of briefly flashing
+  // (or getting stuck on) the restricted "submit a ticket" view — which is
+  // what an authenticated admin was wrongly seeing on a fresh page load.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm">Loading Issue Tracking System…</p>
+        </div>
+      </div>
+    );
+  }
 
   // Non-staff users see a restricted view directing them to create a ticket
   if (!isStaff) {
