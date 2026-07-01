@@ -39,6 +39,7 @@ const Footer: React.FC = () => {
       { name: 'Issue Tracking', href: '/tickets' }
     ],
     Resources: [
+      { name: 'How to Use the Portal', href: '/guide' },
       { name: 'Downloads', href: '/downloads' },
       { name: 'Tools & Calculators', href: '/tools' },
       { name: 'Invoice Generator', href: '/tools/invoice-generator' },
