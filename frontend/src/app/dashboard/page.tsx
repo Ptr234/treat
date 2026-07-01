@@ -99,6 +99,8 @@ export default function DashboardPage() {
   // Executive action state
   const [actionModal, setActionModal] = useState<'flag' | 'message' | 'review' | null>(null);
   const [actionInput, setActionInput] = useState('');
+  const [reviewDate, setReviewDate] = useState('');
+  const [reviewTime, setReviewTime] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
@@ -198,21 +200,30 @@ export default function DashboardPage() {
   };
 
   const handleScheduleReview = async () => {
-    if (!actionInput.trim()) return;
+    if (!actionInput.trim() || !reviewDate) return;
     setActionLoading(true);
     try {
+      const dateLabel = new Date(`${reviewDate}T00:00:00`).toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      });
+      const when = reviewTime ? `${dateLabel} at ${reviewTime}` : dateLabel;
+
       const result = await apiFetch('/api/messages/', {
         method: 'POST',
         body: JSON.stringify({
           channel: 'general',
-          content: `Review Scheduled: ${actionInput.trim()}\n\nRequested by Director General on ${new Date().toLocaleDateString('en-GB')}`,
+          content: `📅 Review scheduled for ${when}\n\n${actionInput.trim()}\n\nRequested by Director General on ${new Date().toLocaleDateString('en-GB')}`,
           senderAgencyCode: 'UIA',
         }),
       });
       if (result.success) {
-        setActionSuccess('Review scheduled and team notified');
+        setActionSuccess(`Review scheduled for ${when} — team notified`);
         setActionModal(null);
         setActionInput('');
+        setReviewDate('');
+        setReviewTime('');
+      } else {
+        setActionSuccess(`Error: ${result.error || 'Failed to schedule review'}`);
       }
     } catch {
       setActionSuccess('Network error — could not schedule review');
@@ -982,7 +993,7 @@ export default function DashboardPage() {
               <DocumentTextIcon className="w-6 h-6" />
               <span className="font-semibold">Generate Report</span>
             </button>
-            <button onClick={() => { setActionModal('review'); setActionInput(''); }} className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-lg transition-all hover:shadow-lg flex items-center gap-3">
+            <button onClick={() => { setActionModal('review'); setActionInput(''); setReviewDate(''); setReviewTime(''); }} className="bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-lg transition-all hover:shadow-lg flex items-center gap-3">
               <CalendarIcon className="w-6 h-6" />
               <span className="font-semibold">Schedule Review</span>
             </button>
@@ -1001,8 +1012,31 @@ export default function DashboardPage() {
                   ? 'Enter the ticket reference number (e.g. UIA-2026-0001):'
                   : actionModal === 'message'
                     ? 'Enter your message to broadcast to all agency officers:'
-                    : 'Enter the review topic and any notes:'}
+                    : 'Pick a date and time, then add the review topic and any notes:'}
               </p>
+              {actionModal === 'review' && (
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={reviewDate}
+                      min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setReviewDate(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Time (optional)</label>
+                    <input
+                      type="time"
+                      value={reviewTime}
+                      onChange={(e) => setReviewTime(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              )}
               {actionModal === 'flag' ? (
                 <input
                   value={actionInput}
@@ -1021,14 +1055,14 @@ export default function DashboardPage() {
               )}
               <div className="flex flex-col-reverse sm:flex-row gap-3 mt-4">
                 <button
-                  onClick={() => { setActionModal(null); setActionInput(''); }}
+                  onClick={() => { setActionModal(null); setActionInput(''); setReviewDate(''); setReviewTime(''); }}
                   className="flex-1 px-4 py-2.5 min-h-[44px] border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={actionModal === 'flag' ? handleFlagCase : actionModal === 'message' ? handleSendMessage : handleScheduleReview}
-                  disabled={!actionInput.trim() || actionLoading}
+                  disabled={!actionInput.trim() || actionLoading || (actionModal === 'review' && !reviewDate)}
                   className="flex-1 px-4 py-2.5 bg-black text-white rounded-lg hover:bg-neutral-800 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium transition-colors"
                 >
                   {actionLoading ? 'Processing...' : actionModal === 'flag' ? 'Flag Case' : actionModal === 'message' ? 'Send Message' : 'Schedule'}
