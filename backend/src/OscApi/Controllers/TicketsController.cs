@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using OscApi.Common;
 using OscApi.Dtos.Common;
 using OscApi.Dtos.Tickets;
 using OscApi.Services;
@@ -18,12 +19,28 @@ public class TicketsController : ControllerBase
         _tickets = tickets;
     }
 
-    /// <summary>List all tickets (admin only).</summary>
+    /// <summary>
+    /// The agency an agency_officer is limited to, or null for admin-level staff
+    /// (who see everything). Sets <paramref name="misconfigured"/> to true when an
+    /// officer account has no agency configured, so the caller can deny access.
+    /// </summary>
+    private string? ResolveAgencyScope(out bool misconfigured)
+    {
+        misconfigured = false;
+        if (!User.IsAgencyOfficer()) return null;
+        var code = User.GetAgencyCode();
+        if (string.IsNullOrEmpty(code)) misconfigured = true;
+        return code;
+    }
+
+    /// <summary>List tickets. Admin-level staff see all; agency officers see only their agency's.</summary>
     [HttpGet]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Roles.StaffPolicy)]
     public async Task<IActionResult> ListTickets([FromQuery] int from = 0, [FromQuery] int to = 50)
     {
-        var result = await _tickets.ListAsync(from, to);
+        var scope = ResolveAgencyScope(out var misconfigured);
+        if (misconfigured) return Forbid();
+        var result = await _tickets.ListAsync(from, to, scope);
         return Ok(new ApiResponse<object>(true, result));
     }
 
@@ -40,21 +57,27 @@ public class TicketsController : ControllerBase
     [HttpGet("{refNumber}")]
     public async Task<IActionResult> GetTicket(string refNumber, [FromQuery] string? email)
     {
-        var isAdmin = User.IsInRole("admin");
-        var result = await _tickets.GetByRefAsync(refNumber, email, isAdmin);
+        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        var scope = ResolveAgencyScope(out var misconfigured);
+        if (misconfigured) return Forbid();
+
+        var result = await _tickets.GetByRefAsync(refNumber, email, isStaff, scope);
         if (result is null)
-            return isAdmin
+            return isStaff
                 ? NotFound(new ApiResponse(false, "Ticket not found"))
                 : StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
         return Ok(new ApiResponse<object>(true, result));
     }
 
-    /// <summary>Update a ticket (admin only).</summary>
+    /// <summary>Update a ticket. Admin-level staff, or an agency officer for their own agency's tickets.</summary>
     [HttpPatch("{refNumber}")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Roles.StaffPolicy)]
     public async Task<IActionResult> UpdateTicket(string refNumber, [FromBody] UpdateTicketRequest request)
     {
-        var result = await _tickets.UpdateAsync(refNumber, request);
+        var scope = ResolveAgencyScope(out var misconfigured);
+        if (misconfigured) return Forbid();
+
+        var result = await _tickets.UpdateAsync(refNumber, request, scope);
         if (result is null) return NotFound(new ApiResponse(false, "Ticket not found"));
         return Ok(new ApiResponse<object>(true, result));
     }
@@ -63,8 +86,11 @@ public class TicketsController : ControllerBase
     [HttpGet("{refNumber}/messages")]
     public async Task<IActionResult> GetMessages(string refNumber, [FromQuery] string? email)
     {
-        var isAdmin = User.IsInRole("admin");
-        var result = await _tickets.GetMessagesAsync(refNumber, email, isAdmin);
+        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        var scope = ResolveAgencyScope(out var misconfigured);
+        if (misconfigured) return Forbid();
+
+        var result = await _tickets.GetMessagesAsync(refNumber, email, isStaff, scope);
         if (result is null) return NotFound(new ApiResponse(false, "Ticket not found"));
         return Ok(new ApiResponse<object>(true, result));
     }

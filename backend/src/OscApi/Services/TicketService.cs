@@ -21,10 +21,14 @@ public class TicketService : ITicketService
         _refGen = refGen;
     }
 
-    public async Task<object> ListAsync(int from, int to)
+    public async Task<object> ListAsync(int from, int to, string? agencyScope = null)
     {
-        var total = await _db.Tickets.CountAsync();
-        var tickets = await _db.Tickets
+        var query = _db.Tickets.AsQueryable();
+        if (!string.IsNullOrEmpty(agencyScope))
+            query = query.Where(t => t.AssignedAgencyCode == agencyScope);
+
+        var total = await query.CountAsync();
+        var tickets = await query
             .OrderByDescending(t => t.CreatedAt)
             .Skip(from).Take(to - from)
             .Select(t => new
@@ -73,7 +77,7 @@ public class TicketService : ITicketService
         return new { ticket.ReferenceNumber, ticket.Title, ticket.Status, ticket.SlaDeadlineAt };
     }
 
-    public async Task<object?> GetByRefAsync(string refNumber, string? email, bool isAdmin)
+    public async Task<object?> GetByRefAsync(string refNumber, string? email, bool isStaff, string? agencyScope = null)
     {
         var ticket = await _db.Tickets
             .Include(t => t.Messages.OrderBy(m => m.SentAt))
@@ -81,14 +85,19 @@ public class TicketService : ITicketService
 
         if (ticket is null) return null;
 
-        if (!isAdmin)
+        if (!isStaff)
         {
             if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail)
                 return null;
         }
+        else if (!string.IsNullOrEmpty(agencyScope) && ticket.AssignedAgencyCode != agencyScope)
+        {
+            // Staff member scoped to another agency — treat as not found.
+            return null;
+        }
 
         var messages = ticket.Messages
-            .Where(m => isAdmin || !m.IsInternal)
+            .Where(m => isStaff || !m.IsInternal)
             .Select(m => new { m.Content, m.AuthorName, m.AuthorRole, m.AuthorEmail, m.IsInternal, m.SentAt })
             .ToList();
 
@@ -107,10 +116,14 @@ public class TicketService : ITicketService
         };
     }
 
-    public async Task<object?> UpdateAsync(string refNumber, UpdateTicketRequest request)
+    public async Task<object?> UpdateAsync(string refNumber, UpdateTicketRequest request, string? agencyScope = null)
     {
         var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
         if (ticket is null) return null;
+
+        // Agency officers may only modify tickets assigned to their agency.
+        if (!string.IsNullOrEmpty(agencyScope) && ticket.AssignedAgencyCode != agencyScope)
+            return null;
 
         if (request.Status is not null)
         {
@@ -148,7 +161,7 @@ public class TicketService : ITicketService
         return new { ticket.ReferenceNumber, ticket.Status };
     }
 
-    public async Task<object?> GetMessagesAsync(string refNumber, string? email, bool isAdmin)
+    public async Task<object?> GetMessagesAsync(string refNumber, string? email, bool isStaff, string? agencyScope = null)
     {
         var ticket = await _db.Tickets
             .Include(t => t.Messages.OrderBy(m => m.SentAt))
@@ -156,11 +169,18 @@ public class TicketService : ITicketService
 
         if (ticket is null) return null;
 
-        if (!isAdmin && (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail))
+        if (!isStaff)
+        {
+            if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail)
+                return null;
+        }
+        else if (!string.IsNullOrEmpty(agencyScope) && ticket.AssignedAgencyCode != agencyScope)
+        {
             return null;
+        }
 
         return ticket.Messages
-            .Where(m => isAdmin || !m.IsInternal)
+            .Where(m => isStaff || !m.IsInternal)
             .Select(m => new { m.Content, m.AuthorName, m.AuthorRole, m.AuthorEmail, m.IsInternal, m.SentAt })
             .ToList();
     }

@@ -21,6 +21,10 @@ public class AdminUser
     [MaxLength(50)]
     public string Role { get; set; } = "admin";
 
+    /// <summary>For agency_officer accounts, the agency whose records they may access. Null for admin-level roles.</summary>
+    [MaxLength(20)]
+    public string? AgencyCode { get; set; }
+
     public bool IsActive { get; set; } = true;
 
     [MaxLength(200)]

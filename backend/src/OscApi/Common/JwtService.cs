@@ -24,7 +24,7 @@ public class JwtService
         _secureCookies = (config["SiteUrl"] ?? "").StartsWith("https", StringComparison.OrdinalIgnoreCase);
     }
 
-    public string CreateToken(string userId, string email, string name, string role, string? picture = null)
+    public string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -44,6 +44,10 @@ public class JwtService
 
         if (picture is not null)
             claims.Add(new Claim("picture", picture));
+
+        // Agency scope for agency_officer accounts (absent for admin-level roles).
+        if (!string.IsNullOrEmpty(agencyCode))
+            claims.Add(new Claim("agency_code", agencyCode));
 
         var token = new JwtSecurityToken(
             issuer: _issuer,

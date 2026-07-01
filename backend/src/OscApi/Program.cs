@@ -95,7 +95,13 @@ builder.Services.AddAuthentication("OscCookie")
         "OscCookie", null);
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
+    // Admin-level: full back-office access (Director General + system admins).
+    options.AddPolicy(OscApi.Common.Roles.AdminOnlyPolicy,
+        policy => policy.RequireRole(OscApi.Common.Roles.AdminLevel));
+    // Staff: all back-office roles, including agency officers (who are then
+    // scoped to their own agency inside each controller/query).
+    options.AddPolicy(OscApi.Common.Roles.StaffPolicy,
+        policy => policy.RequireRole(OscApi.Common.Roles.Staff));
 });
 
 // Controllers + Swagger

@@ -11,7 +11,10 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export default function TicketsPage() {
   const { user, isAuthenticated } = useAuth();
-  const isAdmin = isAuthenticated && (user?.role === 'admin');
+  // Back-office staff (system admin, Director General, agency officers) may use
+  // the tracking board; agency officers see only their agency's tickets (scoped
+  // server-side). Regular users get the restricted "submit a ticket" view.
+  const isStaff = isAuthenticated && ['admin', 'dg', 'agency_officer'].includes(user?.role ?? '');
   const { data: tickets } = useTickets();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,8 +84,8 @@ export default function TicketsPage() {
     return { total, open, resolved, avgResolutionTime };
   }, [tickets]);
 
-  // Non-admin users see a restricted view directing them to create a ticket
-  if (!isAdmin) {
+  // Non-staff users see a restricted view directing them to create a ticket
+  if (!isStaff) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full text-center">

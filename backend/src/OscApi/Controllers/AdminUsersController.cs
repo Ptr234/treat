@@ -30,7 +30,7 @@ public class AdminUsersController : ControllerBase
         var users = await _db.AdminUsers
             .OrderBy(u => u.Name)
             .Select(u => new AdminListItem(
-                u.Id.ToString(), u.Name, u.Email, u.Role, u.IsActive, u.CreatedAt))
+                u.Id.ToString(), u.Name, u.Email, u.Role, u.IsActive, u.CreatedAt, u.AgencyCode))
             .ToListAsync();
 
         return Ok(new ApiResponse<object>(true, users));
@@ -51,12 +51,22 @@ public class AdminUsersController : ControllerBase
         if (!request.Password.Any(char.IsUpper) || !request.Password.Any(char.IsDigit))
             return BadRequest(new ApiResponse(false, "Password must contain at least one uppercase letter and one digit"));
 
+        // Resolve/validate the requested role and its agency scope.
+        var role = NormalizeRole(request.Role);
+        if (role is null)
+            return BadRequest(new ApiResponse(false, "Role must be one of: dg, admin, agency_officer"));
+
+        var agencyCode = role == Roles.AgencyOfficer ? request.AgencyCode?.Trim().ToUpperInvariant() : null;
+        if (role == Roles.AgencyOfficer && string.IsNullOrWhiteSpace(agencyCode))
+            return BadRequest(new ApiResponse(false, "An agency code is required for agency officer accounts"));
+
         var user = new AdminUser
         {
             Name = SanitizeHelper.StripHtml(request.Name),
             Email = email,
             PasswordHash = _password.HashPassword(request.Password),
-            Role = request.Role == "officer" ? "officer" : "admin",
+            Role = role,
+            AgencyCode = agencyCode,
             IsActive = true,
         };
 
@@ -64,7 +74,7 @@ public class AdminUsersController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Created($"/api/admin/users/{user.Id}", new ApiResponse<AdminListItem>(true,
-            new AdminListItem(user.Id.ToString(), user.Name, user.Email, user.Role, user.IsActive, user.CreatedAt)));
+            new AdminListItem(user.Id.ToString(), user.Name, user.Email, user.Role, user.IsActive, user.CreatedAt, user.AgencyCode)));
     }
 
     /// <summary>Update an admin user (name, role, active status).</summary>
@@ -82,8 +92,29 @@ public class AdminUsersController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(request.Name))
             user.Name = SanitizeHelper.StripHtml(request.Name);
+
         if (!string.IsNullOrWhiteSpace(request.Role))
-            user.Role = request.Role;
+        {
+            var role = NormalizeRole(request.Role);
+            if (role is null)
+                return BadRequest(new ApiResponse(false, "Role must be one of: dg, admin, agency_officer"));
+            user.Role = role;
+        }
+
+        // Keep the agency scope consistent with the (possibly updated) role.
+        if (user.Role == Roles.AgencyOfficer)
+        {
+            if (request.AgencyCode is not null)
+                user.AgencyCode = request.AgencyCode.Trim().ToUpperInvariant();
+            if (string.IsNullOrWhiteSpace(user.AgencyCode))
+                return BadRequest(new ApiResponse(false, "An agency code is required for agency officer accounts"));
+        }
+        else
+        {
+            // Admin-level roles are never agency-scoped.
+            user.AgencyCode = null;
+        }
+
         if (request.IsActive.HasValue)
             user.IsActive = request.IsActive.Value;
 
@@ -91,7 +122,7 @@ public class AdminUsersController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Ok(new ApiResponse<AdminListItem>(true,
-            new AdminListItem(user.Id.ToString(), user.Name, user.Email, user.Role, user.IsActive, user.CreatedAt)));
+            new AdminListItem(user.Id.ToString(), user.Name, user.Email, user.Role, user.IsActive, user.CreatedAt, user.AgencyCode)));
     }
 
     /// <summary>Delete an admin user (cannot delete yourself).</summary>
@@ -111,5 +142,16 @@ public class AdminUsersController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Ok(new ApiResponse(true));
+    }
+
+    /// <summary>
+    /// Map a requested role string to a canonical back-office role, tolerating the
+    /// legacy "officer" alias, or null if it isn't an allowed back-office role.
+    /// </summary>
+    private static string? NormalizeRole(string? role)
+    {
+        var r = role?.Trim().ToLowerInvariant();
+        if (r == "officer") return Roles.AgencyOfficer; // legacy alias
+        return Roles.BackOfficeRoles.Contains(r) ? r : null;
     }
 }

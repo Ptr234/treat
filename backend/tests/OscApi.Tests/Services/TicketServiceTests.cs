@@ -112,7 +112,7 @@ public class TicketServiceTests
         var db = TestDbFactory.Create(dbName);
         var ticket = db.Tickets.First();
 
-        var result = await svc.GetByRefAsync(ticket.ReferenceNumber, null, isAdmin: true);
+        var result = await svc.GetByRefAsync(ticket.ReferenceNumber, null, isStaff: true);
         Assert.NotNull(result);
     }
 

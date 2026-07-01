@@ -24,7 +24,9 @@ async function isValidAdmin(request: NextRequest): Promise<boolean> {
     const role =
       payload.role ??
       payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    return role === 'admin';
+    // Admin-level roles (system admin + Director General) reach the leadership
+    // dashboard. Agency officers use the agency-scoped ticket views instead.
+    return role === 'admin' || role === 'dg';
   } catch {
     return false;
   }

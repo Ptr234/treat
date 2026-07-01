@@ -83,11 +83,11 @@ public class AuthController : ControllerBase
                 }
             }
 
-            var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
+            var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role, picture: null, agencyCode: admin.AgencyCode);
             Response.Cookies.Append("osc-session", adminToken, _jwt.GetCookieOptions(_env.IsProduction()));
             await AuditAsync(admin.Email, admin.Role, "auth.login", "Successful sign-in", 200);
             return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
-                admin.Id.ToString(), admin.Email, admin.Name, admin.Role)));
+                admin.Id.ToString(), admin.Email, admin.Name, admin.Role, Picture: null, AgencyCode: admin.AgencyCode)));
         }
 
         // Regular users.
@@ -229,7 +229,8 @@ public class AuthController : ControllerBase
             claims.First(c => c.Type == "email" || c.Type == System.Security.Claims.ClaimTypes.Email).Value,
             claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "",
             claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "user",
-            claims.FirstOrDefault(c => c.Type == "picture")?.Value
+            claims.FirstOrDefault(c => c.Type == "picture")?.Value,
+            claims.FirstOrDefault(c => c.Type == "agency_code")?.Value
         )));
     }
 
@@ -284,12 +285,13 @@ public class AuthController : ControllerBase
 
         string id, email, name, finalRole;
         string? picture = null;
+        string? agencyCode = null;
         if (admin is not null)
         {
             admin.Name = newName;
             admin.PasswordHash = newHash;
             admin.UpdatedAt = DateTimeOffset.UtcNow;
-            (id, email, name, finalRole) = (admin.Id.ToString(), admin.Email, admin.Name, admin.Role);
+            (id, email, name, finalRole, agencyCode) = (admin.Id.ToString(), admin.Email, admin.Name, admin.Role, admin.AgencyCode);
         }
         else
         {
@@ -301,10 +303,10 @@ public class AuthController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        var newToken = _jwt.CreateToken(id, email, name, finalRole, picture);
+        var newToken = _jwt.CreateToken(id, email, name, finalRole, picture, agencyCode);
         Response.Cookies.Append("osc-session", newToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
-        return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, finalRole, picture)));
+        return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, finalRole, picture, agencyCode)));
     }
 
     /// <summary>Resolve the signed-in admin from the session cookie, or null.</summary>
