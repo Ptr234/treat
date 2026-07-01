@@ -318,3 +318,12 @@ export const HOMEPAGE_SECTORS_QUERY = `
     "link": coalesce(link, "/investments")
   }
 `;
+
+// ── Homepage settings (hero slideshow + section background images) ────
+export const HOMEPAGE_SETTINGS_QUERY = `
+  *[_type == "homepageSettings"][0]{
+    "hero": heroImages[].asset->url,
+    "about": aboutImage.asset->url,
+    "cta": ctaImage.asset->url
+  }
+`;

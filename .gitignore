@@ -67,3 +67,6 @@ test-results/
 playwright-report/
 blob-report/
 .playwright/
+
+# Sanity generated runtime/build output
+.sanity/

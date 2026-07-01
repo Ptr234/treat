@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Reveal } from '@/components/ui/Reveal';
 import {
   ArrowRightIcon,
@@ -15,6 +16,18 @@ import {
   ChatBubbleLeftRightIcon,
   CheckBadgeIcon,
 } from '@heroicons/react/24/outline';
+
+// ── Homepage background/hero images (built-in defaults) ───────────────
+// Used until a Homepage Settings document is created in Sanity.
+const DEFAULT_HERO_IMAGES = [
+  '/images/Pride.webp',
+  '/images/uganda-kampala-city-view.webp',
+  '/images/uganda-pearl-africa.jpg',
+  '/images/lake-bunyonyi-uganda.jpg',
+  '/images/Infrastucture.webp',
+];
+const DEFAULT_ABOUT_IMAGE = '/images/uganda-flag-city.jpg';
+const DEFAULT_CTA_IMAGE = '/images/uganda-business-bg.jpeg';
 
 // ── Priority investment sectors (image-forward showcase) ──────────────
 // Built-in defaults, used until Homepage Sector Cards are created in Sanity.
@@ -82,7 +95,13 @@ export default function HomePage() {
   const [liveStats, setLiveStats] = useState({ fdi: 49.5, investments: 9922, satisfaction: 98, sectors: 8 });
   const [sectors, setSectors] = useState<Sector[]>(DEFAULT_SECTORS);
 
-  // Pull CMS-managed sector cards from Sanity; keep built-in defaults otherwise.
+  // Homepage background images (CMS-managed, with built-in fallbacks).
+  const [heroImages, setHeroImages] = useState<string[]>(DEFAULT_HERO_IMAGES);
+  const [aboutImage, setAboutImage] = useState<string>(DEFAULT_ABOUT_IMAGE);
+  const [ctaImage, setCtaImage] = useState<string>(DEFAULT_CTA_IMAGE);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  // Pull CMS-managed sector cards + background images from Sanity.
   useEffect(() => {
     let active = true;
     fetch('/api/homepage/sectors')
@@ -93,10 +112,28 @@ export default function HomePage() {
         }
       })
       .catch(() => {});
+    fetch('/api/homepage/settings')
+      .then((r) => r.json())
+      .then((json) => {
+        if (!active || !json?.success) return;
+        const d = json.data ?? {};
+        if (Array.isArray(d.hero) && d.hero.length > 0) setHeroImages(d.hero);
+        if (d.about) setAboutImage(d.about);
+        if (d.cta) setCtaImage(d.cta);
+      })
+      .catch(() => {});
     return () => {
       active = false;
     };
   }, []);
+
+  // Auto-advance the hero slideshow.
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    setHeroIndex(0);
+    const t = setInterval(() => setHeroIndex((i) => (i + 1) % heroImages.length), 5500);
+    return () => clearInterval(t);
+  }, [heroImages]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -119,14 +156,26 @@ export default function HomePage() {
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="relative flex flex-col min-h-screen overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src="/images/Pride.webp"
-            alt="Uganda — the Pearl of Africa"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
+          {/* Sliding hero slideshow */}
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={heroIndex}
+              className="absolute inset-0"
+              initial={{ opacity: 0, scale: 1.06, x: 40 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 1.06, x: -40 }}
+              transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Image
+                src={heroImages[heroIndex] ?? '/images/Pride.webp'}
+                alt="Uganda — the Pearl of Africa"
+                fill
+                priority={heroIndex === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/70 to-black/90" />
           <div
             className="absolute inset-0 opacity-[0.06]"
@@ -186,6 +235,22 @@ export default function HomePage() {
             </Link>
           </div>
           </Reveal>
+
+          {/* Slideshow indicators */}
+          {heroImages.length > 1 && (
+            <div className="flex items-center gap-2 mt-10">
+              {heroImages.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setHeroIndex(i)}
+                  aria-label={`Show slide ${i + 1}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === heroIndex ? 'w-6 bg-yellow-400' : 'w-2 bg-white/50 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Stats banner */}
@@ -245,7 +310,7 @@ export default function HomePage() {
             <div className="relative">
               <div className="relative overflow-hidden rounded-2xl shadow-2xl">
                 <Image
-                  src="/images/uganda-flag-city.jpg"
+                  src={aboutImage}
                   alt="Uganda Investment Authority — OneStop Centre"
                   width={640}
                   height={460}
@@ -434,7 +499,7 @@ export default function HomePage() {
       {/* ── CTA ───────────────────────────────────────────────────── */}
       <section className="relative py-24 overflow-hidden">
         <div className="absolute inset-0">
-          <Image src="/images/uganda-business-bg.jpeg" alt="" fill sizes="100vw" className="object-cover" />
+          <Image src={ctaImage} alt="" fill sizes="100vw" className="object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/85 to-black/80" />
           <div
             className="absolute inset-0 opacity-[0.08]"

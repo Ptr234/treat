@@ -13,8 +13,10 @@ import chatEnquiry from './chatEnquiry';
 import investmentOpportunity from './investmentOpportunity';
 import downloadableResource from './downloadableResource';
 import homepageSector from './homepageSector';
+import homepageSettings from './homepageSettings';
 
 export const schemaTypes = [
+  homepageSettings,
   homepageSector,
   event,
   licenseProject,
