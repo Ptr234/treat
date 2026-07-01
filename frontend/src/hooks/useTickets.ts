@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { SupportTicket } from '@/types';
 import { apiFetch } from '@/lib/api-client';
+import { normalizeStatus, normalizePriority, normalizeCategory, hoursBetween } from '@/lib/ticket-format';
 
 interface SanityTicketRow {
   _id: string;
@@ -22,18 +23,21 @@ interface SanityTicketRow {
 }
 
 function mapToSupportTicket(t: SanityTicketRow): SupportTicket {
+  const resolutionHours = hoursBetween(t.createdAt, t.resolvedAt);
   return {
     id: t.referenceNumber,
     title: t.title,
     description: '',
-    category: t.category as SupportTicket['category'],
-    status: t.status as SupportTicket['status'],
-    priority: t.priority as SupportTicket['priority'],
+    category: normalizeCategory(t.category),
+    status: normalizeStatus(t.status),
+    priority: normalizePriority(t.priority),
     assignee: t.assignee,
     assigneeAgency: t.assignedAgency?.name,
     createdAt: t.createdAt,
     updatedAt: t.resolvedAt || t.createdAt,
     slaDeadline: t.slaDeadlineAt || '',
+    // Only set once actually resolved; drives the dashboard's average metric.
+    resolutionTime: resolutionHours !== null ? `${resolutionHours.toFixed(1)} hours` : undefined,
     history: [],
     attachments: [],
     contactEmail: t.contactEmail,

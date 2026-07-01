@@ -60,26 +60,25 @@ export default function TicketsPage() {
     return filtered;
   }, [tickets, searchQuery, statusFilter, priorityFilter, sortBy]);
 
-  // Calculate stats
+  // Calculate stats. "Resolved" counts both RESOLVED and CLOSED so that
+  // open + resolved always equals the total (no ticket falls through a gap).
   const stats = useMemo(() => {
     const total = tickets.length;
-    const open = tickets.filter(t =>
-      !['RESOLVED', 'CLOSED'].includes(t.status)
-    ).length;
-    const resolved = tickets.filter(t => t.status === 'RESOLVED').length;
+    const closedStatuses: TicketStatus[] = ['RESOLVED', 'CLOSED'];
+    const open = tickets.filter(t => !closedStatuses.includes(t.status)).length;
+    const resolved = tickets.filter(t => closedStatuses.includes(t.status)).length;
 
-    const responseTimes = tickets
-      .filter(t => t.responseTime)
-      .map(t => {
-        const match = t.responseTime!.match(/(\d+\.?\d*)\s*hours?/);
-        return match?.[1] ? parseFloat(match[1]) : 0;
-      });
+    // Average resolution time (hours) over tickets that carry a resolution time.
+    const resolutionTimes = tickets
+      .map(t => t.resolutionTime?.match(/(\d+\.?\d*)\s*hours?/)?.[1])
+      .filter((v): v is string => v !== undefined)
+      .map(parseFloat);
 
-    const avgResponseTime = responseTimes.length > 0
-      ? (responseTimes.reduce((sum, time) => sum + time, 0) / responseTimes.length).toFixed(1)
+    const avgResolutionTime = resolutionTimes.length > 0
+      ? (resolutionTimes.reduce((sum, time) => sum + time, 0) / resolutionTimes.length).toFixed(1)
       : '0';
 
-    return { total, open, resolved, avgResponseTime };
+    return { total, open, resolved, avgResolutionTime };
   }, [tickets]);
 
   // Non-admin users see a restricted view directing them to create a ticket
@@ -145,8 +144,8 @@ export default function TicketsPage() {
               <p className="text-sm text-gray-600 mt-1">Resolved</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-purple-600">{stats.avgResponseTime}h</p>
-              <p className="text-sm text-gray-600 mt-1">Avg Response</p>
+              <p className="text-3xl font-bold text-purple-600">{stats.avgResolutionTime}h</p>
+              <p className="text-sm text-gray-600 mt-1">Avg Resolution</p>
             </div>
           </div>
         </div>

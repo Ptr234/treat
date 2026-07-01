@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
 import { apiFetch } from '@/lib/api-client';
+import { normalizeStatus, normalizePriority, normalizeCategory, normalizeAuthorRole } from '@/lib/ticket-format';
 
 // --- Types matching Sanity API response ---
 
@@ -130,9 +131,24 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
           return;
         }
 
-        setTicket(json.data as TicketData);
-        setRating((json.data as TicketData).satisfactionRating || 0);
-        setEscalated((json.data as TicketData).isEscalated);
+        // Normalize backend enum casing so status/priority/category comparisons,
+        // labels, colours and the isResolved gate all work. Messages arrive
+        // without an id, so synthesise a stable key for React.
+        const raw = json.data as TicketData;
+        const normalized: TicketData = {
+          ...raw,
+          status: normalizeStatus(raw.status),
+          priority: normalizePriority(raw.priority),
+          category: normalizeCategory(raw.category),
+          messages: (raw.messages ?? []).map((m, i) => ({
+            ...m,
+            _id: m._id ?? `${raw.referenceNumber}-msg-${i}`,
+            authorRole: normalizeAuthorRole(m.authorRole),
+          })),
+        };
+        setTicket(normalized);
+        setRating(raw.satisfactionRating || 0);
+        setEscalated(raw.isEscalated);
         setNeedsVerification(false);
       } catch {
         setError('Network error. Please try again.');
