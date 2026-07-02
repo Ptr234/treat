@@ -11,10 +11,13 @@ public class JwtService
     private readonly int _expiryHours;
     private readonly string _issuer;
     private readonly bool _secureCookies;
+    private readonly string? _cookieDomain;
 
     public JwtService(IConfiguration config)
     {
         _secret = config["Jwt:Secret"] ?? throw new InvalidOperationException("JWT:Secret is not configured");
+        if (Encoding.UTF8.GetByteCount(_secret) < 32)
+            throw new InvalidOperationException("Jwt:Secret must be at least 32 bytes for HS256");
         _expiryHours = int.Parse(config["Jwt:ExpiryHours"] ?? "24");
         _issuer = config["Jwt:Issuer"] ?? "osc-api";
         // The session cookie is only marked Secure when the site is actually
@@ -22,6 +25,12 @@ public class JwtService
         // for a Production build served over plain http (e.g. a LAN address),
         // which silently breaks login because the browser won't send the cookie.
         _secureCookies = (config["SiteUrl"] ?? "").StartsWith("https", StringComparison.OrdinalIgnoreCase);
+        // When the API and the site live on sibling subdomains (api.example.com /
+        // www.example.com), the cookie must carry Domain=.example.com — a host-only
+        // cookie set by the API host is invisible to the Next.js middleware on www,
+        // which would bounce every /dashboard visit back to the homepage. Leave
+        // unset for localhost / single-host deployments.
+        _cookieDomain = config["Cookie:Domain"];
     }
 
     public string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null)
@@ -94,5 +103,6 @@ public class JwtService
         SameSite = SameSiteMode.Lax,
         MaxAge = TimeSpan.FromHours(_expiryHours),
         Path = "/",
+        Domain = string.IsNullOrWhiteSpace(_cookieDomain) ? null : _cookieDomain,
     };
 }

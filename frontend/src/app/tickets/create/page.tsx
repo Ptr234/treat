@@ -17,15 +17,14 @@ import {
   ArrowUpTrayIcon
 } from '@heroicons/react/24/outline';
 import { TicketCategory, TicketPriority } from '@/types';
-import { apiFetch } from '@/lib/api-client';
+import { apiFetch, resolveApiUrl } from '@/lib/api-client';
 
-interface UploadedFile {
-  name: string;
-  size: number;
-  mimeType: string;
-  assetId: string;
-  url: string;
-  fileRef: { _type: 'file'; asset: { _type: 'reference'; _ref: string } };
+// Files are held locally and uploaded only after the ticket exists — the
+// upload endpoint attaches them to the ticket by reference number, gated by
+// the filing email.
+interface PendingFile {
+  id: string;
+  file: File;
 }
 
 interface TicketFormData {
@@ -36,7 +35,7 @@ interface TicketFormData {
   contactName: string;
   contactEmail: string;
   contactPhone: string;
-  attachments: UploadedFile[];
+  attachments: PendingFile[];
 }
 
 interface CategoryOption {
@@ -51,6 +50,14 @@ interface CategoryOption {
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_FILES = 5;
 const ACCEPTED_TYPES = '.pdf,.doc,.docx,.png,.jpg,.jpeg';
+// Must mirror the backend allowlist (UploadController.MimeToExtension).
+const ACCEPTED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/png',
+  'image/jpeg',
+];
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -123,7 +130,7 @@ export default function CreateTicketPage() {
     attachments: []
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [submitting, setSubmitting] = useState(false);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -173,59 +180,7 @@ export default function CreateTicketPage() {
     setErrors({});
   };
 
-  const uploadFile = useCallback(async (file: File) => {
-    const fileId = `${file.name}-${Date.now()}`;
-
-    if (file.size > MAX_FILE_SIZE) {
-      setUploadErrors(prev => [...prev, `${file.name}: File exceeds 10MB limit`]);
-      return;
-    }
-
-    setUploading(prev => ({ ...prev, [fileId]: true }));
-    setUploadErrors([]);
-
-    try {
-      const body = new FormData();
-      body.append('file', file);
-
-      const response = await fetch('/api/upload/', {
-        method: 'POST',
-        body,
-        credentials: 'include',
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        setUploadErrors(prev => [...prev, `${file.name}: ${result.error || 'Upload failed'}`]);
-        return;
-      }
-
-      const uploaded: UploadedFile = {
-        name: result.data.originalFilename,
-        size: result.data.size,
-        mimeType: result.data.mimeType,
-        assetId: result.data.assetId,
-        url: result.data.url,
-        fileRef: result.data.fileRef,
-      };
-
-      setFormData(prev => ({
-        ...prev,
-        attachments: [...prev.attachments, uploaded],
-      }));
-    } catch {
-      setUploadErrors(prev => [...prev, `${file.name}: Network error during upload`]);
-    } finally {
-      setUploading(prev => {
-        const next = { ...prev };
-        delete next[fileId];
-        return next;
-      });
-    }
-  }, []);
-
-  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -235,18 +190,33 @@ export default function CreateTicketPage() {
       return;
     }
 
-    const filesToUpload = Array.from(files).slice(0, remaining);
+    const newErrors: string[] = [];
+    const accepted: PendingFile[] = [];
+    for (const file of Array.from(files).slice(0, remaining)) {
+      if (file.size > MAX_FILE_SIZE) {
+        newErrors.push(`${file.name}: File exceeds 10MB limit`);
+        continue;
+      }
+      if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
+        newErrors.push(`${file.name}: File type not allowed`);
+        continue;
+      }
+      accepted.push({ id: `${file.name}-${file.size}-${Date.now()}-${Math.random()}`, file });
+    }
     if (files.length > remaining) {
-      setUploadErrors([`Only ${remaining} more file(s) can be added (max ${MAX_FILES})`]);
+      newErrors.push(`Only ${remaining} more file(s) can be added (max ${MAX_FILES})`);
     }
 
-    await Promise.all(filesToUpload.map(uploadFile));
+    setUploadErrors(newErrors);
+    if (accepted.length > 0) {
+      setFormData(prev => ({ ...prev, attachments: [...prev.attachments, ...accepted] }));
+    }
 
     // Reset input so same file can be selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [formData.attachments.length, uploadFile]);
+  }, [formData.attachments.length]);
 
   const removeFile = useCallback((index: number) => {
     setFormData(prev => ({
@@ -256,46 +226,69 @@ export default function CreateTicketPage() {
   }, []);
 
   const handleSubmit = async () => {
-    if (validateStep(3)) {
-      try {
-        const documents = formData.attachments.map((f, idx) => ({
-          ...f.fileRef,
-          _key: `doc-${idx}`,
-        }));
+    if (!validateStep(3) || submitting) return;
 
-        const ticketData = {
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          priority: formData.priority,
-          contactName: formData.contactName,
-          contactEmail: formData.contactEmail,
-          contactPhone: formData.contactPhone,
-          ...(documents.length > 0 ? { documents } : {}),
-        };
+    setSubmitting(true);
+    try {
+      const ticketData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        priority: formData.priority,
+        contactName: formData.contactName,
+        contactEmail: formData.contactEmail,
+        contactPhone: formData.contactPhone,
+      };
 
-        const result = await apiFetch<{ referenceNumber: string }>('/api/tickets/', {
-          method: 'POST',
-          body: JSON.stringify(ticketData),
-        });
+      const result = await apiFetch<{ referenceNumber: string }>('/api/tickets/', {
+        method: 'POST',
+        body: JSON.stringify(ticketData),
+      });
 
-        if (!result.success) {
-          alert(result.error || 'Failed to create ticket. Please try again.');
-          return;
-        }
-
-        const refNumber = result.data?.referenceNumber || 'Pending';
-        alert(`Ticket created successfully!\n\nReference: ${refNumber}\n\nYou will receive an email confirmation at ${formData.contactEmail}`);
-        router.push('/tickets/');
-      } catch (error) {
-        console.error('Failed to create ticket:', error);
-        alert('Failed to create ticket. Please try again.');
+      if (!result.success) {
+        alert(result.error || 'Failed to create ticket. Please try again.');
+        return;
       }
+
+      const refNumber = result.data?.referenceNumber || 'Pending';
+
+      // Attach files now that the ticket exists. The upload is authorized by
+      // the filing email, so it works for anonymous investors too.
+      let attachmentWarning = '';
+      if (formData.attachments.length > 0 && result.data?.referenceNumber) {
+        try {
+          const body = new FormData();
+          formData.attachments.forEach(({ file }) => body.append('files', file));
+          body.append('ticketRefNumber', result.data.referenceNumber);
+          body.append('contactEmail', formData.contactEmail);
+
+          const uploadRes = await fetch(resolveApiUrl('/api/upload/'), {
+            method: 'POST',
+            body,
+            credentials: 'include',
+          });
+          const uploadJson = await uploadRes.json().catch(() => null);
+          if (!uploadRes.ok || !uploadJson?.success) {
+            attachmentWarning =
+              '\n\nNote: your attachments could not be uploaded. You can add them later from the ticket page.';
+          }
+        } catch {
+          attachmentWarning =
+            '\n\nNote: your attachments could not be uploaded. You can add them later from the ticket page.';
+        }
+      }
+
+      alert(`Ticket created successfully!\n\nReference: ${refNumber}\n\nYou will receive an email confirmation at ${formData.contactEmail}${attachmentWarning}`);
+      router.push('/tickets/');
+    } catch (error) {
+      console.error('Failed to create ticket:', error);
+      alert('Failed to create ticket. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const selectedCategory = categories.find(c => c.value === formData.category);
-  const isUploading = Object.keys(uploading).length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -556,31 +549,25 @@ export default function CreateTicketPage() {
                     <div
                       className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-yellow-400 transition-colors"
                       onClick={() => {
-                        if (!isUploading && formData.attachments.length < MAX_FILES) {
+                        if (formData.attachments.length < MAX_FILES) {
                           fileInputRef.current?.click();
                         }
                       }}
                     >
-                      {isUploading ? (
-                        <>
-                          <div className="w-8 h-8 border-2 border-yellow-600 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                          <p className="text-sm text-gray-600">Uploading...</p>
-                        </>
-                      ) : (
-                        <>
-                          <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-600 mb-1">
-                            Click to select files
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            PDF, DOC, DOCX, PNG, JPG (max 10MB per file, up to {MAX_FILES} files)
-                          </p>
-                          {formData.attachments.length >= MAX_FILES && (
-                            <p className="text-xs text-yellow-600 mt-2 font-medium">
-                              Maximum number of files reached
-                            </p>
-                          )}
-                        </>
+                      <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-600 mb-1">
+                        Click to select files
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PDF, DOC, DOCX, PNG, JPG (max 10MB per file, up to {MAX_FILES} files)
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Files are uploaded when you submit the ticket.
+                      </p>
+                      {formData.attachments.length >= MAX_FILES && (
+                        <p className="text-xs text-yellow-600 mt-2 font-medium">
+                          Maximum number of files reached
+                        </p>
                       )}
                     </div>
 
@@ -594,13 +581,13 @@ export default function CreateTicketPage() {
 
                     {formData.attachments.length > 0 && (
                       <div className="mt-3 space-y-2">
-                        {formData.attachments.map((file, index) => (
-                          <div key={file.assetId} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
+                        {formData.attachments.map((att, index) => (
+                          <div key={att.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
                             <div className="flex items-center gap-2 min-w-0">
                               <PaperClipIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                              <span className="text-sm text-gray-700 truncate">{file.name}</span>
+                              <span className="text-sm text-gray-700 truncate">{att.file.name}</span>
                               <span className="text-xs text-gray-500 flex-shrink-0">
-                                ({formatFileSize(file.size)})
+                                ({formatFileSize(att.file.size)})
                               </span>
                             </div>
                             <button
@@ -678,12 +665,12 @@ export default function CreateTicketPage() {
                       <h3 className="font-semibold text-gray-900 mb-2">Attachments</h3>
                       <div className="bg-gray-50 rounded-lg p-4">
                         <ul className="space-y-1">
-                          {formData.attachments.map((file) => (
-                            <li key={file.assetId} className="flex items-center gap-2 text-sm text-gray-700">
+                          {formData.attachments.map((att) => (
+                            <li key={att.id} className="flex items-center gap-2 text-sm text-gray-700">
                               <PaperClipIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                              <span className="truncate">{file.name}</span>
+                              <span className="truncate">{att.file.name}</span>
                               <span className="text-xs text-gray-500 flex-shrink-0">
-                                ({formatFileSize(file.size)})
+                                ({formatFileSize(att.file.size)})
                               </span>
                             </li>
                           ))}
@@ -721,10 +708,11 @@ export default function CreateTicketPage() {
             ) : (
               <button
                 onClick={handleSubmit}
-                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-black rounded-lg font-medium transition-colors"
+                disabled={submitting}
+                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-black rounded-lg font-medium transition-colors"
               >
                 <CheckCircleIcon className="w-5 h-5" />
-                Submit Ticket
+                {submitting ? 'Submitting…' : 'Submit Ticket'}
               </button>
             )}
           </div>

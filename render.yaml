@@ -1,0 +1,71 @@
+# Render Blueprint for the OSC Digital Tool backend (ASP.NET Core, Docker).
+# Frontend stays on Vercel (www.oscdigitaltool.com); this deploys the API to
+# api.oscdigitaltool.com. Secrets are marked `sync: false` — set their values in
+# the Render dashboard (never commit them).
+#
+# After first deploy: add the custom domain api.oscdigitaltool.com in the Render
+# service settings, then create the DNS record shown there.
+services:
+  - type: web
+    name: osc-api
+    runtime: docker
+    repo: https://github.com/Ptr234/treat
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter               # single instance; see Redis note below before scaling
+    healthCheckPath: /api/health
+    autoDeploy: true
+    # Ticket document uploads are written to /app/uploads on local disk. Container
+    # filesystems are ephemeral, so persist them on a disk (or migrate to object
+    # storage). Without this, uploaded files vanish on every redeploy/restart.
+    disk:
+      name: osc-uploads
+      mountPath: /app/uploads
+      sizeGB: 1
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+      # Runs EF migrations on boot; requires Seed__AdminPassword to seed the first admin.
+      - key: RunMigrationsOnStartup
+        value: "true"
+      - key: Cors__AllowedOrigins
+        value: https://www.oscdigitaltool.com
+      - key: SiteUrl
+        value: https://www.oscdigitaltool.com
+      # Session cookie must be readable by the Next.js middleware on www.
+      # oscdigitaltool.com, not just by this API host — a host-only cookie set by
+      # api.oscdigitaltool.com would silently break the /dashboard auth gate.
+      - key: Cookie__Domain
+        value: .oscdigitaltool.com
+      - key: Jwt__Issuer
+        value: osc-api
+      - key: Jwt__ExpiryHours
+        value: "24"
+      - key: Groq__Model
+        value: llama-3.3-70b-versatile
+      # ── Secrets — set values in the Render dashboard ──
+      - key: ConnectionStrings__DefaultConnection   # Neon POOLED connection string
+        sync: false
+      - key: ConnectionStrings__Redis               # Upstash (enables shared rate-limit/cache)
+        sync: false
+      - key: Jwt__Secret                            # MUST match the frontend JWT_SECRET
+        sync: false
+      - key: Seed__AdminPassword                    # strong; rotate after first login
+        sync: false
+      - key: Groq__ApiKey
+        sync: false
+      - key: Resend__ApiKey
+        sync: false
+      - key: Resend__FromAddress
+        sync: false
+      - key: Resend__AdminEmail                     # escalation/notification inbox
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: Recaptcha__SecretKey
+        sync: false
+      - key: Sentry__Dsn
+        sync: false

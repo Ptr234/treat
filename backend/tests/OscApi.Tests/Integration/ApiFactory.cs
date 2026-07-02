@@ -39,6 +39,9 @@ public class ApiFactory : WebApplicationFactory<Program>
         Environment.SetEnvironmentVariable("Cors__AllowedOrigins", "http://localhost:3000");
         Environment.SetEnvironmentVariable("SiteUrl", "http://localhost:3000");
         Environment.SetEnvironmentVariable("RunMigrationsOnStartup", "false");
+        // All in-process test requests share one rate-limit partition ("unknown"
+        // client IP) — raise the login cap so the suite never trips the limiter.
+        Environment.SetEnvironmentVariable("RateLimits__LoginPermitLimit", "10000");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

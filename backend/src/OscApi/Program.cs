@@ -46,8 +46,25 @@ var dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<OscDbContext>(options => options.UseNpgsql(dataSource));
 
+// Reverse proxy support (Render/nginx): trust X-Forwarded-For / X-Forwarded-Proto
+// so RemoteIpAddress is the real client IP. Without this, every request appears
+// to come from the proxy, which collapses all per-IP rate-limit buckets into one
+// and records the proxy's address in the audit log.
+builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+    // The platform proxy is not a fixed address; clear the defaults so the
+    // headers are honoured (the app is only reachable through the proxy).
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 // CORS
-var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"]?.Split(',') ?? ["http://localhost:3000"];
+var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"]
+    ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+    ?? ["http://localhost:3000"];
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -164,11 +181,26 @@ builder.Services.AddRateLimiter(options =>
                 PermitLimit = 3,
                 Window = TimeSpan.FromMinutes(15),
             }));
+
+    // Credential endpoints (login / Google): slow down brute-force and
+    // credential-stuffing. 10 attempts per 5 minutes per IP is generous for
+    // humans but throttles automated guessing. Configurable so test hosts
+    // (which funnel every request through one partition) can raise it.
+    var loginPermitLimit = builder.Configuration.GetValue("RateLimits:LoginPermitLimit", 10);
+    options.AddPolicy("login", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = loginPermitLimit,
+                Window = TimeSpan.FromMinutes(5),
+            }));
 });
 
 var app = builder.Build();
 
 // Middleware pipeline
+app.UseForwardedHeaders();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidationExceptionMiddleware>();
 

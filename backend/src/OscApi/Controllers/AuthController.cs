@@ -52,8 +52,12 @@ public class AuthController : ControllerBase
 
     /// <summary>Login with email and password (admins and regular users).</summary>
     [HttpPost("login")]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            return BadRequest(new ApiResponse(false, "Email and password are required"));
+
         var email = request.Email.ToLowerInvariant();
 
         // Admins first.
@@ -110,10 +114,10 @@ public class AuthController : ControllerBase
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> Signup([FromBody] SignupRequest request)
     {
-        var email = request.Email.ToLowerInvariant().Trim();
-
-        if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(request.Password))
+        if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
             return BadRequest(new ApiResponse(false, "Name, email and password are required"));
+
+        var email = request.Email.ToLowerInvariant().Trim();
 
         if (request.Password.Length < 8 || !request.Password.Any(char.IsUpper) || !request.Password.Any(char.IsDigit))
             return BadRequest(new ApiResponse(false, "Password must be at least 8 characters and include an uppercase letter and a digit"));
@@ -140,8 +144,12 @@ public class AuthController : ControllerBase
 
     /// <summary>Authenticate via Google OAuth.</summary>
     [HttpPost("google")]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> GoogleAuth([FromBody] GoogleAuthRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.IdToken))
+            return BadRequest(new ApiResponse(false, "Google credential is required"));
+
         var clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
         if (string.IsNullOrEmpty(clientId))
             return StatusCode(500, new ApiResponse(false, "Google OAuth not configured"));
@@ -207,7 +215,9 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("osc-session", new CookieOptions { Path = "/" });
+        // Delete with the same attributes (Path/Domain/Secure) the cookie was set
+        // with — a mismatched Domain would leave the session cookie alive.
+        Response.Cookies.Delete("osc-session", _jwt.GetCookieOptions(_env.IsProduction()));
         return Ok(new ApiResponse(true));
     }
 
@@ -409,9 +419,13 @@ public class AuthController : ControllerBase
     [EnableRateLimiting("password-reset")]
     public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequest request)
     {
+        if (string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest(new ApiResponse(false, "Email is required"));
+
         // Always return success to prevent email enumeration
+        var resetEmail = request.Email.ToLowerInvariant().Trim();
         var admin = await _db.AdminUsers
-            .FirstOrDefaultAsync(a => a.Email == request.Email.ToLowerInvariant() && a.IsActive);
+            .FirstOrDefaultAsync(a => a.Email == resetEmail && a.IsActive);
 
         if (admin is not null)
         {
@@ -432,8 +446,14 @@ public class AuthController : ControllerBase
     [EnableRateLimiting("password-reset")]
     public async Task<IActionResult> VerifyPasswordReset([FromBody] PasswordResetVerifyRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
-            return BadRequest(new ApiResponse(false, "Password must be at least 8 characters"));
+        // Same complexity rule as signup/profile-change, so a reset can't
+        // downgrade an account to a weaker password.
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8
+            || !request.NewPassword.Any(char.IsUpper) || !request.NewPassword.Any(char.IsDigit))
+            return BadRequest(new ApiResponse(false, "Password must be at least 8 characters and include an uppercase letter and a digit"));
+
+        if (string.IsNullOrWhiteSpace(request.Token))
+            return BadRequest(new ApiResponse(false, "Invalid or expired reset token"));
 
         var admin = await _db.AdminUsers
             .FirstOrDefaultAsync(a => a.PasswordResetToken == request.Token && a.IsActive);

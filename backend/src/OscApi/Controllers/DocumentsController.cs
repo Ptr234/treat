@@ -65,6 +65,46 @@ public class DocumentsController : ControllerBase
         return Ok(new ApiResponse<object>(true, docs));
     }
 
+    /// <summary>
+    /// Download a document's content. Same access rules as listing: staff via
+    /// session (agency officers only within their agency), the public via the
+    /// ticket's filing email. Nothing else serves the uploads directory, so this
+    /// is the only way stored files leave the server.
+    /// </summary>
+    [HttpGet("{documentId:guid}/content")]
+    public async Task<IActionResult> DownloadDocument(string refNumber, Guid documentId, [FromQuery] string? email)
+    {
+        var doc = await _db.TicketDocuments
+            .Include(d => d.Ticket)
+            .FirstOrDefaultAsync(d => d.Id == documentId && d.Ticket.ReferenceNumber == refNumber);
+
+        if (doc is null)
+            return NotFound(new ApiResponse(false, "Document not found"));
+
+        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        if (!isStaff)
+        {
+            if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != doc.Ticket.ContactEmail)
+                return StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+        }
+        else
+        {
+            var scope = AgencyScope(out var misconfigured);
+            if (misconfigured) return Forbid();
+            if (!string.IsNullOrEmpty(scope) && doc.Ticket.AssignedAgencyCode != scope)
+                return NotFound(new ApiResponse(false, "Document not found"));
+        }
+
+        var filePath = Path.Combine(_env.ContentRootPath, doc.StorageUrl.TrimStart('/'));
+        if (!System.IO.File.Exists(filePath))
+            return NotFound(new ApiResponse(false, "File is no longer available"));
+
+        var stream = System.IO.File.OpenRead(filePath);
+        // Force download (attachment) so a mislabelled file can never render
+        // in the browser under this origin.
+        return File(stream, doc.MimeType, doc.FileName);
+    }
+
     /// <summary>Delete a document from a ticket (admin-level staff only).</summary>
     [HttpDelete("{documentId:guid}")]
     public async Task<IActionResult> DeleteDocument(string refNumber, Guid documentId)

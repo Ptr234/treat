@@ -30,12 +30,16 @@ public class AnalyticsController : ControllerBase
         if (!allowed.Contains(request.EventType))
             return BadRequest(new ApiResponse(false, $"eventType must be one of: {string.Join(", ", allowed)}"));
 
+        // Clamp to column widths so an oversized value can't turn the insert
+        // into a 500 (these fields come straight from the public client).
+        static string? Clamp(string? v, int max) => v is null || v.Length <= max ? v : v[..max];
+
         var evt = new AnalyticsEvent
         {
             EventType = request.EventType,
-            EventName = request.EventName,
-            Metadata = request.Metadata,
-            UserEmail = request.UserEmail,
+            EventName = Clamp(request.EventName, 100)!,
+            Metadata = Clamp(request.Metadata, 500),
+            UserEmail = Clamp(request.UserEmail, 100),
             IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
         };
 

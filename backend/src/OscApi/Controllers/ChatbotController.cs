@@ -34,8 +34,16 @@ public class ChatbotController : ControllerBase
             new("system", systemPrompt)
         };
 
+        // Only relay user/assistant turns. The role comes from the client, so
+        // anything else (notably "system") is dropped — otherwise a caller could
+        // inject instructions that override the system prompt above.
         foreach (var entry in request.History.TakeLast(10))
-            messages.Add(new GroqClient.ChatMessage(entry.Role, entry.Content));
+        {
+            var role = entry.Role?.ToLowerInvariant();
+            if (role is not ("user" or "assistant")) continue;
+            if (string.IsNullOrWhiteSpace(entry.Content)) continue;
+            messages.Add(new GroqClient.ChatMessage(role, Truncate(entry.Content, 2000)!));
+        }
 
         messages.Add(new GroqClient.ChatMessage("user", request.Message));
 
@@ -83,15 +91,22 @@ public class ChatbotController : ControllerBase
             !string.IsNullOrEmpty(request.Sentiment) && Enum.TryParse<ChatSentiment>(request.Sentiment, true, out var s)
                 ? s : null;
 
+        if (string.IsNullOrWhiteSpace(request.SessionId) ||
+            string.IsNullOrWhiteSpace(request.UserMessage) ||
+            string.IsNullOrWhiteSpace(request.BotResponse))
+            return BadRequest(new ApiResponse(false, "sessionId, userMessage and botResponse are required"));
+
+        // Clamp free-text fields to the column widths so an oversized payload is
+        // stored truncated instead of failing the insert with a 500.
         var enquiry = new ChatEnquiry
         {
-            SessionId = request.SessionId,
-            UserName = request.UserName,
-            UserEmail = request.UserEmail,
-            UserPhone = request.UserPhone,
-            UserLocation = request.UserLocation,
-            UserMessage = request.UserMessage,
-            BotResponse = request.BotResponse,
+            SessionId = Truncate(request.SessionId, 100)!,
+            UserName = Truncate(request.UserName, 100),
+            UserEmail = Truncate(request.UserEmail, 255),
+            UserPhone = Truncate(request.UserPhone, 30),
+            UserLocation = Truncate(request.UserLocation, 200),
+            UserMessage = Truncate(request.UserMessage, 2000)!,
+            BotResponse = Truncate(request.BotResponse, 10000)!,
             Language = language,
             Sentiment = sentiment,
             Tier = tier,
@@ -102,6 +117,9 @@ public class ChatbotController : ControllerBase
 
         return Ok(new ApiResponse(true));
     }
+
+    private static string? Truncate(string? value, int max) =>
+        value is null ? null : (value.Length <= max ? value : value[..max]);
 
     private static string BuildSystemPrompt(string language)
     {

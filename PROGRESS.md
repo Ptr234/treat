@@ -357,3 +357,29 @@ firebase deploy
 **Status:** ✅ ACTIVE  
 **Performance:** Optimized for fast loading  
 **Compatibility:** All modern browsers supported
+---
+
+## 2026-07-02 — Full-Stack Audit & Hardening (Backend + Frontend)
+
+**Scope:** Expert audit of ASP.NET backend and Next.js frontend; every confirmed defect fixed and verified.
+
+### Security fixes
+- **Upload pipeline rebuilt** (`UploadController`): was unauthenticated with no rate limit, trusted the client MIME type, kept the client's file extension, and let anyone attach files to any ticket by reference number. Now: rate-limited, requires an existing ticket, authorizes via staff session (agency-scoped) or the filing email, validates the whole batch before writing, and stores files under a GUID name with an extension derived from the MIME allowlist.
+- **Document downloads** — files in `/uploads` were never served by anything (dead links). New access-checked endpoint `GET /api/tickets/{ref}/documents/{id}/content` streams them as attachments; frontend links updated.
+- **Login brute-force** — `/api/auth/login` and `/api/auth/google` had no rate limiting (signup and password-reset did). Added a `login` policy (10/5min per IP, configurable).
+- **Reverse-proxy IPs** — no `UseForwardedHeaders`, so on Render every request carried the proxy IP: all per-IP rate buckets collapsed into one, and audit logs recorded the proxy address. Fixed.
+- **Chatbot prompt injection** — client-supplied history roles were forwarded verbatim to Groq; a caller could inject `system` turns. Roles now restricted to user/assistant, content length clamped.
+- **Password reset** — verify step accepted 8-char passwords without the uppercase/digit rule used everywhere else; token/email null-guards added.
+
+### Correctness fixes
+- **DG lockout** (`InvestorsController`): used `IsInRole("admin")` literally, so the Director General (role `dg`, admin-level per the RBAC model) got 401 on investor list/update/delete. Now `IsAdminLevel()`; wrong-role responses are 403, and public create is rate-limited like other public forms.
+- **Cross-domain session cookie**: backend on api.oscdigitaltool.com set a host-only cookie the Next.js middleware on www could never read — /dashboard would redirect forever in production (works on localhost because cookies ignore ports). New `Cookie:Domain` config (`.oscdigitaltool.com` in render.yaml); logout now deletes with matching attributes.
+- **Error contract**: the global exception handler serialized PascalCase (`{"Success":...}`) while everything else is camelCase — clients never saw `error` on 500s. Now camelCase + `Response.HasStarted` guards.
+- **500s → 400s**: staff ticket updates with an unknown status/priority (`Enum.Parse`), appointment `alternativeDate` (`DateOnly.Parse`), oversized chatbot-log/analytics fields (DB column overflow), and missing login/signup/reset fields all returned 500; each is now a validation failure or clamped.
+- **Ticket attachments never persisted**: the create-ticket page uploaded to the Sanity route (admin-gated → failed for anonymous investors) and sent Sanity `fileRef`s the backend silently dropped. Files are now held locally and uploaded to the backend after ticket creation, authorized by the filing email.
+- **Config drift**: `appsettings.json` had a `Postmark` section but code reads `Resend:*` (admin escalation email silently fell back to the from-address); `render.yaml` gained `Resend__AdminEmail` + `Cookie__Domain` and now deploys from `main`; frontend `.env.example` documented Postmark instead of `RESEND_API_KEY`/`EMAIL_FROM`.
+- **apiFetch** forced `Content-Type: application/json` onto FormData bodies; now leaves multipart bodies alone and exports `resolveApiUrl` for raw links/uploads.
+
+### Verification
+- Backend: `dotnet build` 0 errors / 0 warnings; 78/78 tests pass (5 new integration tests covering upload authorization, MIME allowlist, owner-only download, invalid-status 400).
+- Frontend: `tsc --noEmit` clean, ESLint clean, Jest 27/27, production `next build` verified.

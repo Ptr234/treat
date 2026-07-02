@@ -132,12 +132,23 @@ public class TicketService : ITicketService
 
         if (request.Status is not null)
         {
-            ticket.Status = Enum.Parse<TicketStatus>(ToPascalCase(request.Status), true);
+            // TryParse → 400 (via the FluentValidation middleware) instead of a
+            // 500 when a client sends an unknown status string.
+            if (!Enum.TryParse<TicketStatus>(ToPascalCase(request.Status), true, out var status))
+                throw new FluentValidation.ValidationException(
+                    [new FluentValidation.Results.ValidationFailure("status", $"Invalid status '{request.Status}'")]);
+            ticket.Status = status;
             if (ticket.Status == TicketStatus.Resolved) ticket.ResolvedAt = DateTimeOffset.UtcNow;
             if (ticket.Status == TicketStatus.Closed) ticket.ClosedAt = DateTimeOffset.UtcNow;
         }
 
-        if (request.Priority is not null) ticket.Priority = Enum.Parse<TicketPriority>(request.Priority, true);
+        if (request.Priority is not null)
+        {
+            if (!Enum.TryParse<TicketPriority>(request.Priority, true, out var priority))
+                throw new FluentValidation.ValidationException(
+                    [new FluentValidation.Results.ValidationFailure("priority", $"Invalid priority '{request.Priority}'")]);
+            ticket.Priority = priority;
+        }
         if (request.Assignee is not null) ticket.Assignee = request.Assignee;
         if (request.AssignedAgencyCode is not null) ticket.AssignedAgencyCode = request.AssignedAgencyCode;
         if (request.SatisfactionRating is not null) ticket.SatisfactionRating = request.SatisfactionRating;

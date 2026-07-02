@@ -29,7 +29,12 @@ const MIGRATED_PREFIXES = [
   '/api/audit',
 ];
 
-function resolveUrl(path: string): string {
+/**
+ * Resolve an /api path to the ASP.NET backend when configured, otherwise keep
+ * it relative (Next.js route). Exported for callers that need a raw URL
+ * (file uploads, download links) rather than a JSON fetch.
+ */
+export function resolveApiUrl(path: string): string {
   if (BACKEND_URL && MIGRATED_PREFIXES.some((p) => path.startsWith(p))) {
     return `${BACKEND_URL}${path}`;
   }
@@ -40,15 +45,19 @@ export async function apiFetch<T = unknown>(
   path: string,
   options: RequestInit = {}
 ): Promise<{ success: boolean; data?: T; error?: string }> {
-  const url = resolveUrl(path);
+  const url = resolveApiUrl(path);
+
+  // Don't force a JSON content type onto FormData bodies — the browser must
+  // set multipart/form-data with its boundary itself.
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const headers: HeadersInit = isFormData
+    ? { ...options.headers }
+    : { 'Content-Type': 'application/json', ...options.headers };
 
   const res = await fetch(url, {
     ...options,
     credentials: 'include', // always send cookies cross-origin
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
 
   const json = await res.json().catch(() => null);

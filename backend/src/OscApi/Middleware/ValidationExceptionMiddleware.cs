@@ -21,6 +21,8 @@ public class ValidationExceptionMiddleware
         }
         catch (ValidationException ex)
         {
+            if (context.Response.HasStarted) throw;
+
             context.Response.StatusCode = 400;
             context.Response.ContentType = "application/json";
 

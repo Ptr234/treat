@@ -13,7 +13,7 @@ import {
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid';
-import { apiFetch } from '@/lib/api-client';
+import { apiFetch, resolveApiUrl } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
 import { normalizeStatus, normalizePriority, normalizeCategory, normalizeAuthorRole } from '@/lib/ticket-format';
 
@@ -777,10 +777,15 @@ function TicketDocuments({ ticketId, emailParam, isStaff }: { ticketId: string; 
   const fetchDocs = useCallback(async () => {
     // Staff read via session; the public need their filing email.
     if (!isStaff && !emailParam) { setLoading(false); return; }
-    const query = !isStaff && emailParam ? `?email=${encodeURIComponent(emailParam)}` : '';
-    const res = await apiFetch<TicketDocument[]>(`/api/tickets/${ticketId}/documents${query}`);
-    if (res.success && res.data) setDocs(res.data);
-    setLoading(false);
+    try {
+      const query = !isStaff && emailParam ? `?email=${encodeURIComponent(emailParam)}` : '';
+      const res = await apiFetch<TicketDocument[]>(`/api/tickets/${ticketId}/documents${query}`);
+      if (res.success && res.data) setDocs(res.data);
+    } catch {
+      // Documents are supplementary — a failed fetch just hides the panel.
+    } finally {
+      setLoading(false);
+    }
   }, [ticketId, emailParam, isStaff]);
 
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
@@ -803,16 +808,20 @@ function TicketDocuments({ ticketId, emailParam, isStaff }: { ticketId: string; 
                 <p className="text-xs text-gray-500">{doc.mimeType} &middot; {new Date(doc.uploadedAt).toLocaleDateString('en-UG')}</p>
               </div>
             </div>
-            {doc.storageUrl && (
-              <a
-                href={doc.storageUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-yellow-700 hover:text-yellow-600 font-medium flex-shrink-0 ml-2"
-              >
-                Download
-              </a>
-            )}
+            <a
+              // Files are served only through the access-checked content
+              // endpoint (raw /uploads paths are never exposed by the server).
+              href={resolveApiUrl(
+                `/api/tickets/${ticketId}/documents/${doc.id}/content${
+                  !isStaff && emailParam ? `?email=${encodeURIComponent(emailParam)}` : ''
+                }`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-yellow-700 hover:text-yellow-600 font-medium flex-shrink-0 ml-2"
+            >
+              Download
+            </a>
           </div>
         ))}
       </div>

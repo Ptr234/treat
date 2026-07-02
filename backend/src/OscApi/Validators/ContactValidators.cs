@@ -37,5 +37,11 @@ public class CreateAppointmentValidator : AbstractValidator<CreateAppointmentReq
         RuleFor(x => x.PreferredDate).NotEmpty()
             .Must(d => DateOnly.TryParse(d, out _)).WithMessage("Invalid date format");
         RuleFor(x => x.PreferredTime).NotEmpty().MaximumLength(10);
+        // Optional, but when present it is parsed with DateOnly.Parse — an
+        // unparseable value must fail validation, not 500.
+        RuleFor(x => x.AlternativeDate)
+            .Must(d => string.IsNullOrEmpty(d) || DateOnly.TryParse(d, out _))
+            .WithMessage("Invalid alternative date format");
+        RuleFor(x => x.AlternativeTime).MaximumLength(10);
     }
 }
