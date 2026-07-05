@@ -122,6 +122,8 @@ builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.Ticke
 builder.Services.AddScoped<OscApi.Services.IInvestorService, OscApi.Services.InvestorService>();
 builder.Services.AddScoped<OscApi.Services.IContactService, OscApi.Services.ContactService>();
 builder.Services.AddScoped<OscApi.Services.ISettingsService, OscApi.Services.SettingsService>();
+builder.Services.AddScoped<OscApi.Services.IDashboardService, OscApi.Services.DashboardService>();
+builder.Services.AddSingleton<OscApi.Services.IAnalyticsQueueService, OscApi.Services.AnalyticsQueueService>();
 
 // Validation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

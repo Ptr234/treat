@@ -5,6 +5,7 @@ using OscApi.Common;
 using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Models;
+using OscApi.Services;
 
 namespace OscApi.Controllers;
 
@@ -13,128 +14,39 @@ namespace OscApi.Controllers;
 [Authorize(Policy = "AdminOnly")]
 public class DashboardController : ControllerBase
 {
+    private readonly IDashboardService _dashboardService;
     private readonly OscDbContext _db;
 
-    public DashboardController(OscDbContext db)
+    public DashboardController(IDashboardService dashboardService, OscDbContext db)
     {
+        _dashboardService = dashboardService;
         _db = db;
     }
 
-    /// <summary>Get dashboard KPIs and metrics.</summary>
+    /// <summary>Get dashboard KPIs and metrics (cached for 5 minutes).</summary>
     [HttpGet]
     public async Task<IActionResult> GetDashboard()
     {
-        var now = DateTimeOffset.UtcNow;
-        var thirtyDaysAgo = now.AddDays(-30);
+        // Dashboard stats are cached for 5 minutes to reduce database load
+        var stats = await _dashboardService.GetDashboardStatsAsync();
 
-        // Collapse the per-ticket counters into a single aggregate query (SUM(CASE
-        // WHEN …)) instead of ~7 sequential round-trips to the cloud DB. EF Core
-        // does not allow concurrent queries on one DbContext, so fewer queries —
-        // not parallel ones — is the correct optimization here.
-        var ticketStats = await _db.Tickets
-            .GroupBy(_ => 1)
-            .Select(g => new
-            {
-                Total = g.Count(),
-                Open = g.Count(t => t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed),
-                Resolved = g.Count(t => t.Status == TicketStatus.Resolved || t.Status == TicketStatus.Closed),
-                Escalated = g.Count(t => t.IsEscalated),
-                SlaBreached = g.Count(t =>
-                    t.SlaDeadlineAt != null && t.SlaDeadlineAt < now &&
-                    t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed),
-                Recent = g.Count(t => t.CreatedAt >= thirtyDaysAgo),
-                AvgRating = g.Average(t => (double?)t.SatisfactionRating) ?? 0,
-            })
-            .FirstOrDefaultAsync();
-
-        var totalTickets = ticketStats?.Total ?? 0;
-        var openTickets = ticketStats?.Open ?? 0;
-        var resolvedTickets = ticketStats?.Resolved ?? 0;
-        var escalatedTickets = ticketStats?.Escalated ?? 0;
-        var slaBreached = ticketStats?.SlaBreached ?? 0;
-        var avgRating = ticketStats?.AvgRating ?? 0;
-        var recentTickets = ticketStats?.Recent ?? 0;
-
-        var ticketsByCategory = await _db.Tickets
-            .GroupBy(t => t.Category)
-            .Select(g => new { Category = g.Key.ToString(), Count = g.Count() })
-            .ToListAsync();
-
-        var ticketsByStatus = await _db.Tickets
-            .GroupBy(t => t.Status)
-            .Select(g => new { Status = g.Key.ToString(), Count = g.Count() })
-            .ToListAsync();
-
-        var totalInvestors = await _db.InvestorProfiles.CountAsync();
-        var totalChatSessions = await _db.ChatEnquiries.Select(c => c.SessionId).Distinct().CountAsync();
-
-        // Contact & appointment counts — one aggregate query per table.
-        var inquiryStats = await _db.ContactInquiries
-            .GroupBy(_ => 1)
-            .Select(g => new { Total = g.Count(), Recent = g.Count(i => i.CreatedAt >= thirtyDaysAgo) })
-            .FirstOrDefaultAsync();
-        var appointmentStats = await _db.Appointments
-            .GroupBy(_ => 1)
-            .Select(g => new { Total = g.Count(), Recent = g.Count(a => a.CreatedAt >= thirtyDaysAgo) })
-            .FirstOrDefaultAsync();
-        var totalInquiries = inquiryStats?.Total ?? 0;
-        var recentInquiries = inquiryStats?.Recent ?? 0;
-        var totalAppointments = appointmentStats?.Total ?? 0;
-        var recentAppointments = appointmentStats?.Recent ?? 0;
-
-        // Escalation count (from chatbot)
-        var chatEscalations = await _db.ChatEnquiries.CountAsync(c => c.Tier == ChatTier.Escalation);
-
-        // Message volume — single aggregate query.
-        var messageStats = await _db.TicketMessages
-            .GroupBy(_ => 1)
-            .Select(g => new { Total = g.Count(), Recent = g.Count(m => m.SentAt >= thirtyDaysAgo) })
-            .FirstOrDefaultAsync();
-        var totalMessages = messageStats?.Total ?? 0;
-        var recentMessages = messageStats?.Recent ?? 0;
-
-        // Analytics events (tool usage, downloads) — single aggregate query.
-        var analyticsStats = await _db.AnalyticsEvents
-            .GroupBy(_ => 1)
-            .Select(g => new
-            {
-                Tool = g.Count(e => e.EventType == "tool_usage"),
-                Download = g.Count(e => e.EventType == "download"),
-                Search = g.Count(e => e.EventType == "search"),
-            })
-            .FirstOrDefaultAsync();
-        var toolUsageCount = analyticsStats?.Tool ?? 0;
-        var downloadCount = analyticsStats?.Download ?? 0;
-        var searchCount = analyticsStats?.Search ?? 0;
-
-        var toolBreakdown = await _db.AnalyticsEvents
-            .Where(e => e.EventType == "tool_usage")
-            .GroupBy(e => e.EventName)
-            .Select(g => new { Tool = g.Key, Count = g.Count() })
-            .ToListAsync();
-
-        var topDownloads = await _db.AnalyticsEvents
-            .Where(e => e.EventType == "download")
-            .GroupBy(e => e.EventName)
-            .Select(g => new { Resource = g.Key, Count = g.Count() })
-            .OrderByDescending(g => g.Count)
-            .Take(10)
-            .ToListAsync();
+        // Add cache headers for browser-side caching (1 minute)
+        Response.Headers.CacheControl = "private, max-age=60";
 
         return Ok(new ApiResponse<object>(true, new
         {
             kpis = new
             {
-                totalTickets, openTickets, resolvedTickets, escalatedTickets,
-                slaBreached, avgRating, recentTickets, totalInvestors, totalChatSessions,
-                totalInquiries, totalAppointments, recentInquiries, recentAppointments,
-                chatEscalations, totalMessages, recentMessages,
-                toolUsageCount, downloadCount, searchCount,
+                stats.TotalTickets, stats.OpenTickets, stats.ResolvedTickets, stats.EscalatedTickets,
+                stats.SlaBreached, stats.AvgRating, stats.RecentTickets, stats.TotalInvestors, stats.TotalChatSessions,
+                stats.TotalInquiries, stats.TotalAppointments, stats.RecentInquiries, stats.RecentAppointments,
+                stats.ChatEscalations, stats.TotalMessages, stats.RecentMessages,
+                stats.ToolUsageCount, stats.DownloadCount, stats.SearchCount,
             },
-            ticketsByCategory,
-            ticketsByStatus,
-            toolBreakdown,
-            topDownloads,
+            stats.TicketsByCategory,
+            stats.TicketsByStatus,
+            stats.ToolBreakdown,
+            stats.TopDownloads,
         }));
     }
 

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Models;
+using OscApi.Services;
 
 namespace OscApi.Controllers;
 
@@ -11,14 +11,14 @@ namespace OscApi.Controllers;
 [Route("api/analytics")]
 public class AnalyticsController : ControllerBase
 {
-    private readonly OscDbContext _db;
+    private readonly IAnalyticsQueueService _analyticsQueue;
 
-    public AnalyticsController(OscDbContext db)
+    public AnalyticsController(IAnalyticsQueueService analyticsQueue)
     {
-        _db = db;
+        _analyticsQueue = analyticsQueue;
     }
 
-    /// <summary>Log a user interaction event (tool usage, download, search).</summary>
+    /// <summary>Log a user interaction event (tool usage, download, search). Events are queued and batched for write.</summary>
     [HttpPost("event")]
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> LogEvent([FromBody] LogEventRequest request)
@@ -30,8 +30,7 @@ public class AnalyticsController : ControllerBase
         if (!allowed.Contains(request.EventType))
             return BadRequest(new ApiResponse(false, $"eventType must be one of: {string.Join(", ", allowed)}"));
 
-        // Clamp to column widths so an oversized value can't turn the insert
-        // into a 500 (these fields come straight from the public client).
+        // Clamp to column widths so an oversized value can't turn the insert into a 500
         static string? Clamp(string? v, int max) => v is null || v.Length <= max ? v : v[..max];
 
         var evt = new AnalyticsEvent
@@ -43,8 +42,8 @@ public class AnalyticsController : ControllerBase
             IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
         };
 
-        _db.AnalyticsEvents.Add(evt);
-        await _db.SaveChangesAsync();
+        // Queue event for batch processing (non-blocking)
+        await _analyticsQueue.EnqueueAsync(evt);
 
         return Ok(new ApiResponse(true));
     }
