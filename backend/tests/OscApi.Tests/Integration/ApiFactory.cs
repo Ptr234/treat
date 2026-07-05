@@ -56,21 +56,79 @@ public class ApiFactory : WebApplicationFactory<Program>
 
             services.AddDbContext<OscDbContext>(options => options.UseInMemoryDatabase(_dbName, Root));
 
-            // Create schema + seed a known admin so login tests have credentials.
+            // Create schema + seed test users for all roles
             using var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<OscDbContext>();
             db.Database.EnsureCreated();
+
+            var passwordService = new PasswordService();
+
+            // Seed admin user
             if (!db.AdminUsers.Any(a => a.Email == AdminEmail))
             {
-                db.AdminUsers.Add(new AdminUser
-                {
-                    Name = "OSC Administrator",
-                    Email = AdminEmail,
-                    PasswordHash = new PasswordService().HashPassword(AdminPassword),
-                    Role = "admin",
-                    IsActive = true,
-                });
+                db.AdminUsers.AddRange(
+                    new AdminUser
+                    {
+                        Name = "OSC Administrator",
+                        Email = AdminEmail,
+                        PasswordHash = passwordService.HashPassword(AdminPassword),
+                        Role = "admin",
+                        IsActive = true,
+                    },
+                    new AdminUser
+                    {
+                        Name = "Director General",
+                        Email = "dg@test.local",
+                        PasswordHash = passwordService.HashPassword("DG123!@#"),
+                        Role = "dg",
+                        IsActive = true,
+                    },
+                    new AdminUser
+                    {
+                        Name = "UIA Staff",
+                        Email = "staff.uia@test.local",
+                        PasswordHash = passwordService.HashPassword("Staff123!@#"),
+                        Role = "staff",
+                        IsActive = true,
+                    },
+                    new AdminUser
+                    {
+                        Name = "UBOS Staff",
+                        Email = "staff.ubos@test.local",
+                        PasswordHash = passwordService.HashPassword("Staff123!@#"),
+                        Role = "staff",
+                        IsActive = true,
+                    }
+                );
+                db.SaveChanges();
+            }
+
+            // Seed regular users (investors)
+            if (!db.Users.Any())
+            {
+                db.Users.AddRange(
+                    new User
+                    {
+                        Email = "investor.kibuli@test.local",
+                        PasswordHash = passwordService.HashPassword("Investor123!@#"),
+                        FirstName = "John",
+                        LastName = "Kibuli",
+                        Phone = "+256700000010",
+                        IsEmailVerified = true,
+                        IsActive = true,
+                    },
+                    new User
+                    {
+                        Email = "investor.kampala@test.local",
+                        PasswordHash = passwordService.HashPassword("Investor123!@#"),
+                        FirstName = "Jane",
+                        LastName = "Kampala",
+                        Phone = "+256700000011",
+                        IsEmailVerified = true,
+                        IsActive = true,
+                    }
+                );
                 db.SaveChanges();
             }
         });

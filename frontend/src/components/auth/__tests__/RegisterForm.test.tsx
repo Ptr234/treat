@@ -34,15 +34,16 @@ describe('RegisterForm', () => {
   describe('Form rendering', () => {
     it('renders all required fields', () => {
       render(<RegisterForm />);
-      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/first name/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/^password/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/confirm password/i)).toBeInTheDocument();
     });
 
-    it('displays sign up button', () => {
+    it('displays create account button', () => {
       render(<RegisterForm />);
-      expect(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
     });
   });
 
@@ -51,12 +52,13 @@ describe('RegisterForm', () => {
       const user = userEvent.setup();
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'weak');
       await user.type(screen.getByLabelText(/confirm password/i), 'weak');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/password.*strength|must contain|requirements/i)).toBeInTheDocument();
@@ -67,12 +69,13 @@ describe('RegisterForm', () => {
       const user = userEvent.setup();
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'DifferentPassword123!');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/passwords.*match|do not match/i)).toBeInTheDocument();
@@ -83,12 +86,13 @@ describe('RegisterForm', () => {
       const user = userEvent.setup();
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'invalid-email');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/email.*invalid|valid email/i)).toBeInTheDocument();
@@ -116,12 +120,13 @@ describe('RegisterForm', () => {
 
       render(<RegisterForm onSuccess={mockOnSuccess} />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(mockSignup).toHaveBeenCalledWith({
@@ -138,12 +143,13 @@ describe('RegisterForm', () => {
 
       render(<RegisterForm onSuccess={mockOnSuccess} />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(mockOnSuccess).toHaveBeenCalled();
@@ -156,7 +162,8 @@ describe('RegisterForm', () => {
 
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
@@ -175,12 +182,13 @@ describe('RegisterForm', () => {
 
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'existing@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/already.*exists|already.*taken/i)).toBeInTheDocument();
@@ -193,12 +201,13 @@ describe('RegisterForm', () => {
 
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/failed|error|try again/i)).toBeInTheDocument();
@@ -211,12 +220,13 @@ describe('RegisterForm', () => {
 
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
 
-      await user.click(screen.getByRole('button', { name: /sign up/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/registration failed/i)).toBeInTheDocument();
@@ -258,7 +268,8 @@ describe('RegisterForm', () => {
       const user = userEvent.setup();
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');
@@ -271,7 +282,8 @@ describe('RegisterForm', () => {
       const user = userEvent.setup();
       render(<RegisterForm />);
 
-      await user.type(screen.getByLabelText(/^name/i), 'Test User');
+      await user.type(screen.getByLabelText(/first name/i), 'Test');
+      await user.type(screen.getByLabelText(/last name/i), 'User');
       await user.type(screen.getByLabelText(/email/i), 'test@example.com');
       await user.type(screen.getByLabelText(/^password/i), 'ValidPassword123!');
       await user.type(screen.getByLabelText(/confirm password/i), 'ValidPassword123!');

@@ -1,0 +1,346 @@
+name: Comprehensive Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run nightly to catch regressions
+    - cron: '0 2 * * *'
+
+jobs:
+  backend-build:
+    name: Backend Build & Compile
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0'
+
+      - name: Restore dependencies
+        run: cd backend && dotnet restore
+
+      - name: Build
+        run: cd backend && dotnet build --no-restore --configuration Release
+        id: build
+
+      - name: Run Unit Tests
+        if: success()
+        run: cd backend && dotnet test --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+
+      - name: Publish Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/bin/**/test-results.trx
+
+      - name: Upload Coverage
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: backend/bin/**/coverage.cobertura.xml
+          flags: backend
+
+  frontend-build:
+    name: Frontend Build & Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: cd frontend && npm ci --legacy-peer-deps
+
+      - name: TypeScript Type Check
+        run: cd frontend && npm run type-check
+
+      - name: ESLint Check
+        run: cd frontend && npm run lint
+
+      - name: Prettier Format Check
+        run: cd frontend && npx prettier --check .
+
+      - name: Build
+        run: cd frontend && npm run build
+
+      - name: Run Unit Tests
+        run: cd frontend && npm test -- --coverage --watchAll=false
+
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: frontend/coverage/coverage-final.json
+          flags: frontend
+
+  security-scan:
+    name: Security & Vulnerability Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: npm Audit
+        run: cd frontend && npm audit --audit-level=moderate || true
+        id: audit
+
+      - name: SAST - Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/typescript
+            p/react
+            p/owasp-top-ten
+
+      - name: Secret Detection
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'  # Skip on nightly to save time
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install dependencies
+        run: cd frontend && npm ci --legacy-peer-deps
+
+      - name: Build application
+        run: cd frontend && npm run build
+
+      - name: Run E2E Tests
+        run: cd frontend && npm run test:e2e
+        env:
+          FRONTEND_URL: http://localhost:3000
+
+      - name: Upload E2E Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: frontend/test-results/
+
+  code-quality-report:
+    name: Code Quality Report
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0'
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci --legacy-peer-deps
+          cd ../backend
+          dotnet restore
+
+      - name: Run complexity analysis
+        run: |
+          cd frontend
+          npm install -g sonarqube-scanner
+          # Placeholder - would integrate with SonarQube or similar
+          echo "Complexity analysis would run here"
+
+      - name: Generate test report summary
+        run: |
+          echo "# Test Execution Summary" > test-summary.md
+          echo "" >> test-summary.md
+          echo "Generated: $(date)" >> test-summary.md
+          echo "" >> test-summary.md
+          echo "## Status" >> test-summary.md
+          if [ "${{ needs.backend-build.result }}" == "success" ] && [ "${{ needs.frontend-build.result }}" == "success" ]; then
+            echo "✅ All tests passed" >> test-summary.md
+          else
+            echo "❌ Some tests failed" >> test-summary.md
+          fi
+
+      - name: Upload summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-summary
+          path: test-summary.md
+
+  lint-docker:
+    name: Dockerfile & Docker Compose Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Dockerfiles
+        uses: hadolint/hadolint-action@v3
+        with:
+          dockerfile: |
+            frontend/Dockerfile
+            backend/Dockerfile
+          ignore: DL3008
+
+      - name: Validate docker-compose
+        run: |
+          docker-compose -f docker-compose.test.yml config --quiet
+          docker-compose -f docker-compose.yml config --quiet
+
+  integration-test:
+    name: Full Stack Integration Test
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'  # Skip on nightly
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Docker
+        run: docker --version
+
+      - name: Spin up services
+        run: docker-compose -f docker-compose.test.yml up -d --build
+
+      - name: Wait for services
+        run: |
+          sleep 10
+          docker-compose -f docker-compose.test.yml ps
+
+      - name: Run integration tests
+        run: |
+          # Placeholder - would run actual integration tests
+          echo "Integration tests would run here"
+
+      - name: Collect logs
+        if: always()
+        run: docker-compose -f docker-compose.test.yml logs > integration-test.log
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-logs
+          path: integration-test.log
+
+      - name: Cleanup
+        if: always()
+        run: docker-compose -f docker-compose.test.yml down
+
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: npm audit summary
+        run: cd frontend && npm audit --json > npm-audit.json || true
+
+      - name: Parse npm audit
+        run: |
+          cd frontend
+          CRITICAL=$(npm audit --json 2>/dev/null | jq '.metadata.vulnerabilities.critical // 0')
+          HIGH=$(npm audit --json 2>/dev/null | jq '.metadata.vulnerabilities.high // 0')
+
+          echo "## npm Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
+          echo "- High: $HIGH" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$CRITICAL" -gt 0 ]; then
+            echo "⚠️ Critical vulnerabilities detected"
+            exit 1
+          fi
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: frontend/npm-audit.json
+
+  publish-results:
+    name: Publish Test Results
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build, security-scan, code-quality-report]
+    if: always()
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: test-results
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: test-results/**/*.trx
+          check_name: Unit Test Results
+
+      - name: Create GitHub check
+        if: always()
+        run: |
+          echo "## Test Execution Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Backend Build: ${{ needs.backend-build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "Frontend Build: ${{ needs.frontend-build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "Security Scan: ${{ needs.security-scan.result }}" >> $GITHUB_STEP_SUMMARY
+
+  branch-protection-check:
+    name: Branch Protection Gates
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build, security-scan]
+    if: always()
+    steps:
+      - name: Check all required tests passed
+        run: |
+          if [ "${{ needs.backend-build.result }}" != "success" ]; then
+            echo "❌ Backend build failed"
+            exit 1
+          fi
+
+          if [ "${{ needs.frontend-build.result }}" != "success" ]; then
+            echo "❌ Frontend build failed"
+            exit 1
+          fi
+
+          if [ "${{ needs.security-scan.result }}" != "success" ]; then
+            echo "❌ Security scan found issues"
+            exit 1
+          fi
+
+          echo "✅ All gates passed - ready for merge"
