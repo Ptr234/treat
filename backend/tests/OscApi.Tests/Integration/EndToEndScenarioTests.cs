@@ -13,6 +13,12 @@ public class EndToEndScenarioTests
         _factory = new ApiFactory();
     }
 
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+    };
+
     [Fact]
     public async Task InvestorRegistrationToTicketCreation_CompleteFlow()
     {
@@ -25,7 +31,7 @@ public class EndToEndScenarioTests
         // 2. Create ticket as investor
         var ticket = TestTickets.CreateInvestmentInquiry();
         var ticketContent = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket),
+            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
             System.Text.Encoding.UTF8,
             "application/json");
 
@@ -99,7 +105,7 @@ public class EndToEndScenarioTests
             ticket.Priority = priority;
 
             var content = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(ticket),
+                System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
                 System.Text.Encoding.UTF8,
                 "application/json");
 
@@ -122,7 +128,7 @@ public class EndToEndScenarioTests
             ticket.InvestorNationality = location; // Map location to investor info
 
             var content = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(ticket),
+                System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
                 System.Text.Encoding.UTF8,
                 "application/json");
 

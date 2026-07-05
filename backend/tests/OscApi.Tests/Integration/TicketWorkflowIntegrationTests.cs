@@ -13,6 +13,12 @@ public class TicketWorkflowIntegrationTests
         _factory = new ApiFactory();
     }
 
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+    };
+
     [Fact]
     public async Task CreateTicket_AsInvestor_Succeeds()
     {
@@ -20,7 +26,7 @@ public class TicketWorkflowIntegrationTests
 
         var ticket = TestTickets.CreateBusinessRegistration();
         var content = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket),
+            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
             System.Text.Encoding.UTF8,
             "application/json");
 
@@ -37,7 +43,7 @@ public class TicketWorkflowIntegrationTests
 
         var ticket = TestTickets.CreateBusinessRegistration();
         var createContent = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket),
+            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
             System.Text.Encoding.UTF8,
             "application/json");
 
@@ -67,7 +73,7 @@ public class TicketWorkflowIntegrationTests
 
         var ticket = TestTickets.CreateBusinessRegistration();
         var createContent = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket),
+            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
             System.Text.Encoding.UTF8,
             "application/json");
 
