@@ -110,22 +110,18 @@ public class ApiFactory : WebApplicationFactory<Program>
                 db.Users.AddRange(
                     new User
                     {
+                        Name = "John Kibuli",
                         Email = "investor.kibuli@test.local",
                         PasswordHash = passwordService.HashPassword("Investor123!@#"),
-                        FirstName = "John",
-                        LastName = "Kibuli",
-                        Phone = "+256700000010",
-                        IsEmailVerified = true,
+                        Role = "user",
                         IsActive = true,
                     },
                     new User
                     {
+                        Name = "Jane Kampala",
                         Email = "investor.kampala@test.local",
                         PasswordHash = passwordService.HashPassword("Investor123!@#"),
-                        FirstName = "Jane",
-                        LastName = "Kampala",
-                        Phone = "+256700000011",
-                        IsEmailVerified = true,
+                        Role = "user",
                         IsActive = true,
                     }
                 );
