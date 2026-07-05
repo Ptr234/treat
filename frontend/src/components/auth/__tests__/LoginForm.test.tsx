@@ -10,7 +10,7 @@ jest.mock('@/lib/api-client');
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
-interface MockAuthContext {
+interface _MockAuthContext {
   login: jest.Mock;
   logout: jest.Mock;
   user: null;

@@ -114,8 +114,8 @@ describe('Accessibility', () => {
     });
 
     it('images have alt text', () => {
-      // eslint-disable-next-line @next/next/no-img-element
       const ImageComponent = () => (
+        // eslint-disable-next-line @next/next/no-img-element
         <img src="test.jpg" alt="Test image description" />
       );
       render(<ImageComponent />);
@@ -148,11 +148,11 @@ describe('Accessibility', () => {
     });
 
     it('uses ARIA roles appropriately', () => {
-      // eslint-disable-next-line @next/next/no-html-link-for-pages
       const AriaComponent = () => (
         <div>
           <nav aria-label="Main navigation">
             <ul>
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <li><a href="/">Home</a></li>
               <li><a href="/about">About</a></li>
             </ul>

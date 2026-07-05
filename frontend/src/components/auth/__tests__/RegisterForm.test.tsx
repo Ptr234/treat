@@ -8,7 +8,7 @@ jest.mock('@/contexts/AuthContext');
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
-interface MockAuthRegisterContext {
+interface _MockAuthRegisterContext {
   signup: jest.Mock;
   logout: jest.Mock;
   user: null;
