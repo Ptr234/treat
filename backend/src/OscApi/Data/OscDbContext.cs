@@ -55,6 +55,8 @@ public class OscDbContext : DbContext
         modelBuilder.Entity<AdminUser>(e =>
         {
             e.HasIndex(u => u.Email).IsUnique();
+            e.HasIndex(u => u.PasswordResetToken);  // For token verification lookups
+            e.HasIndex(u => u.AgencyCode);  // For agency officer access scoping
         });
 
         // User (regular end users / investors)
@@ -163,6 +165,8 @@ public class OscDbContext : DbContext
         {
             e.HasIndex(a => a.Timestamp);
             e.HasIndex(a => a.ActorEmail);
+            e.HasIndex(a => a.Action);  // For filtering by action type
+            e.HasIndex(a => new { a.Timestamp, a.ActorEmail });  // For audit report queries
         });
 
         // Admin seeding handled in Program.cs (upsert-style) to avoid migration conflicts

@@ -21,33 +21,38 @@ public class AuditMiddleware
     {
         await _next(ctx);
 
-        try
+        // Fire-and-forget: queue audit log without blocking response.
+        // This prevents audit middleware from becoming a bottleneck under load.
+        _ = Task.Run(async () =>
         {
-            var method = ctx.Request.Method;
-            var path = ctx.Request.Path.Value ?? string.Empty;
-
-            if (!Mutating.Contains(method)) return;
-            if (!path.StartsWith("/api", StringComparison.OrdinalIgnoreCase)) return;
-            if (path.StartsWith("/api/analytics", StringComparison.OrdinalIgnoreCase)) return;
-            if (path.StartsWith("/api/auth", StringComparison.OrdinalIgnoreCase)) return;
-
-            var user = ctx.User;
-            var email = user?.FindFirst(ClaimTypes.Email)?.Value ?? user?.FindFirst("email")?.Value;
-            var role = user?.FindFirst(ClaimTypes.Role)?.Value ?? user?.FindFirst("role")?.Value;
-
-            db.AuditLogs.Add(new AuditLog
+            try
             {
-                ActorEmail = email ?? "(anonymous)",
-                ActorRole = role ?? "-",
-                Action = $"{method} {path}",
-                StatusCode = ctx.Response.StatusCode,
-                IpAddress = ctx.Connection.RemoteIpAddress?.ToString(),
-            });
-            await db.SaveChangesAsync();
-        }
-        catch
-        {
-            // Auditing must never break the request path.
-        }
+                var method = ctx.Request.Method;
+                var path = ctx.Request.Path.Value ?? string.Empty;
+
+                if (!Mutating.Contains(method)) return;
+                if (!path.StartsWith("/api", StringComparison.OrdinalIgnoreCase)) return;
+                if (path.StartsWith("/api/analytics", StringComparison.OrdinalIgnoreCase)) return;
+                if (path.StartsWith("/api/auth", StringComparison.OrdinalIgnoreCase)) return;
+
+                var user = ctx.User;
+                var email = user?.FindFirst(ClaimTypes.Email)?.Value ?? user?.FindFirst("email")?.Value;
+                var role = user?.FindFirst(ClaimTypes.Role)?.Value ?? user?.FindFirst("role")?.Value;
+
+                db.AuditLogs.Add(new AuditLog
+                {
+                    ActorEmail = email ?? "(anonymous)",
+                    ActorRole = role ?? "-",
+                    Action = $"{method} {path}",
+                    StatusCode = ctx.Response.StatusCode,
+                    IpAddress = ctx.Connection.RemoteIpAddress?.ToString(),
+                });
+                await db.SaveChangesAsync();
+            }
+            catch
+            {
+                // Auditing must never break the request path.
+            }
+        });
     }
 }

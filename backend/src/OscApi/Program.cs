@@ -42,9 +42,20 @@ if (string.IsNullOrEmpty(connString))
 
 var dataSourceBuilder = new Npgsql.NpgsqlDataSourceBuilder(connString);
 dataSourceBuilder.EnableDynamicJson();
+
+// Connection pooling (critical for scale)
+dataSourceBuilder.ConnectionStringBuilder.MaxPoolSize = 25;
+dataSourceBuilder.ConnectionStringBuilder.MinPoolSize = 5;
+dataSourceBuilder.ConnectionStringBuilder.ConnectionIdleLifetime = 300;
+
 var dataSource = dataSourceBuilder.Build();
 
-builder.Services.AddDbContext<OscDbContext>(options => options.UseNpgsql(dataSource));
+builder.Services.AddDbContext<OscDbContext>(options =>
+    options.UseNpgsql(dataSource, npgOpt => npgOpt.EnableRetryOnFailure(
+        maxRetryCount: 3,
+        maxRetryDelay: TimeSpan.FromSeconds(5),
+        errorCodesToAdd: null))
+    .LogTo(Console.WriteLine, LogLevel.Information));
 
 // Reverse proxy support (Render/nginx): trust X-Forwarded-For / X-Forwarded-Proto
 // so RemoteIpAddress is the real client IP. Without this, every request appears
