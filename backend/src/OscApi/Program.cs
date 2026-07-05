@@ -222,6 +222,8 @@ var app = builder.Build();
 app.UseForwardedHeaders();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidationExceptionMiddleware>();
+// Note: User-based rate limiting is available in UserRateLimitingMiddleware.cs
+// Currently using ASP.NET's RateLimiter policies instead (more flexible)
 
 if (app.Environment.IsDevelopment())
 {

@@ -1,160 +1,200 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
-import AuthModal from '@/components/auth/AuthModal';
+import {
+  EnvelopeIcon,
+  PhoneIcon,
+  MapPinIcon,
+  FacebookIcon,
+  TwitterIcon,
+  LinkedInIcon,
+} from '@heroicons/react/24/outline';
 
-interface FooterLink {
-  name: string;
-  href: string;
-}
-
-interface FooterLinks {
-  [key: string]: FooterLink[];
-}
-
-const Footer: React.FC = () => {
-  const currentYear = new Date().getFullYear();
-  const [showAdminModal, setShowAdminModal] = useState(false);
-
-  const footerLinks: FooterLinks = {
-    Services: [
-      { name: 'All Services', href: '/services' },
-      { name: 'Business Registration', href: '/business/registration' },
-      { name: 'Tax Calculator', href: '/tools/tax-calculator' },
-      { name: 'Document Checklist', href: '/tools/document-checklist' }
+const FOOTER_SECTIONS = [
+  {
+    title: 'Quick Links',
+    links: [
+      { label: 'Home', href: '/' },
+      { label: 'Investments', href: '/investments' },
+      { label: 'Services', href: '/services' },
+      { label: 'News', href: '/news' },
     ],
-    Investment: [
-      { name: 'Investment Opportunities', href: '/investments' },
-      { name: 'Investment Onboarding', href: '/investments/onboarding' },
-      { name: 'ROI Calculator', href: '/tools/roi-calculator' },
-      { name: 'Agencies Directory', href: '/agencies' }
+  },
+  {
+    title: 'Services',
+    links: [
+      { label: 'Business Registration', href: '/services/registration' },
+      { label: 'Investment Facilitation', href: '/services/facilitation' },
+      { label: 'Tax & Compliance', href: '/services/tax' },
+      { label: 'Investor Aftercare', href: '/services/aftercare' },
     ],
-    'Digital Tools': [
-      { name: 'AI Investor Assistant', href: '/chatbot' },
-      { name: 'Events Calendar', href: '/events' },
-      { name: 'Projects Map', href: '/projects' },
-      { name: 'Issue Tracking', href: '/tickets' }
+  },
+  {
+    title: 'Resources',
+    links: [
+      { label: 'Success Stories', href: '/projects' },
+      { label: 'Market Data', href: '/analytics' },
+      { label: 'Market Guide', href: '/guide' },
+      { label: 'FAQ', href: '/support' },
     ],
-    Resources: [
-      { name: 'How to Use the Portal', href: '/guide' },
-      { name: 'Downloads', href: '/downloads' },
-      { name: 'Tools & Calculators', href: '/tools' },
-      { name: 'Invoice Generator', href: '/tools/invoice-generator' },
-      { name: 'Support Center', href: '/support' }
+  },
+  {
+    title: 'Company',
+    links: [
+      { label: 'About Us', href: '/about' },
+      { label: 'Careers', href: '/careers' },
+      { label: 'Privacy Policy', href: '/privacy' },
+      { label: 'Terms of Service', href: '/terms' },
     ],
-    Contact: [
-      { name: 'Ask the AI Assistant', href: '/chatbot' },
-      { name: 'Submit an Inquiry', href: '/support' },
-      { name: 'About Us', href: '/about' }
-    ]
-  };
+  },
+];
 
-  const openAssistant = () => {
-    document.dispatchEvent(new CustomEvent('openChatWidget'));
-  };
-
+export default function Footer() {
   return (
-    <>
-      <footer role="contentinfo" aria-label="Site footer" className="bg-black text-white relative">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-black via-yellow-500 to-red-500"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-8">
-            <div className="lg:col-span-2">
-              <div>
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center mr-3">
-                    <Image
-                      src="/images/oneStopCenter-logo.jpeg"
-                      alt="OneStopCentre Uganda Official Logo"
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">OneStopCentre Uganda</h3>
-                    <p className="text-sm text-yellow-400 font-semibold">InvestUganda simplified</p>
-                  </div>
-                </div>
-                <p className="text-neutral-300 mb-6 max-w-md leading-relaxed">
-                  Your gateway to streamlined government services, business registration,
-                  and investment opportunities in Uganda. Professional, reliable, and efficient.
-                </p>
-              </div>
+    <footer className="bg-primary-900 text-white">
+      {/* Main Footer Content */}
+      <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+          {/* Brand Column */}
+          <div className="lg:col-span-1">
+            <div className="text-3xl font-black bg-gradient-to-r from-secondary-500 to-yellow-400
+                          bg-clip-text text-transparent mb-4">
+              TREAT
             </div>
-
-            {Object.entries(footerLinks).map(([category, links]) => (
-              <div key={category}>
-                <div>
-                  <h4 className="text-lg font-semibold mb-4 text-yellow-400">{category}</h4>
-                  <ul className="space-y-3">
-                    {links.map((link) => (
-                      <li key={link.name}>
-                        <Link
-                          href={link.href}
-                          className="text-neutral-300 hover:text-white transition-colors text-sm hover:text-yellow-300 block py-1"
-                        >
-                          {link.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Need Help — AI Assistant CTA */}
-          <div className="mt-12 pt-8 border-t border-neutral-800">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="text-center md:text-left">
-                <h4 className="text-lg font-semibold text-white mb-1">Need Help?</h4>
-                <p className="text-sm text-neutral-400">Our AI Assistant can answer your investment questions instantly.</p>
-              </div>
-              <button
-                onClick={openAssistant}
-                className="flex items-center gap-2 px-6 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 transition-all duration-300 shadow-lg shadow-yellow-500/20"
-              >
-                <ChatBubbleLeftRightIcon className="w-5 h-5" />
-                Ask the AI Assistant
-              </button>
-            </div>
-          </div>
-
-          {/* Copyright & Policy */}
-          <div className="flex flex-col md:flex-row justify-between items-center pt-6 mt-6 border-t border-neutral-800">
-            <p className="text-neutral-400 text-sm">
-              &copy; {currentYear} OneStop Centre Uganda. All rights reserved.
+            <p className="text-neutral-300 text-sm leading-relaxed mb-6">
+              Uganda's OneStop Centre for business registration, investment facilitation, and regulatory compliance.
             </p>
-            <div className="flex items-center space-x-6 mt-4 md:mt-0">
-              <Link href="/about" className="text-neutral-400 hover:text-yellow-400 text-sm transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/about" className="text-neutral-400 hover:text-yellow-400 text-sm transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/support" className="text-neutral-400 hover:text-yellow-400 text-sm transition-colors">
-                Accessibility
-              </Link>
-              <button
-                onClick={() => setShowAdminModal(true)}
-                className="text-neutral-600 hover:text-neutral-400 text-xs transition-colors"
+            {/* Social Links */}
+            <div className="flex gap-4">
+              {[
+                { href: '#', label: 'Facebook' },
+                { href: '#', label: 'Twitter' },
+                { href: '#', label: 'LinkedIn' },
+              ].map((social, idx) => (
+                <a
+                  key={idx}
+                  href={social.href}
+                  aria-label={social.label}
+                  className="w-10 h-10 bg-secondary-500/20 hover:bg-secondary-500 text-secondary-500
+                           hover:text-primary-900 rounded-lg flex items-center justify-center
+                           transition-all duration-200"
+                >
+                  🔗
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Link Sections */}
+          {FOOTER_SECTIONS.map((section) => (
+            <div key={section.title}>
+              <h4 className="font-bold text-lg mb-4 text-secondary-500">
+                {section.title}
+              </h4>
+              <ul className="space-y-2">
+                {section.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-neutral-300 hover:text-secondary-500 transition-colors
+                               text-sm font-medium"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Contact Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-12 border-t border-neutral-700">
+          <div className="flex items-start gap-4">
+            <EnvelopeIcon className="w-6 h-6 text-secondary-500 flex-shrink-0 mt-1" />
+            <div>
+              <h4 className="font-bold text-sm mb-2">Email</h4>
+              <a
+                href="mailto:info@treat.ug"
+                className="text-neutral-300 hover:text-secondary-500 transition-colors text-sm"
               >
-                Admin
-              </button>
+                info@treat.ug
+              </a>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <PhoneIcon className="w-6 h-6 text-secondary-500 flex-shrink-0 mt-1" />
+            <div>
+              <h4 className="font-bold text-sm mb-2">Phone</h4>
+              <a
+                href="tel:+256414301000"
+                className="text-neutral-300 hover:text-secondary-500 transition-colors text-sm"
+              >
+                +256 414 301 000
+              </a>
+            </div>
+          </div>
+          <div className="flex items-start gap-4">
+            <MapPinIcon className="w-6 h-6 text-secondary-500 flex-shrink-0 mt-1" />
+            <div>
+              <h4 className="font-bold text-sm mb-2">Location</h4>
+              <p className="text-neutral-300 text-sm">
+                Plot 1, Baskerville Ave<br />
+                Kololo, Kampala, Uganda
+              </p>
             </div>
           </div>
         </div>
-      </footer>
 
-      {/* Admin Auth Modal — email/password + Google */}
-      <AuthModal isOpen={showAdminModal} onClose={() => setShowAdminModal(false)} mode="admin" />
-    </>
+        {/* Newsletter Signup */}
+        <div className="bg-gradient-to-r from-secondary-500/10 to-transparent border-l-4 border-secondary-500
+                       p-8 rounded-lg mt-12">
+          <h4 className="font-bold text-lg mb-3">Stay Updated</h4>
+          <p className="text-neutral-300 text-sm mb-4">
+            Subscribe to our newsletter for the latest investment opportunities and regulatory updates.
+          </p>
+          <form className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="flex-1 px-4 py-3 bg-primary-800 text-white rounded-lg focus:outline-none
+                       focus:ring-2 focus:ring-secondary-500 focus:border-transparent
+                       placeholder-neutral-400 transition-all"
+              required
+            />
+            <button
+              type="submit"
+              className="bg-secondary-500 text-primary-900 px-6 py-3 rounded-lg font-bold
+                       hover:bg-secondary-600 transition-all duration-200 whitespace-nowrap"
+            >
+              Subscribe
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Bottom Bar */}
+      <div className="border-t border-neutral-700 bg-primary-950 px-6 py-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-neutral-400 text-sm text-center md:text-left">
+            &copy; 2026 Uganda OneStop Centre (TREAT). All rights reserved.
+          </p>
+          <div className="flex gap-6 text-sm text-neutral-400">
+            <Link href="/privacy" className="hover:text-secondary-500 transition-colors">
+              Privacy Policy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-secondary-500 transition-colors">
+              Terms of Service
+            </Link>
+            <span>•</span>
+            <Link href="/contact" className="hover:text-secondary-500 transition-colors">
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
-};
-
-export default Footer;
+}

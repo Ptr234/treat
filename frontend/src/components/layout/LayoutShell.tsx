@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import Header from './Header';
+import Navigation from './Navigation';
 import Footer from './Footer';
 import NewsBar from './NewsBar';
 import ChatWidget from '@/components/chatbot/ChatWidget';
@@ -20,13 +20,13 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       {/* Skip to main content link — visible on focus for keyboard users */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-yellow-500 focus:text-black focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-secondary-500 focus:text-primary-900 focus:px-4 focus:py-2 focus:rounded-lg focus:font-bold focus:shadow-lg"
       >
         Skip to main content
       </a>
       <NewsBar />
-      <Header />
-      <main id="main-content" role="main" className="flex-1 pt-24 md:pt-28" tabIndex={-1}>
+      <Navigation />
+      <main id="main-content" role="main" className="flex-1" tabIndex={-1}>
         {children}
       </main>
       <Footer />
