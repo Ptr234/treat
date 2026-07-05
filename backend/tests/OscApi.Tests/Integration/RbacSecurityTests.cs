@@ -150,10 +150,13 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
             password = "ValidPassword123!",
         });
 
-        // Add invalid token to cookies
-        client.DefaultRequestHeaders.Add("Cookie", "session=invalid-token");
+        // Create a new client to add invalid token without inheriting valid auth from signup
+        var tamperedClient = _factory.CreateClient();
 
-        var res = await client.GetAsync("/api/me/profile");
+        // Add invalid token to cookies (auth handler looks for "osc-session")
+        tamperedClient.DefaultRequestHeaders.Add("Cookie", "osc-session=invalid-token-xyz");
+
+        var res = await tamperedClient.GetAsync("/api/me/profile");
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
 

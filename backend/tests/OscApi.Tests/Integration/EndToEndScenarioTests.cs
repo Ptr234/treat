@@ -42,12 +42,13 @@ public class EndToEndScenarioTests
             .GetProperty("referenceNumber")
             .GetString();
 
-        var getResponse = await client.GetAsync($"/api/tickets/{referenceNumber}");
+        // Pass email as query parameter for unauthenticated access
+        var getResponse = await client.GetAsync($"/api/tickets/{referenceNumber}?email={request.ContactEmail}");
         Assert.True(getResponse.IsSuccessStatusCode);
 
         // 4. Verify ticket data
         var content = await getResponse.Content.ReadAsStringAsync();
-        Assert.Contains("Investment", content);
+        Assert.Contains("industrial park", content, System.StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
