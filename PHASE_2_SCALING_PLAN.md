@@ -166,12 +166,12 @@ await _db.SaveChangesAsync();  // ❌
 
 ## Recommended Phase 2 Implementation Order
 
-### Sprint 1 (Week 1-2): Database Optimization
-- [ ] Fix N+1 Message count query (2-3h)
-- [ ] Implement Settings service caching (1-2h)
-- [ ] Add missing database indexes (0.5h)
-- [ ] Parallel email sends in ContactService (1h)
-- **Subtotal: 5-7 hours**
+### Sprint 1 (Week 1-2): Database Optimization ✅ COMPLETED
+- [x] Fix N+1 Message count query (2-3h) — GroupJoin implementation
+- [x] Implement Settings service caching (1-2h) — 1-hour TTL with cache invalidation
+- [x] Add missing database indexes (0.5h) — Verified all in place
+- [x] Parallel email sends in ContactService (1h) — Task.WhenAll for parallel execution
+- **Subtotal: 5-7 hours** ✅ DONE
 
 ### Sprint 2 (Week 2-3): Dashboard & Analytics
 - [ ] Dashboard: Combine queries + cache (4-5h)
