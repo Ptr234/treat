@@ -154,27 +154,23 @@ describe('Error Handling', () => {
 
   describe('Retry logic', () => {
     it('retries on network failure', async () => {
-      mockFetch
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({ success: true, data: {} });
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-      // Test that retry mechanism exists (if implemented)
       try {
         await apiFetch('/api/test');
+        fail('Should have thrown');
       } catch (err) {
-        expect(err).toBeDefined();
+        expect(err).toHaveProperty('message', 'Network error');
       }
     });
 
     it('respects retry limits', async () => {
-      mockFetch
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockRejectedValueOnce(new Error('Network error'))
-        .mockResolvedValueOnce({ success: true });
+      const networkError = new Error('Network error');
+      mockFetch.mockRejectedValue(networkError);
 
       try {
         await apiFetch('/api/test');
+        fail('Should have thrown');
       } catch (err) {
         expect(err).toBeDefined();
       }

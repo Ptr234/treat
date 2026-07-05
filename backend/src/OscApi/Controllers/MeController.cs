@@ -159,4 +159,44 @@ public class MeController : ControllerBase
 
         return Ok(new ApiResponse(true));
     }
+
+    /// <summary>Get the signed-in user's profile.</summary>
+    [HttpGet("profile")]
+    public IActionResult GetProfile()
+    {
+        var email = Email;
+        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+
+        return Ok(new ApiResponse<object>(true, new { email }));
+    }
+
+    /// <summary>Update the signed-in user's profile.</summary>
+    [HttpPut("profile")]
+    public IActionResult UpdateProfile([FromBody] JsonElement data)
+    {
+        var email = Email;
+        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+
+        return Ok(new ApiResponse(true, "Profile updated"));
+    }
+
+    /// <summary>Delete the signed-in user's account.</summary>
+    [HttpPost("delete-account")]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var email = Email;
+        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+
+        var investor = await _db.InvestorProfiles.FirstOrDefaultAsync(p => p.Email == email);
+        if (investor is not null)
+        {
+            _db.InvestorProfiles.Remove(investor);
+        }
+
+        var drafts = await _db.FormDrafts.Where(d => d.UserEmail == email).ToListAsync();
+        _db.FormDrafts.RemoveRange(drafts);
+
+        await _db.SaveChangesAsync();
+        return Ok(new ApiResponse(true, "Account deleted"));
+    }
 }

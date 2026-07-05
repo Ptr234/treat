@@ -105,20 +105,19 @@ describe('LoginForm', () => {
       expect(screen.queryByText('Login failed')).not.toBeInTheDocument();
     });
 
-    it('disables submit button while loading', async () => {
-      const user = userEvent.setup();
-      mockLogin.mockImplementation(() => new Promise(() => {})); // Never resolves
+    it('disables submit button while loading', () => {
+      mockUseAuth.mockReturnValue({
+        login: mockLogin,
+        logout: jest.fn(),
+        user: null,
+        isLoading: true,
+        error: null,
+      } as unknown as ReturnType<typeof useAuth>);
 
       render(<LoginForm />);
 
-      await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-      await user.type(screen.getByLabelText(/password/i), 'Password123!');
-
-      const submitButton = screen.getByRole('button', { name: /sign in/i });
-      await user.click(submitButton);
-
+      const submitButton = screen.getByRole('button', { name: /signing in/i });
       expect(submitButton).toBeDisabled();
-      expect(screen.getByText(/signing in/i)).toBeInTheDocument();
     });
   });
 

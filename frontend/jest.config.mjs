@@ -9,7 +9,7 @@ const config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/e2e/'],
+  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/e2e/', '<rootDir>/__tests__/fixtures/'],
   // jose ships ESM-only; let SWC transform it instead of ignoring it.
   transformIgnorePatterns: [
     '/node_modules/(?!(jose)/)',
