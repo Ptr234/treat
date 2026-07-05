@@ -172,13 +172,14 @@ builder.Services.AddRateLimiter(options =>
                 SegmentsPerWindow = 4,
             }));
 
-    // Public form submissions: 10 per minute per IP
+    // Public form submissions: 10 per minute per IP (configurable for tests)
+    var publicFormPermitLimit = builder.Configuration.GetValue("RateLimits:PublicFormPermitLimit", 10);
     options.AddPolicy("public-form", httpContext =>
         RateLimitPartition.GetSlidingWindowLimiter(
             httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new SlidingWindowRateLimiterOptions
             {
-                PermitLimit = 10,
+                PermitLimit = publicFormPermitLimit,
                 Window = TimeSpan.FromMinutes(1),
                 SegmentsPerWindow = 4,
             }));

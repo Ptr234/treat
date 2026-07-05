@@ -119,6 +119,10 @@ public class AuthController : ControllerBase
 
         var email = request.Email.ToLowerInvariant().Trim();
 
+        // Validate email format - simple regex to allow only standard email characters
+        if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"))
+            return BadRequest(new ApiResponse(false, "Invalid email format"));
+
         if (request.Password.Length < 8 || !request.Password.Any(char.IsUpper) || !request.Password.Any(char.IsDigit))
             return BadRequest(new ApiResponse(false, "Password must be at least 8 characters and include an uppercase letter and a digit"));
 

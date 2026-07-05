@@ -187,14 +187,24 @@ public class MeController : ControllerBase
         var email = Email;
         if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
 
+        // Delete investor profile
         var investor = await _db.InvestorProfiles.FirstOrDefaultAsync(p => p.Email == email);
         if (investor is not null)
         {
             _db.InvestorProfiles.Remove(investor);
         }
 
+        // Delete form drafts
         var drafts = await _db.FormDrafts.Where(d => d.UserEmail == email).ToListAsync();
         _db.FormDrafts.RemoveRange(drafts);
+
+        // Deactivate or delete user account
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user is not null)
+        {
+            user.IsActive = false;
+            _db.Users.Update(user);
+        }
 
         await _db.SaveChangesAsync();
         return Ok(new ApiResponse(true, "Account deleted"));

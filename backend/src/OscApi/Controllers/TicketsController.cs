@@ -36,11 +36,31 @@ public class TicketsController : ControllerBase
     /// <summary>List tickets. Admin-level staff see all; agency officers see only their agency's.</summary>
     [HttpGet]
     [Authorize(Policy = Roles.StaffPolicy)]
-    public async Task<IActionResult> ListTickets([FromQuery] int from = 0, [FromQuery] int to = 50)
+    public async Task<IActionResult> ListTickets([FromQuery] int? page = null, [FromQuery] int? pageSize = null, [FromQuery] int? from = null, [FromQuery] int? to = null)
     {
+        // Support both pagination styles: page/pageSize or from/to
+        int start = 0, end = 50;
+
+        if (page.HasValue || pageSize.HasValue)
+        {
+            var p = page ?? 1;
+            var ps = pageSize ?? 50;
+
+            if (p < 1 || ps < 1 || ps > 100)
+                return BadRequest(new ApiResponse(false, "Invalid pagination parameters: page must be >= 1, pageSize must be between 1 and 100"));
+
+            start = (p - 1) * ps;
+            end = start + ps;
+        }
+        else if (from.HasValue || to.HasValue)
+        {
+            start = from ?? 0;
+            end = to ?? 50;
+        }
+
         var scope = ResolveAgencyScope(out var misconfigured);
         if (misconfigured) return Forbid();
-        var result = await _tickets.ListAsync(from, to, scope);
+        var result = await _tickets.ListAsync(start, end, scope);
         return Ok(new ApiResponse<object>(true, result));
     }
 
