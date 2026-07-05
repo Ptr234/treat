@@ -185,12 +185,12 @@ await _db.SaveChangesAsync();  // ❌
 - [x] Chatbot history to Redis (3-4h) — ChatbotSessionService with server-side storage
 - **Subtotal: 11-14 hours** ✅ DONE
 
-### Sprint 4 (Week 4-5): Frontend & Monitoring
-- [ ] Frontend SWR caching (3-4h)
-- [ ] Code splitting for heavy components (2-3h)
-- [ ] Rate limiting by user (2h)
-- [ ] Test under load (2-3h)
-- **Subtotal: 9-12 hours**
+### Sprint 4 (Week 4-5): Frontend & Monitoring ✅ COMPLETED
+- [x] Frontend SWR caching (3-4h) — useTicketsSWR, useDashboardSWR hooks
+- [x] Code splitting for heavy components (2-3h) — Lazy loading with dynamic imports
+- [x] Rate limiting by user (2h) — UserRateLimitingMiddleware (production-ready)
+- [x] Test under load (2-3h) — k6 load testing suite with thresholds
+- **Subtotal: 9-12 hours** ✅ DONE
 
 **Total Effort:** ~35-50 hours
 
