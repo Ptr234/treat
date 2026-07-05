@@ -173,11 +173,11 @@ await _db.SaveChangesAsync();  // ❌
 - [x] Parallel email sends in ContactService (1h) — Task.WhenAll for parallel execution
 - **Subtotal: 5-7 hours** ✅ DONE
 
-### Sprint 2 (Week 2-3): Dashboard & Analytics
-- [ ] Dashboard: Combine queries + cache (4-5h)
-- [ ] Analytics: Batch writes + queue (3-4h)
-- [ ] Add HTTP Cache-Control headers (1-2h)
-- **Subtotal: 8-11 hours**
+### Sprint 2 (Week 2-3): Dashboard & Analytics ✅ COMPLETED
+- [x] Dashboard: Combine queries + cache (4-5h) — DashboardService with 5-min TTL
+- [x] Analytics: Batch writes + queue (3-4h) — AnalyticsQueueService for batching
+- [x] Add HTTP Cache-Control headers (1-2h) — Cache headers on dashboard endpoint
+- **Subtotal: 8-11 hours** ✅ DONE
 
 ### Sprint 3 (Week 3-4): File Storage & Backend Queueing
 - [ ] Migrate uploads to S3 (6-8h)
