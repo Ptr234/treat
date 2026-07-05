@@ -37,14 +37,17 @@ public class ContactService : IContactService
         await _db.SaveWithUniqueReferenceAsync(async () =>
             inquiry.ReferenceNumber = await GenerateRefAsync("INQ"));
 
-        _ = _email.SendContactConfirmationAsync(
+        // Send both emails in parallel to avoid sequential latency
+        var confirmationTask = _email.SendContactConfirmationAsync(
             inquiry.ContactEmail, inquiry.ContactName, inquiry.ReferenceNumber,
             inquiry.AgencyName, inquiry.Subject);
 
-        _ = _email.SendContactNotificationToAgencyAsync(
+        var notificationTask = _email.SendContactNotificationToAgencyAsync(
             inquiry.AgencyCode, inquiry.AgencyName, inquiry.ReferenceNumber,
             inquiry.ContactName, inquiry.ContactEmail, inquiry.Subject, inquiry.Message,
             request.AgencyEmail);
+
+        _ = Task.WhenAll(confirmationTask, notificationTask);
 
         return new ContactInquiryResponse(
             inquiry.ReferenceNumber, inquiry.AgencyCode, inquiry.ContactName,
@@ -76,18 +79,21 @@ public class ContactService : IContactService
         await _db.SaveWithUniqueReferenceAsync(async () =>
             appointment.ReferenceNumber = await GenerateRefAsync("APT"));
 
-        _ = _email.SendAppointmentConfirmationAsync(
+        // Send both emails in parallel to avoid sequential latency
+        var confirmationTask = _email.SendAppointmentConfirmationAsync(
             appointment.ContactEmail, appointment.ContactName, appointment.ReferenceNumber,
             appointment.AgencyName, appointment.PreferredDate.ToString("dd MMM yyyy"),
             appointment.PreferredTime);
 
-        _ = _email.SendAppointmentNotificationToAgencyAsync(
+        var notificationTask = _email.SendAppointmentNotificationToAgencyAsync(
             appointment.AgencyCode, appointment.AgencyName, appointment.ReferenceNumber,
             appointment.ContactName, appointment.ContactEmail, appointment.ContactPhone,
             appointment.ServiceType, appointment.Purpose,
             appointment.PreferredDate.ToString("dd MMM yyyy"), appointment.PreferredTime,
             appointment.DurationMinutes, appointment.MeetingType.ToString(),
             request.AgencyEmail);
+
+        _ = Task.WhenAll(confirmationTask, notificationTask);
 
         return new AppointmentResponse(
             appointment.ReferenceNumber, appointment.AgencyCode, appointment.ContactName,

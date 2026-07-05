@@ -29,16 +29,19 @@ public class TicketService : ITicketService
 
         var total = await query.CountAsync();
         var (skip, take) = Pagination.Normalize(from, to);
+
+        // Use GroupJoin to avoid N+1 query on Messages.Count
         var tickets = await query
             .OrderByDescending(t => t.CreatedAt)
             .Skip(skip).Take(take)
-            .Select(t => new
-            {
-                t.ReferenceNumber, t.Title, t.Category, t.Priority, t.Status,
-                t.ContactName, t.ContactEmail, t.AssignedAgencyCode, t.Assignee,
-                t.IsEscalated, t.SlaDeadlineAt, t.CreatedAt, t.ResolvedAt,
-                MessageCount = t.Messages.Count
-            })
+            .GroupJoin(_db.TicketMessages, t => t.Id, m => m.TicketId,
+                (t, messages) => new
+                {
+                    t.ReferenceNumber, t.Title, t.Category, t.Priority, t.Status,
+                    t.ContactName, t.ContactEmail, t.AssignedAgencyCode, t.Assignee,
+                    t.IsEscalated, t.SlaDeadlineAt, t.CreatedAt, t.ResolvedAt,
+                    MessageCount = messages.Count()
+                })
             .ToListAsync();
 
         return new { tickets, total };

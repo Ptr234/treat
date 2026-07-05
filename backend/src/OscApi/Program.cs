@@ -114,6 +114,9 @@ else
         "and per-instance. Do NOT run more than one backend instance in this mode.");
 }
 
+// In-memory cache for application-level caching (settings, etc.)
+builder.Services.AddMemoryCache();
+
 // Business services
 builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.TicketService>();
 builder.Services.AddScoped<OscApi.Services.IInvestorService, OscApi.Services.InvestorService>();
