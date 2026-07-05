@@ -1,3 +1,4 @@
+using OscApi.Dtos.Tickets;
 using OscApi.Models;
 
 namespace OscApi.Tests.Fixtures;
@@ -104,6 +105,79 @@ public static class TestTickets
             ClosedAt = DateTimeOffset.UtcNow.AddDays(-1),
             Documents = new List<TicketDocument>()
         };
+    }
+
+    // CreateTicketRequest DTO factory methods for API tests
+    public static CreateTicketRequest CreateBusinessRegistrationRequest(
+        string createdBy = TestUsers.InvestorKibuli.Email)
+    {
+        return new(
+            "Register new business entity",
+            "I need to register a limited liability company",
+            "application_support",
+            "high",
+            createdBy,
+            "Business Owner",
+            "+256700000010",
+            null,
+            "Manufacturing",
+            null,
+            false
+        );
+    }
+
+    public static CreateTicketRequest CreateInvestmentInquiryRequest(
+        string createdBy = TestUsers.InvestorCampala.Email)
+    {
+        return new(
+            "Industrial park investment opportunity",
+            "Interested in investing in the industrial park project with UIA",
+            "general_inquiry",
+            "medium",
+            createdBy,
+            "Investor Contact",
+            "+256700000011",
+            "Uganda",
+            "Real Estate",
+            "5M-10M USD",
+            false
+        );
+    }
+
+    public static CreateTicketRequest CreateLicenseApplicationRequest(
+        string createdBy = TestUsers.InvestorMbarara.Email)
+    {
+        return new(
+            "Apply for business license renewal",
+            "Renewal of business license for existing operations",
+            "application_support",
+            "medium",
+            createdBy,
+            "License Applicant",
+            "+256700000012",
+            null,
+            "Retail",
+            null,
+            false
+        );
+    }
+
+    public static CreateTicketRequest CreateTaxInquiryRequest(
+        string createdBy)
+    {
+        return new(
+            "Request tax clearance certificate",
+            "Need tax clearance for company winding up",
+            "procedure_query",
+            "high",
+            createdBy,
+            "Tax Inquiry Person",
+            "+256700000015",
+            null,
+            null,
+            null,
+            false
+        );
     }
 }
 

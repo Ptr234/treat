@@ -1,0 +1,110 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  OscApi -> D:\treat\backend\src\OscApi\bin\Debug\net8.0\OscApi.dll
+  OscApi.Tests -> D:\treat\backend\tests\OscApi.Tests\bin\Debug\net8.0\OscApi.Tests.dll
+Test run for D:\treat\backend\tests\OscApi.Tests\bin\Debug\net8.0\OscApi.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.11.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+[xUnit.net 00:00:19.98]     OscApi.Tests.Integration.EndToEndScenarioTests.MultipleTickets_DifferentCategories_AllSucceed [FAIL]
+[xUnit.net 00:00:19.99]     OscApi.Tests.Integration.TicketWorkflowIntegrationTests.TicketTransitions_ValidStates_AllSucceed [FAIL]
+  Failed OscApi.Tests.Integration.EndToEndScenarioTests.MultipleTickets_DifferentCategories_AllSucceed [15 s]
+  Error Message:
+   Assert.Equal() Failure
+Expected: 3
+Actual:   0
+  Stack Trace:
+     at OscApi.Tests.Integration.EndToEndScenarioTests.MultipleTickets_DifferentCategories_AllSucceed() in D:\treat\backend\tests\OscApi.Tests\Integration\EndToEndScenarioTests.cs:line 72
+--- End of stack trace from previous location ---
+  Failed OscApi.Tests.Integration.TicketWorkflowIntegrationTests.TicketTransitions_ValidStates_AllSucceed [9 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.TicketWorkflowIntegrationTests.TicketTransitions_ValidStates_AllSucceed() in D:\treat\backend\tests\OscApi.Tests\Integration\TicketWorkflowIntegrationTests.cs:line 113
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:25.11]     OscApi.Tests.Integration.EndToEndScenarioTests.TicketListFiltering_ByStatus_WorksCorrectly [FAIL]
+[xUnit.net 00:00:25.14]     OscApi.Tests.Integration.TicketWorkflowIntegrationTests.GetTicket_WithValidReference_ReturnsTicket [FAIL]
+  Failed OscApi.Tests.Integration.EndToEndScenarioTests.TicketListFiltering_ByStatus_WorksCorrectly [5 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.EndToEndScenarioTests.TicketListFiltering_ByStatus_WorksCorrectly() in D:\treat\backend\tests\OscApi.Tests\Integration\EndToEndScenarioTests.cs:line 88
+--- End of stack trace from previous location ---
+  Failed OscApi.Tests.Integration.TicketWorkflowIntegrationTests.GetTicket_WithValidReference_ReturnsTicket [5 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.TicketWorkflowIntegrationTests.GetTicket_WithValidReference_ReturnsTicket() in D:\treat\backend\tests\OscApi.Tests\Integration\TicketWorkflowIntegrationTests.cs:line 51
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:25.15]     OscApi.Tests.Integration.RbacSecurityTests.CsrfToken_ValidatedOnFormSubmission [FAIL]
+  Failed OscApi.Tests.Integration.RbacSecurityTests.CsrfToken_ValidatedOnFormSubmission [2 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: OK
+Actual:   Unauthorized
+  Stack Trace:
+     at OscApi.Tests.Integration.RbacSecurityTests.CsrfToken_ValidatedOnFormSubmission() in D:\treat\backend\tests\OscApi.Tests\Integration\RbacSecurityTests.cs:line 206
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:29.01]     OscApi.Tests.Integration.EndToEndScenarioTests.InvestorRegistrationToTicketCreation_CompleteFlow [FAIL]
+[xUnit.net 00:00:29.07]     OscApi.Tests.Integration.TicketWorkflowIntegrationTests.ListTickets_ReturnsAllUserTickets [FAIL]
+[xUnit.net 00:00:29.11]     OscApi.Tests.Integration.RbacSecurityTests.SessionTampering_InvalidTokenRejected [FAIL]
+  Failed OscApi.Tests.Integration.EndToEndScenarioTests.InvestorRegistrationToTicketCreation_CompleteFlow [3 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.EndToEndScenarioTests.InvestorRegistrationToTicketCreation_CompleteFlow() in D:\treat\backend\tests\OscApi.Tests\Integration\EndToEndScenarioTests.cs:line 39
+--- End of stack trace from previous location ---
+  Failed OscApi.Tests.Integration.TicketWorkflowIntegrationTests.ListTickets_ReturnsAllUserTickets [3 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.TicketWorkflowIntegrationTests.ListTickets_ReturnsAllUserTickets() in D:\treat\backend\tests\OscApi.Tests\Integration\TicketWorkflowIntegrationTests.cs:line 66
+--- End of stack trace from previous location ---
+  Failed OscApi.Tests.Integration.RbacSecurityTests.SessionTampering_InvalidTokenRejected [469 ms]
+  Error Message:
+   Assert.Equal() Failure
+Expected: Unauthorized
+Actual:   OK
+  Stack Trace:
+     at OscApi.Tests.Integration.RbacSecurityTests.SessionTampering_InvalidTokenRejected() in D:\treat\backend\tests\OscApi.Tests\Integration\RbacSecurityTests.cs:line 157
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:31.46]     OscApi.Tests.Integration.TicketWorkflowIntegrationTests.CreateTicket_AsInvestor_Succeeds [FAIL]
+  Failed OscApi.Tests.Integration.TicketWorkflowIntegrationTests.CreateTicket_AsInvestor_Succeeds [2 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.TicketWorkflowIntegrationTests.CreateTicket_AsInvestor_Succeeds() in D:\treat\backend\tests\OscApi.Tests\Integration\TicketWorkflowIntegrationTests.cs:line 35
+--- End of stack trace from previous location ---
+[xUnit.net 00:00:33.61]     OscApi.Tests.Integration.EndToEndScenarioTests.CrossRegion_TicketSubmission_AllLocationsWork [FAIL]
+[xUnit.net 00:00:34.00]     OscApi.Tests.Integration.TicketWorkflowIntegrationTests.UpdateTicketStatus_WithValidStatus_Succeeds [FAIL]
+  Failed OscApi.Tests.Integration.EndToEndScenarioTests.CrossRegion_TicketSubmission_AllLocationsWork [2 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.EndToEndScenarioTests.CrossRegion_TicketSubmission_AllLocationsWork() in D:\treat\backend\tests\OscApi.Tests\Integration\EndToEndScenarioTests.cs:line 137
+--- End of stack trace from previous location ---
+  Failed OscApi.Tests.Integration.TicketWorkflowIntegrationTests.UpdateTicketStatus_WithValidStatus_Succeeds [2 s]
+  Error Message:
+   Assert.True() Failure
+Expected: True
+Actual:   False
+  Stack Trace:
+     at OscApi.Tests.Integration.TicketWorkflowIntegrationTests.UpdateTicketStatus_WithValidStatus_Succeeds() in D:\treat\backend\tests\OscApi.Tests\Integration\TicketWorkflowIntegrationTests.cs:line 81
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:    11, Passed:   109, Skipped:     0, Total:   120, Duration: 29 s - OscApi.Tests.dll (net8.0)

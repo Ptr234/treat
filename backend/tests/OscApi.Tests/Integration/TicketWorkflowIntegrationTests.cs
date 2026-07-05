@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using OscApi.Models;
 using OscApi.Tests.Fixtures;
 using Xunit;
@@ -24,13 +25,8 @@ public class TicketWorkflowIntegrationTests
     {
         var client = _factory.CreateClient();
 
-        var ticket = TestTickets.CreateBusinessRegistration();
-        var content = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
-            System.Text.Encoding.UTF8,
-            "application/json");
-
-        var response = await client.PostAsync("/api/tickets", content);
+        var request = TestTickets.CreateBusinessRegistrationRequest();
+        var response = await client.PostAsJsonAsync("/api/tickets", request);
 
         Assert.True(response.StatusCode == System.Net.HttpStatusCode.Created ||
                    response.StatusCode == System.Net.HttpStatusCode.OK);
@@ -41,18 +37,18 @@ public class TicketWorkflowIntegrationTests
     {
         var client = _factory.CreateClient();
 
-        var ticket = TestTickets.CreateBusinessRegistration();
-        var createContent = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
-            System.Text.Encoding.UTF8,
-            "application/json");
-
-        var createResponse = await client.PostAsync("/api/tickets", createContent);
+        var request = TestTickets.CreateBusinessRegistrationRequest();
+        var createResponse = await client.PostAsJsonAsync("/api/tickets", request);
         Assert.True(createResponse.IsSuccessStatusCode);
 
-        var reference = ticket.ReferenceNumber;
-        var getResponse = await client.GetAsync($"/api/tickets/{reference}");
+        var responseBody = await createResponse.Content.ReadAsStringAsync();
+        var jsonDoc = System.Text.Json.JsonDocument.Parse(responseBody);
+        var referenceNumber = jsonDoc.RootElement
+            .GetProperty("data")
+            .GetProperty("referenceNumber")
+            .GetString();
 
+        var getResponse = await client.GetAsync($"/api/tickets/{referenceNumber}");
         Assert.True(getResponse.IsSuccessStatusCode);
     }
 
@@ -60,6 +56,13 @@ public class TicketWorkflowIntegrationTests
     public async Task ListTickets_ReturnsAllUserTickets()
     {
         var client = _factory.CreateClient();
+
+        // Authenticate as admin/staff first
+        await client.PostAsJsonAsync("/api/auth/login", new
+        {
+            email = ApiFactory.AdminEmail,
+            password = ApiFactory.AdminPassword,
+        });
 
         var response = await client.GetAsync("/api/tickets");
 
@@ -71,22 +74,19 @@ public class TicketWorkflowIntegrationTests
     {
         var client = _factory.CreateClient();
 
-        var ticket = TestTickets.CreateBusinessRegistration();
-        var createContent = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
-            System.Text.Encoding.UTF8,
-            "application/json");
-
-        var createResponse = await client.PostAsync("/api/tickets", createContent);
+        var request = TestTickets.CreateBusinessRegistrationRequest();
+        var createResponse = await client.PostAsJsonAsync("/api/tickets", request);
         Assert.True(createResponse.IsSuccessStatusCode);
 
-        var updateData = new { status = "in_progress" };
-        var updateContent = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(updateData),
-            System.Text.Encoding.UTF8,
-            "application/json");
+        var responseBody = await createResponse.Content.ReadAsStringAsync();
+        var jsonDoc = System.Text.Json.JsonDocument.Parse(responseBody);
+        var referenceNumber = jsonDoc.RootElement
+            .GetProperty("data")
+            .GetProperty("referenceNumber")
+            .GetString();
 
-        var updateResponse = await client.PutAsync($"/api/tickets/{ticket.ReferenceNumber}", updateContent);
+        var updateData = new { status = "in_progress" };
+        var updateResponse = await client.PutAsJsonAsync($"/api/tickets/{referenceNumber}", updateData);
 
         Assert.True(updateResponse.StatusCode == System.Net.HttpStatusCode.OK ||
                    updateResponse.StatusCode == System.Net.HttpStatusCode.NoContent);
@@ -97,18 +97,23 @@ public class TicketWorkflowIntegrationTests
     {
         var client = _factory.CreateClient();
 
-        var ticket = TestTickets.CreateBusinessRegistration();
+        var request = TestTickets.CreateBusinessRegistrationRequest();
+        var createResponse = await client.PostAsJsonAsync("/api/tickets", request);
+        Assert.True(createResponse.IsSuccessStatusCode);
+
+        var responseBody = await createResponse.Content.ReadAsStringAsync();
+        var jsonDoc = System.Text.Json.JsonDocument.Parse(responseBody);
+        var referenceNumber = jsonDoc.RootElement
+            .GetProperty("data")
+            .GetProperty("referenceNumber")
+            .GetString();
+
         var statuses = new[] { "open", "in_progress", "pending_info", "in_progress", "closed" };
 
         foreach (var status in statuses)
         {
             var updateData = new { status };
-            var content = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(updateData),
-                System.Text.Encoding.UTF8,
-                "application/json");
-
-            var response = await client.PutAsync($"/api/tickets/{ticket.ReferenceNumber}", content);
+            var response = await client.PutAsJsonAsync($"/api/tickets/{referenceNumber}", updateData);
 
             Assert.True(response.StatusCode == System.Net.HttpStatusCode.OK ||
                        response.StatusCode == System.Net.HttpStatusCode.NoContent ||

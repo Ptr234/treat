@@ -24,11 +24,11 @@ public class CookieJwtAuthHandler : AuthenticationHandler<AuthenticationSchemeOp
     {
         var token = Request.Cookies["osc-session"];
         if (string.IsNullOrEmpty(token))
-            return Task.FromResult(AuthenticateResult.NoResult());
+            return Task.FromResult(AuthenticateResult.Fail("No authentication token provided"));
 
         var principal = _jwt.ValidateToken(token);
         if (principal is null)
-            return Task.FromResult(AuthenticateResult.Fail("Invalid token"));
+            return Task.FromResult(AuthenticateResult.Fail("Invalid or expired token"));
 
         var ticket = new AuthenticationTicket(principal, Scheme.Name);
         return Task.FromResult(AuthenticateResult.Success(ticket));

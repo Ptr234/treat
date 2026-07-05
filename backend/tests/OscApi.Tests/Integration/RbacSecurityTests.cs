@@ -201,7 +201,15 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
 
-        // Get form page to extract CSRF token
+        // Authenticate as staff first (required for /api/tickets GET)
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new
+        {
+            email = ApiFactory.AdminEmail,
+            password = ApiFactory.AdminPassword,
+        });
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        // Get ticket list to verify authenticated access works
         var formPage = await client.GetAsync("/api/tickets");
         Assert.Equal(HttpStatusCode.OK, formPage.StatusCode);
     }

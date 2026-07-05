@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using OscApi.Models;
 using OscApi.Tests.Fixtures;
 using Xunit;
@@ -29,22 +30,24 @@ public class EndToEndScenarioTests
         // Assert.True(signupResponse.IsSuccessStatusCode);
 
         // 2. Create ticket as investor
-        var ticket = TestTickets.CreateInvestmentInquiry();
-        var ticketContent = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
-            System.Text.Encoding.UTF8,
-            "application/json");
-
-        var ticketResponse = await client.PostAsync("/api/tickets", ticketContent);
+        var request = TestTickets.CreateInvestmentInquiryRequest();
+        var ticketResponse = await client.PostAsJsonAsync("/api/tickets", request);
         Assert.True(ticketResponse.IsSuccessStatusCode);
 
-        // 3. Retrieve created ticket
-        var getResponse = await client.GetAsync($"/api/tickets/{ticket.ReferenceNumber}");
+        // 3. Retrieve created ticket and extract reference number
+        var responseBody = await ticketResponse.Content.ReadAsStringAsync();
+        var jsonDoc = System.Text.Json.JsonDocument.Parse(responseBody);
+        var referenceNumber = jsonDoc.RootElement
+            .GetProperty("data")
+            .GetProperty("referenceNumber")
+            .GetString();
+
+        var getResponse = await client.GetAsync($"/api/tickets/{referenceNumber}");
         Assert.True(getResponse.IsSuccessStatusCode);
 
         // 4. Verify ticket data
         var content = await getResponse.Content.ReadAsStringAsync();
-        Assert.Contains("Investment Inquiry", content);
+        Assert.Contains("Investment", content);
     }
 
     [Fact]
@@ -52,24 +55,23 @@ public class EndToEndScenarioTests
     {
         var client = _factory.CreateClient();
 
-        var ticketFactories = new Func<string>[]
+        var requests = new object[]
         {
-            () => System.Text.Json.JsonSerializer.Serialize(TestTickets.CreateBusinessRegistration()),
-            () => System.Text.Json.JsonSerializer.Serialize(TestTickets.CreateInvestmentInquiry()),
-            () => System.Text.Json.JsonSerializer.Serialize(TestTickets.CreateLicenseApplication()),
+            TestTickets.CreateBusinessRegistrationRequest(),
+            TestTickets.CreateInvestmentInquiryRequest(),
+            TestTickets.CreateLicenseApplicationRequest(),
         };
 
         var successCount = 0;
-        foreach (var factory in ticketFactories)
+        foreach (var request in requests)
         {
-            var content = new StringContent(factory(), System.Text.Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("/api/tickets", content);
+            var response = await client.PostAsJsonAsync("/api/tickets", request);
 
             if (response.IsSuccessStatusCode)
                 successCount++;
         }
 
-        Assert.Equal(ticketFactories.Length, successCount);
+        Assert.Equal(requests.Length, successCount);
     }
 
     [Fact]
@@ -78,14 +80,16 @@ public class EndToEndScenarioTests
         var client = _factory.CreateClient();
 
         // Create tickets with different statuses
-        var ticketPending = TestTickets.CreateBusinessRegistration();
-        var contentPending = new StringContent(
-            System.Text.Json.JsonSerializer.Serialize(ticketPending),
-            System.Text.Encoding.UTF8,
-            "application/json");
-
-        var responsePending = await client.PostAsync("/api/tickets", contentPending);
+        var request = TestTickets.CreateBusinessRegistrationRequest();
+        var responsePending = await client.PostAsJsonAsync("/api/tickets", request);
         Assert.True(responsePending.IsSuccessStatusCode);
+
+        // Authenticate as admin to list tickets
+        await client.PostAsJsonAsync("/api/auth/login", new
+        {
+            email = ApiFactory.AdminEmail,
+            password = ApiFactory.AdminPassword,
+        });
 
         // Retrieve list and verify filtering capability
         var listResponse = await client.GetAsync("/api/tickets?status=pending");
@@ -124,15 +128,23 @@ public class EndToEndScenarioTests
 
         foreach (var location in locations)
         {
-            var ticket = TestTickets.CreateBusinessRegistration();
-            ticket.InvestorNationality = location; // Map location to investor info
+            var request = TestTickets.CreateBusinessRegistrationRequest();
+            // Create new request with updated InvestorNationality
+            var requestWithLocation = new OscApi.Dtos.Tickets.CreateTicketRequest(
+                request.Title,
+                request.Description,
+                request.Category,
+                request.Priority,
+                request.ContactEmail,
+                request.ContactName,
+                request.ContactPhone,
+                location,  // Update InvestorNationality to location
+                request.Sector,
+                request.InvestmentSize,
+                request.IsEscalated
+            );
 
-            var content = new StringContent(
-                System.Text.Json.JsonSerializer.Serialize(ticket, JsonOptions),
-                System.Text.Encoding.UTF8,
-                "application/json");
-
-            var response = await client.PostAsync("/api/tickets", content);
+            var response = await client.PostAsJsonAsync("/api/tickets", requestWithLocation);
 
             Assert.True(response.IsSuccessStatusCode);
         }
