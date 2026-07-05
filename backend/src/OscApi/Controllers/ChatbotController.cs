@@ -5,6 +5,7 @@ using OscApi.Data;
 using OscApi.Dtos.Chatbot;
 using OscApi.Dtos.Common;
 using OscApi.Models;
+using OscApi.Services;
 
 namespace OscApi.Controllers;
 
@@ -14,12 +15,14 @@ public class ChatbotController : ControllerBase
 {
     private readonly OscDbContext _db;
     private readonly GroqClient _groq;
+    private readonly IChatbotSessionService _sessions;
     private readonly ILogger<ChatbotController> _logger;
 
-    public ChatbotController(OscDbContext db, GroqClient groq, ILogger<ChatbotController> logger)
+    public ChatbotController(OscDbContext db, GroqClient groq, IChatbotSessionService sessions, ILogger<ChatbotController> logger)
     {
         _db = db;
         _groq = groq;
+        _sessions = sessions;
         _logger = logger;
     }
 
@@ -27,22 +30,23 @@ public class ChatbotController : ControllerBase
     [EnableRateLimiting("chatbot")]
     public async Task<IActionResult> Chat([FromBody] ChatRequest request)
     {
-        var systemPrompt = BuildSystemPrompt(request.Language);
+        if (string.IsNullOrWhiteSpace(request.SessionId))
+            return BadRequest(new ApiResponse(false, "sessionId is required"));
 
+        var systemPrompt = BuildSystemPrompt(request.Language);
         var messages = new List<GroqClient.ChatMessage>
         {
             new("system", systemPrompt)
         };
 
-        // Only relay user/assistant turns. The role comes from the client, so
-        // anything else (notably "system") is dropped — otherwise a caller could
-        // inject instructions that override the system prompt above.
-        foreach (var entry in request.History.TakeLast(10))
+        // Get conversation history from Redis (server-side storage)
+        var sessionHistory = await _sessions.GetSessionHistoryAsync(request.SessionId);
+
+        // Add recent messages (limit to 10 to reduce token usage)
+        foreach (var entry in sessionHistory.TakeLast(10))
         {
-            var role = entry.Role?.ToLowerInvariant();
-            if (role is not ("user" or "assistant")) continue;
             if (string.IsNullOrWhiteSpace(entry.Content)) continue;
-            messages.Add(new GroqClient.ChatMessage(role, Truncate(entry.Content, 2000)!));
+            messages.Add(new GroqClient.ChatMessage(entry.Role ?? "user", Truncate(entry.Content, 2000)!));
         }
 
         messages.Add(new GroqClient.ChatMessage("user", request.Message));
@@ -56,9 +60,7 @@ public class ChatbotController : ControllerBase
         {
             var response = await _groq.ChatAsync(messages);
 
-            // Parse sentiment tag if present (e.g., [SENTIMENT:positive]). Normalize
-            // to a known lowercase value; anything unexpected from the model is
-            // dropped so downstream ("negative" → escalation) stays consistent.
+            // Parse sentiment tag if present (e.g., [SENTIMENT:positive])
             string? sentiment = null;
             var sentimentMatch = System.Text.RegularExpressions.Regex.Match(response, @"\[SENTIMENT:(\w+)\]");
             if (sentimentMatch.Success)
@@ -67,6 +69,13 @@ public class ChatbotController : ControllerBase
                 if (raw is "positive" or "neutral" or "negative") sentiment = raw;
                 response = response.Replace(sentimentMatch.Value, "").Trim();
             }
+
+            // Store messages in Redis session (non-blocking)
+            _ = Task.Run(async () =>
+            {
+                await _sessions.AddMessageAsync(request.SessionId, "user", request.Message);
+                await _sessions.AddMessageAsync(request.SessionId, "assistant", response);
+            });
 
             return Ok(new ApiResponse<ChatResponse>(true, new ChatResponse(
                 response, request.Language, sentiment, "ai")));
@@ -115,6 +124,17 @@ public class ChatbotController : ControllerBase
         _db.ChatEnquiries.Add(enquiry);
         await _db.SaveChangesAsync();
 
+        return Ok(new ApiResponse(true));
+    }
+
+    [HttpPost("clear")]
+    [EnableRateLimiting("chatbot")]
+    public async Task<IActionResult> ClearSession([FromBody] ClearSessionRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.SessionId))
+            return BadRequest(new ApiResponse(false, "sessionId is required"));
+
+        await _sessions.ClearSessionAsync(request.SessionId);
         return Ok(new ApiResponse(true));
     }
 

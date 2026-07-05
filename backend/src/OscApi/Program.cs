@@ -124,6 +124,8 @@ builder.Services.AddScoped<OscApi.Services.IContactService, OscApi.Services.Cont
 builder.Services.AddScoped<OscApi.Services.ISettingsService, OscApi.Services.SettingsService>();
 builder.Services.AddScoped<OscApi.Services.IDashboardService, OscApi.Services.DashboardService>();
 builder.Services.AddSingleton<OscApi.Services.IAnalyticsQueueService, OscApi.Services.AnalyticsQueueService>();
+builder.Services.AddScoped<OscApi.Services.IS3UploadService, OscApi.Services.S3UploadService>();
+builder.Services.AddScoped<OscApi.Services.IChatbotSessionService, OscApi.Services.ChatbotSessionService>();
 
 // Validation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();

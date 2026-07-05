@@ -2,9 +2,9 @@ namespace OscApi.Dtos.Chatbot;
 
 public record ChatRequest(
     string Message,
-    List<ChatHistoryEntry> History,
+    string SessionId,
     string Language = "en",
-    string? SessionId = null
+    List<ChatHistoryEntry>? History = null
 );
 
 public record ChatHistoryEntry(string Role, string Content);
@@ -23,3 +23,5 @@ public record ChatLogRequest(
 );
 
 public record ChatResponse(string Response, string Language, string? Sentiment, string Tier);
+
+public record ClearSessionRequest(string SessionId);

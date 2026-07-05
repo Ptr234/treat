@@ -5,6 +5,7 @@ using OscApi.Common;
 using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Models;
+using OscApi.Services;
 
 namespace OscApi.Controllers;
 
@@ -13,7 +14,7 @@ namespace OscApi.Controllers;
 public class UploadController : ControllerBase
 {
     private readonly OscDbContext _db;
-    private readonly IWebHostEnvironment _env;
+    private readonly IS3UploadService _s3Upload;
     private readonly ILogger<UploadController> _logger;
 
     private const long MaxFileSize = 10 * 1024 * 1024; // 10 MB
@@ -36,10 +37,10 @@ public class UploadController : ControllerBase
         ["text/plain"] = ".txt",
     };
 
-    public UploadController(OscDbContext db, IWebHostEnvironment env, ILogger<UploadController> logger)
+    public UploadController(OscDbContext db, IS3UploadService s3Upload, ILogger<UploadController> logger)
     {
         _db = db;
-        _env = env;
+        _s3Upload = s3Upload;
         _logger = logger;
     }
 
@@ -107,34 +108,36 @@ public class UploadController : ControllerBase
                 return BadRequest(new ApiResponse(false, $"File type '{file.ContentType}' is not allowed"));
         }
 
-        var uploadDir = Path.Combine(_env.ContentRootPath, "uploads");
-        Directory.CreateDirectory(uploadDir);
-
         var results = new List<object>();
 
         foreach (var file in files)
         {
-            var safeFileName = $"{Guid.NewGuid()}{MimeToExtension[file.ContentType]}";
-            var filePath = Path.Combine(uploadDir, safeFileName);
-
-            await using (var stream = new FileStream(filePath, FileMode.Create))
+            try
             {
-                await file.CopyToAsync(stream);
+                // Upload to S3 (or S3-compatible storage)
+                await using var stream = file.OpenReadStream();
+                var safeFileName = $"{Guid.NewGuid()}{MimeToExtension[file.ContentType]}";
+                var storageUrl = await _s3Upload.UploadFileAsync(stream, safeFileName, file.ContentType);
+
+                var displayName = SanitizeHelper.StripHtml(Path.GetFileName(file.FileName));
+                if (displayName.Length > 255) displayName = displayName[^255..];
+
+                var doc = new TicketDocument
+                {
+                    TicketId = ticket.Id,
+                    FileName = displayName,
+                    MimeType = file.ContentType,
+                    FileSize = file.Length,
+                    StorageUrl = storageUrl,
+                };
+                _db.TicketDocuments.Add(doc);
+                results.Add(new { doc.Id, doc.FileName, doc.MimeType, doc.FileSize, doc.StorageUrl });
             }
-
-            var displayName = SanitizeHelper.StripHtml(Path.GetFileName(file.FileName));
-            if (displayName.Length > 255) displayName = displayName[^255..];
-
-            var doc = new TicketDocument
+            catch (Exception ex)
             {
-                TicketId = ticket.Id,
-                FileName = displayName,
-                MimeType = file.ContentType,
-                FileSize = file.Length,
-                StorageUrl = $"/uploads/{safeFileName}",
-            };
-            _db.TicketDocuments.Add(doc);
-            results.Add(new { doc.Id, doc.FileName, doc.MimeType, doc.FileSize, doc.StorageUrl });
+                _logger.LogError(ex, "Failed to upload file {FileName}", file.FileName);
+                return StatusCode(500, new ApiResponse(false, $"Failed to upload {file.FileName}"));
+            }
         }
 
         await _db.SaveChangesAsync();
