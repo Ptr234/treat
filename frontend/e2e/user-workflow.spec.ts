@@ -25,7 +25,7 @@ test.describe('Complete user workflows', () => {
     await page.click('button:has-text("Submit")');
 
     await expect(page).toHaveURL(/.*submissions.*/, { timeout: 5000 });
-    await expect(page).toContainText('E2E Test Ticket');
+    await expect(page.locator('body')).toContainText('E2E Test Ticket');
   });
 
   test('Login and view submissions', async ({ page }) => {
@@ -52,7 +52,7 @@ test.describe('Complete user workflows', () => {
 
     // Click forgot password
     await page.click('text=Forgot password?');
-    await expect(page).toContainText(/reset password/i);
+    await expect(page.locator('body')).toContainText(/reset password/i);
 
     const testEmail = 'passwordtest@example.com';
     await page.fill('input[type="email"]', testEmail);
@@ -60,7 +60,7 @@ test.describe('Complete user workflows', () => {
 
     // In a real scenario, you'd check email here
     // For testing, we'll just verify the UI changed
-    await expect(page).toContainText(/reset link has been sent/i);
+    await expect(page.locator('body')).toContainText(/reset link has been sent/i);
   });
 
   test('Form validation on signup', async ({ page }) => {
@@ -83,7 +83,7 @@ test.describe('Complete user workflows', () => {
     await page.click('button:has-text("Sign In")');
 
     // Verify error message
-    await expect(page).toContainText(/invalid|failed|incorrect/i);
+    await expect(page.locator('body')).toContainText(/invalid|failed|incorrect/i);
   });
 
   test('Session persistence', async ({ page, context }) => {
@@ -161,7 +161,7 @@ test.describe('Complete user workflows', () => {
     await page.click('button:has-text("Submit")');
 
     // Verify success message
-    await expect(page).toContainText(/submitted|success|thank you/i);
+    await expect(page.locator('body')).toContainText(/submitted|success|thank you/i);
   });
 
   test('Mobile responsiveness', async ({ browser }) => {

@@ -385,6 +385,9 @@ export default function AgencyChatPage() {
       for (const file of toUpload) {
         const formData = new FormData();
         formData.append('file', file);
+        // Agency chat attachments are Sanity message assets, not ticket documents.
+        // Keep this on the Next.js upload route; the ASP.NET upload endpoint
+        // expects ticketRefNumber + files[] and would reject this payload.
         const res = await fetch('/api/upload/', { method: 'POST', body: formData, credentials: 'include' });
         if (!res.ok) continue;
         const json = await res.json();

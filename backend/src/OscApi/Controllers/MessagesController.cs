@@ -46,7 +46,17 @@ public class MessagesController : ControllerBase
         var messages = await _db.AgencyMessages
             .Where(m => m.Channel == channel)
             .OrderBy(m => m.SentAt)
-            .Select(m => new { m.Content, m.SenderName, m.SenderAgencyCode, m.SenderEmail, m.IsInternal, m.SentAt })
+            .Select(m => new
+            {
+                _id = m.Id.ToString(),
+                m.Channel,
+                m.Content,
+                m.SenderName,
+                m.SenderAgencyCode,
+                m.SenderEmail,
+                m.IsInternal,
+                m.SentAt
+            })
             .ToListAsync();
 
         return Ok(new ApiResponse<object>(true, messages));
@@ -59,12 +69,14 @@ public class MessagesController : ControllerBase
         var name = User.FindFirst("name")?.Value ?? "Unknown";
         var email = User.FindFirst("email")?.Value
             ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        var agencyCode = User.GetAgencyCode() ?? request.SenderAgencyCode;
 
         var message = new AgencyMessage
         {
             Channel = request.Channel,
             Content = SanitizeHelper.StripHtml(request.Content),
             SenderName = name,
+            SenderAgencyCode = agencyCode,
             SenderEmail = email,
             IsInternal = request.IsInternal,
         };
@@ -74,7 +86,14 @@ public class MessagesController : ControllerBase
 
         return Created("", new ApiResponse<object>(true, new
         {
-            message.Content, message.SenderName, message.SentAt
+            _id = message.Id.ToString(),
+            message.Channel,
+            message.Content,
+            message.SenderName,
+            message.SenderAgencyCode,
+            message.SenderEmail,
+            message.IsInternal,
+            message.SentAt
         }));
     }
 }
