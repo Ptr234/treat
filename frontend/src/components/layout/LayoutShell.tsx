@@ -24,12 +24,17 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       >
         Skip to main content
       </a>
-      <NewsBar />
-      <Navigation />
-      <main id="main-content" role="main" className="flex-1" tabIndex={-1}>
-        {children}
-      </main>
-      <Footer />
+      {/* Dashboard layout: viewport-fixed sidebar on desktop, pages render in the offset column */}
+      <div className="flex-1 flex flex-col">
+        <Navigation />
+        <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
+          <NewsBar />
+          <main id="main-content" role="main" className="flex-1" tabIndex={-1}>
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </div>
       <ChatWidget />
     </div>
   );

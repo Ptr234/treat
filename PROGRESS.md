@@ -11,6 +11,8 @@
 
 ## Executive Summary
 
+**HOMEPAGE REDESIGN (July 6, 2026):** Restored the homepage from commit `93c8e04` and completely redesigned it as a premium landing page: editorial hero with Ken Burns slideshow and slide progress indicators, floating live-stats card, auto-scrolling agency logo marquee, bento-grid priority sectors, a new three-step investor journey section, AI advisor section with decorative chat preview, numbered services grid, and full-bleed final CTA. All existing routes, CMS-driven content (Sanity sector cards + homepage settings), the chat-widget event, and the Uganda flag palette are preserved; animations respect `prefers-reduced-motion`. Also fixed pre-existing build blockers: removed unused/broken `src/lib/code-splitting.ts` (JSX in a `.ts` file referencing four non-existent components) and fixed `Footer.tsx` (non-existent heroicons imports, unescaped apostrophe). Production build passes with 97 pages and zero ESLint/TypeScript errors.
+
 **BACKEND TEST SUITE ACHIEVEMENT (July 5, 2026):** Successfully resolved all 11 remaining backend test failures and achieved 120/120 passing tests (100%) in the ASP.NET Web API test suite. Fixed critical authentication handler behavior, DTO serialization patterns, and endpoint parameter handling. Authentication system is now fully validated across integration tests.
 
 Successfully implemented the core frontend functionality for the Uganda OneStopCentre application according to Plan.md requirements. The implementation focuses on static-first architecture optimized for Firebase hosting, with comprehensive investment opportunities system featuring real-time search, filtering, and detailed investment pages. All components are TypeScript-compatible with proper type safety and modern React patterns.

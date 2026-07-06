@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { Reveal } from '@/components/ui/Reveal';
 import {
   ArrowRightIcon,
+  ArrowUpRightIcon,
   DocumentTextIcon,
   CalculatorIcon,
   HandRaisedIcon,
@@ -13,9 +15,13 @@ import {
   ShieldCheckIcon,
   ChartBarIcon,
   ChatBubbleLeftRightIcon,
+  CheckBadgeIcon,
+  SparklesIcon,
+  BuildingLibraryIcon,
 } from '@heroicons/react/24/outline';
 
-// ── Homepage Data ───────────────────────────────────────────────────────
+// ── Homepage background/hero images (built-in defaults) ───────────────
+// Used until a Homepage Settings document is created in Sanity.
 const DEFAULT_HERO_IMAGES = [
   '/images/Pride.webp',
   '/images/uganda-kampala-city-view.webp',
@@ -23,7 +29,11 @@ const DEFAULT_HERO_IMAGES = [
   '/images/lake-bunyonyi-uganda.jpg',
   '/images/Infrastucture.webp',
 ];
+const DEFAULT_ABOUT_IMAGE = '/images/uganda-flag-city.jpg';
+const DEFAULT_CTA_IMAGE = '/images/uganda-business-bg.jpeg';
 
+// ── Priority investment sectors (image-forward showcase) ──────────────
+// Built-in defaults, used until Homepage Sector Cards are created in Sanity.
 type Sector = { title: string; blurb: string; image: string; link?: string };
 
 const DEFAULT_SECTORS: Sector[] = [
@@ -47,41 +57,19 @@ const DEFAULT_SECTORS: Sector[] = [
     blurb: 'A fast-growing digital economy and a young, tech-ready workforce.',
     image: '/images/uganda-kampala-city-view.webp',
   },
-];
-
-const SERVICES = [
   {
-    icon: RocketLaunchIcon,
-    title: 'Investment Facilitation',
-    description: 'End-to-end facilitation from project conception to implementation.'
+    title: 'Manufacturing & Industry',
+    blurb: 'Import substitution and export-ready manufacturing with tax incentives.',
+    image: '/images/uganda-background.jpeg',
   },
   {
-    icon: DocumentTextIcon,
-    title: 'Business Registration',
-    description: 'Company formation through URSB with streamlined processing.'
-  },
-  {
-    icon: CalculatorIcon,
-    title: 'Tax & Compliance',
-    description: 'Tax registration and URA compliance with expert advisory.'
-  },
-  {
-    icon: ChartBarIcon,
-    title: 'ROI Analysis',
-    description: 'Professional ROI modelling with Uganda-specific market data.'
-  },
-  {
-    icon: HandRaisedIcon,
-    title: 'Investment Aftercare',
-    description: 'Ongoing support and government liaison for sustainable growth.'
-  },
-  {
-    icon: ShieldCheckIcon,
-    title: 'Regulatory Compliance',
-    description: 'Expert guidance through Uganda\'s regulatory landscape.'
+    title: 'Energy & Minerals',
+    blurb: 'Oil & gas, hydropower, renewables and an expanding mining sector.',
+    image: '/images/Tourism.webp',
   },
 ];
 
+// ── Partner government institutions (trust marquee) ────────────────────
 const AGENCY_LOGOS = [
   { name: 'Uganda Investment Authority', src: '/images/logos/UIA%20logo.png' },
   { name: 'Uganda Revenue Authority', src: '/images/logos/URA%20logo.png' },
@@ -89,408 +77,657 @@ const AGENCY_LOGOS = [
   { name: 'Bank of Uganda', src: '/images/logos/BOU.jpeg' },
   { name: 'National Environment Management Authority', src: '/images/logos/NEMA.png' },
   { name: 'National Social Security Fund', src: '/images/logos/NSSF%20logo.png' },
+  { name: 'Kampala Capital City Authority', src: '/images/logos/kcca.png' },
+  { name: 'Electricity Regulatory Authority', src: '/images/logos/ERA-logo.png' },
+  { name: 'Uganda Communications Commission', src: '/images/logos/UCC%20logo.png' },
+  { name: 'Capital Markets Authority', src: '/images/logos/CMA%20logo.png' },
+  { name: 'Uganda Tourism Board', src: '/images/logos/UTB.png' },
+  { name: 'Petroleum Authority of Uganda', src: '/images/logos/PAU.png' },
 ];
 
-// ────────────────────────────────────────────────────────────────────────
-export default function HomePage() {
-  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
-  const [liveStats, setLiveStats] = useState({
-    fdi: 49.5,
-    investments: 9922,
-    satisfaction: 98,
-    sectors: 8
-  });
+const SERVICES = [
+  { icon: RocketLaunchIcon, title: 'Investment Facilitation', description: 'End-to-end facilitation from project conception to implementation, with government support and regulatory guidance.' },
+  { icon: DocumentTextIcon, title: 'Business Registration', description: 'Company formation and registration through URSB with streamlined, single-window processing.' },
+  { icon: CalculatorIcon, title: 'Tax & Compliance', description: 'Tax registration, URA compliance and ongoing advisory tailored to your sector and incentives.' },
+  { icon: ChartBarIcon, title: 'ROI Analysis', description: 'Professional return-on-investment modelling with Uganda-specific market and sector data.' },
+  { icon: HandRaisedIcon, title: 'Investment Aftercare', description: 'Ongoing support, aftercare and government liaison for sustainable, long-term growth.' },
+  { icon: ShieldCheckIcon, title: 'Regulatory Compliance', description: "Expert guidance through Uganda's regulatory landscape with full compliance assurance." },
+];
 
-  // Hero carousel auto-advance
+// ── Three-step investor journey (uses existing routes only) ────────────
+const JOURNEY_STEPS = [
+  {
+    step: '01',
+    title: 'Explore opportunities',
+    description: 'Browse priority sectors, bankable projects and incentives curated by the Uganda Investment Authority.',
+    href: '/investments',
+    cta: 'Browse investments',
+  },
+  {
+    step: '02',
+    title: 'Model your returns',
+    description: 'Run Uganda-specific ROI projections with real market data before you commit a single dollar.',
+    href: '/tools/roi-calculator',
+    cta: 'Calculate returns',
+  },
+  {
+    step: '03',
+    title: 'Start your application',
+    description: 'Begin a guided onboarding that takes you from intent to licensed investor — all in one window.',
+    href: '/investments/onboarding',
+    cta: 'Start onboarding',
+  },
+];
+
+const ADVISOR_TOPICS = [
+  { label: 'Bankable Projects', query: 'What are the current bankable investment projects in Uganda?' },
+  { label: 'Why Uganda?', query: 'Why should I invest in Uganda? What is the economic overview?' },
+  { label: 'Tax Incentives', query: 'What tax incentives are available for investors in Uganda?' },
+  { label: 'Business Registration', query: 'How do I register a business in Uganda?' },
+];
+
+const DISPLAY_FONT = { fontFamily: "'Playfair Display', Georgia, serif" };
+
+// Small gold kicker used above every section heading.
+function Kicker({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  return (
+    <span
+      className={`inline-flex items-center gap-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] mb-4 ${
+        dark ? 'text-yellow-400' : 'text-yellow-600'
+      }`}
+    >
+      <span className="h-px w-8 bg-gradient-to-r from-yellow-500 to-red-500" aria-hidden="true" />
+      {children}
+    </span>
+  );
+}
+
+export default function HomePage() {
+  const prefersReducedMotion = useReducedMotion();
+  const [liveStats, setLiveStats] = useState({ fdi: 49.5, investments: 9922, satisfaction: 98, sectors: 8 });
+  const [sectors, setSectors] = useState<Sector[]>(DEFAULT_SECTORS);
+
+  // Homepage background images (CMS-managed, with built-in fallbacks).
+  const [heroImages, setHeroImages] = useState<string[]>(DEFAULT_HERO_IMAGES);
+  const [aboutImage, setAboutImage] = useState<string>(DEFAULT_ABOUT_IMAGE);
+  const [ctaImage, setCtaImage] = useState<string>(DEFAULT_CTA_IMAGE);
+  const [heroIndex, setHeroIndex] = useState(0);
+
+  // Pull CMS-managed sector cards + background images from Sanity.
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentHeroIndex((prev) => (prev + 1) % DEFAULT_HERO_IMAGES.length);
-    }, 6000);
-    return () => clearInterval(timer);
+    let active = true;
+    fetch('/api/homepage/sectors')
+      .then((r) => r.json())
+      .then((json) => {
+        if (active && json?.success && Array.isArray(json.data) && json.data.length > 0) {
+          setSectors(json.data as Sector[]);
+        }
+      })
+      .catch(() => {});
+    fetch('/api/homepage/settings')
+      .then((r) => r.json())
+      .then((json) => {
+        if (!active || !json?.success) return;
+        const d = json.data ?? {};
+        if (Array.isArray(d.hero) && d.hero.length > 0) setHeroImages(d.hero);
+        if (d.about) setAboutImage(d.about);
+        if (d.cta) setCtaImage(d.cta);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
+  // Auto-advance the hero slideshow.
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    setHeroIndex(0);
+    const t = setInterval(() => setHeroIndex((i) => (i + 1) % heroImages.length), 6500);
+    return () => clearInterval(t);
+  }, [heroImages]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveStats(prev => ({
+        fdi: Math.max(49.4, Math.min(49.6, prev.fdi + (Math.random() - 0.5) * 0.01)),
+        investments: prev.investments + Math.floor(Math.random() * 2),
+        satisfaction: Math.max(97, Math.min(99, prev.satisfaction + (Math.random() - 0.5) * 0.1)),
+        sectors: prev.sectors,
+      }));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const openAssistant = (message?: string) => {
+    document.dispatchEvent(new CustomEvent('openChatWidget', { detail: message ? { message } : undefined }));
+  };
+
   return (
-    <main className="w-full bg-neutral-50">
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* HERO SECTION - Rotating carousel with Uganda flag overlay */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="relative w-full h-screen max-h-600px md:max-h-700px bg-black overflow-hidden">
-        {/* Hero Carousel */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentHeroIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="absolute inset-0"
-          >
-            <Image
-              src={DEFAULT_HERO_IMAGES[currentHeroIndex]}
-              alt="Investment opportunity"
-              fill
-              priority={currentHeroIndex === 0}
-              className="object-cover w-full h-full"
-            />
-          </motion.div>
-        </AnimatePresence>
+    <div className="min-h-screen bg-black">
+      {/* ── Hero ──────────────────────────────────────────────────── */}
+      <section className="relative min-h-[92svh] flex items-center overflow-hidden bg-black">
+        <div className="absolute inset-0">
+          {/* Slideshow with slow Ken Burns drift */}
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={heroIndex}
+              className="absolute inset-0"
+              initial={{ opacity: 0, scale: 1 }}
+              animate={{ opacity: 1, scale: prefersReducedMotion ? 1 : 1.08 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                opacity: { duration: 1.4, ease: [0.22, 1, 0.36, 1] },
+                scale: { duration: 8, ease: 'linear' },
+              }}
+            >
+              <Image
+                src={heroImages[heroIndex] ?? '/images/Pride.webp'}
+                alt="Uganda — the Pearl of Africa"
+                fill
+                priority={heroIndex === 0}
+                sizes="100vw"
+                className="object-cover"
+              />
+            </motion.div>
+          </AnimatePresence>
+          {/* Balanced scrim keeps centered text legible over any slide */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
+          <div
+            className="absolute inset-0 opacity-[0.07] pointer-events-none"
+            style={{ backgroundImage: 'radial-gradient(circle at 15% 25%, #FFD700 0%, transparent 32%), radial-gradient(circle at 85% 85%, #CE1126 0%, transparent 30%)' }}
+          />
+        </div>
 
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 pb-44 sm:pb-48">
+          <Reveal y={36} className="max-w-2xl mx-auto flex flex-col items-center text-center">
+            {/* Eyebrow */}
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full border border-yellow-400/40 bg-yellow-400/10 text-yellow-300 text-[10px] sm:text-xs font-semibold tracking-[0.12em] uppercase backdrop-blur-sm">
+              <CheckBadgeIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              Uganda Investment Authority · OneStop Centre
+            </span>
 
-        {/* Hero Content - Centered */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-6 z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="text-center max-w-4xl"
-          >
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
-              Invest in Uganda's Future
+            <h1 className="mb-5 text-white leading-[1.08]">
+              <span className="block text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
+                Invest in the
+              </span>
+              <span
+                className="block text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-black italic text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-amber-300 pb-2"
+                style={DISPLAY_FONT}
+              >
+                Pearl of Africa
+              </span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-10 drop-shadow-md">
-              Your OneStop Centre for business registration, investment facilitation, and regulatory compliance
+
+            <p className="text-sm sm:text-base md:text-lg text-neutral-200 mb-8 max-w-xl mx-auto leading-relaxed font-light">
+              The OneStop Centre brings government-backed investment advisory under one roof.
+              Unlock Uganda&apos;s <span className="text-yellow-400 font-semibold">$49.5B+</span> in
+              opportunities through a single, streamlined facilitation platform.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-primary-900 text-white px-8 py-4 rounded-lg font-bold
-                               text-lg hover:bg-primary-800 transition-all duration-200
-                               shadow-lg hover:shadow-xl hover:scale-105">
-                Get Started
-              </button>
-              <button className="bg-white/20 backdrop-blur-sm text-white px-8 py-4 rounded-lg
-                               font-bold text-lg border-2 border-white hover:bg-white/30
-                               transition-all duration-200">
-                Learn More
+            {/* CTAs */}
+            <div className="flex flex-col xs:flex-row items-center justify-center gap-3 mb-5">
+              <Link
+                href="/investments/onboarding"
+                prefetch={true}
+                className="group inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 bg-yellow-500 text-black font-bold rounded-lg text-sm transition-all duration-300 hover:bg-yellow-400 hover:shadow-xl hover:shadow-yellow-500/25 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
+              >
+                Start Investment Journey
+                <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+              </Link>
+              <button
+                onClick={() => openAssistant()}
+                className="group inline-flex items-center justify-center px-5 sm:px-6 py-2.5 sm:py-3 bg-white/10 text-white font-semibold rounded-lg text-sm border border-white/25 backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-black hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                <ChatBubbleLeftRightIcon className="w-4 h-4 mr-2 flex-shrink-0" />
+                Ask the AI Assistant
               </button>
             </div>
+            <Link
+              href="/tools/roi-calculator"
+              prefetch={true}
+              className="group inline-flex items-center justify-center text-neutral-300 font-semibold text-xs sm:text-sm transition-colors duration-300 hover:text-yellow-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
+            >
+              <CalculatorIcon className="w-4 h-4 mr-1.5 flex-shrink-0" />
+              Calculate Returns
+              <ArrowUpRightIcon className="w-3.5 h-3.5 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform flex-shrink-0" />
+            </Link>
+          </Reveal>
+
+          {/* Slide progress indicators */}
+          {heroImages.length > 1 && (
+            <div className="absolute bottom-32 sm:bottom-36 left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {heroImages.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setHeroIndex(i)}
+                  aria-label={`Show slide ${i + 1}`}
+                  aria-current={i === heroIndex}
+                  className={`h-1 rounded-full transition-all duration-500 ${
+                    i === heroIndex ? 'w-10 bg-yellow-400' : 'w-4 bg-white/40 hover:bg-white/70'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── Floating live-stats card (overlaps hero) ──────────────── */}
+      <section className="relative z-20 -mt-28 sm:-mt-32 px-4 sm:px-6 lg:px-8" aria-label="Investment statistics">
+        <Reveal className="max-w-6xl mx-auto" y={20}>
+          <div className="bg-neutral-950 rounded-2xl sm:rounded-3xl border border-white/10 shadow-2xl shadow-black/40 overflow-hidden">
+            <div className="h-1 w-full bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400" aria-hidden="true" />
+            <div className="px-5 sm:px-10 py-7 sm:py-10">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                {[
+                  { value: `${liveStats.investments.toLocaleString()}+`, label: 'Licensed Projects' },
+                  { value: `$${liveStats.fdi.toFixed(1)}B+`, label: 'FDI Facilitated' },
+                  { value: `${liveStats.satisfaction.toFixed(0)}%`, label: 'Success Rate' },
+                  { value: `${liveStats.sectors}`, label: 'Key Sectors' },
+                ].map((s) => (
+                  <div key={s.label} className="text-center lg:text-left">
+                    <div className="text-2xl sm:text-4xl font-black text-yellow-400 tabular-nums" style={DISPLAY_FONT}>
+                      {s.value}
+                    </div>
+                    <div className="mt-1.5 text-[11px] sm:text-xs font-semibold text-neutral-400 uppercase tracking-[0.16em]">
+                      {s.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-6 pt-5 border-t border-white/10 text-center text-[10px] sm:text-xs text-neutral-500">
+                Data: January 1991 — December 2025 · Source: Uganda Investment Authority
+              </p>
+            </div>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* ── Agency trust marquee ──────────────────────────────────── */}
+      <section className="pt-16 sm:pt-20 pb-14 sm:pb-16 bg-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-[11px] sm:text-sm font-bold uppercase tracking-[0.22em] text-yellow-500 mb-10">
+            Backed by Uganda&apos;s leading government institutions
+          </p>
+        </div>
+        <div
+          className="relative overflow-hidden"
+          style={{ maskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)' }}
+        >
+          <motion.div
+            className="flex items-center gap-14 sm:gap-20 w-max px-8"
+            animate={prefersReducedMotion ? undefined : { x: ['0%', '-50%'] }}
+            transition={{ duration: 45, ease: 'linear', repeat: Infinity }}
+          >
+            {[...AGENCY_LOGOS, ...AGENCY_LOGOS].map((logo, i) => (
+              <div
+                key={`${logo.name}-${i}`}
+                aria-hidden={i >= AGENCY_LOGOS.length}
+                className="relative h-14 sm:h-16 w-28 sm:w-36 flex-shrink-0 bg-white rounded-xl p-2 opacity-90 hover:opacity-100 hover:-translate-y-0.5 transition-all duration-300 border border-white/10"
+              >
+                <Image src={logo.src} alt={i < AGENCY_LOGOS.length ? logo.name : ''} fill sizes="160px" className="object-contain p-2" />
+              </div>
+            ))}
           </motion.div>
         </div>
-
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-          {DEFAULT_HERO_IMAGES.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentHeroIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                index === currentHeroIndex
-                  ? 'bg-secondary-500 w-8'
-                  : 'bg-white/50 hover:bg-white/75'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* STATISTICS DASHBOARD - Key metrics with gold accents */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { label: 'FDI Invested', value: `$${liveStats.fdi}B+`, icon: '💰' },
-              { label: 'Active Investments', value: `${liveStats.investments}+`, icon: '📊' },
-              { label: 'Investor Satisfaction', value: `${liveStats.satisfaction}%`, icon: '⭐' },
-              { label: 'Growth Sectors', value: `${liveStats.sectors}+`, icon: '🚀' },
-            ].map((stat, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="text-center p-8 rounded-lg border-l-4 border-secondary-500
-                           bg-white hover:shadow-lg transition-all duration-300"
-              >
-                <div className="text-4xl mb-3">{stat.icon}</div>
-                <div className="text-4xl font-bold text-secondary-500 mb-2">
-                  {stat.value}
+      {/* ── About ─────────────────────────────────────────────────── */}
+      <section className="py-20 sm:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <Reveal>
+              <div className="relative">
+                <div className="absolute -top-6 -left-6 w-40 h-40 rounded-3xl bg-yellow-400/15 blur-2xl" aria-hidden="true" />
+                <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+                  <Image
+                    src={aboutImage}
+                    alt="Uganda Investment Authority — OneStop Centre"
+                    width={640}
+                    height={460}
+                    className="w-full h-auto object-cover"
+                  />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-3xl" />
                 </div>
-                <div className="text-primary-900 font-semibold text-sm">
-                  {stat.label}
+                {/* Floating accent badge */}
+                <div className="absolute -bottom-6 -right-3 sm:-right-6 bg-black text-white rounded-2xl shadow-2xl px-6 py-5 border border-yellow-500/30">
+                  <div className="text-3xl font-black text-yellow-400" style={DISPLAY_FONT}>16+</div>
+                  <div className="text-[11px] text-neutral-300 uppercase tracking-[0.14em] font-semibold mt-0.5">Agencies, One Roof</div>
                 </div>
-              </motion.div>
-            ))}
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+              <div>
+                <Kicker>Who we are</Kicker>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-6 leading-tight" style={DISPLAY_FONT}>
+                  One centre. Every agency an investor needs.
+                </h2>
+                <p className="text-base sm:text-lg text-neutral-600 mb-5 leading-relaxed">
+                  The Uganda Investment Authority&apos;s OneStop Centre brings more than sixteen government
+                  agencies into a single portal. With government backing and deep market knowledge, we turn
+                  investment challenges into sustainable opportunities.
+                </p>
+                <p className="text-base sm:text-lg text-neutral-600 mb-9 leading-relaxed">
+                  Our expert team provides end-to-end support — from first consultation to project
+                  implementation — ensuring optimal returns in Uganda&apos;s fastest-growing sectors.
+                </p>
+
+                <div className="grid grid-cols-2 gap-x-6 gap-y-7 mb-10">
+                  {[
+                    { v: '1.25M+', l: 'Jobs Created' },
+                    { v: '6.3%', l: 'GDP Growth' },
+                    { v: '$61B', l: 'GDP (2024)' },
+                    { v: '11', l: 'Industrial Parks' },
+                  ].map((s, i) => (
+                    <div key={s.l} className={`border-l-2 ${i % 2 === 0 ? 'border-yellow-500' : 'border-red-500'} pl-4`}>
+                      <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums" style={DISPLAY_FONT}>{s.v}</div>
+                      <div className="text-xs sm:text-sm text-neutral-500 font-medium mt-0.5">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <Link
+                  href="/about"
+                  className="group inline-flex items-center px-7 py-3.5 bg-black text-white font-semibold rounded-xl transition-all duration-300 hover:bg-neutral-800 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+                >
+                  Learn More
+                  <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                </Link>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* INVESTMENT OPPORTUNITIES - 4-column sector grid */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 px-6 bg-neutral-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-primary-900 mb-4">
-              Growth Sectors
-            </h2>
-            <p className="text-lg text-primary-700 max-w-2xl mx-auto">
-              Explore Uganda's most dynamic and promising investment opportunities across key economic sectors
-            </p>
+      {/* ── Priority sectors (bento image grid) ───────────────────── */}
+      <section className="py-20 sm:py-28 bg-neutral-950 relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-500/10 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 sm:mb-16">
+            <Reveal className="max-w-2xl">
+              <Kicker dark>Where to invest</Kicker>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 leading-tight" style={DISPLAY_FONT}>
+                Priority investment sectors
+              </h2>
+              <p className="text-base sm:text-lg text-neutral-400 leading-relaxed">
+                High-growth sectors backed by incentives, infrastructure and a strategic position at the
+                heart of East Africa.
+              </p>
+            </Reveal>
+            <Reveal delay={0.1} className="flex-shrink-0">
+              <Link
+                href="/investments"
+                className="group inline-flex items-center px-6 py-3 border border-white/25 text-white font-semibold rounded-xl transition-all duration-300 hover:bg-yellow-500 hover:border-yellow-500 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
+              >
+                Explore All Investments
+                <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Reveal>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {DEFAULT_SECTORS.map((sector, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-white rounded-lg overflow-hidden shadow-soft hover:shadow-medium
-                           transition-all duration-300 group cursor-pointer"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-[15rem] gap-5 sm:gap-6">
+            {sectors.map((sector, i) => (
+              <Reveal
+                key={sector.title}
+                delay={i * 0.06}
+                className={`h-full ${i === 0 ? 'sm:col-span-2 lg:row-span-2' : ''} ${i === sectors.length - 1 ? 'sm:col-span-2 lg:col-span-1' : ''}`}
               >
-                {/* Image Container */}
-                <div className="relative h-48 bg-gray-200 overflow-hidden">
+                <Link
+                  href={sector.link || '/investments'}
+                  className="group relative block h-full overflow-hidden rounded-2xl sm:rounded-3xl border border-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
+                >
                   <Image
                     src={sector.image}
                     alt={sector.title}
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    sizes={i === 0 ? '(max-width: 640px) 100vw, 66vw' : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'}
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
-                </div>
-
-                {/* Content */}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-primary-900 mb-3 group-hover:text-secondary-500
-                                transition-colors">
-                    {sector.title}
-                  </h3>
-                  <p className="text-primary-700 text-sm mb-4">
-                    {sector.blurb}
-                  </p>
-                  <a
-                    href={sector.link || '#'}
-                    className="text-secondary-500 font-bold text-sm hover:text-secondary-600
-                             flex items-center gap-2 transition-colors"
-                  >
-                    Explore Sector
-                    <ArrowRightIcon className="w-4 h-4" />
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Browse All CTA */}
-          <div className="text-center mt-12">
-            <Link
-              href="/investments"
-              className="inline-block bg-primary-900 text-white px-8 py-4 rounded-lg font-bold
-                       hover:bg-primary-800 transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              View All Opportunities
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* SERVICES - 6 core services with icons */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 px-6 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-primary-900 mb-4">
-              Our Services
-            </h2>
-            <p className="text-lg text-primary-700 max-w-2xl mx-auto">
-              Comprehensive support from investment planning through ongoing aftercare and government liaison
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {SERVICES.map((service, idx) => {
-              const Icon = service.icon;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="p-8 rounded-lg border-t-4 border-secondary-500 bg-neutral-50
-                           hover:shadow-lg transition-all duration-300"
-                >
-                  {/* Icon */}
-                  <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center
-                                mb-6 group-hover:bg-secondary-500 transition-colors">
-                    <Icon className="w-8 h-8 text-primary-900" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/10 group-hover:from-black/95 transition-colors duration-500" />
+                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
+                    <h3 className={`font-bold text-white mb-2 leading-snug ${i === 0 ? 'text-xl sm:text-2xl md:text-3xl' : 'text-lg sm:text-xl'}`}>
+                      {sector.title}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed line-clamp-2 mb-3 max-w-md">
+                      {sector.blurb}
+                    </p>
+                    <span className="inline-flex items-center text-yellow-400 text-xs sm:text-sm font-bold opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+                      Explore opportunities
+                      <ArrowRightIcon className="w-4 h-4 ml-1.5" />
+                    </span>
                   </div>
-
-                  {/* Content */}
-                  <h3 className="text-xl font-bold text-primary-900 mb-3">
-                    {service.title}
-                  </h3>
-                  <p className="text-primary-700 text-sm leading-relaxed">
-                    {service.description}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* TRUST PARTNERS - Government institutions logo strip */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 px-6 bg-neutral-50 border-t-2 border-secondary-500">
-        <div className="max-w-7xl mx-auto">
-          <h3 className="text-center text-sm font-bold text-primary-900 uppercase tracking-wider mb-8">
-            Trusted by Uganda's Leading Institutions
-          </h3>
-          <div className="flex flex-wrap items-center justify-center gap-8">
-            {AGENCY_LOGOS.slice(0, 6).map((logo, idx) => (
-              <div
-                key={idx}
-                className="h-16 relative flex items-center justify-center grayscale hover:grayscale-0
-                           transition-all duration-300 opacity-70 hover:opacity-100"
-              >
-                <Image
-                  src={logo.src}
-                  alt={logo.name}
-                  height={64}
-                  width={120}
-                  className="object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden="true" />
+                </Link>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* CTA SECTION - Strong call-to-action with gold accent */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-20 px-6 bg-primary-900 text-white relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary-500 to-transparent"></div>
-        </div>
-
-        <div className="max-w-4xl mx-auto relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Ready to Invest in Uganda?
+      {/* ── Three-step journey ────────────────────────────────────── */}
+      <section className="py-20 sm:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal className="text-center max-w-2xl mx-auto mb-14 sm:mb-20">
+            <Kicker>How it works</Kicker>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-4 leading-tight" style={DISPLAY_FONT}>
+              From interest to investor in three steps
             </h2>
-            <p className="text-xl text-white/90 mb-10">
-              Start your investment journey with Uganda's OneStop Centre. We handle the paperwork, you handle the growth.
+            <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
+              A single window replaces months of agency-to-agency paperwork.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-secondary-500 text-primary-900 px-8 py-4 rounded-lg font-bold
-                               text-lg hover:bg-secondary-600 transition-all duration-200
-                               shadow-lg hover:shadow-xl">
-                Start Your Application
-              </button>
-              <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold
-                               text-lg hover:bg-white/10 transition-all duration-200">
-                Schedule a Consultation
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+          </Reveal>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* FAQ PREVIEW - Quick answers */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 md:py-24 px-6 bg-white">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-primary-900 mb-4">
-              Frequently Asked Questions
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            {[
-              {
-                q: 'How long does business registration take?',
-                a: 'Standard registration through URSB takes 2-3 business days with our facilitation support.'
-              },
-              {
-                q: 'What are the minimum investment requirements?',
-                a: 'Minimum investment varies by sector. Contact us for sector-specific requirements and incentives.'
-              },
-              {
-                q: 'Can I get tax incentives on my investment?',
-                a: 'Yes. Uganda offers various incentives for qualifying investments. Our team will identify your eligibility.'
-              },
-              {
-                q: 'How long does the investment license process take?',
-                a: 'With our facilitation, most licenses are processed within 2-4 weeks depending on sector complexity.'
-              },
-            ].map((item, idx) => (
-              <details
-                key={idx}
-                className="group border border-neutral-300 rounded-lg p-6 cursor-pointer
-                           hover:border-secondary-500 hover:bg-yellow-50 transition-all"
-              >
-                <summary className="flex items-center justify-between font-bold text-primary-900
-                                   text-lg group-open:text-secondary-500 transition-colors">
-                  {item.q}
-                  <span className="transform group-open:rotate-180 transition-transform">
-                    <ArrowRightIcon className="w-5 h-5" />
+          <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+            <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-px bg-gradient-to-r from-yellow-400 via-red-400 to-yellow-400 opacity-40" aria-hidden="true" />
+            {JOURNEY_STEPS.map((step, i) => (
+              <Reveal key={step.step} delay={i * 0.1} className="h-full">
+                <Link
+                  href={step.href}
+                  className="group relative flex flex-col h-full bg-neutral-50 hover:bg-white rounded-3xl p-7 sm:p-9 border border-neutral-200 hover:border-yellow-400/70 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500"
+                >
+                  <span
+                    className="relative inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-black text-yellow-400 text-3xl font-black mb-7 shadow-lg group-hover:shadow-yellow-500/20 transition-shadow"
+                    style={DISPLAY_FONT}
+                  >
+                    {step.step}
                   </span>
-                </summary>
-                <p className="mt-4 text-primary-700 text-sm leading-relaxed">
-                  {item.a}
-                </p>
-              </details>
+                  <h3 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-3">{step.title}</h3>
+                  <p className="text-sm sm:text-base text-neutral-600 leading-relaxed mb-6 flex-1">{step.description}</p>
+                  <span className="inline-flex items-center text-sm font-bold text-neutral-900 group-hover:text-yellow-600 transition-colors">
+                    {step.cta}
+                    <ArrowRightIcon className="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Link>
+              </Reveal>
             ))}
           </div>
+        </div>
+      </section>
 
-          <div className="text-center mt-12">
-            <Link
-              href="/support"
-              className="text-secondary-500 font-bold hover:text-secondary-600 flex items-center
-                       justify-center gap-2 transition-colors"
-            >
-              View All FAQ
-              <ArrowRightIcon className="w-4 h-4" />
-            </Link>
+      {/* ── AI Investment Advisor ─────────────────────────────────── */}
+      <section className="py-20 sm:py-28 bg-black relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.07]">
+          <Image src="/images/uganda-kampala-city-view.webp" alt="" fill sizes="100vw" className="object-cover" />
+        </div>
+        <div className="absolute -top-24 left-1/3 w-[28rem] h-[28rem] bg-yellow-500/15 rounded-full blur-3xl pointer-events-none" aria-hidden="true" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <Reveal>
+              <div>
+                <Kicker dark>Always on</Kicker>
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 leading-tight" style={DISPLAY_FONT}>
+                  Your AI investment advisor
+                </h2>
+                <p className="text-base sm:text-lg text-neutral-300 mb-8 leading-relaxed max-w-xl">
+                  Get instant answers about investing in Uganda — business registration, tax incentives,
+                  sector opportunities and more, any time of day.
+                </p>
+
+                <div className="flex flex-wrap gap-2.5 mb-9">
+                  {ADVISOR_TOPICS.map((topic) => (
+                    <button
+                      key={topic.label}
+                      onClick={() => openAssistant(topic.query)}
+                      className="px-4 py-2 bg-white/10 text-white border border-white/20 rounded-full text-xs sm:text-sm font-medium hover:bg-yellow-500/20 hover:border-yellow-500/50 hover:text-yellow-300 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
+                    >
+                      {topic.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => openAssistant()}
+                  className="group inline-flex items-center px-8 py-4 bg-yellow-500 text-black font-bold rounded-xl text-base sm:text-lg transition-all duration-300 hover:bg-yellow-400 hover:shadow-2xl hover:shadow-yellow-500/25 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
+                >
+                  <SparklesIcon className="w-5 h-5 mr-2.5" />
+                  Start a Conversation
+                  <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </Reveal>
+
+            {/* Decorative chat preview */}
+            <Reveal delay={0.15}>
+              <div aria-hidden="true" className="relative select-none pointer-events-none max-w-md mx-auto lg:mx-0 lg:ml-auto w-full">
+                <div className="rounded-3xl border border-white/15 bg-white/[0.06] backdrop-blur-md shadow-2xl overflow-hidden">
+                  <div className="flex items-center gap-3 px-5 py-4 border-b border-white/10 bg-white/[0.04]">
+                    <span className="flex items-center justify-center w-9 h-9 rounded-full bg-yellow-500 text-black">
+                      <SparklesIcon className="w-5 h-5" />
+                    </span>
+                    <div>
+                      <div className="text-sm font-bold text-white">OneStop Centre Assistant</div>
+                      <div className="flex items-center gap-1.5 text-[11px] text-neutral-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                        Online now
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-5 space-y-4">
+                    <div className="flex justify-end">
+                      <p className="max-w-[85%] rounded-2xl rounded-br-md bg-yellow-500 text-black text-sm font-medium px-4 py-2.5">
+                        What tax incentives are available for investors?
+                      </p>
+                    </div>
+                    <div className="flex justify-start">
+                      <p className="max-w-[90%] rounded-2xl rounded-bl-md bg-white/10 text-neutral-200 text-sm px-4 py-2.5 leading-relaxed">
+                        Uganda offers a 10-year tax holiday for qualifying exporters, VAT deferment on
+                        plant &amp; machinery, and duty-free import of capital goods. Would you like the
+                        breakdown for your sector?
+                      </p>
+                    </div>
+                    <div className="flex justify-start">
+                      <span className="inline-flex items-center gap-1 rounded-2xl bg-white/10 px-4 py-3">
+                        <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:150ms]" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce [animation-delay:300ms]" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -bottom-5 -left-4 sm:-left-8 flex items-center gap-2 bg-white rounded-2xl shadow-2xl px-4 py-3">
+                  <BuildingLibraryIcon className="w-5 h-5 text-red-500" />
+                  <span className="text-xs font-bold text-neutral-900">Backed by official UIA data</span>
+                </div>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      {/* NEWSLETTER - Signup form */}
-      {/* ═══════════════════════════════════════════════════════════════════ */}
-      <section className="py-16 px-6 bg-neutral-50 border-t border-neutral-200">
-        <div className="max-w-2xl mx-auto text-center">
-          <h3 className="text-3xl font-bold text-primary-900 mb-4">
-            Stay Updated
-          </h3>
-          <p className="text-primary-700 mb-8">
-            Subscribe to our newsletter for the latest investment opportunities and regulatory updates.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none
-                       focus:ring-2 focus:ring-secondary-500 focus:border-transparent transition"
-              required
-            />
-            <button
-              type="submit"
-              className="bg-primary-900 text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-800
-                       transition-all duration-200"
-            >
-              Subscribe
-            </button>
-          </form>
+      {/* ── Services ──────────────────────────────────────────────── */}
+      <section className="py-20 sm:py-28 bg-neutral-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 sm:mb-16">
+            <Reveal className="max-w-2xl">
+              <Kicker>What we do</Kicker>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900 mb-4 leading-tight" style={DISPLAY_FONT}>
+                Professional investment services
+              </h2>
+              <p className="text-base sm:text-lg text-neutral-600 leading-relaxed">
+                Comprehensive facilitation and business support, backed by government expertise and
+                regulatory knowledge.
+              </p>
+            </Reveal>
+            <Reveal delay={0.1} className="flex-shrink-0">
+              <Link
+                href="/services"
+                className="group inline-flex items-center px-6 py-3 bg-black text-white font-semibold rounded-xl transition-all duration-300 hover:bg-neutral-800 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black"
+              >
+                View All Services
+                <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+              </Link>
+            </Reveal>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {SERVICES.map((service, i) => (
+              <Reveal key={service.title} delay={i * 0.05} className="h-full">
+                <div className="group relative bg-white p-7 sm:p-9 rounded-3xl border border-neutral-200 hover:border-yellow-400/70 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 h-full overflow-hidden">
+                  <span
+                    className="absolute top-6 right-7 text-4xl font-black text-neutral-100 group-hover:text-yellow-100 transition-colors select-none"
+                    style={DISPLAY_FONT}
+                    aria-hidden="true"
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <div className="relative">
+                    <div className="w-14 h-14 bg-yellow-50 group-hover:bg-yellow-400 rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300">
+                      <service.icon className="w-7 h-7 text-yellow-600 group-hover:text-black transition-colors duration-300" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-3">{service.title}</h3>
+                    <p className="text-sm sm:text-base text-neutral-600 leading-relaxed">{service.description}</p>
+                  </div>
+                  <div className="absolute bottom-0 left-0 h-1 w-0 bg-gradient-to-r from-yellow-400 to-red-500 group-hover:w-full transition-all duration-500" aria-hidden="true" />
+                </div>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
-    </main>
+
+      {/* ── Final CTA ─────────────────────────────────────────────── */}
+      <section className="relative py-24 sm:py-36 overflow-hidden">
+        <div className="absolute inset-0">
+          <Image src={ctaImage} alt="" fill sizes="100vw" className="object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/85 to-black/75" />
+          <div
+            className="absolute inset-0 opacity-[0.1] pointer-events-none"
+            style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, #FFD700 0%, transparent 45%), radial-gradient(circle at 90% 100%, #CE1126 0%, transparent 40%)' }}
+          />
+        </div>
+        <Reveal className="relative max-w-4xl mx-auto text-center px-4 sm:px-6">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 mb-7 rounded-full border border-yellow-400/40 bg-yellow-400/10 text-yellow-300 text-[11px] sm:text-sm font-semibold tracking-[0.12em] uppercase backdrop-blur-sm">
+            <CheckBadgeIcon className="w-4 h-4" />
+            Join {liveStats.investments.toLocaleString()}+ licensed investors
+          </span>
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-6 leading-tight" style={DISPLAY_FONT}>
+            Ready to invest in Uganda?
+          </h2>
+          <p className="text-base sm:text-xl text-neutral-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Start your journey today with professional guidance and government support — from first
+            question to licensed project, all under one roof.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Link
+              href="/investments/onboarding"
+              className="group inline-flex items-center justify-center px-7 sm:px-9 py-4 bg-yellow-500 text-black font-bold rounded-xl text-base sm:text-lg transition-all duration-300 hover:bg-yellow-400 hover:shadow-2xl hover:shadow-yellow-500/25 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-400"
+            >
+              Start Investment Journey
+              <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <button
+              onClick={() => openAssistant()}
+              className="inline-flex items-center justify-center px-7 sm:px-9 py-4 bg-white/10 text-white font-semibold rounded-xl text-base sm:text-lg border border-white/30 backdrop-blur-sm transition-all duration-300 hover:bg-white hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <ChatBubbleLeftRightIcon className="w-5 h-5 mr-2 flex-shrink-0" />
+              Ask the AI Assistant
+            </button>
+          </div>
+        </Reveal>
+      </section>
+    </div>
   );
 }

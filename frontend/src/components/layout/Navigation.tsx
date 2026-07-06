@@ -3,178 +3,194 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import {
+  Bars3Icon,
+  XMarkIcon,
+  HomeIcon,
+  BanknotesIcon,
+  BriefcaseIcon,
+  WrenchScrewdriverIcon,
+  ArrowDownTrayIcon,
+  MapIcon,
+  CalendarDaysIcon,
+  ChatBubbleLeftRightIcon,
+  BuildingLibraryIcon,
+  UserCircleIcon,
+  ArrowRightOnRectangleIcon,
+} from '@heroicons/react/24/outline';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthModal from '@/components/auth/AuthModal';
 
-interface NavItem {
-  label: string;
+type NavItem = {
+  name: string;
   href: string;
-  icon?: React.ReactNode;
-  children?: NavItem[];
-}
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  highlight?: boolean;
+};
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Home', href: '/' },
-  {
-    label: 'Services',
-    href: '/services',
-    children: [
-      { label: 'Business Registration', href: '/services/registration' },
-      { label: 'Investment Facilitation', href: '/services/facilitation' },
-      { label: 'Tax & Compliance', href: '/services/tax' },
-      { label: 'Aftercare Support', href: '/services/aftercare' },
-    ],
-  },
-  {
-    label: 'Invest',
-    href: '/investments',
-    children: [
-      { label: 'Investment Opportunities', href: '/investments' },
-      { label: 'Why Uganda', href: '/about/why-uganda' },
-      { label: 'Success Stories', href: '/projects' },
-      { label: 'Market Data', href: '/analytics' },
-    ],
-  },
-  { label: 'About', href: '/about' },
-  { label: 'News', href: '/news' },
-  { label: 'Contact', href: '/contact' },
+  { name: 'Home', href: '/', icon: HomeIcon },
+  { name: 'Projects Map', href: '/projects', icon: MapIcon },
+  { name: 'Events Calendar', href: '/events', icon: CalendarDaysIcon },
+  { name: 'Investments', href: '/investments', icon: BanknotesIcon },
+  { name: 'Services', href: '/services', icon: BriefcaseIcon },
+  { name: 'Tools', href: '/tools', icon: WrenchScrewdriverIcon },
+  { name: 'Resources', href: '/downloads', icon: ArrowDownTrayIcon },
+  { name: 'AI Assistant', href: '/chatbot', icon: ChatBubbleLeftRightIcon, highlight: true },
+  { name: 'OSC Hub', href: '/agencies', icon: BuildingLibraryIcon },
 ];
+
+function Brand() {
+  return (
+    <Link href="/" className="flex items-center gap-3 group">
+      <Image
+        src="/images/oneStopCenter-logo.jpeg"
+        alt="OneStopCentre Uganda logo"
+        width={40}
+        height={40}
+        className="rounded-lg object-contain bg-white flex-shrink-0"
+      />
+      <span className="leading-tight">
+        <span className="block text-base font-black text-white group-hover:text-yellow-400 transition-colors">
+          OneStopCentre
+        </span>
+        <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-yellow-500">
+          Uganda
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const pathname = usePathname();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const isActive = (href: string) =>
+    href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  const navLinks = (
+    <ul className="flex flex-col gap-1.5">
+      {NAV_ITEMS.map((item) => {
+        const active = isActive(item.href);
+        return (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              onClick={() => setIsOpen(false)}
+              aria-current={active ? 'page' : undefined}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+                ${
+                  active
+                    ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20'
+                    : item.highlight
+                      ? 'text-yellow-400 hover:bg-white/10'
+                      : 'text-neutral-300 hover:bg-white/10 hover:text-white'
+                }`}
+            >
+              <item.icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+              {item.name}
+              {item.highlight && !active && (
+                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" aria-hidden="true" />
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+
+  const authArea = isAuthenticated ? (
+    <div className="space-y-1.5">
+      <Link
+        href="/account"
+        onClick={() => setIsOpen(false)}
+        className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-neutral-300 hover:bg-white/10 hover:text-white transition-all duration-200"
+      >
+        <UserCircleIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+        <span className="truncate">{user?.name ?? 'My Account'}</span>
+      </Link>
+      <button
+        onClick={() => {
+          setIsOpen(false);
+          logout();
+        }}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-neutral-400 hover:bg-white/10 hover:text-white transition-all duration-200"
+      >
+        <ArrowRightOnRectangleIcon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+        Sign Out
+      </button>
+    </div>
+  ) : (
+    <button
+      onClick={() => {
+        setIsOpen(false);
+        setShowAuthModal(true);
+      }}
+      className="w-full px-4 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl text-sm transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/25"
+    >
+      Sign In
+    </button>
+  );
+
+  const sidebarInner = (
+    <div className="flex flex-col h-full">
+      {/* Brand */}
+      <div className="px-5 pt-6 pb-5 border-b border-white/10">
+        <Brand />
+      </div>
+
+      {/* Links — fill the height consistently */}
+      <nav aria-label="Main navigation" className="flex-1 overflow-y-auto px-3 py-5">
+        {navLinks}
+      </nav>
+
+      {/* Auth */}
+      <div className="px-3 pb-6 pt-4 border-t border-white/10">{authArea}</div>
+    </div>
+  );
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b-2 border-secondary-500 shadow-soft">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <div className="text-2xl font-black bg-gradient-to-r from-primary-900 to-secondary-500
-                          bg-clip-text text-transparent">
-              TREAT
-            </div>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8">
-            {NAV_ITEMS.map((item) => (
-              <div
-                key={item.label}
-                className="relative group"
-                onMouseEnter={() => setActiveDropdown(item.label)}
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <Link
-                  href={item.href}
-                  className="text-primary-900 font-semibold text-sm hover:text-secondary-500
-                           transition-colors duration-200 flex items-center gap-1 py-2"
-                >
-                  {item.label}
-                  {item.children && <ChevronDownIcon className="w-4 h-4" />}
-                </Link>
-
-                {/* Dropdown Menu */}
-                {item.children && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={activeDropdown === item.label ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100
-                             group-hover:visible transition-all duration-200"
-                  >
-                    <div className="bg-white rounded-lg shadow-lg border-t-4 border-secondary-500 py-2 min-w-64">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.label}
-                          href={child.href}
-                          className="block px-6 py-3 text-primary-900 hover:bg-yellow-50
-                                   hover:text-secondary-500 transition-colors text-sm font-medium"
-                        >
-                          {child.label}
-                        </Link>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* CTA Button */}
-          <Link
-            href="/business/new"
-            className="hidden md:inline-block bg-primary-900 text-white px-6 py-2 rounded-lg
-                     font-bold text-sm hover:bg-primary-800 transition-colors duration-200
-                     shadow-md hover:shadow-lg"
-          >
-            Get Started
-          </Link>
-
-          {/* Mobile Menu Button */}
+    <>
+      {/* Mobile top bar */}
+      <header className="lg:hidden sticky top-0 z-50 bg-black border-b-2 border-yellow-500 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <Brand />
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-            aria-label="Toggle menu"
+            aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isOpen}
+            className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
           >
-            {isOpen ? (
-              <XMarkIcon className="w-6 h-6 text-primary-900" />
-            ) : (
-              <Bars3Icon className="w-6 h-6 text-primary-900" />
-            )}
+            {isOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
           </button>
         </div>
+      </header>
 
-        {/* Mobile Navigation */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-neutral-50 border-t border-neutral-200"
-            >
-              <div className="px-6 py-4 space-y-2">
-                {NAV_ITEMS.map((item) => (
-                  <div key={item.label}>
-                    <Link
-                      href={item.href}
-                      onClick={() => !item.children && setIsOpen(false)}
-                      className="block py-3 text-primary-900 font-semibold hover:text-secondary-500
-                               transition-colors text-sm"
-                    >
-                      {item.label}
-                    </Link>
-                    {item.children && (
-                      <div className="ml-4 space-y-2 mt-2 border-l-2 border-secondary-500 pl-4">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.label}
-                            href={child.href}
-                            onClick={() => setIsOpen(false)}
-                            className="block py-2 text-primary-700 hover:text-secondary-500
-                                     transition-colors text-xs font-medium"
-                          >
-                            {child.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-                <Link
-                  href="/business/new"
-                  onClick={() => setIsOpen(false)}
-                  className="block mt-6 bg-primary-900 text-white px-4 py-3 rounded-lg
-                           font-bold text-sm hover:bg-primary-800 transition-colors text-center"
-                >
-                  Get Started
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </nav>
+      {/* Sidebar — pinned full-height on desktop, slide-in overlay on mobile */}
+      {/* Fixed to the viewport so the nav never moves on scroll; content offsets past it via lg:ml-64 */}
+      <aside
+        className={`fixed left-0 top-0 h-screen w-64 bg-black border-r border-white/10 z-40
+                    transform transition-transform duration-300 lg:transform-none
+                    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+      >
+        {sidebarInner}
+      </aside>
+
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* User sign-in (Google) — admin sign-in lives in the footer */}
+      <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} mode="user" />
+    </>
   );
 }
