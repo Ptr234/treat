@@ -21,6 +21,7 @@ public class S3UploadService : IS3UploadService
     private readonly string _s3Bucket;
     private readonly string _s3Region;
     private readonly string _s3BaseUrl;
+    private readonly string _signedUrlSecret;
 
     public S3UploadService(IConfiguration config, IWebHostEnvironment env, ILogger<S3UploadService> logger)
     {
@@ -29,6 +30,8 @@ public class S3UploadService : IS3UploadService
         _s3Bucket = config["S3:Bucket"] ?? "osc-uploads";
         _s3Region = config["S3:Region"] ?? "us-east-1";
         _s3BaseUrl = config["S3:BaseUrl"] ?? $"https://{_s3Bucket}.s3.{_s3Region}.amazonaws.com";
+        _signedUrlSecret = config["S3:SignedUrlSecret"]
+            ?? throw new InvalidOperationException("S3:SignedUrlSecret is not configured");
     }
 
     public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
@@ -58,7 +61,7 @@ public class S3UploadService : IS3UploadService
         // Format: base64(fileKey|timestamp|signature)
         var timestamp = DateTimeOffset.UtcNow.AddMinutes(expirationMinutes).ToUnixTimeSeconds();
         var message = $"{fileKey}|{timestamp}";
-        var signature = HmacSha256(message, "secret-key"); // Use env var in production
+        var signature = HmacSha256(message, _signedUrlSecret);
         var token = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{message}|{signature}"));
         return $"{_s3BaseUrl}/{fileKey}?token={Uri.EscapeDataString(token)}&expires={timestamp}";
     }

@@ -46,8 +46,8 @@ public class TicketsController : ControllerBase
             var p = page ?? 1;
             var ps = pageSize ?? 50;
 
-            if (p < 1 || ps < 1 || ps > 100)
-                return BadRequest(new ApiResponse(false, "Invalid pagination parameters: page must be >= 1, pageSize must be between 1 and 100"));
+            if (p < 1 || ps < 1 || ps > Pagination.MaxPageSize)
+                return BadRequest(new ApiResponse(false, $"Invalid pagination parameters: page must be >= 1, pageSize must be between 1 and {Pagination.MaxPageSize}"));
 
             start = (p - 1) * ps;
             end = start + ps;
@@ -75,6 +75,7 @@ public class TicketsController : ControllerBase
 
     /// <summary>Get a ticket by reference number.</summary>
     [HttpGet("{refNumber}")]
+    [EnableRateLimiting("public-form")]
     public async Task<IActionResult> GetTicket(string refNumber, [FromQuery] string? email)
     {
         var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();

@@ -1,3 +1,4 @@
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,9 @@ public class UploadController : ControllerBase
 
     // Allowed document types. The stored extension is derived from the MIME type
     // (never from the client-supplied file name), so a disguised executable or
-    // HTML file can't be persisted under its real extension.
+    // HTML file can't be persisted under its real extension. The MIME type itself
+    // is verified against the file's actual byte signature in HasValidSignatureAsync
+    // — the client-supplied Content-Type header alone can't be trusted.
     private static readonly Dictionary<string, string> MimeToExtension = new(StringComparer.OrdinalIgnoreCase)
     {
         ["application/pdf"] = ".pdf",
@@ -42,6 +45,37 @@ public class UploadController : ControllerBase
         _db = db;
         _s3Upload = s3Upload;
         _logger = logger;
+    }
+
+    /// <summary>
+    /// Confirms the file's actual bytes match its declared Content-Type, so an
+    /// executable or HTML file relabeled with an allowed MIME type is rejected
+    /// rather than trusted on the client-supplied header alone.
+    /// </summary>
+    private static async Task<bool> HasValidSignatureAsync(IFormFile file)
+    {
+        var buffer = new byte[12];
+        await using var stream = file.OpenReadStream();
+        var read = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length));
+
+        bool StartsWith(byte[] signature) =>
+            read >= signature.Length && buffer.AsSpan(0, signature.Length).SequenceEqual(signature);
+
+        return file.ContentType.ToLowerInvariant() switch
+        {
+            "application/pdf" => StartsWith([0x25, 0x50, 0x44, 0x46]), // %PDF
+            "image/jpeg" => StartsWith([0xFF, 0xD8, 0xFF]),
+            "image/png" => StartsWith([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+            "image/webp" => StartsWith([0x52, 0x49, 0x46, 0x46]) // "RIFF"
+                && read >= 12 && Encoding.ASCII.GetString(buffer, 8, 4) == "WEBP",
+            "application/msword" or "application/vnd.ms-excel" =>
+                StartsWith([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]), // OLE2 compound file
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" or
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" =>
+                StartsWith([0x50, 0x4B, 0x03, 0x04]), // ZIP-based Office Open XML
+            "text/plain" => true, // no reliable magic number; the extension is inert in a browser
+            _ => false,
+        };
     }
 
     /// <summary>
@@ -106,6 +140,9 @@ public class UploadController : ControllerBase
 
             if (!MimeToExtension.ContainsKey(file.ContentType))
                 return BadRequest(new ApiResponse(false, $"File type '{file.ContentType}' is not allowed"));
+
+            if (!await HasValidSignatureAsync(file))
+                return BadRequest(new ApiResponse(false, $"File '{file.FileName}' does not match its declared type '{file.ContentType}'"));
         }
 
         var results = new List<object>();

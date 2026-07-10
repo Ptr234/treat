@@ -110,12 +110,12 @@ export default function InvestmentOnboardingWizard() {
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitResult, setSubmitResult] = useState<{ referenceNumber: string; existing: boolean } | null>(null);
+  const [submitResult, setSubmitResult] = useState<{ referenceNumber?: string; existing: boolean } | null>(null);
 
   const submitApplication = async () => {
     setIsSubmitting(true);
     try {
-      const json = await apiFetch<{ referenceNumber: string; existing: boolean }>('/api/investors/', {
+      const json = await apiFetch<{ referenceNumber?: string; existing: boolean }>('/api/investors/', {
         method: 'POST',
         body: JSON.stringify(investmentData),
       });
@@ -133,7 +133,7 @@ export default function InvestmentOnboardingWizard() {
           ? 'Profile Already Exists'
           : 'Application Submitted Successfully!',
         message: json.data!.existing
-          ? `We already have your profile on file (${json.data!.referenceNumber}). Our team will be in touch.`
+          ? `We already have a profile on file for this email. We've emailed your reference number — our team will be in touch.`
           : `Your investor reference is ${json.data!.referenceNumber}. Our investment team will contact you within 24 hours.`,
       });
     } catch (err) {
@@ -629,12 +629,20 @@ export default function InvestmentOnboardingWizard() {
           <div className="text-green-800 font-bold text-lg mb-2">
             {submitResult.existing ? 'Profile Found' : 'Profile Created Successfully'}
           </div>
-          <p className="text-green-700 mb-2">
-            Your investor reference number is:
-          </p>
-          <p className="text-2xl font-mono font-bold text-green-900 mb-4">
-            {submitResult.referenceNumber}
-          </p>
+          {submitResult.referenceNumber ? (
+            <>
+              <p className="text-green-700 mb-2">
+                Your investor reference number is:
+              </p>
+              <p className="text-2xl font-mono font-bold text-green-900 mb-4">
+                {submitResult.referenceNumber}
+              </p>
+            </>
+          ) : (
+            <p className="text-green-700 mb-4">
+              We&apos;ve emailed your reference number to the address on file.
+            </p>
+          )}
           <p className="text-sm text-green-600">
             Our investment team will contact you within 24 hours. Check your email for confirmation.
           </p>

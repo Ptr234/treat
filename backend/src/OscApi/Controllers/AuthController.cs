@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +50,10 @@ public class AuthController : ControllerBase
         }
         catch { /* audit is best-effort */ }
     }
+
+    /// <summary>Hash a password-reset token for storage/lookup — never persist the raw token.</summary>
+    private static string HashResetToken(string token) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 
     /// <summary>Login with email and password (admins and regular users).</summary>
     [HttpPost("login")]
@@ -175,6 +180,23 @@ public class AuthController : ControllerBase
         string role, name, id;
         if (admin is not null)
         {
+            // Google sign-in authenticates identity, not the second factor: an admin who
+            // enrolled in TOTP must still supply a valid code, exactly as with password login.
+            if (admin.MfaEnabled)
+            {
+                if (string.IsNullOrWhiteSpace(request.MfaCode))
+                {
+                    await AuditAsync(admin.Email, admin.Role, "auth.login.mfa_required", "Google token OK, awaiting TOTP", 200);
+                    return Ok(new ApiResponse<MfaChallengeResponse>(true, new MfaChallengeResponse()));
+                }
+
+                if (!_totp.Verify(admin.MfaSecret, request.MfaCode))
+                {
+                    await AuditAsync(admin.Email, admin.Role, "auth.login.failed", "Invalid MFA code (Google)", 401);
+                    return Unauthorized(new ApiResponse(false, "Invalid authentication code"));
+                }
+            }
+
             role = admin.Role;
             name = admin.Name;
             id = admin.Id.ToString();
@@ -376,6 +398,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Confirm enrolment by verifying a code against the pending secret, activating MFA.</summary>
     [HttpPost("mfa/verify")]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> MfaVerify([FromBody] MfaVerifyRequest request)
     {
         var admin = await ResolveAdminAsync();
@@ -396,6 +419,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Disable MFA. Requires the current password and a valid TOTP code.</summary>
     [HttpPost("mfa/disable")]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> MfaDisable([FromBody] MfaDisableRequest request)
     {
         var admin = await ResolveAdminAsync();
@@ -433,8 +457,10 @@ public class AuthController : ControllerBase
 
         if (admin is not null)
         {
+            // The raw token is only ever sent by email; the DB stores its hash, so a
+            // read-only compromise of the database can't be used to reset a password.
             var resetToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
-            admin.PasswordResetToken = resetToken;
+            admin.PasswordResetToken = HashResetToken(resetToken);
             admin.PasswordResetExpiresAt = DateTimeOffset.UtcNow.AddHours(1);
             admin.UpdatedAt = DateTimeOffset.UtcNow;
             await _db.SaveChangesAsync();
@@ -459,8 +485,9 @@ public class AuthController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Token))
             return BadRequest(new ApiResponse(false, "Invalid or expired reset token"));
 
+        var tokenHash = HashResetToken(request.Token);
         var admin = await _db.AdminUsers
-            .FirstOrDefaultAsync(a => a.PasswordResetToken == request.Token && a.IsActive);
+            .FirstOrDefaultAsync(a => a.PasswordResetToken == tokenHash && a.IsActive);
 
         if (admin is null || admin.PasswordResetExpiresAt is null || admin.PasswordResetExpiresAt < DateTimeOffset.UtcNow)
             return BadRequest(new ApiResponse(false, "Invalid or expired reset token"));

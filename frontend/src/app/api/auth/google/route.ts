@@ -24,7 +24,7 @@ const GOOGLE_JWKS = createRemoteJWKSet(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { credential } = body;
+    const { idToken: credential } = body;
 
     if (!credential) {
       return apiError('Google credential is required', 400);

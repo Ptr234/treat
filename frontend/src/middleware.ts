@@ -5,7 +5,10 @@ const COOKIE_NAME = 'osc-session';
 
 // Routes that require admin authentication
 const PROTECTED_ROUTES = ['/dashboard', '/agency-chat', '/admin'];
-const PROTECTED_API_ROUTES = ['/api/dashboard', '/api/messages', '/api/upload'];
+// /api/upload is intentionally excluded: it serves both admin-only generic
+// uploads and anonymous ticket-attachment uploads (authorized by filing email),
+// so authorization is enforced per-request inside the route handler instead.
+const PROTECTED_API_ROUTES = ['/api/dashboard', '/api/messages'];
 
 function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET || '';
@@ -69,6 +72,5 @@ export const config = {
     '/admin/:path*',
     '/api/dashboard/:path*',
     '/api/messages/:path*',
-    '/api/upload/:path*',
   ],
 };

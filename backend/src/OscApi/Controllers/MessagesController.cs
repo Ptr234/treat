@@ -11,7 +11,7 @@ namespace OscApi.Controllers;
 
 [ApiController]
 [Route("api/messages")]
-[Authorize(Policy = "AdminOnly")]
+[Authorize(Policy = Roles.StaffPolicy)]
 public class MessagesController : ControllerBase
 {
     private readonly OscDbContext _db;
@@ -21,10 +21,25 @@ public class MessagesController : ControllerBase
         _db = db;
     }
 
+    /// <summary>
+    /// True if the signed-in agency officer may access this channel: the shared
+    /// "general" channel, or a per-ticket channel for a ticket assigned to their
+    /// own agency. Admin-level users (checked by the caller) bypass this.
+    /// </summary>
+    private async Task<bool> OfficerCanAccessChannelAsync(string channel)
+    {
+        if (channel == "general") return true;
+        var agencyCode = User.GetAgencyCode();
+        if (string.IsNullOrEmpty(agencyCode)) return false;
+        return await _db.Tickets.AnyAsync(t => t.ReferenceNumber == channel && t.AssignedAgencyCode == agencyCode);
+    }
+
     /// <summary>Get messages (optionally filtered by channel).</summary>
     [HttpGet]
     public async Task<IActionResult> GetMessages([FromQuery] string? channel)
     {
+        var isOfficer = User.IsAgencyOfficer();
+
         if (string.IsNullOrEmpty(channel))
         {
             var channels = await _db.AgencyMessages
@@ -40,8 +55,22 @@ public class MessagesController : ControllerBase
                 .OrderByDescending(c => c.LastAt)
                 .ToListAsync();
 
+            if (isOfficer)
+            {
+                var agencyCode = User.GetAgencyCode();
+                var agencyTicketRefs = await _db.Tickets
+                    .Where(t => t.AssignedAgencyCode == agencyCode)
+                    .Select(t => t.ReferenceNumber)
+                    .ToListAsync();
+                var visibleRefs = new HashSet<string>(agencyTicketRefs) { "general" };
+                channels = channels.Where(c => visibleRefs.Contains(c.Channel)).ToList();
+            }
+
             return Ok(new ApiResponse<object>(true, channels));
         }
+
+        if (isOfficer && !await OfficerCanAccessChannelAsync(channel))
+            return NotFound(new ApiResponse(false, "Channel not found"));
 
         var messages = await _db.AgencyMessages
             .Where(m => m.Channel == channel)
@@ -66,6 +95,9 @@ public class MessagesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
     {
+        if (User.IsAgencyOfficer() && !await OfficerCanAccessChannelAsync(request.Channel))
+            return NotFound(new ApiResponse(false, "Channel not found"));
+
         var name = User.FindFirst("name")?.Value ?? "Unknown";
         var email = User.FindFirst("email")?.Value
             ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;

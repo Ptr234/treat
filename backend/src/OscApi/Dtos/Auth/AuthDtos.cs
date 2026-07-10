@@ -16,7 +16,7 @@ public record MfaStatusResponse(bool Enabled);
 
 public record SignupRequest(string Name, string Email, string Password);
 
-public record GoogleAuthRequest(string IdToken);
+public record GoogleAuthRequest(string IdToken, string? MfaCode = null);
 
 public record ProfileUpdateRequest(string? Name, string? CurrentPassword, string? NewPassword);
 

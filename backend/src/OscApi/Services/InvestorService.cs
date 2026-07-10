@@ -114,7 +114,15 @@ public class InvestorService : IInvestorService
         if (request.SecondarySectors is not null) profile.SecondarySectors = request.SecondarySectors.ToArray();
         if (request.SpecificInterests is not null) profile.SpecificInterests = request.SpecificInterests;
         if (request.SupportNeeded is not null) profile.SupportNeeded = request.SupportNeeded.ToArray();
-        if (!string.IsNullOrWhiteSpace(request.Status)) profile.Status = Enum.Parse<InvestorStatus>(request.Status, true);
+        if (!string.IsNullOrWhiteSpace(request.Status))
+        {
+            // TryParse → 400 (via the FluentValidation middleware) instead of a
+            // 500 when a client sends an unknown status string.
+            if (!Enum.TryParse<InvestorStatus>(request.Status, true, out var status))
+                throw new FluentValidation.ValidationException(
+                    [new FluentValidation.Results.ValidationFailure("status", $"Invalid status '{request.Status}'")]);
+            profile.Status = status;
+        }
 
         await _db.SaveChangesAsync();
 

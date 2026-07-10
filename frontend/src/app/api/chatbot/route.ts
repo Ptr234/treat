@@ -2,33 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { chatKnowledgeBase } from '@/data/mock/chat-kb';
 import { apiError, validateBody, sanitizeString } from '@/lib/api-utils';
 import { chatbotMessageSchema } from '@/lib/validations';
+import { createRateLimiter, clientIp } from '@/lib/rate-limit';
 import type { ChatLanguage } from '@/types';
 
-// --- Rate Limiting (in-memory, per-IP) ---
-const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
-const RATE_LIMIT_MAX = 20;
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
-    return false;
-  }
-
-  entry.count++;
-  return entry.count > RATE_LIMIT_MAX;
-}
-
-// Periodic cleanup to prevent memory leak
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, entry] of rateLimitMap) {
-    if (now > entry.resetAt) rateLimitMap.delete(ip);
-  }
-}, 5 * 60_000);
+const chatbotLimiter = createRateLimiter(60_000, 20); // 20 messages/minute/IP
 
 // --- Helpers ---
 const LANGUAGE_NAMES: Record<ChatLanguage, string> = {
@@ -210,8 +187,7 @@ function parseSentiment(text: string): { response: string; sentiment?: 'positive
 
 export async function POST(request: NextRequest) {
   // Rate limiting
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
-  if (isRateLimited(ip)) {
+  if (chatbotLimiter.isRateLimited(clientIp(request))) {
     return apiError('Too many requests. Please wait a moment before trying again.', 429, 'RATE_LIMITED');
   }
 

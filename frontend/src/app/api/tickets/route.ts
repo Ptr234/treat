@@ -15,7 +15,10 @@ import { apiSuccess, apiError, validateBody, validateSearchParams, sanitizeStrin
 import { createTicketSchema, paginationSchema, SLA_HOURS } from '@/lib/validations';
 import { sendTicketConfirmationEmail, sendEscalationNotificationEmail } from '@/lib/email';
 import { requireAdmin } from '@/lib/auth';
+import { createRateLimiter, clientIp } from '@/lib/rate-limit';
 import type { SanityTicket } from '@/types/sanity';
+
+const ticketCreateLimiter = createRateLimiter(60_000, 10); // 10 tickets/minute/IP
 
 export async function GET(request: NextRequest) {
   // Admin-only: returns the full ticket list with investor contact details.
@@ -61,6 +64,10 @@ async function generateRefNumber(): Promise<string> {
 
 export async function POST(request: NextRequest) {
   try {
+    if (ticketCreateLimiter.isRateLimited(clientIp(request))) {
+      return apiError('Too many requests. Please wait a moment before trying again.', 429, 'RATE_LIMITED');
+    }
+
     const [data, err] = await validateBody(request, createTicketSchema);
     if (err) return err;
 

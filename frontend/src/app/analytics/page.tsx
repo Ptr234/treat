@@ -165,10 +165,22 @@ export default function AnalyticsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">Analytics & Intelligence</h1>
+              <div className="flex flex-wrap items-center gap-3 mb-3">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Analytics & Intelligence</h1>
+                {activeTab === 'inquiries' && (
+                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                    Sample Data
+                  </span>
+                )}
+              </div>
               <p className="text-yellow-100 text-lg max-w-2xl">
                 Comprehensive insights into investment inquiries, licensed projects, and performance benchmarks
               </p>
+              {activeTab === 'inquiries' && (
+                <p className="text-yellow-100/80 text-sm max-w-2xl mt-1">
+                  The figures below are illustrative sample data, not live platform metrics.
+                </p>
+              )}
               {/* Tab Navigation */}
               <div className="flex gap-2 mt-4 overflow-x-auto">
                 <button
@@ -625,13 +637,17 @@ export default function AnalyticsPage() {
           className="mt-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200"
         >
           <p className="text-sm text-gray-700 text-center">
-            <span className="font-semibold">Data Updated:</span> {new Date().toLocaleString('en-UG', {
-              dateStyle: 'long',
-              timeStyle: 'short',
-              timeZone: 'Africa/Kampala'
-            })} (EAT)
-            {activeTab === 'projects' && (
-              <span className="block sm:inline sm:ml-2">| Source: UIA Licensed Projects Database & Bankable Projects Report 2025</span>
+            {activeTab === 'projects' ? (
+              <>
+                <span className="font-semibold">Data Updated:</span> {new Date().toLocaleString('en-UG', {
+                  dateStyle: 'long',
+                  timeStyle: 'short',
+                  timeZone: 'Africa/Kampala'
+                })} (EAT)
+                <span className="block sm:inline sm:ml-2">| Source: UIA Licensed Projects Database & Bankable Projects Report 2025</span>
+              </>
+            ) : (
+              <span className="font-semibold">Note: Inquiry Analytics above uses sample data for illustration and does not reflect live UIA figures.</span>
             )}
           </p>
         </motion.div>

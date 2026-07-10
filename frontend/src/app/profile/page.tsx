@@ -233,7 +233,7 @@ export default function ProfilePage() {
     try {
       const json = await apiFetch('/api/auth/profile', {
         method: 'PATCH',
-        body: JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({ currentPassword, newPassword }),
       });
       if (!json.success) {
         setPasswordError(json.error || 'Failed to change password');

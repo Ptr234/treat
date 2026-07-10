@@ -51,22 +51,34 @@ public class ContactController : ControllerBase
             new ApiResponse<AppointmentResponse>(true, result));
     }
 
-    /// <summary>List contact inquiries (admin only).</summary>
+    /// <summary>List contact inquiries (staff only; agency officers are scoped to their own agency).</summary>
     [HttpGet("inquiries")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Roles.StaffPolicy)]
     public async Task<IActionResult> ListInquiries(
         [FromQuery] int from = 0, [FromQuery] int to = 50, [FromQuery] string? agencyCode = null)
     {
+        if (User.IsAgencyOfficer())
+        {
+            var scope = User.GetAgencyCode();
+            if (string.IsNullOrEmpty(scope)) return Forbid();
+            agencyCode = scope;
+        }
         var result = await _contactService.ListInquiriesAsync(from, to, agencyCode);
         return Ok(new ApiResponse<object>(true, result));
     }
 
-    /// <summary>List appointments (admin only).</summary>
+    /// <summary>List appointments (staff only; agency officers are scoped to their own agency).</summary>
     [HttpGet("appointments")]
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = Roles.StaffPolicy)]
     public async Task<IActionResult> ListAppointments(
         [FromQuery] int from = 0, [FromQuery] int to = 50, [FromQuery] string? agencyCode = null)
     {
+        if (User.IsAgencyOfficer())
+        {
+            var scope = User.GetAgencyCode();
+            if (string.IsNullOrEmpty(scope)) return Forbid();
+            agencyCode = scope;
+        }
         var result = await _contactService.ListAppointmentsAsync(from, to, agencyCode);
         return Ok(new ApiResponse<object>(true, result));
     }

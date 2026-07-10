@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Microsoft.Extensions.DependencyInjection;
 using OscApi.Data;
 using OscApi.Models;
 
@@ -12,16 +13,16 @@ public interface IAnalyticsQueueService
 
 public class AnalyticsQueueService : IAnalyticsQueueService, IAsyncDisposable
 {
-    private readonly OscDbContext _db;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<AnalyticsQueueService> _logger;
     private readonly ConcurrentQueue<AnalyticsEvent> _queue = new();
     private readonly Timer? _batchTimer;
     private const int BatchSize = 100;
     private const int BatchIntervalMs = 5000; // 5 seconds
 
-    public AnalyticsQueueService(OscDbContext db, ILogger<AnalyticsQueueService> logger)
+    public AnalyticsQueueService(IServiceScopeFactory scopeFactory, ILogger<AnalyticsQueueService> logger)
     {
-        _db = db;
+        _scopeFactory = scopeFactory;
         _logger = logger;
 
         // Start background timer to process batches
@@ -53,8 +54,10 @@ public class AnalyticsQueueService : IAnalyticsQueueService, IAsyncDisposable
 
         try
         {
-            _db.AnalyticsEvents.AddRange(batch);
-            await _db.SaveChangesAsync();
+            using var scope = _scopeFactory.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<OscDbContext>();
+            db.AnalyticsEvents.AddRange(batch);
+            await db.SaveChangesAsync();
             _logger.LogInformation("Processed analytics batch of {Count} events", batch.Count);
         }
         catch (Exception ex)

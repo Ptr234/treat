@@ -12,6 +12,9 @@ import {
 import { apiSuccess, apiError, validateBody, sanitizeString } from '@/lib/api-utils';
 import { createInvestorProfileSchema } from '@/lib/validations';
 import { sendInvestorWelcomeEmail } from '@/lib/email';
+import { createRateLimiter, clientIp } from '@/lib/rate-limit';
+
+const investorCreateLimiter = createRateLimiter(60_000, 10); // 10 submissions/minute/IP
 
 // ── Reference number generation ──────────────────────────────────────
 
@@ -36,19 +39,31 @@ async function generateInvestorRef(): Promise<string> {
 
 export async function POST(request: NextRequest) {
   try {
+    if (investorCreateLimiter.isRateLimited(clientIp(request))) {
+      return apiError('Too many requests. Please wait a moment before trying again.', 429, 'RATE_LIMITED');
+    }
+
     const [data, err] = await validateBody(request, createInvestorProfileSchema);
     if (err) return err;
 
     const email = data.email.toLowerCase().trim();
 
-    // Check if investor with this email already exists
+    // Check if investor with this email already exists. The reference number is
+    // never returned directly here — anyone can submit an arbitrary email, so
+    // echoing it back would let a caller enumerate which emails have a profile
+    // and harvest valid reference numbers. It's emailed to the address on file
+    // instead, which only the account owner can read.
     const existing = await getWriteClient().fetch(INVESTOR_BY_EMAIL_QUERY, { email });
     if (existing) {
-      return apiSuccess(
-        { referenceNumber: existing.referenceNumber, investorId: existing._id, existing: true },
-        undefined,
-        200
-      );
+      sendInvestorWelcomeEmail({
+        to: email,
+        name: existing.name ?? data.name,
+        referenceNumber: existing.referenceNumber,
+        primarySector: existing.primarySector ?? data.primarySector,
+        investmentAmount: existing.investmentAmount ?? data.investmentAmount,
+      }).catch((err) => console.error('[POST /api/investors] reminder email failed:', err));
+
+      return apiSuccess({ existing: true }, undefined, 200);
     }
 
     const referenceNumber = await generateInvestorRef();

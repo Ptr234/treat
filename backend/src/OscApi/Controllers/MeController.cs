@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OscApi.Common;
 using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Models;
@@ -162,22 +163,55 @@ public class MeController : ControllerBase
 
     /// <summary>Get the signed-in user's profile.</summary>
     [HttpGet("profile")]
-    public IActionResult GetProfile()
+    public async Task<IActionResult> GetProfile()
     {
         var email = Email;
         if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
 
-        return Ok(new ApiResponse<object>(true, new { email }));
+        var isBackOffice = Roles.BackOfficeRoles.Contains(User.GetRole());
+        var name = isBackOffice
+            ? (await _db.AdminUsers.AsNoTracking().Where(a => a.Email == email).Select(a => a.Name).FirstOrDefaultAsync())
+            : (await _db.Users.AsNoTracking().Where(u => u.Email == email).Select(u => u.Name).FirstOrDefaultAsync());
+
+        return Ok(new ApiResponse<object>(true, new { email, name }));
     }
 
-    /// <summary>Update the signed-in user's profile.</summary>
+    /// <summary>
+    /// Update the signed-in user's profile. Only the display name can be changed
+    /// here — email is the account's login identity and is never mutable via this
+    /// endpoint (changing it would let a caller redirect ownership of submissions).
+    /// </summary>
     [HttpPut("profile")]
-    public IActionResult UpdateProfile([FromBody] JsonElement data)
+    public async Task<IActionResult> UpdateProfile([FromBody] JsonElement data)
     {
         var email = Email;
         if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
 
-        return Ok(new ApiResponse(true, "Profile updated"));
+        if (data.ValueKind != JsonValueKind.Object || !data.TryGetProperty("name", out var nameProp)
+            || nameProp.ValueKind != JsonValueKind.String)
+            return Ok(new ApiResponse<object>(true, new { email }));
+
+        var name = nameProp.GetString()!.Trim();
+        if (name.Length < 2 || name.Length > 100)
+            return BadRequest(new ApiResponse(false, "Name must be 2-100 characters"));
+
+        var isBackOffice = Roles.BackOfficeRoles.Contains(User.GetRole());
+        if (isBackOffice)
+        {
+            var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email);
+            if (admin is null) return NotFound(new ApiResponse(false, "Account not found"));
+            admin.Name = name;
+            admin.UpdatedAt = DateTimeOffset.UtcNow;
+        }
+        else
+        {
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user is null) return NotFound(new ApiResponse(false, "Account not found"));
+            user.Name = name;
+        }
+
+        await _db.SaveChangesAsync();
+        return Ok(new ApiResponse<object>(true, new { email, name }));
     }
 
     /// <summary>Delete the signed-in user's account.</summary>

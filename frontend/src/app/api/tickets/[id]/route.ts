@@ -9,13 +9,22 @@ import { apiSuccess, apiError, validateBody } from '@/lib/api-utils';
 import { ticketUpdateSchema, publicTicketUpdateSchema } from '@/lib/validations';
 import { requireAdmin } from '@/lib/auth';
 import { sendTicketStatusEmail, sendEscalationNotificationEmail } from '@/lib/email';
+import { createRateLimiter, clientIp } from '@/lib/rate-limit';
 import type { SanityTicket, SanityTicketMessage } from '@/types/sanity';
+
+// Guards against brute-forcing a ticket's reference number when the attacker
+// already knows (or guesses) the filing email — ref numbers are sequential.
+const ticketLookupLimiter = createRateLimiter(60_000, 10); // 10 lookups/minute/IP
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (ticketLookupLimiter.isRateLimited(clientIp(request))) {
+      return apiError('Too many requests. Please wait a moment before trying again.', 429, 'RATE_LIMITED');
+    }
+
     const { id } = await params;
     const ticket = await client.fetch<SanityTicket | null>(TICKET_BY_REFERENCE_QUERY, { ref: id });
 

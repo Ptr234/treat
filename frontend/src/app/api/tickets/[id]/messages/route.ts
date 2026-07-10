@@ -8,7 +8,10 @@ import { TICKET_BY_REFERENCE_QUERY, TICKET_MESSAGES_QUERY } from '@/lib/sanity-q
 import { apiSuccess, apiError, validateBody, sanitizeString } from '@/lib/api-utils';
 import { ticketMessageSchema, publicCommentSchema } from '@/lib/validations';
 import { requireAdmin } from '@/lib/auth';
+import { createRateLimiter, clientIp } from '@/lib/rate-limit';
 import type { SanityTicket, SanityTicketMessage } from '@/types/sanity';
+
+const messagePostLimiter = createRateLimiter(60_000, 10); // 10 messages/minute/IP
 
 export async function GET(
   request: NextRequest,
@@ -45,6 +48,10 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (messagePostLimiter.isRateLimited(clientIp(request))) {
+      return apiError('Too many requests. Please wait a moment before trying again.', 429, 'RATE_LIMITED');
+    }
+
     const { id } = await params;
     const ticket = await client.fetch<SanityTicket | null>(TICKET_BY_REFERENCE_QUERY, { ref: id });
     if (!ticket) return apiError('Ticket not found', 404, 'NOT_FOUND');

@@ -69,3 +69,5 @@ services:
         sync: false
       - key: Sentry__Dsn
         sync: false
+      - key: S3__SignedUrlSecret                     # used to sign document download URLs
+        sync: false
