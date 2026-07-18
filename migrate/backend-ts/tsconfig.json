@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    // Deliberately NOT including "node" globally: @types/node's ambient
+    // FormData/File/Request/Response globals collide with
+    // @cloudflare/workers-types' versions (concretely broke File/FormData
+    // typing in routes/upload.ts when this was tried). Where a test needs a
+    // Node builtin (e.g. Buffer) under nodejs_compat, import it explicitly
+    // — `import { Buffer } from 'node:buffer'` — rather than relying on the
+    // ambient global.
+    // The bare "@cloudflare/workers-types" package root resolves to its
+    // OLDEST dated type snapshot (predates FormData returning File from
+    // getAll() — concretely broke routes/upload.ts's file handling).
+    // "/latest" tracks current Workers APIs; bump wrangler.toml's
+    // compatibility_date and this together if a specific dated snapshot
+    // ever matters more than "current".
+    "types": ["@cloudflare/workers-types/latest", "@cloudflare/vitest-pool-workers", "vitest/globals"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "paths": {
+      "@shared/*": ["../../shared/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "worker-configuration.d.ts"]
+}

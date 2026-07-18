@@ -1,0 +1,38 @@
+{
+  "name": "osc-api-workers",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "OSC Digital Tool backend — Hono on Cloudflare Workers. Replaces backend/ (ASP.NET) resource-by-resource during the strangler migration; see PROGRESS.md / the migration plan for sequencing.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "hono": "^4.12.30",
+    "drizzle-orm": "^0.36.4",
+    "postgres": "^3.4.5",
+    "jose": "^5.9.6",
+    "bcryptjs": "^2.4.3",
+    "otpauth": "^9.3.4",
+    "zod": "^4.3.6",
+    "@hono/zod-validator": "^0.9.0",
+    "@sentry/cloudflare": "^8.47.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.6.4",
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.10.2",
+    "drizzle-kit": "^0.28.1",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "wrangler": "^3.91.0"
+  }
+}

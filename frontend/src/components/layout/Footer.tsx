@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -8,7 +8,6 @@ import {
   PhoneIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
-import AuthModal from '@/components/auth/AuthModal';
 
 const FOOTER_SECTIONS = [
   {
@@ -62,8 +61,6 @@ const CONTACTS = [
 ];
 
 export default function Footer() {
-  const [showAdminModal, setShowAdminModal] = useState(false);
-
   return (
     <footer className="bg-black text-white border-t-2 border-yellow-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
@@ -146,18 +143,12 @@ export default function Footer() {
             <Link href="/search" className="hover:text-yellow-400 transition-colors">
               Search
             </Link>
-            <button
-              onClick={() => setShowAdminModal(true)}
-              className="hover:text-yellow-400 transition-colors"
-            >
+            <Link href="/login" className="hover:text-yellow-400 transition-colors">
               Admin
-            </button>
+            </Link>
           </div>
         </div>
       </div>
-
-      {/* Admin sign-in */}
-      <AuthModal isOpen={showAdminModal} onClose={() => setShowAdminModal(false)} mode="admin" />
     </footer>
   );
 }
