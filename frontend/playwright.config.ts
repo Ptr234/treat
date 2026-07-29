@@ -13,7 +13,9 @@ export default defineConfig({
   retries: 0,
   reporter: [['list']],
   use: {
-    baseURL: 'http://localhost:3000',
+    // Overridable so the suite can also run from inside a container, where the
+    // app is reached by service name (http://frontend:3000) rather than localhost.
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
     trace: 'retain-on-failure',
     serviceWorkers: 'block',
   },

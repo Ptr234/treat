@@ -73,3 +73,6 @@ blob-report/
 
 # Uploaded ticket documents (runtime data, never committed)
 backend/src/OscApi/uploads/
+
+# Local QA harness output (docker compose, seeds, screenshots, findings)
+.qa/

@@ -142,6 +142,8 @@ export default function ChatWidget() {
   const [language, setLanguage] = useState<ChatLanguage>('en');
   const [unreadCount, setUnreadCount] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
+  /** True while the site footer is scrolled into view — the launcher hides then. */
+  const [footerVisible, setFooterVisible] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isOpenRef = useRef(false);
@@ -153,6 +155,10 @@ export default function ChatWidget() {
   const [showManualForm, setShowManualForm] = useState(false);
 
   const voice = useVoiceInput(language);
+
+  // Hide the launcher once the footer is reached — but never while a
+  // conversation is open, or the user would lose the close button.
+  const hideLauncher = footerVisible && !isOpen;
 
   // Auto-set userInfo from Google auth when user signs in
   useEffect(() => {
@@ -209,6 +215,24 @@ export default function ChatWidget() {
       clearTimeout(hideTimer);
     };
   }, [isOpen, messages.length]);
+
+  // Keep the floating button clear of the footer. It is position:fixed, so it
+  // would otherwise sit on top of the footer's links and contact details once
+  // the reader scrolls to the bottom. Hide it while the footer is on screen
+  // (an open conversation stays open — only the launcher is hidden).
+  useEffect(() => {
+    const footer = document.getElementById('site-footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => setFooterVisible(entries.some((e) => e.isIntersecting)),
+      // A small negative margin means it hides just as the footer reaches the
+      // button rather than the instant its first pixel appears.
+      { rootMargin: '0px 0px -64px 0px' }
+    );
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   // Listen for custom event to open chat from other components
   const handleOpenChat = useCallback((e: Event) => {
@@ -540,7 +564,7 @@ export default function ChatWidget() {
 
       {/* Tooltip Bubble */}
       <AnimatePresence>
-        {showTooltip && !isOpen && (
+        {showTooltip && !isOpen && !footerVisible && (
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -560,9 +584,18 @@ export default function ChatWidget() {
           setIsOpen(!isOpen);
           setShowTooltip(false);
         }}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center gap-2 w-12 h-12 sm:w-auto sm:h-14 bg-yellow-500 text-black rounded-full shadow-lg shadow-yellow-500/25 hover:shadow-yellow-400/40 transition-all duration-300 sm:px-5 ring-2 ring-yellow-400/20 sm:ring-4 hover:ring-yellow-400/40"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center gap-2 w-12 h-12 sm:w-auto sm:h-14 bg-yellow-500 text-black rounded-full shadow-lg shadow-yellow-500/25 hover:shadow-yellow-400/40 sm:px-5 ring-2 ring-yellow-400/20 sm:ring-4 hover:ring-yellow-400/40 ${
+          hideLauncher ? 'pointer-events-none' : ''
+        }`}
+        // Opacity is animated through Framer rather than a Tailwind class:
+        // this is a motion component, so Framer owns the inline style and a
+        // competing `opacity-0` class just leaves it stuck mid-transition.
+        animate={{ opacity: hideLauncher ? 0 : 1, y: hideLauncher ? 16 : 0 }}
+        transition={{ duration: 0.2 }}
+        aria-hidden={hideLauncher}
+        tabIndex={hideLauncher ? -1 : 0}
+        whileHover={hideLauncher ? undefined : { scale: 1.05 }}
+        whileTap={hideLauncher ? undefined : { scale: 0.95 }}
         aria-label="Toggle AI Assistant"
       >
         <AnimatePresence mode="wait">

@@ -394,7 +394,7 @@
       "company": "Uganda Development Corporation (UDC)"
     },
     "investmentPromoter": "Adam Mutebi — UIA",
-    "logoPath": "/images/logos/MEMD-logo.png",
+    "logoPath": "/images/logos/default-agency.png",
     "marketSize": "USD 1.8B (Uganda/regional construction materials)",
     "competitiveAdvantage": "Abundant raw materials, import substitution, regional market access",
     "requiredLicenses": ["Mining Lease", "Environmental Impact Assessment", "Manufacturing License"],
@@ -434,7 +434,7 @@
       "company": "Uganda Development Corporation (UDC)"
     },
     "investmentPromoter": "Adam Mutebi — UIA",
-    "logoPath": "/images/logos/MEMD-logo.png",
+    "logoPath": "/images/logos/default-agency.png",
     "marketSize": "USD 500M (East African glass market)",
     "competitiveAdvantage": "First-of-its-kind in Uganda, abundant local silica, import substitution",
     "requiredLicenses": ["Mining License", "Manufacturing License", "Environmental Impact Assessment"],
@@ -474,7 +474,7 @@
       "company": "Uganda Development Corporation (UDC)"
     },
     "investmentPromoter": "Adam Mutebi — UIA",
-    "logoPath": "/images/logos/MEMD-logo.png",
+    "logoPath": "/images/logos/default-agency.png",
     "marketSize": "USD 2B (Great Lakes region steel market)",
     "competitiveAdvantage": "Local high-grade iron ore (80%+ Fe), strategic location for western Uganda/Great Lakes markets",
     "requiredLicenses": ["Mining Lease", "Environmental Certificate", "Manufacturing License"],
@@ -708,7 +708,7 @@
       "company": "National Information Technology Authority (NITA-U)"
     },
     "investmentPromoter": "Irene Ssagala — UIA",
-    "logoPath": "/images/logos/NITA-U-logo.png",
+    "logoPath": "/images/logos/default-agency.png",
     "marketSize": "USD 20B (Global BPO market segment)",
     "competitiveAdvantage": "Young English-speaking workforce, competitive costs, government ICT policy support, 17-acre land available",
     "requiredLicenses": ["Business License", "Environmental Impact Assessment", "ICT Service Provider License"],

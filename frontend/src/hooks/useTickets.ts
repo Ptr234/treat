@@ -53,13 +53,25 @@ interface UseTicketsReturn {
   refresh: () => void;
 }
 
-export function useTickets(): UseTicketsReturn {
+/**
+ * The staff ticket board. `enabled` gates the request: `/api/tickets` is
+ * staff-only, so calling it for an anonymous or regular-user visitor just
+ * produces a guaranteed 401/403. Callers pass `enabled: isStaff`.
+ */
+export function useTickets(enabled: boolean = true): UseTicketsReturn {
   const [data, setData] = useState<SupportTicket[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
 
   const fetchTickets = useCallback(async () => {
+    if (!enabled) {
+      setData([]);
+      setTotal(0);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     try {
       const json = await apiFetch<{ tickets: SanityTicketRow[]; total: number }>('/api/tickets?from=0&to=100');
       if (!json.success) throw new Error(json.error || 'Unknown error');
@@ -78,7 +90,7 @@ export function useTickets(): UseTicketsReturn {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     fetchTickets();

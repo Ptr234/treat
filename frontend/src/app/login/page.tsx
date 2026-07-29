@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from '@/components/auth/LoginForm';
+import { postLoginPath } from '@/lib/roles';
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export default function LoginPage() {
@@ -19,9 +20,12 @@ export default function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Already signed in? Send them to the landing page their role can actually
+  // open — /dashboard is admin-level only, so routing everyone there bounces
+  // officers and regular users back out with ?auth=required.
   useEffect(() => {
-    if (isAuthenticated && user?.role === 'admin') {
-      router.replace('/dashboard');
+    if (isAuthenticated && user?.role) {
+      router.replace(postLoginPath(user.role));
     }
   }, [isAuthenticated, user, router]);
 
@@ -57,7 +61,10 @@ export default function LoginPage() {
           </div>
 
           <GoogleSignInButton
-            onSuccess={() => router.push('/dashboard')}
+            // Navigation is handled by the redirect effect above: `user` is
+            // still the pre-login value inside this callback, so deciding the
+            // destination here would route on a stale role.
+            onSuccess={() => {}}
             onError={(error) => setGoogleError(error)}
             disabled={isLoading}
           />
@@ -74,7 +81,7 @@ export default function LoginPage() {
             <div className="flex-1 border-t border-gray-300" />
           </div>
 
-          <LoginForm onSuccess={() => router.push('/dashboard')} />
+          <LoginForm />
         </div>
 
         <p className="mt-6 text-center text-sm text-gray-500">

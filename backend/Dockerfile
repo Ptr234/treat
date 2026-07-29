@@ -10,6 +10,13 @@ RUN dotnet publish src/OscApi/OscApi.csproj -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
+# curl is required by the HEALTHCHECK below and is NOT present in the aspnet
+# runtime image. Without it the container reports "unhealthy" forever even
+# though the API is serving fine, which stalls any `depends_on: service_healthy`.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /app/uploads
 
 COPY --from=build /app/publish .

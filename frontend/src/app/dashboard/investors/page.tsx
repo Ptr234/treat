@@ -7,19 +7,53 @@ import { useAuth } from '@/contexts/AuthContext';
 import { isAdminLevel } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
 
+/**
+ * Shape returned by the ASP.NET InvestorsController. The list projection is a
+ * subset of the detail projection, so the extra fields are optional and only
+ * populated once a profile is opened.
+ */
 interface InvestorProfile {
-  id: string;
   referenceNumber: string;
-  fullName: string;
+  name: string;
   email: string;
   phone?: string;
   nationality?: string;
   companyName?: string;
+  position?: string;
   investorType?: string;
-  sectorInterests?: string[];
-  estimatedBudget?: string;
+  primarySector?: string;
+  secondarySectors?: string[];
+  investmentAmount?: string;
   status: string;
   createdAt: string;
+}
+
+/** The sectors an investor registered interest in (primary first, de-duplicated). */
+function sectorsOf(inv: InvestorProfile): string[] {
+  return [inv.primarySector, ...(inv.secondarySectors ?? [])]
+    .filter((s): s is string => Boolean(s))
+    .filter((s, i, all) => all.indexOf(s) === i);
+}
+
+/**
+ * The status as a lower-case key. The API serialises the .NET enum in
+ * PascalCase ("Active"), while the badge palette and the `<option>` values are
+ * lower-case — without this the badge always fell back to the "new" colour and
+ * the dropdown showed "New" for every investor regardless of their real status.
+ */
+function statusKey(inv: { status: string }): string {
+  return (inv.status ?? '').toLowerCase();
+}
+
+/** Initials for the avatar, tolerant of a missing/blank name. */
+function initialsOf(name: string | undefined): string {
+  return (name ?? '')
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || '??';
 }
 
 const statusColors: Record<string, string> = {
@@ -59,7 +93,7 @@ export default function InvestorsPage() {
       body: JSON.stringify({ status: newStatus }),
     });
     if (res.success) {
-      setFeedback({ type: 'success', message: `${inv.fullName} marked as ${newStatus}.` });
+      setFeedback({ type: 'success', message: `${inv.name} marked as ${newStatus}.` });
       fetchInvestors();
     } else {
       setFeedback({ type: 'error', message: res.error || 'Update failed.' });
@@ -68,12 +102,12 @@ export default function InvestorsPage() {
   };
 
   const handleDelete = async (inv: InvestorProfile) => {
-    if (!confirm(`Delete investor ${inv.fullName} (${inv.referenceNumber})? This cannot be undone.`)) return;
+    if (!confirm(`Delete investor ${inv.name} (${inv.referenceNumber})? This cannot be undone.`)) return;
     const res = await apiFetch(`/api/investors/${inv.referenceNumber}`, { method: 'DELETE' });
     if (res.success) {
-      setFeedback({ type: 'success', message: `${inv.fullName} deleted.` });
+      setFeedback({ type: 'success', message: `${inv.name} deleted.` });
       fetchInvestors();
-      if (selectedInvestor?.id === inv.id) setSelectedInvestor(null);
+      if (selectedInvestor?.referenceNumber === inv.referenceNumber) setSelectedInvestor(null);
     } else {
       setFeedback({ type: 'error', message: res.error || 'Delete failed.' });
     }
@@ -142,30 +176,30 @@ export default function InvestorsPage() {
             ) : (
               <div className="space-y-3">
                 {investors.map((inv) => (
-                  <div key={inv.id} className={`bg-neutral-900 rounded-xl border p-4 transition-colors ${
-                    selectedInvestor?.id === inv.id ? 'border-yellow-500' : 'border-neutral-800'
+                  <div key={inv.referenceNumber} className={`bg-neutral-900 rounded-xl border p-4 transition-colors ${
+                    selectedInvestor?.referenceNumber === inv.referenceNumber ? 'border-yellow-500' : 'border-neutral-800'
                   }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center font-bold text-sm flex-shrink-0">
-                          {inv.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
+                          {initialsOf(inv.name)}
                         </div>
                         <div className="min-w-0">
                           <div className="font-semibold flex items-center gap-2 flex-wrap">
-                            <span className="truncate">{inv.fullName}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[inv.status] || statusColors.new}`}>
+                            <span className="truncate">{inv.name}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[statusKey(inv)] || statusColors.new}`}>
                               {inv.status}
                             </span>
                           </div>
                           <div className="text-xs text-neutral-500 truncate">
                             {inv.referenceNumber} &middot; {inv.email}
-                            {inv.companyName && ` &middot; ${inv.companyName}`}
+                            {inv.companyName && ` · ${inv.companyName}`}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-1 ml-2 flex-shrink-0">
                         <select
-                          value={inv.status}
+                          value={statusKey(inv)}
                           onChange={(e) => handleStatusChange(inv, e.target.value)}
                           className="bg-neutral-800 border border-neutral-700 text-xs text-white rounded px-2 py-1"
                         >
@@ -184,13 +218,13 @@ export default function InvestorsPage() {
                         </button>
                       </div>
                     </div>
-                    {inv.sectorInterests && inv.sectorInterests.length > 0 && (
+                    {sectorsOf(inv).length > 0 && (
                       <div className="flex gap-1.5 mt-2 flex-wrap">
-                        {inv.sectorInterests.slice(0, 4).map((s) => (
+                        {sectorsOf(inv).slice(0, 4).map((s) => (
                           <span key={s} className="text-xs px-2 py-0.5 bg-neutral-800 text-neutral-400 rounded">{s}</span>
                         ))}
-                        {inv.sectorInterests.length > 4 && (
-                          <span className="text-xs text-neutral-600">+{inv.sectorInterests.length - 4} more</span>
+                        {sectorsOf(inv).length > 4 && (
+                          <span className="text-xs text-neutral-600">+{sectorsOf(inv).length - 4} more</span>
                         )}
                       </div>
                     )}
@@ -213,7 +247,7 @@ export default function InvestorsPage() {
                     <UserIcon className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="font-semibold text-white">{selectedInvestor.fullName}</div>
+                    <div className="font-semibold text-white">{selectedInvestor.name}</div>
                     <div className="text-xs text-neutral-500">{selectedInvestor.referenceNumber}</div>
                   </div>
                 </div>
@@ -223,7 +257,7 @@ export default function InvestorsPage() {
                   ['Nationality', selectedInvestor.nationality],
                   ['Company', selectedInvestor.companyName],
                   ['Investor Type', selectedInvestor.investorType],
-                  ['Budget', selectedInvestor.estimatedBudget],
+                  ['Budget', selectedInvestor.investmentAmount],
                   ['Status', selectedInvestor.status],
                   ['Registered', new Date(selectedInvestor.createdAt).toLocaleDateString('en-UG')],
                 ].filter(([, v]) => v).map(([label, value]) => (
@@ -232,11 +266,11 @@ export default function InvestorsPage() {
                     <span className="text-white text-right">{value}</span>
                   </div>
                 ))}
-                {selectedInvestor.sectorInterests && selectedInvestor.sectorInterests.length > 0 && (
+                {sectorsOf(selectedInvestor).length > 0 && (
                   <div>
                     <span className="text-neutral-500 block mb-1">Sectors</span>
                     <div className="flex gap-1 flex-wrap">
-                      {selectedInvestor.sectorInterests.map((s) => (
+                      {sectorsOf(selectedInvestor).map((s) => (
                         <span key={s} className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded">{s}</span>
                       ))}
                     </div>

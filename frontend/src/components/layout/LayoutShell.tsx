@@ -27,7 +27,12 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       {/* Dashboard layout: viewport-fixed sidebar on desktop, pages render in the offset column */}
       <div className="flex-1 flex flex-col">
         <Navigation />
-        <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
+        {/* Offset past the fixed announcement strip so page content starts
+            below it rather than underneath it. */}
+        <div
+          className="flex-1 flex flex-col min-w-0 lg:ml-64"
+          style={{ paddingTop: 'var(--newsbar-h, 0px)' }}
+        >
           <NewsBar />
           <main id="main-content" role="main" className="flex-1" tabIndex={-1}>
             {children}

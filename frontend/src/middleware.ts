@@ -3,21 +3,29 @@ import { jwtVerify } from 'jose';
 
 const COOKIE_NAME = 'osc-session';
 
-// Routes that require admin authentication
-const PROTECTED_ROUTES = ['/dashboard', '/agency-chat', '/admin'];
+// Routes that require an admin-level session (system admin / Director General).
+const PROTECTED_ROUTES = ['/dashboard', '/admin'];
+// Routes open to all back-office staff, including agency officers. The backend
+// scopes an officer to their own agency's channels, so they must be able to
+// reach the workspace at all — locking them out here left them with no UI.
+const STAFF_ROUTES = ['/agency-chat'];
 // /api/upload is intentionally excluded: it serves both admin-only generic
 // uploads and anonymous ticket-attachment uploads (authorized by filing email),
 // so authorization is enforced per-request inside the route handler instead.
-const PROTECTED_API_ROUTES = ['/api/dashboard', '/api/messages'];
+const PROTECTED_API_ROUTES = ['/api/dashboard'];
+// Staff-level APIs. /api/messages mirrors the backend's Staff policy, which
+// includes agency officers (scoped to their own agency's channels server-side).
+const STAFF_API_ROUTES = ['/api/messages'];
 
 function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET || '';
   return new TextEncoder().encode(secret);
 }
 
-async function isValidAdmin(request: NextRequest): Promise<boolean> {
+/** The signed-in principal's role, or null when there is no valid session. */
+async function sessionRole(request: NextRequest): Promise<string | null> {
   const token = request.cookies.get(COOKIE_NAME)?.value;
-  if (!token) return false;
+  if (!token) return null;
 
   try {
     const { payload } = await jwtVerify(token, getJwtSecret());
@@ -27,12 +35,22 @@ async function isValidAdmin(request: NextRequest): Promise<boolean> {
     const role =
       payload.role ??
       payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    // Admin-level roles (system admin + Director General) reach the leadership
-    // dashboard. Agency officers use the agency-scoped ticket views instead.
-    return role === 'admin' || role === 'dg';
+    return typeof role === 'string' ? role : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+/** Admin-level roles (system admin + Director General). */
+async function isValidAdmin(request: NextRequest): Promise<boolean> {
+  const role = await sessionRole(request);
+  return role === 'admin' || role === 'dg';
+}
+
+/** Any back-office staff member, including agency officers. */
+async function isValidStaff(request: NextRequest): Promise<boolean> {
+  const role = await sessionRole(request);
+  return role === 'admin' || role === 'dg' || role === 'agency_officer';
 }
 
 export async function middleware(request: NextRequest) {
@@ -40,8 +58,11 @@ export async function middleware(request: NextRequest) {
 
   // Check protected page routes
   const isProtectedPage = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-  if (isProtectedPage) {
-    const valid = await isValidAdmin(request);
+  const isStaffPage = STAFF_ROUTES.some((route) => pathname.startsWith(route));
+  if (isProtectedPage || isStaffPage) {
+    const valid = isStaffPage
+      ? await isValidStaff(request)
+      : await isValidAdmin(request);
     if (!valid) {
       const url = request.nextUrl.clone();
       url.pathname = '/';
@@ -52,8 +73,11 @@ export async function middleware(request: NextRequest) {
 
   // Check protected API routes
   const isProtectedApi = PROTECTED_API_ROUTES.some((route) => pathname.startsWith(route));
-  if (isProtectedApi) {
-    const valid = await isValidAdmin(request);
+  const isStaffApi = STAFF_API_ROUTES.some((route) => pathname.startsWith(route));
+  if (isProtectedApi || isStaffApi) {
+    const valid = isStaffApi
+      ? await isValidStaff(request)
+      : await isValidAdmin(request);
     if (!valid) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },

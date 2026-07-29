@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { isStaff } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
 
 // ── Types ────────────────────────────────────────────────────────────
@@ -50,6 +51,15 @@ interface Ticket {
   referenceNumber: string;
   title: string;
   status: string;
+  agencyCode?: string;
+}
+
+/** A row as returned by the ticket list endpoint. */
+interface TicketRow {
+  referenceNumber: string;
+  title: string;
+  status: string;
+  assignedAgencyCode?: string;
   agencyCode?: string;
 }
 
@@ -153,7 +163,11 @@ function setReadState(channel: string, count: number) {
 
 export default function AgencyChatPage() {
   const { isAuthenticated, user } = useAuth();
-  const isAdmin = isAuthenticated && user?.role === 'admin';
+  // Mirrors the backend's Staff policy on /api/messages: system admins, the
+  // Director General, and agency officers (whose channels the API scopes to
+  // their own agency). Gating on `role === 'admin'` locked out both the DG and
+  // every officer — the people the workspace exists for.
+  const canUseChat = isAuthenticated && isStaff(user?.role);
 
   // State
   const [channels, setChannels] = useState<string[]>([]);
@@ -209,10 +223,38 @@ export default function AgencyChatPage() {
 
   const fetchChannels = useCallback(async () => {
     try {
-      const json = await apiFetch<{ channels: string[]; tickets: Ticket[] }>('/api/messages/');
+      // ASP.NET returns an array of channel summaries ({ channel, lastMessage,
+      // ... }); the legacy Next route returned { channels, tickets }. Reading
+      // only the latter left the sidebar showing nothing but #general.
+      const json = await apiFetch<
+        { channels?: string[]; tickets?: Ticket[] } | { channel: string }[]
+      >('/api/messages/');
       if (json.success && json.data) {
-        setChannels(json.data.channels ?? []);
-        setTickets(json.data.tickets ?? []);
+        const raw = json.data;
+        if (Array.isArray(raw)) {
+          setChannels(raw.map((c) => c.channel).filter(Boolean));
+        } else {
+          setChannels(raw.channels ?? []);
+          if (raw.tickets) setTickets(raw.tickets);
+        }
+      }
+
+      // Ticket channels are labelled with the ticket's title and status. The
+      // ticket list is staff-only and agency-scoped server-side, so an officer
+      // only ever gets labels for their own agency's channels.
+      const t = await apiFetch<{ tickets: TicketRow[]; total: number } | TicketRow[]>(
+        '/api/tickets?page=1&pageSize=100'
+      );
+      if (t.success && t.data) {
+        const rows: TicketRow[] = Array.isArray(t.data) ? t.data : (t.data.tickets ?? []);
+        setTickets(
+          rows.map((r) => ({
+            referenceNumber: r.referenceNumber,
+            title: r.title,
+            status: r.status,
+            agencyCode: r.assignedAgencyCode ?? r.agencyCode,
+          }))
+        );
       }
     } catch (err) {
       console.error('Failed to fetch channels', err);
@@ -452,7 +494,7 @@ export default function AgencyChatPage() {
 
   // ── Render ─────────────────────────────────────────────────────────
 
-  if (!isAdmin) {
+  if (!canUseChat) {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
@@ -461,7 +503,7 @@ export default function AgencyChatPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-3">Agency Chat</h1>
           <p className="text-gray-600 mb-6">
-            Inter-agency messaging requires admin authorization.
+            Inter-agency messaging is available to OneStop Centre staff only.
           </p>
           <Link
             href="/"

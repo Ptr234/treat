@@ -4,7 +4,6 @@ import { useState, useMemo, useRef } from 'react';
 import { ugandaRegions } from '@/data/mock/projects';
 import { useProjects } from '@/hooks/useProjects';
 import { ProjectStatus } from '@/types';
-import ProjectCard from '@/components/projects/ProjectCard';
 import DynamicLeafletMap from '@/components/projects/DynamicLeafletMap';
 import {
   MagnifyingGlassIcon,
@@ -30,6 +29,22 @@ const investmentRanges = [
   { label: 'Over $30M', min: 30000000, max: Infinity }
 ];
 const statuses: ProjectStatus[] = ['active', 'under_construction', 'planned', 'completed'];
+
+/** A single applied filter, removable on its own. */
+function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full border border-neutral-700 bg-neutral-800 py-1 pl-3 pr-1 text-xs text-neutral-200">
+      {label}
+      <button
+        onClick={onRemove}
+        aria-label={`Remove filter ${label}`}
+        className="rounded-full p-0.5 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+      >
+        <XMarkIcon className="h-3.5 w-3.5" />
+      </button>
+    </span>
+  );
+}
 
 export default function ProjectsPage() {
   const { data: projects } = useProjects();
@@ -85,6 +100,22 @@ export default function ProjectsPage() {
 
   const totalInvestment = filteredProjects.reduce((sum, p) => sum + p.investmentValue, 0);
   const totalEmployment = filteredProjects.reduce((sum, p) => sum + p.plannedEmployment, 0);
+
+  // How many projects each option would match, so a filter that can only ever
+  // return nothing is visibly empty before it is clicked.
+  const counts = useMemo(() => {
+    const tally = (pick: (p: (typeof projects)[number]) => string | undefined) =>
+      projects.reduce<Record<string, number>>((acc, p) => {
+        const k = pick(p);
+        if (k) acc[k] = (acc[k] ?? 0) + 1;
+        return acc;
+      }, {});
+    return {
+      sector: tally((p) => p.sector),
+      region: tally((p) => p.region),
+      status: tally((p) => p.status),
+    };
+  }, [projects]);
 
   const toggleSector = (sector: string) => {
     setSelectedSectors((prev) =>
@@ -213,7 +244,7 @@ export default function ProjectsPage() {
             ${showFilters ? 'lg:w-80' : 'lg:w-0 lg:overflow-hidden'}
             transition-all duration-300
           `}>
-            <div className="bg-neutral-900 h-full lg:h-auto rounded-none lg:rounded-xl shadow-lg p-6 overflow-y-auto lg:sticky lg:top-6 border-r lg:border border-neutral-800">
+            <div className="bg-neutral-900 h-full lg:h-auto lg:max-h-[calc(100vh-3rem)] rounded-none lg:rounded-xl shadow-lg p-6 overflow-y-auto lg:sticky lg:top-6 border-r lg:border border-neutral-800">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white flex items-center gap-2">
                   <FunnelIcon className="w-6 h-6 text-yellow-500" />
@@ -256,7 +287,8 @@ export default function ProjectsPage() {
                           onChange={() => toggleSector(sector)}
                           className="w-4 h-4 text-yellow-500 bg-neutral-800 border-neutral-600 rounded focus:ring-yellow-500"
                         />
-                        <span className="text-sm text-neutral-300">{sector}</span>
+                        <span className="text-sm text-neutral-300 flex-1">{sector}</span>
+                        <span className="text-xs tabular-nums text-neutral-500">{counts.sector[sector] ?? 0}</span>
                       </label>
                     ))}
                   </div>
@@ -273,7 +305,8 @@ export default function ProjectsPage() {
                           onChange={() => toggleRegion(region)}
                           className="w-4 h-4 text-yellow-500 bg-neutral-800 border-neutral-600 rounded focus:ring-yellow-500"
                         />
-                        <span className="text-sm text-neutral-300">{region}</span>
+                        <span className="text-sm text-neutral-300 flex-1">{region}</span>
+                        <span className="text-xs tabular-nums text-neutral-500">{counts.region[region] ?? 0}</span>
                       </label>
                     ))}
                   </div>
@@ -311,6 +344,7 @@ export default function ProjectsPage() {
                             className="w-4 h-4 text-yellow-500 bg-neutral-800 border-neutral-600 rounded focus:ring-yellow-500"
                           />
                           <span className={`text-sm px-2 py-0.5 rounded border ${badge.className}`}>{badge.label}</span>
+                          <span className="ml-auto text-xs tabular-nums text-neutral-500">{counts.status[status] ?? 0}</span>
                         </label>
                       );
                     })}
@@ -332,17 +366,24 @@ export default function ProjectsPage() {
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-neutral-700 max-h-96 overflow-y-auto">
-                <h3 className="text-sm font-semibold text-neutral-300 mb-3">Project List</h3>
-                <div className="space-y-2">
-                  {sortedProjects.map((project) => (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      isSelected={selectedProject === project.id}
-                      onClick={() => setSelectedProject(project.id)}
-                    />
-                  ))}
+              {/* Totals for the current filter selection. The full project
+                  list lives in the results area — repeating it here just
+                  duplicated the grid and made the panel scroll forever. */}
+              <div className="mt-6 pt-6 border-t border-neutral-700 space-y-3">
+                <h3 className="text-sm font-semibold text-neutral-300">Selection totals</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-neutral-800 p-3">
+                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">Investment</p>
+                    <p className="text-lg font-bold text-yellow-400">
+                      ${(totalInvestment / 1_000_000_000).toFixed(2)}B
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-neutral-800 p-3">
+                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">Jobs</p>
+                    <p className="text-lg font-bold text-red-400">
+                      {totalEmployment.toLocaleString()}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -389,7 +430,34 @@ export default function ProjectsPage() {
                       <span className="hidden sm:inline">Cards View</span>
                     </button>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {/* Sorting used to be reachable only through the table
+                        header, so map and card users could not reorder at all. */}
+                    <label className="flex items-center gap-2 text-sm text-neutral-400">
+                      <span className="hidden sm:inline">Sort</span>
+                      <select
+                        value={sortField}
+                        onChange={(e) => setSortField(e.target.value as SortField)}
+                        aria-label="Sort projects by"
+                        className="bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-lg px-2 py-2 min-h-[44px] focus:ring-2 focus:ring-yellow-500"
+                      >
+                        <option value="investmentValue">Investment</option>
+                        <option value="plannedEmployment">Employment</option>
+                        <option value="name">Name</option>
+                        <option value="sector">Sector</option>
+                        <option value="region">Region</option>
+                      </select>
+                    </label>
+                    <button
+                      onClick={() => setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'))}
+                      aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+                      title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                      className="px-3 py-2 min-h-[44px] bg-neutral-800 text-neutral-300 rounded-lg hover:bg-neutral-700 flex items-center"
+                    >
+                      {sortOrder === 'asc'
+                        ? <ArrowUpIcon className="w-5 h-5" />
+                        : <ArrowDownIcon className="w-5 h-5" />}
+                    </button>
                     {!showFilters && (
                       <button
                         onClick={() => setShowFilters(true)}
@@ -429,19 +497,77 @@ export default function ProjectsPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Active filters — previously the only indication of what was
+                    applied lived in the sidebar, which is collapsible and off
+                    screen on mobile. Each chip removes just that one filter. */}
+                {hasFilters && (
+                  <div className="mt-4 flex items-center gap-2 flex-wrap">
+                    <span className="text-xs uppercase tracking-wide text-neutral-500">Filtered by</span>
+                    {searchQuery && (
+                      <FilterChip label={`“${searchQuery}”`} onRemove={() => setSearchQuery('')} />
+                    )}
+                    {selectedSectors.map((s) => (
+                      <FilterChip key={`s-${s}`} label={s} onRemove={() => toggleSector(s)} />
+                    ))}
+                    {selectedRegions.map((r) => (
+                      <FilterChip key={`r-${r}`} label={r} onRemove={() => toggleRegion(r)} />
+                    ))}
+                    {selectedInvestmentRange && (
+                      <FilterChip
+                        label={selectedInvestmentRange}
+                        onRemove={() => setSelectedInvestmentRange('')}
+                      />
+                    )}
+                    {selectedStatuses.map((st) => (
+                      <FilterChip
+                        key={`st-${st}`}
+                        label={getStatusBadge(st).label}
+                        onRemove={() => toggleStatus(st)}
+                      />
+                    ))}
+                    <button
+                      onClick={clearFilters}
+                      className="text-xs font-semibold text-yellow-500 hover:text-yellow-400 underline underline-offset-2 ml-1"
+                    >
+                      Clear all
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* === CARDS VIEW === */}
-              {viewMode === 'cards' ? (
+              {/* A filter combination that matches nothing previously rendered
+                  an empty panel with no explanation or way back. */}
+              {sortedProjects.length === 0 ? (
+                <div className="p-12 text-center">
+                  <MagnifyingGlassIcon className="mx-auto mb-4 h-12 w-12 text-neutral-700" />
+                  <h3 className="text-lg font-bold text-white">No projects match these filters</h3>
+                  <p className="mx-auto mt-2 max-w-md text-sm text-neutral-400">
+                    {projects.length === 0
+                      ? 'The licensed projects database is not available right now. Please try again shortly.'
+                      : `None of the ${projects.length} licensed projects match your current selection. Try removing a filter or broadening the investment range.`}
+                  </p>
+                  {hasFilters && (
+                    <button
+                      onClick={clearFilters}
+                      className="mt-5 rounded-lg bg-yellow-500 px-5 py-2.5 font-bold text-black hover:bg-yellow-400"
+                    >
+                      Clear all filters
+                    </button>
+                  )}
+                </div>
+
+              /* === CARDS VIEW === */
+              ) : viewMode === 'cards' ? (
                 <div className="p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
                     {sortedProjects.map((project) => {
                       const badge = getStatusBadge(project.status);
                       return (
                         <div
                           key={project.id}
                           onClick={() => setSelectedProject(project.id)}
-                          className={`rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-lg hover:shadow-yellow-500/10 ${
+                          className={`flex h-full flex-col rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-lg hover:shadow-yellow-500/10 ${
                             selectedProject === project.id
                               ? 'border-yellow-500 bg-yellow-500/10 shadow-lg shadow-yellow-500/20'
                               : 'border-neutral-700 bg-neutral-800 hover:border-yellow-600'
@@ -450,7 +576,9 @@ export default function ProjectsPage() {
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1 min-w-0">
                               <h3 className="font-bold text-white text-base leading-tight line-clamp-2">{project.name}</h3>
-                              <p className="text-sm text-neutral-400 mt-1">{project.company}</p>
+                              {project.company !== project.name && (
+                                <p className="text-sm text-neutral-400 mt-1">{project.company}</p>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-2 flex-wrap mb-4">
@@ -464,7 +592,7 @@ export default function ProjectsPage() {
                               {badge.label}
                             </span>
                           </div>
-                          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-neutral-700">
+                          <div className="mt-auto grid grid-cols-2 gap-3 pt-3 border-t border-neutral-700">
                             <div>
                               <p className="text-xs text-neutral-500 mb-0.5">Investment</p>
                               <p className="text-lg font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
@@ -507,7 +635,9 @@ export default function ProjectsPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <h3 className="font-bold text-white text-sm leading-tight truncate">{project.name}</h3>
-                            <p className="text-xs text-neutral-400">{project.company}</p>
+                            {project.company !== project.name && (
+                              <p className="text-xs text-neutral-400">{project.company}</p>
+                            )}
                           </div>
                           <button
                             onClick={() => setSelectedProject(null)}
@@ -568,7 +698,7 @@ export default function ProjectsPage() {
                   {/* Desktop: full project cards grid below map */}
                   <div className="hidden sm:block p-6 border-t border-neutral-800">
                     <h3 className="text-lg font-bold text-white mb-4">All Projects ({sortedProjects.length})</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
                       {sortedProjects.map((project) => {
                         const badge = getStatusBadge(project.status);
                         return (
@@ -578,7 +708,7 @@ export default function ProjectsPage() {
                               setSelectedProject(project.id);
                               mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }}
-                            className={`rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-lg hover:shadow-yellow-500/10 ${
+                            className={`flex h-full flex-col rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-lg hover:shadow-yellow-500/10 ${
                               selectedProject === project.id
                                 ? 'border-yellow-500 bg-yellow-500/10 shadow-lg shadow-yellow-500/20'
                                 : 'border-neutral-700 bg-neutral-800 hover:border-yellow-600'
@@ -587,7 +717,9 @@ export default function ProjectsPage() {
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1 min-w-0">
                                 <h3 className="font-bold text-white text-base leading-tight line-clamp-2">{project.name}</h3>
-                                <p className="text-sm text-neutral-400 mt-1">{project.company}</p>
+                                {project.company !== project.name && (
+                                  <p className="text-sm text-neutral-400 mt-1">{project.company}</p>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2 flex-wrap mb-4">
@@ -601,7 +733,7 @@ export default function ProjectsPage() {
                                 {badge.label}
                               </span>
                             </div>
-                            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-neutral-700">
+                            <div className="mt-auto grid grid-cols-2 gap-3 pt-3 border-t border-neutral-700">
                               <div>
                                 <p className="text-xs text-neutral-500 mb-0.5">Investment</p>
                                 <p className="text-lg font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
@@ -636,7 +768,9 @@ export default function ProjectsPage() {
                           <div className="flex items-start justify-between mb-2">
                             <div className="flex-1 min-w-0">
                               <h3 className="font-bold text-white text-sm leading-tight">{project.name}</h3>
-                              <p className="text-xs text-neutral-400 mt-0.5">{project.company}</p>
+                              {project.company !== project.name && (
+                                <p className="text-xs text-neutral-400 mt-0.5">{project.company}</p>
+                              )}
                             </div>
                             <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded border whitespace-nowrap ${badge.className}`}>
                               {badge.label}

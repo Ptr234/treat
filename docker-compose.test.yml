@@ -30,10 +30,20 @@ services:
       ASPNETCORE_ENVIRONMENT: Testing
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=osc_test;Username=testuser;Password=testpass123"
+      # Outside Development the app only migrates/seeds when asked to. Without
+      # these two the database stays empty and there is no account to log in
+      # with, so every authenticated test fails at the first request.
+      RunMigrationsOnStartup: "true"
+      Seed__AdminPassword: "Admin@2026!"
       Jwt__Secret: "test-secret-key-for-testing-only-change-in-production"
       Jwt__Issuer: "http://localhost:8080"
       Jwt__Audience: "http://localhost:3000"
-      Cookie__Domain: ".localhost"
+      # NOTE: do not set Cookie__Domain for localhost — browsers reject a
+      # Domain=.localhost cookie outright, which silently breaks sign-in.
+      # The browser must be able to reach the API at the same origin it was
+      # given at build time, and that origin must be allowed by CORS.
+      Cors__AllowedOrigins: "http://localhost:3000"
+      SiteUrl: "http://localhost:3000"
       Resend__ApiKey: "test-resend-key"
       Resend__AdminEmail: "admin@test.local"
     ports:
@@ -51,51 +61,72 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      # NEXT_PUBLIC_* is inlined into the browser bundle at build time, so it
+      # must be a build arg. It also has to be an origin the *browser* can
+      # resolve — "http://backend:8080" only exists inside the compose network.
+      args:
+        NEXT_PUBLIC_BACKEND_URL: "http://localhost:8080"
+        NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
     container_name: osc-test-frontend
     depends_on:
       backend:
         condition: service_healthy
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:8080
-      NODE_ENV: test
+      NODE_ENV: production
+      # Must match the backend's Jwt__Secret, or the Next middleware rejects
+      # every session the API issues and bounces /dashboard to the homepage.
+      JWT_SECRET: "test-secret-key-for-testing-only-change-in-production"
     ports:
       - "3000:3000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      # node:20-alpine has no curl — use the runtime's own fetch, otherwise this
+      # check can never pass and anything waiting on it blocks indefinitely.
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Test Runner
-  test-runner:
-    image: node:20-alpine
-    container_name: osc-test-runner
+  # Backend test suite. Needs the .NET SDK — the previous single "test-runner"
+  # ran `dotnet test` inside node:20-alpine, where dotnet does not exist, and
+  # swallowed the failure with `|| true` so the run always looked green.
+  backend-tests:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    container_name: osc-test-backend-tests
+    profiles: ["test"]
+    working_dir: /src
+    environment:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      HOME: /tmp
+    volumes:
+      - ./backend:/src
+      - ./test-results:/test-results
+    command: >
+      bash -lc "dotnet test OscApi.sln --logger:trx --results-directory:/test-results/backend"
+
+  # Frontend unit tests + Playwright e2e. The image tag must track the
+  # @playwright/test version in frontend/package.json so the bundled browsers
+  # match the client library.
+  frontend-tests:
+    image: mcr.microsoft.com/playwright:v1.61.1-noble
+    container_name: osc-test-frontend-tests
+    profiles: ["test"]
     depends_on:
       backend:
         condition: service_healthy
       frontend:
         condition: service_healthy
-    working_dir: /workspace
+    working_dir: /app
     environment:
+      CI: "true"
+      # Inside the compose network the app answers to its service name.
+      PLAYWRIGHT_BASE_URL: http://frontend:3000
       TEST_API_URL: http://backend:8080
-      TEST_FRONTEND_URL: http://frontend:3000
-      NODE_ENV: test
     volumes:
-      - .:/workspace
-      - /workspace/node_modules
-      - /workspace/frontend/node_modules
-      - /workspace/backend/bin
-      - /workspace/backend/obj
-    command: sh -c "
-      echo '=== Starting Full Test Suite ===' &&
-      echo 'Testing Backend...' &&
-      cd backend && dotnet test --logger:trx --results-directory:../test-results/backend || true &&
-      echo 'Testing Frontend...' &&
-      cd ../frontend && npm run test:coverage || true &&
-      echo 'Running E2E Tests...' &&
-      npm run test:e2e || true &&
-      echo '=== Test Suite Complete ==='
-      "
+      - ./frontend:/app
+      - /app/node_modules
+      - ./test-results:/test-results
+    command: >
+      bash -lc "npm ci --legacy-peer-deps && npm run test:coverage && npm run test:e2e"
 
 volumes:
   postgres_test_data:

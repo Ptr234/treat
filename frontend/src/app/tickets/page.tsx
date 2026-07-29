@@ -15,7 +15,8 @@ export default function TicketsPage() {
   // the tracking board; agency officers see only their agency's tickets (scoped
   // server-side). Regular users get the restricted "submit a ticket" view.
   const isStaff = isAuthenticated && ['admin', 'dg', 'agency_officer'].includes(user?.role ?? '');
-  const { data: tickets } = useTickets();
+  // Only staff may list tickets; fetching as anyone else is a guaranteed 403.
+  const { data: tickets } = useTickets(isStaff && !authLoading);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'ALL'>('ALL');

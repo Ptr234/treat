@@ -16,6 +16,7 @@ import {
   CalendarDaysIcon,
   ChatBubbleLeftRightIcon,
   BuildingLibraryIcon,
+  LifebuoyIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
@@ -39,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: 'Resources', href: '/downloads', icon: ArrowDownTrayIcon },
   { name: 'AI Assistant', href: '/chatbot', icon: ChatBubbleLeftRightIcon, highlight: true },
   { name: 'OSC Hub', href: '/agencies', icon: BuildingLibraryIcon },
+  { name: 'Support Tickets', href: '/tickets', icon: LifebuoyIcon },
 ];
 
 function Brand() {
@@ -156,7 +158,10 @@ export default function Navigation() {
   return (
     <>
       {/* Mobile top bar */}
-      <header className="lg:hidden sticky top-0 z-50 bg-black border-b-2 border-yellow-500 px-4 py-3">
+      <header
+        className="lg:hidden sticky z-50 bg-black border-b-2 border-yellow-500 px-4 py-3"
+        style={{ top: 'var(--newsbar-h, 0px)' }}
+      >
         <div className="flex items-center justify-between">
           <Brand />
           <button
@@ -173,9 +178,15 @@ export default function Navigation() {
       {/* Sidebar — pinned full-height on desktop, slide-in overlay on mobile */}
       {/* Fixed to the viewport so the nav never moves on scroll; content offsets past it via lg:ml-64 */}
       <aside
-        className={`fixed left-0 top-0 h-screen w-64 bg-black border-r border-white/10 z-40
+        className={`fixed left-0 w-64 bg-black border-r border-white/10 z-40
                     transform transition-transform duration-300 lg:transform-none
                     ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+        // Starts below the announcement strip so the brand mark is never
+        // covered by it (see NewsBar, which publishes --newsbar-h).
+        style={{
+          top: 'var(--newsbar-h, 0px)',
+          height: 'calc(100vh - var(--newsbar-h, 0px))',
+        }}
       >
         {sidebarInner}
       </aside>

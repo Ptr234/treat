@@ -21,3 +21,16 @@ export function isAdminLevel(role: string | null | undefined): boolean {
 export function isStaff(role: string | null | undefined): boolean {
   return STAFF_ROLES.includes((role ?? '') as (typeof STAFF_ROLES)[number]);
 }
+
+/**
+ * Where to send someone after a successful sign-in.
+ *
+ * Must agree with the route guards in `src/middleware.ts`: sending every role to
+ * `/dashboard` bounces agency officers and regular users straight back to
+ * `/?auth=required`, which reads as a failed login even though it succeeded.
+ */
+export function postLoginPath(role: string | null | undefined): string {
+  if (isAdminLevel(role)) return '/dashboard';
+  if (role === 'agency_officer') return '/agency-chat';
+  return '/account';
+}

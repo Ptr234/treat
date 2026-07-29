@@ -5,6 +5,9 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 
 const NEWS_DISMISSED_KEY = 'newsbar_dismissed';
 
+/** Height of the announcement strip. Mirrors the `h-9` class below. */
+const NEWSBAR_HEIGHT = '2.25rem';
+
 export default function NewsBar() {
   const [isDismissed, setIsDismissed] = useState(true);
 
@@ -12,6 +15,16 @@ export default function NewsBar() {
     const dismissed = sessionStorage.getItem(NEWS_DISMISSED_KEY);
     setIsDismissed(dismissed === 'true');
   }, []);
+
+  // The bar is position:fixed, so it takes no layout space of its own. Publish
+  // its height as a CSS variable and let the sidebar / mobile header / main
+  // column offset by it — otherwise the strip sits *on top of* the sidebar and
+  // clips the OneStopCentre logo instead of sitting above it.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty('--newsbar-h', isDismissed ? '0px' : NEWSBAR_HEIGHT);
+    return () => root.style.setProperty('--newsbar-h', '0px');
+  }, [isDismissed]);
 
   const handleDismiss = () => {
     setIsDismissed(true);

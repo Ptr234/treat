@@ -61,6 +61,7 @@ const LANG_FLAGS: Record<string, string> = {
 
 const TIER_LABELS: Record<string, string> = {
   ai: 'AI (Groq)', kb: 'Knowledge Base', suggestions: 'Topic Suggestions',
+  escalation: 'Escalated',
 };
 
 const SENTIMENT_CONFIG: Record<string, { label: string; color: string; icon: typeof FaceSmileIcon }> = {
@@ -73,6 +74,24 @@ const TIER_CONFIG: Record<string, { icon: typeof CpuChipIcon; color: string }> =
   ai: { icon: CpuChipIcon, color: 'text-purple-600 bg-purple-100' },
   kb: { icon: BookOpenIcon, color: 'text-blue-600 bg-blue-100' },
   suggestions: { icon: LightBulbIcon, color: 'text-yellow-600 bg-yellow-100' },
+  escalation: { icon: FaceFrownIcon, color: 'text-red-600 bg-red-100' },
+};
+
+/**
+ * Look-ups above are keyed lower-case, but the API serialises the .NET enums in
+ * PascalCase ("Neutral", "Kb", "Escalation"). Without normalising, every row
+ * rendered an unstyled fallback — sentiment showed "-" and every tier showed
+ * "Tips" regardless of the actual value.
+ */
+const key = (v: string | null | undefined): string => (v ?? '').toLowerCase();
+
+/** Short tier badge text used in the table. */
+const tierShort = (tier: string): string => {
+  const k = key(tier);
+  if (k === 'ai') return 'AI';
+  if (k === 'kb') return 'KB';
+  if (k === 'escalation') return 'ESC';
+  return 'Tips';
 };
 
 const PAGE_SIZE = 20;
@@ -93,7 +112,20 @@ export default function EnquiriesPage() {
   const fetchStats = useCallback(async () => {
     try {
       const json = await apiFetch<EnquiryStats>('/api/dashboard/enquiries?action=stats');
-      if (json.success) setStats(json.data as EnquiryStats);
+      // Normalise before it reaches the render tree: a missing breakdown must
+      // show as "no data", never crash the whole dashboard page.
+      if (json.success && json.data) {
+        const d = json.data as Partial<EnquiryStats>;
+        setStats({
+          total: d.total ?? 0,
+          today: d.today ?? 0,
+          thisWeek: d.thisWeek ?? 0,
+          uniqueSessions: d.uniqueSessions ?? 0,
+          byLanguage: d.byLanguage ?? {},
+          bySentiment: d.bySentiment ?? {},
+          byTier: d.byTier ?? {},
+        });
+      }
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }
@@ -104,10 +136,16 @@ export default function EnquiriesPage() {
     try {
       const from = pageNum * PAGE_SIZE;
       const to = from + PAGE_SIZE;
-      const json = await apiFetch<Enquiry[]>(`/api/dashboard/enquiries?from=${from}&to=${to}`);
+      const json = await apiFetch<{ enquiries: Enquiry[]; total: number } | Enquiry[]>(
+        `/api/dashboard/enquiries?from=${from}&to=${to}`
+      );
       if (json.success) {
-        setEnquiries(json.data as Enquiry[]);
-        setTotal((json as unknown as { total: number }).total ?? 0);
+        // ASP.NET returns { enquiries, total }; the legacy Next route returned
+        // a bare array. Accept both so the table never receives a non-array.
+        const raw = json.data;
+        const rows = Array.isArray(raw) ? raw : (raw?.enquiries ?? []);
+        setEnquiries(rows);
+        setTotal(Array.isArray(raw) ? rows.length : (raw?.total ?? 0));
       }
     } catch (err) {
       console.error('Failed to fetch enquiries:', err);
@@ -121,7 +159,7 @@ export default function EnquiriesPage() {
     setSelectedSession(sessionId);
     try {
       const json = await apiFetch<Enquiry[]>(`/api/dashboard/enquiries?action=session&sessionId=${encodeURIComponent(sessionId)}`);
-      if (json.success) setSessionMessages(json.data as Enquiry[]);
+      if (json.success) setSessionMessages(Array.isArray(json.data) ? json.data : []);
     } catch (err) {
       console.error('Failed to fetch session:', err);
     } finally {
@@ -230,7 +268,7 @@ export default function EnquiriesPage() {
               <div className="flex flex-wrap gap-2">
                 {Object.entries(stats.byLanguage).filter(([,v]) => v > 0).map(([lang, count]) => (
                   <span key={lang} className="px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-700">
-                    {LANG_FLAGS[lang] || lang} {count}
+                    {LANG_FLAGS[key(lang)] || lang} {count}
                   </span>
                 ))}
                 {Object.values(stats.byLanguage).every(v => v === 0) && (
@@ -246,7 +284,7 @@ export default function EnquiriesPage() {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(stats.bySentiment).filter(([,v]) => v > 0).map(([sent, count]) => {
-                  const cfg = SENTIMENT_CONFIG[sent];
+                  const cfg = SENTIMENT_CONFIG[key(sent)];
                   return (
                     <span key={sent} className={`px-3 py-1 rounded-full text-xs font-medium ${cfg?.color || 'bg-gray-100 text-gray-700'}`}>
                       {cfg?.label || sent} {count}
@@ -266,10 +304,10 @@ export default function EnquiriesPage() {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {Object.entries(stats.byTier).filter(([,v]) => v > 0).map(([tier, count]) => {
-                  const cfg = TIER_CONFIG[tier];
+                  const cfg = TIER_CONFIG[key(tier)];
                   return (
                     <span key={tier} className={`px-3 py-1 rounded-full text-xs font-medium ${cfg?.color || 'bg-gray-100 text-gray-700'}`}>
-                      {TIER_LABELS[tier] || tier} {count}
+                      {TIER_LABELS[key(tier)] || tier} {count}
                     </span>
                   );
                 })}
@@ -315,8 +353,8 @@ export default function EnquiriesPage() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {enquiries.map((enq) => {
-                      const sentCfg = enq.sentiment ? SENTIMENT_CONFIG[enq.sentiment] : null;
-                      const tierCfg = TIER_CONFIG[enq.tier];
+                      const sentCfg = enq.sentiment ? SENTIMENT_CONFIG[key(enq.sentiment)] : null;
+                      const tierCfg = TIER_CONFIG[key(enq.tier)];
                       const TierIcon = tierCfg?.icon || CpuChipIcon;
                       return (
                         <tr key={enq._id} className="hover:bg-gray-50 transition-colors">
@@ -333,7 +371,7 @@ export default function EnquiriesPage() {
                           </td>
                           <td className="px-6 py-3 text-center">
                             <span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-medium text-gray-600">
-                              {LANG_FLAGS[enq.language] || enq.language}
+                              {LANG_FLAGS[key(enq.language)] || enq.language}
                             </span>
                           </td>
                           <td className="px-6 py-3 text-center">
@@ -349,7 +387,7 @@ export default function EnquiriesPage() {
                           <td className="px-6 py-3 text-center">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${tierCfg?.color || 'bg-gray-100 text-gray-600'}`}>
                               <TierIcon className="w-3 h-3" />
-                              {enq.tier === 'ai' ? 'AI' : enq.tier === 'kb' ? 'KB' : 'Tips'}
+                              {tierShort(enq.tier)}
                             </span>
                           </td>
                           <td className="px-6 py-3 text-right text-xs text-gray-500 whitespace-nowrap">
@@ -452,7 +490,7 @@ export default function EnquiriesPage() {
                   )}
                   <span className="flex items-center gap-1.5 text-gray-500">
                     <GlobeAltIcon className="w-4 h-4 text-gray-400" />
-                    {LANG_LABELS[first.language] || first.language}
+                    {LANG_LABELS[key(first.language)] || first.language}
                   </span>
                 </div>
               </div>
@@ -484,12 +522,12 @@ export default function EnquiriesPage() {
                         <p className="text-sm text-gray-800 whitespace-pre-wrap">{msg.botResponse}</p>
                         <div className="flex items-center gap-2 mt-1">
                           {msg.sentiment && (
-                            <span className={`text-xs px-1.5 py-0.5 rounded ${SENTIMENT_CONFIG[msg.sentiment]?.color || ''}`}>
-                              {SENTIMENT_CONFIG[msg.sentiment]?.label || msg.sentiment}
+                            <span className={`text-xs px-1.5 py-0.5 rounded ${SENTIMENT_CONFIG[key(msg.sentiment)]?.color || ''}`}>
+                              {SENTIMENT_CONFIG[key(msg.sentiment)]?.label || msg.sentiment}
                             </span>
                           )}
-                          <span className={`text-xs px-1.5 py-0.5 rounded ${TIER_CONFIG[msg.tier]?.color || 'bg-gray-200'}`}>
-                            {TIER_LABELS[msg.tier] || msg.tier}
+                          <span className={`text-xs px-1.5 py-0.5 rounded ${TIER_CONFIG[key(msg.tier)]?.color || 'bg-gray-200'}`}>
+                            {TIER_LABELS[key(msg.tier)] || msg.tier}
                           </span>
                         </div>
                       </div>

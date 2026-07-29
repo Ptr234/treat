@@ -60,19 +60,47 @@ public class DashboardController : ControllerBase
     {
         if (action == "stats")
         {
+            var now = DateTimeOffset.UtcNow;
+            var startOfToday = new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero);
+            var startOfWeek = startOfToday.AddDays(-(int)now.UtcDateTime.DayOfWeek);
+
             var total = await _db.ChatEnquiries.CountAsync();
             var uniqueSessions = await _db.ChatEnquiries.Select(c => c.SessionId).Distinct().CountAsync();
-            var byLanguage = await _db.ChatEnquiries
-                .GroupBy(c => c.Language)
-                .Select(g => new { Language = g.Key.ToString(), Count = g.Count() })
-                .ToListAsync();
-            var bySentiment = await _db.ChatEnquiries
-                .Where(c => c.Sentiment != null)
-                .GroupBy(c => c.Sentiment)
-                .Select(g => new { Sentiment = g.Key!.Value.ToString(), Count = g.Count() })
-                .ToListAsync();
+            var today = await _db.ChatEnquiries.CountAsync(c => c.CreatedAt >= startOfToday);
+            var thisWeek = await _db.ChatEnquiries.CountAsync(c => c.CreatedAt >= startOfWeek);
 
-            return Ok(new ApiResponse<object>(true, new { total, uniqueSessions, byLanguage, bySentiment }));
+            // The dashboard indexes these by name (e.g. byTier.ai), so they are
+            // returned as lower-cased maps rather than arrays of pairs.
+            var byLanguage = (await _db.ChatEnquiries
+                    .GroupBy(c => c.Language)
+                    .Select(g => new { Key = g.Key, Count = g.Count() })
+                    .ToListAsync())
+                .ToDictionary(x => x.Key.ToString().ToLowerInvariant(), x => x.Count);
+            var bySentiment = (await _db.ChatEnquiries
+                    .Where(c => c.Sentiment != null)
+                    .GroupBy(c => c.Sentiment!.Value)
+                    .Select(g => new { Key = g.Key, Count = g.Count() })
+                    .ToListAsync())
+                .ToDictionary(x => x.Key.ToString().ToLowerInvariant(), x => x.Count);
+            var byTier = (await _db.ChatEnquiries
+                    .GroupBy(c => c.Tier)
+                    .Select(g => new { Key = g.Key, Count = g.Count() })
+                    .ToListAsync())
+                .ToDictionary(x => x.Key.ToString().ToLowerInvariant(), x => x.Count);
+
+            // Emit every enum member, so the dashboard's "no data" checks and
+            // percentage maths never hit an undefined bucket.
+            foreach (var l in Enum.GetNames<ChatLanguage>())
+                byLanguage.TryAdd(l.ToLowerInvariant(), 0);
+            foreach (var s in Enum.GetNames<ChatSentiment>())
+                bySentiment.TryAdd(s.ToLowerInvariant(), 0);
+            foreach (var t in Enum.GetNames<ChatTier>())
+                byTier.TryAdd(t.ToLowerInvariant(), 0);
+
+            return Ok(new ApiResponse<object>(true, new
+            {
+                total, uniqueSessions, today, thisWeek, byLanguage, bySentiment, byTier,
+            }));
         }
 
         if (action == "session" && sessionId is not null)
