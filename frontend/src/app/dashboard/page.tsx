@@ -41,6 +41,19 @@ type SortDir = 'asc' | 'desc';
 
 const ACK_STORAGE_KEY = 'osc-dashboard-acked-alerts';
 
+/**
+ * Pipeline capital, in the unit that suits its size. Always formatting in
+ * billions turned a real $40M pipeline into "$0.0B", which reads as nothing at
+ * all; anything under a billion is therefore shown in millions.
+ */
+function formatPipeline(valueInBillions: number): string {
+  const usd = valueInBillions * 1_000_000_000;
+  if (usd >= 1_000_000_000) return `$${(usd / 1_000_000_000).toFixed(2)}B`;
+  if (usd >= 1_000_000) return `$${(usd / 1_000_000).toFixed(1)}M`;
+  if (usd >= 1_000) return `$${(usd / 1_000).toFixed(0)}K`;
+  return '$0';
+}
+
 function loadAckedAlerts(): Set<string> {
   try {
     const raw = localStorage.getItem(ACK_STORAGE_KEY);
@@ -180,7 +193,7 @@ export default function DashboardPage() {
     lines.push(`Live Inquiries,${metrics.liveInquiries}`);
     lines.push(`Active Cases,${metrics.activeCases}`);
     lines.push(`Pending Approvals,${metrics.pendingApprovals}`);
-    lines.push(`Pipeline Value (USD B),${(metrics.pipelineValue ?? 0).toFixed(1)}`);
+    lines.push(`Pipeline Value (USD),${Math.round((metrics.pipelineValue ?? 0) * 1_000_000_000)}`);
     lines.push(`Response Rate,${metrics.responseRate}%`);
     lines.push(`Conversion Rate,${metrics.conversionRate}%`);
     lines.push(`SLA Compliance,${metrics.slaCompliance}%`);
@@ -566,12 +579,14 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
             <p className="text-sm text-gray-500 font-medium mb-2">Pipeline Value</p>
             <div className="flex items-end gap-2">
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-700">${(metrics.pipelineValue ?? 0).toFixed(1)}B</p>
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-700">
+                {formatPipeline(metrics.pipelineValue ?? 0)}
+              </p>
               {delta?.pipelineValue !== undefined && delta.pipelineValue !== 0 && (
-                <TrendBadge value={Number(delta.pipelineValue.toFixed(2))} suffix="B" />
+                <TrendBadge value={Number((delta.pipelineValue * 1000).toFixed(1))} suffix="M" />
               )}
             </div>
-            <p className="text-xs text-gray-400 mt-1">Total licensed investment</p>
+            <p className="text-xs text-gray-400 mt-1">Capital in the investor pipeline</p>
           </div>
         </div>
 

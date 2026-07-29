@@ -289,10 +289,17 @@ function SingleAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: ReturnT
     }));
   };
 
-  const cardBg = getCardBg(agency.id);
+  const isGold = cfg.accent.includes('yellow');
 
   return (
-    <div className={`rounded-2xl border ${cardBg} overflow-hidden`}>
+    <div className={`relative rounded-2xl border ${CARD_SURFACE} overflow-hidden`}>
+      <div
+        className={`h-1 w-full ${
+          isGold
+            ? 'bg-gradient-to-r from-yellow-500 via-yellow-500/40 to-transparent'
+            : 'bg-gradient-to-r from-red-600 via-red-600/40 to-transparent'
+        }`}
+      />
       <div className="p-6 md:p-8 flex flex-col md:flex-row gap-6">
         {/* Left — info */}
         <div className="flex-1">
@@ -364,35 +371,19 @@ function SingleAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: ReturnT
    Compact Agency Card — Used in multi-agency categories
    ──────────────────────────────────────────────────────── */
 
-// Card bg styles — each card gets a unique Uganda flag–inspired background
-const CARD_BG_STYLES = [
-  // Black-dominant
-  'bg-neutral-900 border-neutral-800',
-  'bg-gradient-to-br from-neutral-900 to-neutral-950 border-neutral-700',
-  // Yellow-tinted
-  'bg-gradient-to-br from-yellow-950/80 to-neutral-900 border-yellow-800/30',
-  'bg-gradient-to-br from-neutral-900 to-yellow-950/60 border-yellow-700/20',
-  'bg-gradient-to-br from-yellow-900/30 to-neutral-950 border-yellow-600/25',
-  // Red-tinted
-  'bg-gradient-to-br from-red-950/70 to-neutral-900 border-red-800/30',
-  'bg-gradient-to-br from-neutral-900 to-red-950/50 border-red-700/20',
-  'bg-gradient-to-br from-red-900/25 to-neutral-950 border-red-600/25',
-  // Mixed
-  'bg-gradient-to-br from-yellow-950/50 to-red-950/30 border-yellow-700/20',
-  'bg-gradient-to-br from-red-950/40 to-yellow-950/30 border-red-700/20',
-  'bg-gradient-to-br from-neutral-950 via-yellow-950/20 to-neutral-900 border-yellow-800/15',
-  'bg-gradient-to-br from-neutral-950 via-red-950/20 to-neutral-900 border-red-800/15',
-] as const;
-
-function getCardBg(id: string): string {
-  // Hash the id to get a deterministic but varied index
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash) + id.charCodeAt(i);
-    hash |= 0;
-  }
-  return CARD_BG_STYLES[Math.abs(hash) % CARD_BG_STYLES.length]!;
-}
+/**
+ * One consistent card surface for the whole directory.
+ *
+ * Cards previously drew from twelve red/gold tinted gradients picked by hashing
+ * the agency id. Because the tint carried no meaning, the grid read as muddy
+ * and uneven — neighbouring cards sat at visibly different brightnesses for no
+ * reason, and the darker red variants pushed the body text under a comfortable
+ * contrast ratio. The Uganda palette now shows up where it can carry meaning
+ * (the category accent stripe, the acronym, hover) over a single calm surface.
+ */
+const CARD_SURFACE =
+  'bg-neutral-900/80 border-white/10 shadow-lg shadow-black/40 ' +
+  'hover:bg-neutral-900 hover:shadow-xl hover:shadow-yellow-500/5';
 
 function CompactAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: ReturnType<typeof getCfg> }) {
   const openAssistant = (e: React.MouseEvent) => {
@@ -402,15 +393,24 @@ function CompactAgencyCard({ agency, cfg }: { agency: AgencyContact; cfg: Return
     }));
   };
 
-  const cardBg = getCardBg(agency.id);
+  const isGold = cfg.accent.includes('yellow');
 
   return (
     <Link
       href={`/agencies/${agency.id}`}
-      className={`group relative rounded-2xl border ${cardBg} hover:border-yellow-500/50 transition-all duration-300 overflow-hidden flex flex-col`}
+      className={`group relative rounded-2xl border ${CARD_SURFACE} hover:border-yellow-500/40 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col`}
     >
-      {/* Uganda flag accent stripe */}
-      <div className={`h-1 ${cfg.accent.includes('yellow') ? 'bg-gradient-to-r from-yellow-500/60 to-transparent' : 'bg-gradient-to-r from-red-500/60 to-transparent'}`} />
+      {/* Category accent — the one place the flag palette varies per card, and
+          it varies for a reason (the agency's category), not by a hash. */}
+      <div
+        className={`h-1 w-full ${
+          isGold
+            ? 'bg-gradient-to-r from-yellow-500 via-yellow-500/40 to-transparent'
+            : 'bg-gradient-to-r from-red-600 via-red-600/40 to-transparent'
+        }`}
+      />
+      {/* Soft top highlight so the surface reads as lit rather than flat. */}
+      <div className="pointer-events-none absolute inset-x-0 top-1 h-24 bg-gradient-to-b from-white/[0.04] to-transparent" />
 
       <div className="p-5 flex-1 flex flex-col">
         {/* Header */}

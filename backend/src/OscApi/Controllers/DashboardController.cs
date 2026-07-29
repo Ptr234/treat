@@ -42,11 +42,15 @@ public class DashboardController : ControllerBase
                 stats.TotalInquiries, stats.TotalAppointments, stats.RecentInquiries, stats.RecentAppointments,
                 stats.ChatEscalations, stats.TotalMessages, stats.RecentMessages,
                 stats.ToolUsageCount, stats.DownloadCount, stats.SearchCount,
+                stats.PipelineValueUsd, stats.ConversionRate,
             },
             stats.TicketsByCategory,
             stats.TicketsByStatus,
             stats.ToolBreakdown,
             stats.TopDownloads,
+            stats.AgencyScorecard,
+            stats.Alerts,
+            stats.RecentActivity,
         }));
     }
 

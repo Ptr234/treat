@@ -53,17 +53,16 @@ function mapBackendMetrics(raw: BackendDashboard): DGDashboardMetrics {
     activeCases: openTickets,
     pendingApprovals: k.totalAppointments ?? 0,
     escalatedCount: k.escalatedTickets ?? 0,
-    // No revenue-pipeline source in the backend yet — report 0 rather than NaN.
-    pipelineValue: 0,
+    // Capital still in the investor funnel, reported by the API in USD and
+    // displayed in billions.
+    pipelineValue: (k.pipelineValueUsd ?? 0) / 1_000_000_000,
     responseRate: pct(resolvedTickets, totalTickets),
-    conversionRate: 0,
+    conversionRate: k.conversionRate ?? 0,
     slaCompliance: openTickets > 0 ? Math.round((1 - slaBreached / openTickets) * 100) : 100,
     investorSatisfaction: pct(avgRating, 5),
-    // The backend does not (yet) supply these structured lists; the UI guards
-    // each with `?? []`, so empty is safe and honest (no fabricated rows).
-    agencyScorecard: [],
-    alerts: [],
-    recentActivity: [],
+    agencyScorecard: raw.agencyScorecard ?? [],
+    alerts: raw.alerts ?? [],
+    recentActivity: raw.recentActivity ?? [],
     // Pass through the extended KPI counters for secondary displays.
     totalInquiries: k.totalInquiries,
     totalAppointments: k.totalAppointments,

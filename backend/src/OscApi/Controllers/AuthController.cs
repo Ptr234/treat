@@ -21,8 +21,9 @@ public class AuthController : ControllerBase
     private readonly EmailService _email;
     private readonly TotpService _totp;
     private readonly IWebHostEnvironment _env;
+    private readonly IConfiguration _config;
 
-    public AuthController(OscDbContext db, JwtService jwt, PasswordService password, EmailService email, TotpService totp, IWebHostEnvironment env)
+    public AuthController(OscDbContext db, JwtService jwt, PasswordService password, EmailService email, TotpService totp, IWebHostEnvironment env, IConfiguration config)
     {
         _db = db;
         _jwt = jwt;
@@ -30,6 +31,7 @@ public class AuthController : ControllerBase
         _email = email;
         _totp = totp;
         _env = env;
+        _config = config;
     }
 
     /// <summary>Append a best-effort audit entry (never throws into the request).</summary>
@@ -159,7 +161,12 @@ public class AuthController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.IdToken))
             return BadRequest(new ApiResponse(false, "Google credential is required"));
 
-        var clientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+        // Read through IConfiguration like every other setting, so "Google:ClientId"
+        // in appsettings and the Google__ClientId environment convention both work.
+        // The bare GOOGLE_CLIENT_ID variable is still honoured for deployments that
+        // were configured before this was wired to configuration.
+        var clientId = _config["Google:ClientId"]
+            ?? Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
         if (string.IsNullOrEmpty(clientId))
             return StatusCode(500, new ApiResponse(false, "Google OAuth not configured"));
 
@@ -172,6 +179,18 @@ public class AuthController : ControllerBase
         catch
         {
             return Unauthorized(new ApiResponse(false, "Invalid Google token"));
+        }
+
+        // Accounts here are matched to admin and user records *by email address*.
+        // An unverified Google email is not proof of ownership, so accepting one
+        // would let anyone who registers a Google account bearing a staff address
+        // sign in as that member of staff.
+        if (!payload.EmailVerified || string.IsNullOrWhiteSpace(payload.Email))
+        {
+            await AuditAsync(payload.Email ?? "(unknown)", "user", "auth.login.failed",
+                "Google account e-mail is not verified", 401);
+            return Unauthorized(new ApiResponse(false,
+                "Your Google account e-mail address is not verified"));
         }
 
         var email = payload.Email.ToLowerInvariant();
