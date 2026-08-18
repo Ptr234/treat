@@ -181,6 +181,33 @@ public class TicketServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_Reopening_ClearsResolvedAndClosedAt()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+
+        await svc.CreateAsync(new CreateTicketRequest("T1", "D1", "general_inquiry", "low",
+            "a@b.com", "A", null, null, null, null, false));
+
+        var db = TestDbFactory.Create(dbName);
+        var reference = db.Tickets.First().ReferenceNumber;
+
+        await svc.UpdateAsync(reference,
+            new UpdateTicketRequest(Status: "closed", null, null, null, null, null, null));
+        var closed = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
+        Assert.NotNull(closed.ClosedAt);
+
+        // Reopening must not leave a stale ResolvedAt/ClosedAt behind — otherwise a
+        // ticket back in progress still counts as "resolved" in SLA/resolution-time
+        // aggregates and still shows a resolution timestamp on its detail page.
+        await svc.UpdateAsync(reference,
+            new UpdateTicketRequest(Status: "in_progress", null, null, null, null, null, null));
+        var reopened = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
+        Assert.Null(reopened.ResolvedAt);
+        Assert.Null(reopened.ClosedAt);
+    }
+
+    [Fact]
     public async Task UpdateAsync_ReturnsNullForMissing()
     {
         var svc = CreateService();

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api-client';
+import { isStaff } from '@/lib/roles';
 import {
   UserCircleIcon,
   LockClosedIcon,
@@ -15,6 +16,16 @@ import {
 
 export default function ProfilePage() {
   const { isAuthenticated, user, isLoading: authLoading, refreshUser } = useAuth();
+
+  // Set when middleware redirected here because a back-office session hasn't
+  // completed MFA enrolment yet (?mfa=required) — read client-side to avoid
+  // pulling useSearchParams (and its Suspense requirement) into this page.
+  const [mfaSetupRequired, setMfaSetupRequired] = useState(false);
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('mfa') === 'required') {
+      setMfaSetupRequired(true);
+    }
+  }, []);
 
   // Edit mode
   const [isEditing, setIsEditing] = useState(false);
@@ -32,8 +43,10 @@ export default function ProfilePage() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
 
-  // Multi-factor authentication (admins only)
-  const isAdmin = user?.role === 'admin';
+  // Multi-factor authentication — every back-office role (admin, dg,
+  // agency_officer) has an admin_users record and may enrol; matches the
+  // backend's ResolveAdminAsync, which accepts the same set of roles.
+  const canUseMfa = isStaff(user?.role);
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [mfaStatusLoaded, setMfaStatusLoaded] = useState(false);
   const [enroll, setEnroll] = useState<{ secret: string; otpauthUri: string } | null>(null);
@@ -54,8 +67,8 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (isAdmin) loadMfaStatus();
-  }, [isAdmin, loadMfaStatus]);
+    if (canUseMfa) loadMfaStatus();
+  }, [canUseMfa, loadMfaStatus]);
 
   const handleStartEnroll = async () => {
     setMfaError('');
@@ -262,6 +275,19 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-neutral-50 py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        {mfaSetupRequired && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex items-start gap-3">
+            <DevicePhoneMobileIcon className="w-6 h-6 text-yellow-700 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-yellow-900">Set up two-factor authentication to continue</p>
+              <p className="text-sm text-yellow-800 mt-1">
+                Back-office accounts now require MFA. Scan the QR code below with an authenticator app and enter
+                a code to unlock the dashboard and staff tools again.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="bg-white rounded-xl shadow-soft p-6 mb-6">
           <div className="flex items-center gap-5">
@@ -472,8 +498,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Two-factor authentication (admins only) */}
-        {isAdmin && (
+        {/* Two-factor authentication (back-office roles only) */}
+        {canUseMfa && (
           <div className="bg-white rounded-xl shadow-soft overflow-hidden mb-6">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">

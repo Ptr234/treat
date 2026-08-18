@@ -4,7 +4,23 @@ using System.Text.Json;
 
 namespace OscApi.Common;
 
-public class EmailService
+public interface IEmailService
+{
+    Task SendTicketConfirmationAsync(string toEmail, string contactName, string referenceNumber, string title);
+    Task SendTicketStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string newStatus);
+    Task SendEscalationNotificationAsync(string referenceNumber, string title, string contactName, string[]? additionalRecipients = null, string? customMessage = null);
+    Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber);
+    Task SendPasswordResetAsync(string toEmail, string name, string resetToken);
+    Task SendContactConfirmationAsync(string toEmail, string name, string referenceNumber, string agencyName, string subject);
+    Task SendContactNotificationToAgencyAsync(string agencyCode, string agencyName, string referenceNumber, string contactName, string contactEmail, string subject, string message, string? agencyEmail = null);
+    Task SendAppointmentConfirmationAsync(string toEmail, string name, string referenceNumber, string agencyName, string date, string time);
+    Task SendAppointmentNotificationToAgencyAsync(string agencyCode, string agencyName, string referenceNumber, string contactName, string contactEmail, string contactPhone, string serviceType, string purpose, string date, string time, int durationMinutes, string meetingType, string? agencyEmail = null);
+    Task SendBusinessRegistrationReceivedAsync(string toEmail, string contactName, string referenceNumber, string businessName);
+    Task SendBusinessRegistrationStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string businessName, string newStatus);
+    Task SendBusinessRegistrationCertificateIssuedAsync(string toEmail, string contactName, string referenceNumber, string businessName, string certificateNumber);
+}
+
+public class EmailService : IEmailService
 {
     private static readonly HttpClient Http = new();
     private readonly string? _apiKey;
@@ -58,6 +74,30 @@ public class EmailService
                 await SendAsync(recipient, subject, htmlBody: html, textBody: text);
             }
         }
+    }
+
+    public async Task SendBusinessRegistrationReceivedAsync(string toEmail, string contactName, string referenceNumber, string businessName)
+    {
+        var trackUrl = $"{_siteUrl}/business/registration/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}";
+        await SendAsync(toEmail, $"Business Registration {referenceNumber} Received — URSB",
+            htmlBody: EmailTemplates.BusinessRegistrationReceived(contactName, referenceNumber, businessName, trackUrl),
+            textBody: $"Dear {contactName},\n\nYour business registration for {businessName} has been received.\nReference: {referenceNumber}\nTrack: {trackUrl}");
+    }
+
+    public async Task SendBusinessRegistrationStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string businessName, string newStatus)
+    {
+        var trackUrl = $"{_siteUrl}/business/registration/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}";
+        await SendAsync(toEmail, $"Registration {referenceNumber} — Status Update",
+            htmlBody: EmailTemplates.BusinessRegistrationStatusUpdate(contactName, referenceNumber, businessName, newStatus, trackUrl),
+            textBody: $"Dear {contactName},\n\n{businessName} ({referenceNumber}) updated to: {newStatus}\nView: {trackUrl}");
+    }
+
+    public async Task SendBusinessRegistrationCertificateIssuedAsync(string toEmail, string contactName, string referenceNumber, string businessName, string certificateNumber)
+    {
+        var certificateUrl = $"{_siteUrl}/business/registration/{referenceNumber}/certificate?email={Uri.EscapeDataString(toEmail)}";
+        await SendAsync(toEmail, $"Certificate Issued — {businessName}",
+            htmlBody: EmailTemplates.BusinessRegistrationCertificateIssued(contactName, referenceNumber, businessName, certificateNumber, certificateUrl),
+            textBody: $"Dear {contactName},\n\n{businessName} is now registered.\nCertificate: {certificateNumber}\nView: {certificateUrl}");
     }
 
     public async Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber)

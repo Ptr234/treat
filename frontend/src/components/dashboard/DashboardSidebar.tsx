@@ -11,6 +11,7 @@ import {
   CalendarIcon,
   MegaphoneIcon,
   BuildingOffice2Icon,
+  BuildingLibraryIcon,
   UserGroupIcon,
   Cog6ToothIcon,
   ShieldCheckIcon,
@@ -51,6 +52,10 @@ const NAV: NavGroup[] = [
       { label: 'Chat Enquiries', href: '/dashboard/enquiries', icon: ChatBubbleLeftRightIcon, roles: ['admin'] },
       { label: 'Investor Pipeline', href: '/dashboard/investors', icon: ArrowTrendingUpIcon, roles: ['admin'] },
       { label: 'Appointments', href: '/dashboard/appointments', icon: CalendarIcon, roles: ['admin'] },
+      // Its own StaffPolicy + URSB-agency-scoped backend, so agency officers
+      // (not just admin-level staff) belong here — see middleware.ts's
+      // STAFF_ROUTES override for /dashboard/business-registrations.
+      { label: 'Business Registrations', href: '/dashboard/business-registrations', icon: BuildingLibraryIcon, roles: ['admin', 'dg', 'agency_officer'] },
     ],
   },
   {

@@ -9,11 +9,8 @@ namespace OscApi.Models;
 /// per (user, form type) — saving upserts. Lets users resume across devices.
 /// </summary>
 [Table("form_drafts")]
-public class FormDraft
+public class FormDraft : AuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     /// <summary>Owner — the signed-in user's login email (lower-cased).</summary>
     [Required, MaxLength(255)]
     public string UserEmail { get; set; } = string.Empty;
@@ -26,7 +23,4 @@ public class FormDraft
     [Required]
     [Column(TypeName = "text")]
     public string Data { get; set; } = "{}";
-
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

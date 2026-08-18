@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("contact_inquiries")]
-public class ContactInquiry
+public class ContactInquiry : AuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(20)]
     public string ReferenceNumber { get; set; } = string.Empty;
 
@@ -42,9 +39,6 @@ public class ContactInquiry
     public ContactUrgency Urgency { get; set; } = ContactUrgency.Normal;
 
     public ContactInquiryStatus Status { get; set; } = ContactInquiryStatus.Pending;
-
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
 public enum ContactUrgency { Low, Normal, Urgent }

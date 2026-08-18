@@ -88,13 +88,13 @@ builder.Services.AddCors(options =>
 });
 
 // Core services
-builder.Services.AddSingleton<JwtService>();
-builder.Services.AddSingleton<PasswordService>();
-builder.Services.AddSingleton<TotpService>();
-builder.Services.AddSingleton<EmailService>();
-builder.Services.AddScoped<ReferenceNumberGenerator>();
-builder.Services.AddHttpClient<GroqClient>();
-builder.Services.AddHttpClient<RecaptchaService>();
+builder.Services.AddSingleton<IJwtService, JwtService>();
+builder.Services.AddSingleton<IPasswordService, PasswordService>();
+builder.Services.AddSingleton<ITotpService, TotpService>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddScoped<IReferenceNumberGenerator, ReferenceNumberGenerator>();
+builder.Services.AddHttpClient<IGroqClient, GroqClient>();
+builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();
 
 // Redis cache (optional — falls back to in-memory if not configured).
 // NOTE: the rate limiter (below) and this cache are per-process. They are only
@@ -121,6 +121,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.TicketService>();
 builder.Services.AddScoped<OscApi.Services.IInvestorService, OscApi.Services.InvestorService>();
 builder.Services.AddScoped<OscApi.Services.IContactService, OscApi.Services.ContactService>();
+builder.Services.AddScoped<OscApi.Services.IBusinessRegistrationService, OscApi.Services.BusinessRegistrationService>();
 builder.Services.AddScoped<OscApi.Services.ISettingsService, OscApi.Services.SettingsService>();
 builder.Services.AddScoped<OscApi.Services.IDashboardService, OscApi.Services.DashboardService>();
 builder.Services.AddSingleton<OscApi.Services.IAnalyticsQueueService, OscApi.Services.AnalyticsQueueService>();
@@ -135,15 +136,21 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddAuthentication("OscCookie")
     .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, OscApi.Middleware.CookieJwtAuthHandler>(
         "OscCookie", null);
+builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, OscApi.Common.MfaCompleteHandler>();
 builder.Services.AddAuthorization(options =>
 {
     // Admin-level: full back-office access (Director General + system admins).
+    // Mandatory MFA: a back-office session that hasn't completed TOTP enrolment
+    // can still authenticate (see MfaCompleteRequirement) but cannot use this
+    // policy — enrolment itself sits outside it, so it's never a dead end.
     options.AddPolicy(OscApi.Common.Roles.AdminOnlyPolicy,
-        policy => policy.RequireRole(OscApi.Common.Roles.AdminLevel));
+        policy => policy.RequireRole(OscApi.Common.Roles.AdminLevel)
+            .AddRequirements(new OscApi.Common.MfaCompleteRequirement()));
     // Staff: all back-office roles, including agency officers (who are then
     // scoped to their own agency inside each controller/query).
     options.AddPolicy(OscApi.Common.Roles.StaffPolicy,
-        policy => policy.RequireRole(OscApi.Common.Roles.Staff));
+        policy => policy.RequireRole(OscApi.Common.Roles.Staff)
+            .AddRequirements(new OscApi.Common.MfaCompleteRequirement()));
 });
 
 // Controllers + Swagger
@@ -266,7 +273,7 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("RunMigr
             }
             else
             {
-                var pw = scope.ServiceProvider.GetRequiredService<PasswordService>();
+                var pw = scope.ServiceProvider.GetRequiredService<IPasswordService>();
                 db.AdminUsers.Add(new OscApi.Models.AdminUser
                 {
                     Name = "OSC Administrator",

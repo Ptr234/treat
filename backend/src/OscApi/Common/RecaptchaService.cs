@@ -3,7 +3,15 @@ using System.Text.Json.Serialization;
 
 namespace OscApi.Common;
 
-public class RecaptchaService
+public interface IRecaptchaService
+{
+    bool IsConfigured { get; }
+
+    /// <summary>Verify a reCAPTCHA v3 token. Returns true if valid or if reCAPTCHA is not configured.</summary>
+    Task<bool> VerifyAsync(string? token);
+}
+
+public class RecaptchaService : IRecaptchaService
 {
     private readonly HttpClient _http;
     private readonly string? _secretKey;

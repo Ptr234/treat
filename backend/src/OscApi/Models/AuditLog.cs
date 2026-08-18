@@ -8,11 +8,8 @@ namespace OscApi.Models;
 /// Rows are never updated or deleted by the application.
 /// </summary>
 [Table("audit_logs")]
-public class AuditLog
+public class AuditLog : Entity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     public DateTimeOffset Timestamp { get; set; } = DateTimeOffset.UtcNow;
 
     /// <summary>Login email of the actor, or "(anonymous)" for unauthenticated actions.</summary>

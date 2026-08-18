@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("agency_messages")]
-public class AgencyMessage
+public class AgencyMessage : Entity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(100)]
     public string Channel { get; set; } = string.Empty;
 

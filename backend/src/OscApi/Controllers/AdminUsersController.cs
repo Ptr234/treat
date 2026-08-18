@@ -15,9 +15,9 @@ namespace OscApi.Controllers;
 public class AdminUsersController : ControllerBase
 {
     private readonly OscDbContext _db;
-    private readonly PasswordService _password;
+    private readonly IPasswordService _password;
 
-    public AdminUsersController(OscDbContext db, PasswordService password)
+    public AdminUsersController(OscDbContext db, IPasswordService password)
     {
         _db = db;
         _password = password;

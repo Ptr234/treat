@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("chat_enquiries")]
-public class ChatEnquiry
+public class ChatEnquiry : Entity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(100)]
     public string SessionId { get; set; } = string.Empty;
 

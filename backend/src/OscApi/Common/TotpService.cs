@@ -7,7 +7,14 @@ namespace OscApi.Common;
 /// Secrets are base32-encoded so they can be stored as text and rendered into the
 /// standard otpauth:// URI that authenticator apps (Google Authenticator, Authy…) consume.
 /// </summary>
-public class TotpService
+public interface ITotpService
+{
+    string GenerateSecret();
+    string BuildOtpauthUri(string email, string base32Secret);
+    bool Verify(string? base32Secret, string? code);
+}
+
+public class TotpService : ITotpService
 {
     // Shown as the account issuer inside authenticator apps.
     private const string Issuer = "OSC Digital Tool";

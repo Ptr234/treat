@@ -118,3 +118,18 @@ public enum InvestorStatus
     Active,
     Inactive
 }
+
+/// <summary>
+/// A business registration's own lifecycle — distinct from <see cref="TicketStatus"/>
+/// so a registration is a tracked transaction with its own state, not a support
+/// ticket wearing a registration form's clothing.
+/// </summary>
+public enum BusinessRegistrationStatus
+{
+    Received,
+    UnderReview,
+    NameApproved,
+    NameRejected,
+    CertificateIssued,
+    Rejected
+}

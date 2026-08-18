@@ -62,5 +62,8 @@ public record InvestorDetailResponse(
     string Timeframe,
     string[] SupportNeeded,
     string Status,
-    DateTimeOffset CreatedAt
+    DateTimeOffset CreatedAt,
+    // Reference of a completed URSB business registration matched by email +
+    // company name at creation time, or null if none was found.
+    string? LinkedBusinessRegistrationRef
 );

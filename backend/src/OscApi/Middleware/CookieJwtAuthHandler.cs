@@ -8,13 +8,13 @@ namespace OscApi.Middleware;
 
 public class CookieJwtAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private readonly JwtService _jwt;
+    private readonly IJwtService _jwt;
 
     public CookieJwtAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        JwtService jwt)
+        IJwtService jwt)
         : base(options, logger, encoder)
     {
         _jwt = jwt;

@@ -13,9 +13,9 @@ namespace OscApi.Controllers;
 public class ContactController : ControllerBase
 {
     private readonly IContactService _contactService;
-    private readonly RecaptchaService _recaptcha;
+    private readonly IRecaptchaService _recaptcha;
 
-    public ContactController(IContactService contactService, RecaptchaService recaptcha)
+    public ContactController(IContactService contactService, IRecaptchaService recaptcha)
     {
         _contactService = contactService;
         _recaptcha = recaptcha;

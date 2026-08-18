@@ -1,3 +1,4 @@
+using OscApi.Common;
 using OscApi.Dtos.Contact;
 using OscApi.Services;
 using OscApi.Tests.Helpers;
@@ -10,7 +11,8 @@ public class ContactServiceTests
     {
         var db = TestDbFactory.Create(dbName);
         var email = MockEmailService.Create();
-        return new ContactService(db, email);
+        var refGen = new ReferenceNumberGenerator(db);
+        return new ContactService(db, email, refGen);
     }
 
     private static CreateContactInquiryRequest ValidInquiry() => new(

@@ -9,10 +9,10 @@ namespace OscApi.Services;
 public class InvestorService : IInvestorService
 {
     private readonly OscDbContext _db;
-    private readonly EmailService _email;
-    private readonly ReferenceNumberGenerator _refGen;
+    private readonly IEmailService _email;
+    private readonly IReferenceNumberGenerator _refGen;
 
-    public InvestorService(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen)
+    public InvestorService(OscDbContext db, IEmailService email, IReferenceNumberGenerator refGen)
     {
         _db = db;
         _email = email;
@@ -35,7 +35,7 @@ public class InvestorService : IInvestorService
             {
                 i.ReferenceNumber, i.Name, i.Email, i.Phone, i.Nationality,
                 i.CompanyName, i.InvestorType, i.PrimarySector,
-                Status = i.Status.ToString(), i.CreatedAt
+                Status = i.Status.ToString(), i.CreatedAt, i.LinkedBusinessRegistrationRef
             })
             .ToListAsync();
 
@@ -56,7 +56,7 @@ public class InvestorService : IInvestorService
             p.InvestmentAmount, p.TimeHorizon.ToString(), p.RiskTolerance.ToString(),
             p.PrimarySector, p.SecondarySectors, p.SpecificInterests,
             p.CapitalSource.ToString(), p.Timeframe.ToString(), p.SupportNeeded,
-            p.Status.ToString(), p.CreatedAt
+            p.Status.ToString(), p.CreatedAt, p.LinkedBusinessRegistrationRef
         );
     }
 
@@ -88,6 +88,19 @@ public class InvestorService : IInvestorService
             Timeframe = ParseTimeframe(request.Timeframe),
             SupportNeeded = request.SupportNeeded?.ToArray() ?? Array.Empty<string>(),
         };
+
+        // Cross-agency reuse: if this investor already completed URSB registration
+        // under the same email and company name, link to it so UIA doesn't ask them
+        // to re-supply fundamentals URSB already collected and verified.
+        if (!string.IsNullOrWhiteSpace(profile.CompanyName))
+        {
+            var companyName = profile.CompanyName.Trim().ToLower();
+            profile.LinkedBusinessRegistrationRef = await _db.BusinessRegistrations
+                .Where(r => r.Status == BusinessRegistrationStatus.CertificateIssued)
+                .Where(r => r.ContactEmail == email && r.BusinessName.ToLower() == companyName)
+                .Select(r => r.ReferenceNumber)
+                .FirstOrDefaultAsync();
+        }
 
         _db.InvestorProfiles.Add(profile);
         // Assign the reference number and persist with retry, so concurrent

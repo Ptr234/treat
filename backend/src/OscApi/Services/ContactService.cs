@@ -9,12 +9,14 @@ namespace OscApi.Services;
 public class ContactService : IContactService
 {
     private readonly OscDbContext _db;
-    private readonly EmailService _email;
+    private readonly IEmailService _email;
+    private readonly IReferenceNumberGenerator _refGen;
 
-    public ContactService(OscDbContext db, EmailService email)
+    public ContactService(OscDbContext db, IEmailService email, IReferenceNumberGenerator refGen)
     {
         _db = db;
         _email = email;
+        _refGen = refGen;
     }
 
     public async Task<ContactInquiryResponse> CreateInquiryAsync(CreateContactInquiryRequest request)
@@ -35,7 +37,7 @@ public class ContactService : IContactService
 
         _db.ContactInquiries.Add(inquiry);
         await _db.SaveWithUniqueReferenceAsync(async () =>
-            inquiry.ReferenceNumber = await GenerateRefAsync("INQ"));
+            inquiry.ReferenceNumber = await _refGen.GenerateInquiryReferenceAsync());
 
         // Send both emails in parallel to avoid sequential latency
         var confirmationTask = _email.SendContactConfirmationAsync(
@@ -77,7 +79,7 @@ public class ContactService : IContactService
 
         _db.Appointments.Add(appointment);
         await _db.SaveWithUniqueReferenceAsync(async () =>
-            appointment.ReferenceNumber = await GenerateRefAsync("APT"));
+            appointment.ReferenceNumber = await _refGen.GenerateAppointmentReferenceAsync());
 
         // Send both emails in parallel to avoid sequential latency
         var confirmationTask = _email.SendAppointmentConfirmationAsync(
@@ -144,26 +146,5 @@ public class ContactService : IContactService
             .ToListAsync();
 
         return new { appointments = items, total };
-    }
-
-    private async Task<string> GenerateRefAsync(string prefix)
-    {
-        var fullPrefix = $"{prefix}-{DateTime.UtcNow.Year}-";
-        // Take the numeric MAX of the suffix so the sequence stays correct past 9999,
-        // where "…-10000" sorts below "…-9999" as text. Both tables are checked to
-        // keep INQ/APT sequences from ever colliding.
-        var maxNum = Math.Max(
-            await MaxSuffixAsync(_db.ContactInquiries.Select(i => i.ReferenceNumber), fullPrefix),
-            await MaxSuffixAsync(_db.Appointments.Select(a => a.ReferenceNumber), fullPrefix));
-        return $"{fullPrefix}{maxNum + 1:D4}";
-    }
-
-    private static async Task<int> MaxSuffixAsync(IQueryable<string> references, string fullPrefix)
-    {
-        var matching = await references.Where(r => r.StartsWith(fullPrefix)).ToListAsync();
-        return matching
-            .Select(r => int.TryParse(r.Substring(fullPrefix.Length), out var n) ? n : 0)
-            .DefaultIfEmpty(0)
-            .Max();
     }
 }

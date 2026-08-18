@@ -19,6 +19,7 @@ const MIGRATED_PREFIXES = [
   '/api/dashboard',
   '/api/chatbot',
   '/api/investors',
+  '/api/business-registrations',
   '/api/messages',
   '/api/upload',
   '/api/health',

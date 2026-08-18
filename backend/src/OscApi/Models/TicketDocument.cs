@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("ticket_documents")]
-public class TicketDocument
+public class TicketDocument : Entity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     public Guid TicketId { get; set; }
 
     [Required, MaxLength(255)]

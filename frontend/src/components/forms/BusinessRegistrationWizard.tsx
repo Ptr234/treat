@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '@/lib/api-client';
 
@@ -8,13 +8,20 @@ interface BusinessData {
   // Step 1: Business Type
   businessType: string;
   businessStructure: string;
-  
+
   // Step 2: Business Details
   businessName: string;
   businessDescription: string;
   sector: string;
   location: string;
-  
+
+  // Step 2: Contact — who is filing, and where their confirmation and
+  // status updates go. Real values only: this is what lets an applicant
+  // track their own submission afterward.
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
+
   // Step 3: Ownership
   owners: Array<{
     name: string;
@@ -55,7 +62,12 @@ export default function BusinessRegistrationWizard() {
     businessDescription: '',
     sector: '',
     location: '',
-    
+
+    // Step 2: Contact
+    contactName: '',
+    contactEmail: '',
+    contactPhone: '',
+
     // Step 3: Ownership
     owners: [{ name: '', nationality: '', idNumber: '', percentage: '' }],
     
@@ -68,6 +80,41 @@ export default function BusinessRegistrationWizard() {
     estimatedCost: 0,
     timeframe: ''
   });
+
+  // Live business-name availability, checked against URSB's registry as the
+  // applicant types — mirrors what a real registrar's name-reservation search
+  // does, rather than only discovering a conflict after full submission.
+  const [nameCheck, setNameCheck] = useState<
+    { checking: boolean; available: boolean | null; conflictRef: string | null }
+  >({ checking: false, available: null, conflictRef: null });
+  const nameCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const name = businessData.businessName.trim();
+    if (nameCheckTimer.current) clearTimeout(nameCheckTimer.current);
+    if (name.length < 3) {
+      setNameCheck({ checking: false, available: null, conflictRef: null });
+      return;
+    }
+    setNameCheck((prev) => ({ ...prev, checking: true }));
+    nameCheckTimer.current = setTimeout(async () => {
+      const res = await apiFetch<{ available: boolean; conflictingReferenceNumber: string | null }>(
+        `/api/business-registrations/check-name?name=${encodeURIComponent(name)}`
+      );
+      if (res.success && res.data) {
+        setNameCheck({
+          checking: false,
+          available: res.data.available,
+          conflictRef: res.data.conflictingReferenceNumber,
+        });
+      } else {
+        setNameCheck({ checking: false, available: null, conflictRef: null });
+      }
+    }, 500);
+    return () => {
+      if (nameCheckTimer.current) clearTimeout(nameCheckTimer.current);
+    };
+  }, [businessData.businessName]);
 
   const businessTypes = [
     { value: 'sole-proprietorship', label: 'Sole Proprietorship', description: 'Individual business ownership' },
@@ -148,6 +195,8 @@ export default function BusinessRegistrationWizard() {
       case 2:
         if (!businessData.businessName.trim()) {
           newErrors.businessName = 'Business name is required';
+        } else if (nameCheck.available === false) {
+          newErrors.businessName = 'This business name is not available — choose a different name';
         }
         if (!businessData.businessDescription.trim()) {
           newErrors.businessDescription = 'Business description is required';
@@ -157,6 +206,14 @@ export default function BusinessRegistrationWizard() {
         }
         if (!businessData.location) {
           newErrors.location = 'Please select a business location';
+        }
+        if (!businessData.contactName.trim()) {
+          newErrors.contactName = 'Your name is required';
+        }
+        if (!businessData.contactEmail.trim()) {
+          newErrors.contactEmail = 'An email address is required so you can track this registration';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(businessData.contactEmail.trim())) {
+          newErrors.contactEmail = 'Enter a valid email address';
         }
         break;
 
@@ -322,37 +379,39 @@ export default function BusinessRegistrationWizard() {
 
   const handleSubmit = async () => {
     if (!validateStep(5)) return;
+    if (nameCheck.available === false) {
+      setErrors({ submit: 'That business name is not available. Go back and choose a different name.' });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      // Submit as a support ticket with business registration details
-      const ticketPayload = {
-        title: `Business Registration: ${businessData.businessName}`,
-        description: [
-          `Business Type: ${businessData.businessType}`,
-          `Structure: ${businessData.businessStructure}`,
-          `Sector: ${businessData.sector}`,
-          `Location: ${businessData.location}`,
-          `Initial Capital: UGX ${parseFloat(businessData.initialCapital).toLocaleString()}`,
-          `Projected Turnover: UGX ${parseFloat(businessData.projectedTurnover).toLocaleString()}`,
-          `Owners: ${businessData.owners.map(o => `${o.name} (${o.nationality}, ${o.percentage}%)`).join('; ')}`,
-          `Estimated Cost: UGX ${businessData.estimatedCost.toLocaleString()}`,
-          `Estimated Timeframe: ${businessData.timeframe}`,
-        ].join('\n'),
-        category: 'application_support',
-        priority: 'medium',
-        contactEmail: 'registration@oscdigitaltool.com',
-        contactName: businessData.owners[0]?.name || 'Business Registrant',
+      // A real registration transaction — its own tracked record with a name-
+      // availability check and a certificate on completion, not a support ticket.
+      const payload = {
+        businessName: businessData.businessName,
+        businessType: businessData.businessType,
+        businessStructure: businessData.businessStructure,
+        businessDescription: businessData.businessDescription,
         sector: businessData.sector,
+        location: businessData.location,
+        owners: businessData.owners.map((o) => ({
+          name: o.name, nationality: o.nationality, idNumber: o.idNumber, percentage: o.percentage,
+        })),
+        initialCapital: businessData.initialCapital ? `UGX ${businessData.initialCapital}` : null,
+        projectedTurnover: businessData.projectedTurnover ? `UGX ${businessData.projectedTurnover}` : null,
+        contactName: businessData.contactName,
+        contactEmail: businessData.contactEmail,
+        contactPhone: businessData.contactPhone || null,
       };
 
-      const res = await apiFetch<{ referenceNumber: string }>('/api/tickets', {
+      const res = await apiFetch<{ referenceNumber: string }>('/api/business-registrations', {
         method: 'POST',
-        body: JSON.stringify(ticketPayload),
+        body: JSON.stringify(payload),
       });
 
       if (!res.success) throw new Error(res.error);
-      const refNumber = res.data?.referenceNumber || `BRW-${Date.now()}`;
+      const refNumber = res.data?.referenceNumber || `REG-${Date.now()}`;
       setSubmitResult({ referenceNumber: refNumber });
 
       // Reset form
@@ -364,6 +423,9 @@ export default function BusinessRegistrationWizard() {
         businessDescription: '',
         sector: '',
         location: '',
+        contactName: '',
+        contactEmail: '',
+        contactPhone: '',
         owners: [{ name: '', nationality: '', idNumber: '', percentage: '' }],
         initialCapital: '',
         projectedTurnover: '',
@@ -465,7 +527,7 @@ export default function BusinessRegistrationWizard() {
         return (
           <div className="space-y-6">
             <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Business Details</h3>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Business Name
@@ -481,6 +543,21 @@ export default function BusinessRegistrationWizard() {
               />
               {errors.businessName && (
                 <p className="text-red-600 text-sm mt-1">{errors.businessName}</p>
+              )}
+              {!errors.businessName && businessData.businessName.trim().length >= 3 && (
+                <p className={`text-sm mt-1 ${
+                  nameCheck.checking ? 'text-gray-500'
+                    : nameCheck.available === false ? 'text-red-600'
+                    : nameCheck.available === true ? 'text-green-600' : 'text-gray-500'
+                }`}>
+                  {nameCheck.checking
+                    ? 'Checking availability against the URSB registry…'
+                    : nameCheck.available === false
+                      ? `Not available — already registered as ${nameCheck.conflictRef}`
+                      : nameCheck.available === true
+                        ? 'Available'
+                        : ''}
+                </p>
               )}
             </div>
 
@@ -546,6 +623,58 @@ export default function BusinessRegistrationWizard() {
               {errors.location && (
                 <p className="text-red-600 text-sm mt-1">{errors.location}</p>
               )}
+            </div>
+
+            <div className="border-t border-gray-200 pt-6">
+              <h4 className="text-lg font-medium text-gray-900 mb-1">Your Contact Information</h4>
+              <p className="text-sm text-gray-500 mb-4">
+                Used to send your confirmation and let you track this registration — not shared publicly.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Your Name</label>
+                  <input
+                    type="text"
+                    value={businessData.contactName}
+                    onChange={(e) => handleInputChange('contactName', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
+                      errors.contactName ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
+                    }`}
+                    placeholder="Your full name"
+                  />
+                  {errors.contactName && (
+                    <p className="text-red-600 text-sm mt-1">{errors.contactName}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone (optional)</label>
+                  <input
+                    type="tel"
+                    value={businessData.contactPhone}
+                    onChange={(e) => handleInputChange('contactPhone', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                    placeholder="+256 700 000 000"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    value={businessData.contactEmail}
+                    onChange={(e) => handleInputChange('contactEmail', e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
+                      errors.contactEmail ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-yellow-500'
+                    }`}
+                    placeholder="your.email@example.com"
+                  />
+                  {errors.contactEmail && (
+                    <p className="text-red-600 text-sm mt-1">{errors.contactEmail}</p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -779,14 +908,23 @@ export default function BusinessRegistrationWizard() {
             Reference Number: <strong>{submitResult.referenceNumber}</strong>
           </p>
           <p className="text-green-600 text-sm mt-2">
-            Next steps: Prepare required documents, visit respective authorities, pay fees, and track your application.
+            A confirmation has been sent to your email. URSB will review your business name next — you can
+            track progress and download your certificate once issued.
           </p>
-          <button
-            onClick={() => setSubmitResult(null)}
-            className="mt-2 text-sm text-green-700 underline"
-          >
-            Dismiss
-          </button>
+          <div className="mt-3 flex flex-wrap gap-3 items-center">
+            <a
+              href={`/business/registration/${submitResult.referenceNumber}/`}
+              className="text-sm font-medium text-black bg-yellow-500 hover:bg-yellow-600 rounded-md px-4 py-2"
+            >
+              Track This Registration
+            </a>
+            <button
+              onClick={() => setSubmitResult(null)}
+              className="text-sm text-green-700 underline"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 

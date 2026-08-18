@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("admin_users")]
-public class AdminUser
+public class AdminUser : AuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
@@ -38,7 +35,4 @@ public class AdminUser
 
     /// <summary>True once the admin has verified a code against <see cref="MfaSecret"/>. Login then requires a TOTP code.</summary>
     public bool MfaEnabled { get; set; }
-
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

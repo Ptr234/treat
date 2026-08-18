@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("analytics_events")]
-public class AnalyticsEvent
+public class AnalyticsEvent : Entity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(50)]
     public string EventType { get; set; } = string.Empty; // tool_usage, download, search
 

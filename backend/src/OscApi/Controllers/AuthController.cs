@@ -16,14 +16,14 @@ namespace OscApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly OscDbContext _db;
-    private readonly JwtService _jwt;
-    private readonly PasswordService _password;
-    private readonly EmailService _email;
-    private readonly TotpService _totp;
+    private readonly IJwtService _jwt;
+    private readonly IPasswordService _password;
+    private readonly IEmailService _email;
+    private readonly ITotpService _totp;
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _config;
 
-    public AuthController(OscDbContext db, JwtService jwt, PasswordService password, EmailService email, TotpService totp, IWebHostEnvironment env, IConfiguration config)
+    public AuthController(OscDbContext db, IJwtService jwt, IPasswordService password, IEmailService email, ITotpService totp, IWebHostEnvironment env, IConfiguration config)
     {
         _db = db;
         _jwt = jwt;
@@ -94,7 +94,7 @@ public class AuthController : ControllerBase
                 }
             }
 
-            var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role, picture: null, agencyCode: admin.AgencyCode);
+            var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role, picture: null, agencyCode: admin.AgencyCode, mfaEnabled: admin.MfaEnabled);
             Response.Cookies.Append("osc-session", adminToken, _jwt.GetCookieOptions(_env.IsProduction()));
             await AuditAsync(admin.Email, admin.Role, "auth.login", "Successful sign-in", 200);
             return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
@@ -250,7 +250,7 @@ public class AuthController : ControllerBase
             id = user.Id.ToString();
         }
 
-        var token = _jwt.CreateToken(id, email, name, role, payload.Picture);
+        var token = _jwt.CreateToken(id, email, name, role, payload.Picture, mfaEnabled: admin?.MfaEnabled ?? false);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
 
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, role, payload.Picture)));
@@ -360,7 +360,7 @@ public class AuthController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        var newToken = _jwt.CreateToken(id, email, name, finalRole, picture, agencyCode);
+        var newToken = _jwt.CreateToken(id, email, name, finalRole, picture, agencyCode, mfaEnabled: admin?.MfaEnabled ?? false);
         Response.Cookies.Append("osc-session", newToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, finalRole, picture, agencyCode)));
@@ -433,6 +433,13 @@ public class AuthController : ControllerBase
         await _db.SaveChangesAsync();
         await AuditAsync(admin.Email, admin.Role, "auth.mfa.enabled", "TOTP enabled", 200);
 
+        // Back-office roles require mfa_enabled=true in the token to use Staff/
+        // AdminOnly endpoints (see MfaCompleteHandler) — reissue now so this same
+        // browser session is unblocked immediately, without a fresh login.
+        var refreshedToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role,
+            picture: null, agencyCode: admin.AgencyCode, mfaEnabled: true);
+        Response.Cookies.Append("osc-session", refreshedToken, _jwt.GetCookieOptions(_env.IsProduction()));
+
         return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(true)));
     }
 
@@ -457,6 +464,13 @@ public class AuthController : ControllerBase
         admin.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync();
         await AuditAsync(admin.Email, admin.Role, "auth.mfa.disabled", "TOTP disabled", 200);
+
+        // Disabling MFA immediately drops this session back to "setup required" for
+        // Staff/AdminOnly endpoints — you cannot turn off MFA and keep unrestricted
+        // access on the same token.
+        var refreshedToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role,
+            picture: null, agencyCode: admin.AgencyCode, mfaEnabled: false);
+        Response.Cookies.Append("osc-session", refreshedToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
         return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(false)));
     }

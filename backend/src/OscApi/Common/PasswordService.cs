@@ -1,6 +1,12 @@
 namespace OscApi.Common;
 
-public class PasswordService
+public interface IPasswordService
+{
+    string HashPassword(string password);
+    bool VerifyPassword(string password, string hash);
+}
+
+public class PasswordService : IPasswordService
 {
     public string HashPassword(string password)
     {

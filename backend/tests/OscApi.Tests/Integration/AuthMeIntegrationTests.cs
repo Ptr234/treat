@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using OtpNet;
 
 namespace OscApi.Tests.Integration;
 
@@ -9,6 +11,29 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public AuthMeIntegrationTests(ApiFactory factory) => _factory = factory;
 
     private static string NewEmail(string p) => $"{p}-{Guid.NewGuid():N}@example.com";
+
+    // Shared admin account across every test in this class (IClassFixture) —
+    // AdminOnly endpoints now require completed TOTP enrolment (see
+    // MfaCompleteRequirement), so cache the secret once enrolled.
+    private static string? _adminMfaSecret;
+
+    private static async Task LoginAdminWithMfaAsync(HttpClient client)
+    {
+        object body = _adminMfaSecret is null
+            ? new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword }
+            : new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword, mfaCode = new Totp(Base32Encoding.ToBytes(_adminMfaSecret)).ComputeTotp() };
+        var login = await client.PostAsJsonAsync("/api/auth/login", body);
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+
+        if (_adminMfaSecret is null)
+        {
+            var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+            _adminMfaSecret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
+                .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
+            var code = new Totp(Base32Encoding.ToBytes(_adminMfaSecret)).ComputeTotp();
+            await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
+        }
+    }
 
     [Fact]
     public async Task Signup_SetsSession_And_MeReturnsSubmissions()
@@ -62,10 +87,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public async Task AdminLogin_GrantsDashboardAccess()
     {
         var client = _factory.CreateClient();
-
-        var login = await client.PostAsJsonAsync("/api/auth/login",
-            new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword });
-        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+        await LoginAdminWithMfaAsync(client);
 
         var dash = await client.GetAsync("/api/dashboard");
         Assert.Equal(HttpStatusCode.OK, dash.StatusCode);

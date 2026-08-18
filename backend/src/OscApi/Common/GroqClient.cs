@@ -5,7 +5,13 @@ using System.Text.Json.Serialization;
 
 namespace OscApi.Common;
 
-public class GroqClient
+public interface IGroqClient
+{
+    bool IsConfigured { get; }
+    Task<string> ChatAsync(List<GroqClient.ChatMessage> messages, double temperature = 0.7, int maxTokens = 1024);
+}
+
+public class GroqClient : IGroqClient
 {
     private readonly HttpClient _http;
     private readonly string _model;

@@ -1,6 +1,8 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using OscApi.Models;
 using OscApi.Tests.Fixtures;
+using OtpNet;
 using Xunit;
 
 namespace OscApi.Tests.Integration;
@@ -12,6 +14,23 @@ public class EndToEndScenarioTests
     public EndToEndScenarioTests()
     {
         _factory = new ApiFactory();
+    }
+
+    /// <summary>Log in as the seeded admin and complete TOTP enrolment — required
+    /// to reach a Staff-policy endpoint under MfaCompleteRequirement. Each test
+    /// here gets its own fresh ApiFactory/admin, so no secret caching is needed.</summary>
+    private static async Task LoginAdminWithMfaAsync(HttpClient client)
+    {
+        await client.PostAsJsonAsync("/api/auth/login", new
+        {
+            email = ApiFactory.AdminEmail,
+            password = ApiFactory.AdminPassword,
+        });
+        var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+        var secret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
+            .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
+        var code = new Totp(Base32Encoding.ToBytes(secret)).ComputeTotp();
+        await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
     }
 
     private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
@@ -86,11 +105,7 @@ public class EndToEndScenarioTests
         Assert.True(responsePending.IsSuccessStatusCode);
 
         // Authenticate as admin to list tickets
-        await client.PostAsJsonAsync("/api/auth/login", new
-        {
-            email = ApiFactory.AdminEmail,
-            password = ApiFactory.AdminPassword,
-        });
+        await LoginAdminWithMfaAsync(client);
 
         // Retrieve list and verify filtering capability
         var listResponse = await client.GetAsync("/api/tickets?status=pending");

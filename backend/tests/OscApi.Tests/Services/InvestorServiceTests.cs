@@ -1,4 +1,5 @@
 using OscApi.Common;
+using OscApi.Dtos.BusinessRegistrations;
 using OscApi.Dtos.Investors;
 using OscApi.Services;
 using OscApi.Tests.Helpers;
@@ -13,6 +14,14 @@ public class InvestorServiceTests
         var email = MockEmailService.Create();
         var refGen = new ReferenceNumberGenerator(db);
         return new InvestorService(db, email, refGen);
+    }
+
+    private BusinessRegistrationService CreateRegistrationService(string dbName)
+    {
+        var db = TestDbFactory.Create(dbName);
+        var email = MockEmailService.Create();
+        var refGen = new ReferenceNumberGenerator(db);
+        return new BusinessRegistrationService(db, email, refGen);
     }
 
     private static CreateInvestorRequest ValidRequest(string email = "inv@example.com") => new(
@@ -146,5 +155,48 @@ public class InvestorServiceTests
 
         Assert.Equal(2, allTotal);
         Assert.Equal(1, activeTotal);
+    }
+
+    [Fact]
+    public async Task CreateAsync_LinksToCompletedUrsbRegistration_WhenEmailAndCompanyNameMatch()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var regSvc = CreateRegistrationService(dbName);
+
+        var registration = await regSvc.CreateAsync(new CreateBusinessRegistrationRequest(
+            BusinessName: "Nakato Agro Processing Ltd", BusinessType: "Private Company",
+            BusinessStructure: "Limited Liability", BusinessDescription: null, Sector: "Agriculture",
+            Location: "Mbarara", Owners: [new OwnerInfo("Grace Nakato", "Ugandan", "CM1", "100")],
+            InitialCapital: null, ProjectedTurnover: null, ContactName: "Grace Nakato",
+            ContactEmail: "grace.nakato@example.com", ContactPhone: null));
+
+        await regSvc.UpdateAsync(registration.ReferenceNumber,
+            new UpdateBusinessRegistrationRequest(Status: "name_approved", null, null), agencyScope: null);
+        await regSvc.UpdateAsync(registration.ReferenceNumber,
+            new UpdateBusinessRegistrationRequest(Status: "certificate_issued", null, null), agencyScope: null);
+
+        var invSvc = CreateService(dbName);
+        var (created, error) = await invSvc.CreateAsync(new CreateInvestorRequest(
+            Name: "Grace Nakato", Email: "grace.nakato@example.com", Phone: "+256772445118",
+            Nationality: "Ugandan", CompanyName: "Nakato Agro Processing Ltd", Position: "Director",
+            InvestorType: "Individual", Experience: "Intermediate", InvestmentGoal: "Growth",
+            InvestmentAmount: "250000", TimeHorizon: "MediumTerm", RiskTolerance: "Moderate",
+            PrimarySector: "Agriculture", SecondarySectors: null, SpecificInterests: null,
+            CapitalSource: "Savings", Timeframe: "immediate", SupportNeeded: null));
+
+        Assert.Null(error);
+        var detail = await invSvc.GetByRefAsync(created!.ReferenceNumber, "grace.nakato@example.com", isAdmin: false);
+        Assert.Equal(registration.ReferenceNumber, detail!.LinkedBusinessRegistrationRef);
+    }
+
+    [Fact]
+    public async Task CreateAsync_NoLink_WhenNoMatchingUrsbRegistrationExists()
+    {
+        var svc = CreateService();
+        var (created, error) = await svc.CreateAsync(ValidRequest("unlinked@example.com"));
+
+        Assert.Null(error);
+        var detail = await svc.GetByRefAsync(created!.ReferenceNumber, "unlinked@example.com", isAdmin: false);
+        Assert.Null(detail!.LinkedBusinessRegistrationRef);
     }
 }

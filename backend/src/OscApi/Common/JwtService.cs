@@ -5,7 +5,14 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace OscApi.Common;
 
-public class JwtService
+public interface IJwtService
+{
+    string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null, bool mfaEnabled = false);
+    ClaimsPrincipal? ValidateToken(string token);
+    CookieOptions GetCookieOptions(bool isProduction = false);
+}
+
+public class JwtService : IJwtService
 {
     private readonly string _secret;
     private readonly int _expiryHours;
@@ -33,7 +40,7 @@ public class JwtService
         _cookieDomain = config["Cookie:Domain"];
     }
 
-    public string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null)
+    public string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null, bool mfaEnabled = false)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -49,6 +56,12 @@ public class JwtService
             new(ClaimTypes.Role, role),
             new("role", role),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            // Read by MfaCompleteHandler (Staff/AdminOnly policies) and by the
+            // frontend middleware, so a back-office session that hasn't completed
+            // MFA enrolment can reach the enrolment flow but nothing else. Always
+            // present (not just for back-office roles) so its absence is never
+            // mistaken for "not required".
+            new("mfa_enabled", mfaEnabled ? "true" : "false"),
         };
 
         if (picture is not null)

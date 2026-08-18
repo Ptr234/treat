@@ -14,11 +14,11 @@ namespace OscApi.Controllers;
 public class ChatbotController : ControllerBase
 {
     private readonly OscDbContext _db;
-    private readonly GroqClient _groq;
+    private readonly IGroqClient _groq;
     private readonly IChatbotSessionService _sessions;
     private readonly ILogger<ChatbotController> _logger;
 
-    public ChatbotController(OscDbContext db, GroqClient groq, IChatbotSessionService sessions, ILogger<ChatbotController> logger)
+    public ChatbotController(OscDbContext db, IGroqClient groq, IChatbotSessionService sessions, ILogger<ChatbotController> logger)
     {
         _db = db;
         _groq = groq;

@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("appointments")]
-public class Appointment
+public class Appointment : AuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(20)]
     public string ReferenceNumber { get; set; } = string.Empty;
 
@@ -55,9 +52,6 @@ public class Appointment
     public string? SpecialRequirements { get; set; }
 
     public AppointmentStatus Status { get; set; } = AppointmentStatus.Requested;
-
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
 public enum MeetingType { InPerson, Virtual, Phone }

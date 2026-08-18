@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace OscApi.Models;
 
 [Table("tickets")]
-public class Ticket
+public class Ticket : AuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(20)]
     public string ReferenceNumber { get; set; } = string.Empty;
 
@@ -57,8 +54,6 @@ public class Ticket
     public bool IsEscalated { get; set; }
     public DateTimeOffset? EscalatedAt { get; set; }
 
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? ResolvedAt { get; set; }
     public DateTimeOffset? ClosedAt { get; set; }
 

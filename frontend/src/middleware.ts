@@ -8,7 +8,10 @@ const PROTECTED_ROUTES = ['/dashboard', '/admin'];
 // Routes open to all back-office staff, including agency officers. The backend
 // scopes an officer to their own agency's channels, so they must be able to
 // reach the workspace at all — locking them out here left them with no UI.
-const STAFF_ROUTES = ['/agency-chat'];
+// /dashboard/business-registrations is a more specific match than the bare
+// /dashboard admin-only entry above and takes precedence below, because URSB
+// officers (not just admin-level staff) review and issue registrations there.
+const STAFF_ROUTES = ['/agency-chat', '/dashboard/business-registrations'];
 // /api/upload is intentionally excluded: it serves both admin-only generic
 // uploads and anonymous ticket-attachment uploads (authorized by filing email),
 // so authorization is enforced per-request inside the route handler instead.
@@ -22,10 +25,16 @@ function getJwtSecret(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
-/** The signed-in principal's role, or null when there is no valid session. */
-async function sessionRole(request: NextRequest): Promise<string | null> {
+const BACK_OFFICE_ROLES = ['admin', 'dg', 'agency_officer'];
+
+/** The signed-in principal's role and MFA-enrolment state, or nulls when there
+ * is no valid session. Mirrors the backend's mfa_enabled claim, added at
+ * MfaCompleteRequirement — kept in sync here so a back-office session that
+ * hasn't completed enrolment is redirected to finish it, instead of bouncing
+ * off the API with a bare 403 the first time it hits a Staff/AdminOnly call. */
+async function sessionInfo(request: NextRequest): Promise<{ role: string | null; mfaEnabled: boolean }> {
   const token = request.cookies.get(COOKIE_NAME)?.value;
-  if (!token) return null;
+  if (!token) return { role: null, mfaEnabled: false };
 
   try {
     const { payload } = await jwtVerify(token, getJwtSecret());
@@ -35,22 +44,33 @@ async function sessionRole(request: NextRequest): Promise<string | null> {
     const role =
       payload.role ??
       payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    return typeof role === 'string' ? role : null;
+    return {
+      role: typeof role === 'string' ? role : null,
+      mfaEnabled: payload.mfa_enabled === 'true',
+    };
   } catch {
-    return null;
+    return { role: null, mfaEnabled: false };
   }
 }
 
-/** Admin-level roles (system admin + Director General). */
+/** Admin-level roles (system admin + Director General), with MFA enrolment complete. */
 async function isValidAdmin(request: NextRequest): Promise<boolean> {
-  const role = await sessionRole(request);
-  return role === 'admin' || role === 'dg';
+  const { role, mfaEnabled } = await sessionInfo(request);
+  return (role === 'admin' || role === 'dg') && mfaEnabled;
 }
 
-/** Any back-office staff member, including agency officers. */
+/** Any back-office staff member, including agency officers, with MFA enrolment complete. */
 async function isValidStaff(request: NextRequest): Promise<boolean> {
-  const role = await sessionRole(request);
-  return role === 'admin' || role === 'dg' || role === 'agency_officer';
+  const { role, mfaEnabled } = await sessionInfo(request);
+  return role !== null && BACK_OFFICE_ROLES.includes(role) && mfaEnabled;
+}
+
+/** True for an authenticated back-office session that just hasn't finished MFA
+ * enrolment yet — distinct from "not signed in at all", so the redirect can
+ * send them to complete setup instead of back to the homepage. */
+async function needsMfaSetup(request: NextRequest): Promise<boolean> {
+  const { role, mfaEnabled } = await sessionInfo(request);
+  return role !== null && BACK_OFFICE_ROLES.includes(role) && !mfaEnabled;
 }
 
 export async function middleware(request: NextRequest) {
@@ -65,8 +85,13 @@ export async function middleware(request: NextRequest) {
       : await isValidAdmin(request);
     if (!valid) {
       const url = request.nextUrl.clone();
-      url.pathname = '/';
-      url.searchParams.set('auth', 'required');
+      if (pathname !== '/profile' && await needsMfaSetup(request)) {
+        url.pathname = '/profile';
+        url.searchParams.set('mfa', 'required');
+      } else {
+        url.pathname = '/';
+        url.searchParams.set('auth', 'required');
+      }
       return NextResponse.redirect(url);
     }
   }

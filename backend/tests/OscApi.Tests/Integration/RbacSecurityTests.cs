@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using OtpNet;
 using Xunit;
 
 namespace OscApi.Tests.Integration;
@@ -10,6 +12,30 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
     public RbacSecurityTests(ApiFactory factory) => _factory = factory;
 
     private static string NewEmail(string p) => $"{p}-{Guid.NewGuid():N}@example.com";
+
+    // The seeded admin account is shared across every test in this class (same
+    // in-memory DB via IClassFixture). Back-office sessions now need completed
+    // TOTP enrolment to reach a Staff/AdminOnly endpoint (MfaCompleteRequirement),
+    // so cache the secret once enrolled rather than re-enrolling (which 400s).
+    private static string? _adminMfaSecret;
+    private static string Code(string secret) => new Totp(Base32Encoding.ToBytes(secret)).ComputeTotp();
+
+    private static async Task LoginAdminWithMfaAsync(HttpClient client)
+    {
+        object body = _adminMfaSecret is null
+            ? new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword }
+            : new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword, mfaCode = Code(_adminMfaSecret) };
+        var login = await client.PostAsJsonAsync("/api/auth/login", body);
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+
+        if (_adminMfaSecret is null)
+        {
+            var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+            _adminMfaSecret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
+                .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
+            await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code = Code(_adminMfaSecret) });
+        }
+    }
 
     [Fact]
     public async Task RegularUser_CannotAccessAdminEndpoints()
@@ -34,13 +60,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
     public async Task Admin_CanAccessDashboard()
     {
         var client = _factory.CreateClient();
-
-        var login = await client.PostAsJsonAsync("/api/auth/login", new
-        {
-            email = ApiFactory.AdminEmail,
-            password = ApiFactory.AdminPassword,
-        });
-        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+        await LoginAdminWithMfaAsync(client);
 
         var res = await client.GetAsync("/api/dashboard");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
@@ -205,12 +225,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
 
         // Authenticate as staff first (required for /api/tickets GET)
-        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new
-        {
-            email = ApiFactory.AdminEmail,
-            password = ApiFactory.AdminPassword,
-        });
-        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        await LoginAdminWithMfaAsync(client);
 
         // Get ticket list to verify authenticated access works
         var formPage = await client.GetAsync("/api/tickets");

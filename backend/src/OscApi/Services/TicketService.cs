@@ -9,11 +9,11 @@ namespace OscApi.Services;
 public class TicketService : ITicketService
 {
     private readonly OscDbContext _db;
-    private readonly EmailService _email;
-    private readonly ReferenceNumberGenerator _refGen;
+    private readonly IEmailService _email;
+    private readonly IReferenceNumberGenerator _refGen;
     private readonly ISettingsService _settings;
 
-    public TicketService(OscDbContext db, EmailService email, ReferenceNumberGenerator refGen, ISettingsService settings)
+    public TicketService(OscDbContext db, IEmailService email, IReferenceNumberGenerator refGen, ISettingsService settings)
     {
         _db = db;
         _email = email;
@@ -141,8 +141,13 @@ public class TicketService : ITicketService
                 throw new FluentValidation.ValidationException(
                     [new FluentValidation.Results.ValidationFailure("status", $"Invalid status '{request.Status}'")]);
             ticket.Status = status;
-            if (ticket.Status == TicketStatus.Resolved) ticket.ResolvedAt = DateTimeOffset.UtcNow;
-            if (ticket.Status == TicketStatus.Closed) ticket.ClosedAt = DateTimeOffset.UtcNow;
+            // Clear (not just set) on every transition, so a reopened ticket doesn't
+            // keep a stale ResolvedAt/ClosedAt from a previous resolution — which
+            // would otherwise still count toward SLA compliance and mean-resolution-
+            // time averages in DashboardService, and still render on the ticket
+            // detail page, even though the ticket is open again.
+            ticket.ResolvedAt = status == TicketStatus.Resolved ? DateTimeOffset.UtcNow : null;
+            ticket.ClosedAt = status == TicketStatus.Closed ? DateTimeOffset.UtcNow : null;
         }
 
         if (request.Priority is not null)

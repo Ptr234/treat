@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using OtpNet;
 
 namespace OscApi.Tests.Integration;
 
@@ -108,6 +109,14 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
         var login = await admin.PostAsJsonAsync("/api/auth/login",
             new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
+
+        // PATCH /api/tickets is Staff-policy — needs completed TOTP enrolment
+        // (MfaCompleteRequirement) or this 400 assertion would see 403 instead.
+        var enroll = await admin.PostAsync("/api/auth/mfa/enroll", null);
+        var secret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
+            .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
+        var code = new Totp(Base32Encoding.ToBytes(secret)).ComputeTotp();
+        await admin.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
 
         var refNo = await CreateTicketAsync(admin);
         var res = await admin.PatchAsJsonAsync($"/api/tickets/{refNo}", new { status = "not_a_status" });

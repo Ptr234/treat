@@ -102,6 +102,44 @@ public static class EmailTemplates
             <p style="color:#333;line-height:1.6;">The agency will confirm or propose an alternative within 24 hours.</p>
             """);
 
+    public static string BusinessRegistrationReceived(string name, string refNumber, string businessName, string trackUrl) =>
+        Wrap("Business Registration Received — URSB", $"""
+            <p style="color:#333;line-height:1.6;">Dear {name},</p>
+            <p style="color:#333;line-height:1.6;">Your business registration for <strong>{businessName}</strong> has been received by the Uganda Registration Services Bureau.</p>
+            <div style="background:#f9f9f9;border-left:4px solid {BrandColor};padding:12px 16px;margin:16px 0;">
+              <p style="margin:0;font-size:18px;font-weight:bold;color:#111;">{refNumber}</p>
+              <p style="margin:4px 0 0;color:#555;">Status: Received — a name-availability review is next.</p>
+            </div>
+            <p style="margin:24px 0 0;">
+              <a href="{trackUrl}" style="display:inline-block;background:{BrandColor};color:#000;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">Track Your Registration</a>
+            </p>
+            """);
+
+    public static string BusinessRegistrationStatusUpdate(string name, string refNumber, string businessName, string newStatus, string trackUrl) =>
+        Wrap("Registration Status Update — URSB", $"""
+            <p style="color:#333;line-height:1.6;">Dear {name},</p>
+            <p style="color:#333;line-height:1.6;">Your registration for <strong>{businessName}</strong> ({refNumber}) has been updated:</p>
+            <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:12px 16px;margin:16px 0;">
+              <p style="margin:0;font-size:16px;font-weight:bold;color:#111;">New Status: {newStatus}</p>
+            </div>
+            <p style="margin:24px 0 0;">
+              <a href="{trackUrl}" style="display:inline-block;background:{BrandColor};color:#000;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">View Details</a>
+            </p>
+            """);
+
+    public static string BusinessRegistrationCertificateIssued(string name, string refNumber, string businessName, string certificateNumber, string certificateUrl) =>
+        Wrap("Certificate of Incorporation Issued — URSB", $"""
+            <p style="color:#333;line-height:1.6;">Dear {name},</p>
+            <p style="color:#333;line-height:1.6;">Congratulations — <strong>{businessName}</strong> is now registered with URSB.</p>
+            <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:12px 16px;margin:16px 0;">
+              <p style="margin:0;color:#555;">Certificate Number:</p>
+              <p style="margin:4px 0 0;font-size:18px;font-weight:bold;color:#111;">{certificateNumber}</p>
+            </div>
+            <p style="margin:24px 0 0;">
+              <a href="{certificateUrl}" style="display:inline-block;background:{BrandColor};color:#000;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;">View Certificate</a>
+            </p>
+            """);
+
     public static string EscalationNotification(string refNumber, string title, string contactName, string dashboardUrl, string? customMessage = null) =>
         Wrap("Ticket Escalation Alert", $"""
             <p style="color:#333;line-height:1.6;">A ticket has been escalated by the investor.</p>

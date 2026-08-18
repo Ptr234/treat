@@ -9,11 +9,8 @@ namespace OscApi.Models;
 /// Admins continue to live in <see cref="AdminUser"/>.
 /// </summary>
 [Table("users")]
-public class User
+public class User : AuditableEntity
 {
-    [Key]
-    public Guid Id { get; set; } = Guid.NewGuid();
-
     [Required, MaxLength(100)]
     public string Name { get; set; } = string.Empty;
 
@@ -40,7 +37,4 @@ public class User
     public string? PasswordResetToken { get; set; }
 
     public DateTimeOffset? PasswordResetExpiresAt { get; set; }
-
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

@@ -21,6 +21,7 @@ public class OscDbContext : DbContext
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
     public DbSet<AnalyticsEvent> AnalyticsEvents => Set<AnalyticsEvent>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<BusinessRegistration> BusinessRegistrations => Set<BusinessRegistration>();
 
     public override int SaveChanges()
     {
@@ -34,16 +35,18 @@ public class OscDbContext : DbContext
         return base.SaveChangesAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Stamps <see cref="IAuditable.UpdatedAt"/> on every modified entity that opts
+    /// into it, dispatched by the interface rather than a property-name lookup — so
+    /// it's compiler-checked and applies polymorphically to any current or future
+    /// <see cref="AuditableEntity"/>.
+    /// </summary>
     private void SetUpdatedTimestamps()
     {
-        var entries = ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Modified);
-
-        foreach (var entry in entries)
+        foreach (var entry in ChangeTracker.Entries<IAuditable>())
         {
-            var prop = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "UpdatedAt");
-            if (prop is not null)
-                prop.CurrentValue = DateTimeOffset.UtcNow;
+            if (entry.State == EntityState.Modified)
+                entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 
@@ -167,6 +170,16 @@ public class OscDbContext : DbContext
             e.HasIndex(a => a.ActorEmail);
             e.HasIndex(a => a.Action);  // For filtering by action type
             e.HasIndex(a => new { a.Timestamp, a.ActorEmail });  // For audit report queries
+        });
+
+        // BusinessRegistration
+        modelBuilder.Entity<BusinessRegistration>(e =>
+        {
+            e.HasIndex(r => r.ReferenceNumber).IsUnique();
+            e.HasIndex(r => r.ContactEmail);
+            e.HasIndex(r => r.BusinessName);  // For the name-availability check
+            e.HasIndex(r => r.AssignedAgencyCode);
+            e.Property(r => r.Status).HasConversion<string>();
         });
 
         // Admin seeding handled in Program.cs (upsert-style) to avoid migration conflicts
