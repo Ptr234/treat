@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,500;1,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Source+Serif+4:wght@500;600;700&display=swap');
 @import "tailwindcss";
 /* Tailwind v4 does not auto-load the v3 JS config — without this line the
    brand palettes (primary/secondary/brand, gold #FFD700, red #CE1126) and
@@ -94,15 +94,42 @@ body {
   background: var(--background);
   color: var(--foreground);
   overflow-x: clip;
-  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  font-family: 'Public Sans', 'Segoe UI', sans-serif;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
+html.large-text body { font-size: 1.125rem; }
+html.large-text :where(p, li, dd, dt, label, input, select, textarea) { font-size: 1.0625em; }
+html.high-contrast {
+  --foreground: #000000;
+  --ink-muted: #303030;
+  --surface-muted: #f2f2f2;
+}
+html.high-contrast body { color: #000; }
+html.high-contrast [class*="text-neutral-"] { color: #171717 !important; }
+html.high-contrast *:focus-visible { outline-color: #000 !important; }
+html.high-contrast a { text-decoration-thickness: 2px; }
+html.low-bandwidth [data-decorative="true"] { display: none !important; }
+html.low-bandwidth *, html.low-bandwidth *::before, html.low-bandwidth *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
+
+@media print {
+  .access-tools, #site-header, #site-footer, [data-chat-widget], [data-print-hide], .no-print { display: none !important; }
+  body { color: #000; background: #fff; font-size: 11pt; }
+  a { color: #000 !important; text-decoration: underline; }
+  main { width: 100%; }
+  section, article, dl { break-inside: avoid; }
+}
+
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-family: 'Source Serif 4', Georgia, serif;
   letter-spacing: -0.025em;
 }
 

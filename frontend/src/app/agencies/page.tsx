@@ -99,7 +99,6 @@ function AgencyDetail({ agency }: { agency: AgencyContact }) {
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider">
             <span className="text-red-600">{agency.acronym}</span>
-            {agency.urgencyLevel === 'high' && <span className="text-neutral-500">· Priority</span>}
           </p>
           <h3 className="mt-1 text-lg font-bold leading-snug">
             <Link
@@ -195,6 +194,9 @@ function Section({ heading, subtitle, count, agencies }: { heading: string; subt
 
 export default function GovernmentAgencies() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const hasFilters = Boolean(searchQuery.trim() || categoryFilter || locationFilter);
 
   // Group agencies by category, preserving order
   const grouped = useMemo(() => {
@@ -213,19 +215,27 @@ export default function GovernmentAgencies() {
 
   // Search filter; null means no search is active
   const filteredAgencies = useMemo(() => {
-    if (!searchQuery.trim()) return null;
+    if (!hasFilters) return null;
     const q = searchQuery.toLowerCase();
     return ugandaAgencies.filter(a =>
-      a.name.toLowerCase().includes(q) ||
+      (!q || a.name.toLowerCase().includes(q) ||
       a.acronym.toLowerCase().includes(q) ||
       a.description.toLowerCase().includes(q) ||
-      a.services.some(s => s.toLowerCase().includes(q))
+      a.services.some(s => s.toLowerCase().includes(q))) &&
+      (!categoryFilter || a.category === categoryFilter) &&
+      (!locationFilter || (locationFilter === 'kampala'
+        ? a.contact.address.toLowerCase().includes('kampala')
+        : locationFilter === 'outside'
+          ? Boolean(a.contact.address) && !a.contact.address.toLowerCase().includes('kampala')
+          : !a.contact.address))
     );
-  }, [searchQuery]);
+  }, [searchQuery, categoryFilter, locationFilter, hasFilters]);
+
+  const clearFilters = () => { setSearchQuery(''); setCategoryFilter(''); setLocationFilter(''); };
 
   const categoryCount = new Set(ugandaAgencies.map(a => a.category)).size;
-  const highPriority = ugandaAgencies.filter(a => a.urgencyLevel === 'high').length;
   const withAppointments = ugandaAgencies.filter(a => a.hasAppointmentBooking).length;
+  const withWebsite = ugandaAgencies.filter(a => Boolean(a.contact.website)).length;
 
   return (
  <div className="min-h-screen bg-white text-black">
@@ -274,6 +284,25 @@ export default function GovernmentAgencies() {
             </button>
           )}
         </div>
+        <div className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-2">
+          <label className="text-xs font-semibold text-neutral-700">
+            Service area
+            <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} className="mt-1 block min-h-11 w-full rounded-md border border-neutral-400 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
+              <option value="">All service areas</option>
+              {Array.from(new Set(ugandaAgencies.map((agency) => agency.category))).map((category) => (
+                <option key={category} value={category}>{getHeading(category).heading}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-semibold text-neutral-700">
+            Location
+            <select value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)} className="mt-1 block min-h-11 w-full rounded-md border border-neutral-400 bg-white px-3 text-sm text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
+              <option value="">All locations</option>
+              <option value="kampala">Kampala</option>
+              <option value="outside">Outside Kampala</option>
+            </select>
+          </label>
+        </div>
       </section>
 
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
@@ -283,10 +312,10 @@ export default function GovernmentAgencies() {
             <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b-2 border-black pb-3">
               <p className="text-sm text-neutral-700">
                 <span className="font-bold text-red-600">{filteredAgencies.length}</span>{' '}
-                {filteredAgencies.length === 1 ? 'agency' : 'agencies'} found for &ldquo;{searchQuery}&rdquo;
+                {filteredAgencies.length === 1 ? 'agency' : 'agencies'} match your filters
               </p>
-              <button type="button" onClick={() => setSearchQuery('')} className={`${linkClass} text-sm`}>
-                Clear search
+              <button type="button" onClick={clearFilters} className={`${linkClass} text-sm`}>
+                Clear filters
               </button>
             </div>
             {filteredAgencies.length === 0 ? (
@@ -311,8 +340,8 @@ export default function GovernmentAgencies() {
               {[
                 { label: 'Total agencies', value: ugandaAgencies.length },
                 { label: 'Categories', value: categoryCount },
-                { label: 'High priority', value: highPriority },
                 { label: 'With appointments', value: withAppointments },
+                { label: 'Official websites listed', value: withWebsite },
               ].map((stat) => (
                 <div key={stat.label}>
                   <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">{stat.label}</dt>

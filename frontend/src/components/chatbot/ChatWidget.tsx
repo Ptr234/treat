@@ -331,6 +331,7 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
+            data-chat-widget="true"
             className="fixed bottom-[4.5rem] left-2 right-2 sm:bottom-24 sm:left-auto sm:right-6 z-50 w-auto sm:w-[400px] h-[calc(100dvh-6rem)] sm:h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
@@ -569,6 +570,7 @@ export default function ChatWidget() {
             initial={{ opacity: 0, y: 10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            data-chat-widget="true"
             className="fixed bottom-[4.5rem] right-4 sm:bottom-24 sm:right-6 z-50 bg-white rounded-xl shadow-xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-[180px] sm:max-w-[220px] border border-yellow-300"
           >
             <p className="text-xs sm:text-sm font-medium text-gray-800">How can I help you invest?</p>
@@ -580,6 +582,7 @@ export default function ChatWidget() {
 
       {/* Floating Chat Button */}
       <motion.button
+        data-chat-widget="true"
         onClick={() => {
           setIsOpen(!isOpen);
           setShowTooltip(false);

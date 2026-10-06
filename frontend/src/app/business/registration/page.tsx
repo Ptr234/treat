@@ -20,8 +20,8 @@ export default function BusinessRegistrationPage() {
               Business Registration Wizard
             </h1>
             <p className="mt-5 text-base leading-7 text-neutral-700 sm:text-lg">
-              Complete your business registration step by step with our comprehensive wizard. 
-              Get accurate cost estimates, required documents, and timeframes for your business type.
+              Complete your business registration step by step with our guided wizard.
+              Review estimated costs, document guidance and process steps for your business type.
             </p>
           </div>
           

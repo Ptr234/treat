@@ -34,7 +34,7 @@ export default function NewsBar() {
   if (isDismissed) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[60] bg-black text-white">
+    <div data-print-hide="true" className="fixed top-0 left-0 right-0 z-[60] bg-black text-white">
       <div className="flex items-center justify-center h-9 px-4 relative">
         <p className="text-xs sm:text-sm font-medium text-neutral-100 text-center truncate pr-8">
           <span className="text-yellow-400 font-semibold">New:</span>{' '}

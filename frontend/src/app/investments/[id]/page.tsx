@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!opportunity) {
     return buildMetadata({ title: 'Investment opportunity not found', path: `/investments/${id}/`, noIndex: true });
   }
+
   return buildMetadata({
     title: opportunity.title,
     description: opportunity.description,
@@ -48,6 +49,11 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
       </div>
     );
   }
+
+  const hasValidUpdateDate = Boolean(opportunity.sourceUpdatedAt && !Number.isNaN(Date.parse(opportunity.sourceUpdatedAt)));
+  const sourceUpdatedAt = hasValidUpdateDate
+    ? new Intl.DateTimeFormat('en-UG', { dateStyle: 'long', timeZone: 'Africa/Kampala' }).format(new Date(opportunity.sourceUpdatedAt!))
+    : 'Not provided for this listing';
 
   return (
  <div className="min-h-screen bg-white text-black">
@@ -110,6 +116,18 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
             <dd className="mt-1 text-sm font-bold text-black">{opportunity.marketSize}</dd>
           </div>
         </dl>
+        <section aria-label="Project listing source and currency" className="mt-4 grid gap-3 border border-neutral-200 bg-white px-4 py-4 text-sm sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">Source / lead agency</p>
+            <p className="mt-1 font-semibold text-neutral-900">{opportunity.agency}</p>
+            <a href={opportunity.sourceUrl ?? opportunity.contact.website} target="_blank" rel="noopener noreferrer" className={`${linkClass} mt-1 inline-block text-xs`}>Agency website</a>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">Last updated</p>
+            <p className="mt-1 text-neutral-800">{sourceUpdatedAt}</p>
+          </div>
+          <p className="text-xs leading-5 text-neutral-600 sm:col-span-2">Investment ranges, returns, market figures and timelines are published listing information. Confirm current details and requirements with the lead agency before making a decision.</p>
+        </section>
 
         <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-3">
           {/* Main content */}

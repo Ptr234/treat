@@ -73,6 +73,8 @@ export interface InvestmentKeyMetrics {
 
 export interface InvestmentOpportunity {
   id: number;
+  sourceUpdatedAt?: string;
+  sourceUrl?: string;
   title: string;
   category: string;
   description: string;

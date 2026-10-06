@@ -96,7 +96,7 @@ export default function Footer() {
             </Link>
             <p className="text-sm leading-relaxed text-neutral-600 mb-6">
               Uganda&apos;s OneStop Centre for business registration, investment facilitation, and
-              regulatory compliance — 16+ government agencies under one roof.
+              regulatory compliance, connecting investors with public agencies and services.
             </p>
             <ul className="space-y-2.5">
               {CONTACTS.map((c) => (

@@ -16,26 +16,6 @@ export async function generateStaticParams() {
   }));
 }
 
-const SLA_BY_SERVICE: Record<string, string> = {
-  'default': '5-7 business days',
-  'license': '10-14 business days',
-  'permit': '7-10 business days',
-  'registration': '3-5 business days',
-  'application': '5-7 business days',
-  'certificate': '7-10 business days',
-  'approval': '10-15 business days'
-};
-
-const getSlaForService = (service: string): string => {
-  const lowerService = service.toLowerCase();
-  for (const [key, value] of Object.entries(SLA_BY_SERVICE)) {
-    if (lowerService.includes(key)) {
-      return value;
-    }
-  }
-  return SLA_BY_SERVICE.default ?? '5-7 business days';
-};
-
 const linkClass =
   'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
@@ -114,7 +94,6 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-wider">
             <span className="text-red-600">{agency.acronym}</span>
             <span className="capitalize text-neutral-600">{agency.category.replace(/_/g, ' ')}</span>
-            {agency.urgencyLevel === 'high' && <span className="text-neutral-600">· Priority agency</span>}
           </p>
           <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{agency.name}</h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">{agency.description}</p>
@@ -149,8 +128,8 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
             <dd className="mt-1 text-sm font-bold leading-6">{agency.hasAppointmentBooking ? 'Bookable online' : 'Contact to arrange'}</dd>
           </div>
           <div className="border-l-4 border-red-600 pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Priority</dt>
-            <dd className="mt-1 text-sm font-bold leading-6 capitalize">{agency.urgencyLevel}</dd>
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Service area</dt>
+            <dd className="mt-1 text-sm font-bold leading-6 capitalize">{agency.category.replace(/_/g, ' ')}</dd>
           </div>
         </dl>
         <nav aria-label="On this page" className="mt-4">
@@ -171,7 +150,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
         <section id="services" aria-labelledby="services-heading" className="scroll-mt-24">
           <h2 id="services-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Services offered</h2>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-700">
-            Turnaround times are indicative estimates based on the type of service. Confirm current timelines with the agency.
+            Requirements, fees and processing times depend on the service. Contact the agency to confirm the current details before applying.
           </p>
           <ol className="mt-4 divide-y divide-neutral-200">
             {agency.services.map((service, index) => (
@@ -179,7 +158,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
                 <span className="text-sm font-bold text-red-600">{String(index + 1).padStart(2, '0')}</span>
                 <p className="font-bold leading-snug">{service}</p>
                 <p className="text-sm text-neutral-700 sm:text-right">
-                  <span className="font-semibold text-black">Indicative:</span> {getSlaForService(service)}
+                  <span className="font-semibold text-black">Current details:</span> Confirm with agency
                 </p>
               </li>
             ))}
@@ -189,6 +168,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
         {/* Contact */}
         <section id="contact" aria-labelledby="contact-heading" className="mt-16 scroll-mt-24">
           <h2 id="contact-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Contact information</h2>
+          <p className="mt-4 text-sm text-neutral-600">Contact information is listed for convenience. Confirm details on the agency&apos;s website before visiting.</p>
           <dl className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-2">
             <div className="border-l-4 border-yellow-400 pl-4">
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Email</dt>
@@ -239,7 +219,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
         <section id="request" aria-labelledby="request-heading" className="mt-16 scroll-mt-24 border-t-4 border-yellow-400 pt-10">
           <h2 id="request-heading" className="text-xl font-bold sm:text-2xl">Request a service</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-700">
-            Send a request to {agency.name}. You will receive a reference number, and the agency will contact you within 24–48 hours.
+            Send a request to {agency.name}. Keep the reference number provided for follow-up; the agency will confirm the next steps and processing time.
           </p>
           <div className="mt-8">
             <ServiceRequestForm agencyName={agency.name} agencyCode={agency.acronym} agencyEmail={agency.contact.email} services={agency.services} />

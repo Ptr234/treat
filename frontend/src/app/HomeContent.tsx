@@ -90,8 +90,18 @@ export default function HomePage() {
   const [heroImages, setHeroImages] = useState(HERO_IMAGES);
   const [sectors, setSectors] = useState(SECTORS);
   const [heroIndex, setHeroIndex] = useState(0);
+  const [lowBandwidth, setLowBandwidth] = useState(false);
   const [taskSearch, setTaskSearch] = useState('');
   const [activeSectorIndex, setActiveSectorIndex] = useState(0);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => setLowBandwidth(root.classList.contains('low-bandwidth'));
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -132,62 +142,79 @@ export default function HomePage() {
   return (
     <div className="bg-white text-black">
       {/* Hero */}
-      <section className="border-b border-neutral-200">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_.9fr] lg:px-8 lg:pb-16">
-          <div>
-            <p className={sectionHeading}>Uganda Investment Authority · OneStop Centre</p>
-            <h1 className="text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-              Make your next move in Uganda.
+      <section className="relative isolate overflow-hidden bg-[#10283f] text-white">
+        <div className="absolute inset-0 -z-10" data-decorative="true">
+          {!lowBandwidth && (
+            <Image
+              src={heroImages[heroIndex] ?? '/images/uganda-kampala-city-view.webp'}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover opacity-35"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#10283f] via-[#10283f]/95 to-[#10283f]/55" />
+        </div>
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_.75fr] lg:px-8 lg:py-24">
+          <div className="max-w-3xl">
+            <p className="mb-5 inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[.18em] text-yellow-300">
+              <span className="h-1 w-10 bg-yellow-400" aria-hidden="true" />
+              Uganda Investment Authority · OneStop Centre
+            </p>
+            <h1 className="max-w-3xl text-5xl font-semibold leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl">
+              Invest in Uganda. <span className="text-yellow-300">Build what’s next.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-neutral-700 sm:text-lg">
-              Find the right opportunity, agency or business service. One starting point for building what comes next.
+            <p className="mt-6 max-w-2xl text-base leading-7 text-white/85 sm:text-lg sm:leading-8">
+              Official guidance for investors and businesses: explore projects, understand requirements and connect with the right public agency.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/investments"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-yellow-400 px-6 py-3 text-sm font-bold text-[#10283f] transition hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#10283f]"
               >
                 Explore investments <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
               </Link>
               <Link
                 href="/services"
-                className="inline-flex items-center justify-center gap-2 rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/60 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#10283f] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#10283f]"
               >
                 Find a service
               </Link>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-neutral-700">
-              <li className="inline-flex items-center gap-2"><span className="h-2 w-2 bg-red-600" aria-hidden="true" />16+ government agencies</li>
-              <li className="inline-flex items-center gap-2"><span className="h-2 w-2 bg-yellow-400" aria-hidden="true" />One coordinated service centre</li>
-            </ul>
           </div>
 
-          <div>
-            <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200">
-              <Image
-                src={heroImages[heroIndex] ?? '/images/uganda-kampala-city-view.webp'}
-                alt="Uganda, the Pearl of Africa"
-                fill
-                priority
-                sizes="(min-width: 1024px) 45vw, 100vw"
-                className="object-cover transition duration-1000"
-              />
-              {heroImages.length > 1 && (
-                <div className="absolute bottom-4 right-4 flex gap-2" aria-label="Choose featured image">
-                  {heroImages.map((_, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setHeroIndex(index)}
-                      aria-label={`Show image ${index + 1}`}
-                      aria-current={index === heroIndex}
-                      className={`h-2.5 border border-white transition-all ${index === heroIndex ? 'w-8 bg-yellow-400' : 'w-2.5 bg-white/60'}`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-            <p className="mt-3 text-xs text-neutral-600">Uganda, open for possibility.</p>
+          <div className="border-l border-white/25 py-2 pl-6 sm:pl-8">
+            <p className="text-xs font-bold uppercase tracking-[.16em] text-white/65">A single point of access</p>
+            <ul className="mt-5 divide-y divide-white/20">
+              {[
+                ['01', 'Find investment opportunities', 'Browse projects by sector, investment range and lead agency.'],
+                ['02', 'Understand business requirements', 'Locate registration, permits and compliance guidance.'],
+                ['03', 'Connect with public agencies', 'Identify institutions and the next step for your plans.'],
+              ].map(([number, title, description]) => (
+                <li key={number} className="grid grid-cols-[2.5rem_1fr] gap-3 py-4 first:pt-0 last:pb-0">
+                  <span className="pt-0.5 text-xs font-bold text-yellow-300">{number}</span>
+                  <div>
+                    <p className="font-semibold text-white">{title}</p>
+                    <p className="mt-1 text-sm leading-6 text-white/70">{description}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            {heroImages.length > 1 && (
+              <div className="mt-6 flex gap-2" aria-label="Choose featured image">
+                {heroImages.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setHeroIndex(index)}
+                    aria-label={`Show image ${index + 1}`}
+                    aria-current={index === heroIndex}
+                    className={`h-1.5 transition-all ${index === heroIndex ? 'w-8 bg-yellow-300' : 'w-3 bg-white/50 hover:bg-white'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -234,20 +261,23 @@ export default function HomePage() {
 
       {/* Key facts */}
       <section className="border-y border-neutral-200 bg-neutral-50" aria-label="Key facts">
-        <dl className="mx-auto grid max-w-6xl grid-cols-2 gap-x-8 gap-y-8 px-4 py-10 sm:px-6 md:grid-cols-4 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+          <p className="mb-5 text-xs font-bold uppercase tracking-[.16em] text-neutral-500">Investment directory at a glance</p>
+          <dl className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-0">
           {[
-            { label: 'Government agencies', value: '16+', note: 'under one coordinated centre' },
-            { label: 'Investment opportunities', value: String(OPPORTUNITIES.length), note: 'with ROI and timelines' },
-            { label: 'Sectors covered', value: String(categoryCount), note: 'from agriculture to ICT' },
-            { label: 'Assistant languages', value: '5', note: 'English, French, Arabic, Chinese, Swahili' },
+            { label: 'Listed opportunities', value: String(OPPORTUNITIES.length), note: 'Browse projects and their published details' },
+            { label: 'Sectors represented', value: String(categoryCount), note: 'Explore the directory by industry' },
+            { label: 'Lead agencies', value: String(new Set(OPPORTUNITIES.map((o) => o.agency).filter(Boolean)).size), note: 'Named across the listed opportunities' },
           ].map((fact) => (
-            <div key={fact.label} className="border-l-4 border-yellow-400 pl-4">
+            <div key={fact.label} className="border-l-4 border-yellow-400 pl-4 sm:ml-6 sm:first:ml-0 sm:pl-6">
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">{fact.label}</dt>
-              <dd className="mt-1 text-3xl font-bold text-black sm:text-4xl">{fact.value}</dd>
+              <dd className="mt-1 text-4xl font-semibold leading-none text-[#10283f] sm:text-5xl">{fact.value}</dd>
               <p className="mt-1 text-xs leading-5 text-neutral-600">{fact.note}</p>
             </div>
           ))}
-        </dl>
+          </dl>
+          <p className="mt-5 text-[11px] text-neutral-500">Counts reflect the opportunities currently published in this directory.</p>
+        </div>
       </section>
 
       {/* What we offer */}

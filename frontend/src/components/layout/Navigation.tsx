@@ -13,12 +13,12 @@ const MENUS = [
     title: 'Start a business',
     intro: 'Get oriented and take your first steps in Uganda.',
     groups: [
-      { label: 'First steps', links: [{ label: 'Investment onboarding', href: '/investments/onboarding' }, { label: 'Explore opportunities', href: '/investments' }, { label: 'Business guide', href: '/guide' }] },
+      { label: 'First steps', links: [{ label: 'Investment onboarding', href: '/investments/onboarding' }, { label: 'Explore opportunities', href: '/investments' }, { label: 'Track an application', href: '/track' }, { label: 'Business guide', href: '/guide' }] },
       { label: 'Registrations', links: [{ label: 'Register a business', href: '/business/registration' }, { label: 'Investment certificate', href: '/investments/onboarding' }, { label: 'Agency directory', href: '/agencies' }] },
     ],
   },
   {
-    title: 'Services',
+    title: 'Find a service',
     intro: 'Find public services for setting up and running a business.',
     groups: [
       { label: 'Business services', links: [{ label: 'Registration & incorporation', href: '/business/registration' }, { label: 'Permits & licences', href: '/services' }, { label: 'Tax & compliance', href: '/services' }] },
@@ -29,7 +29,7 @@ const MENUS = [
     title: 'Invest in Uganda',
     intro: 'Research the market, sectors and licensed projects.',
     groups: [
-      { label: 'Opportunities', links: [{ label: 'Priority sectors', href: '/investments' }, { label: 'Licensed projects map', href: '/projects' }, { label: 'Investor analytics', href: '/analytics' }] },
+      { label: 'Opportunities', links: [{ label: 'Priority sectors', href: '/investments' }, { label: 'Licensed projects map', href: '/projects' }, { label: 'Investor analytics', href: '/analytics' }, { label: 'Investment incentives', href: '/incentives' }, { label: 'Investment process', href: '/investments/process' }] },
       { label: 'Plan your investment', links: [{ label: 'ROI calculator', href: '/tools/roi-calculator' }, { label: 'Investment onboarding', href: '/investments/onboarding' }, { label: 'Investor profiles', href: '/investments/onboarding' }] },
     ],
   },
@@ -46,6 +46,7 @@ const MENUS = [
 function Brand() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600" aria-label="OneStop Centre Uganda home">
+      <Image src="/images/uganda-coat-of-arms.png" alt="Uganda flag with the crowned crane emblem" width={36} height={24} className="h-6 w-9 object-contain" priority />
       <Image src="/images/oneStopCenter-logo.jpeg" alt="" width={42} height={42} className="h-10 w-10 object-contain" priority />
       <span className="leading-[1.05]">
         <span className="block text-sm font-extrabold tracking-tight text-black">OneStop Centre</span>
@@ -74,7 +75,7 @@ export default function Navigation() {
       {/* Utility strip */}
       <div className="hidden border-b border-neutral-200 bg-white text-[11px] text-neutral-600 md:block">
         <div className="mx-auto flex h-8 max-w-6xl items-center justify-between px-6 lg:px-8">
-          <span>Official investment services · Republic of Uganda</span>
+          <span className="font-semibold text-neutral-800">Republic of Uganda <span className="mx-2 text-neutral-400">|</span> Uganda Investment Authority</span>
           <div className="flex items-center gap-5">
             <Link href="/events" className="hover:text-red-600 transition-colors">News &amp; events</Link>
             <Link href="/support" className="hover:text-red-600 transition-colors">Contact</Link>
@@ -82,7 +83,7 @@ export default function Navigation() {
         </div>
       </div>
 
-      <header className="sticky z-50 border-b border-neutral-200 bg-white" style={{ top: 'var(--newsbar-h, 0px)' }}>
+      <header id="site-header" className="sticky z-50 border-b border-neutral-200 bg-white" style={{ top: 'var(--newsbar-h, 0px)' }}>
         <div className="mx-auto flex h-[76px] max-w-6xl items-stretch justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <div className="flex shrink-0 items-center pr-2">
             <Brand />
@@ -90,7 +91,7 @@ export default function Navigation() {
 
           <nav aria-label="Main navigation" className="hidden items-stretch gap-0.5 lg:flex xl:gap-1">
             {MENUS.map((menu) => {
-              const isCurrent = pathname.startsWith(menu.title === 'Invest in Uganda' ? '/investments' : menu.title === 'Services' ? '/services' : menu.title === 'Resources' ? '/downloads' : '/business');
+              const isCurrent = pathname.startsWith(menu.title === 'Invest in Uganda' ? '/investments' : menu.title === 'Find a service' ? '/services' : menu.title === 'Resources' ? '/downloads' : '/business');
               const expanded = activeMenu === menu.title;
               const menuId = `menu-${menu.title.toLowerCase().replace(/[^a-z]+/g, '-')}`;
               return (
@@ -137,7 +138,8 @@ export default function Navigation() {
                 </div>
               );
             })}
-            <Link href="/agencies" className="inline-flex shrink-0 items-center whitespace-nowrap px-3.5 text-[15px] text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-red-600 xl:px-4">Agencies</Link>
+            <Link href="/agencies" className="inline-flex shrink-0 items-center whitespace-nowrap px-3 text-[15px] text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-red-600">Agencies</Link>
+            <Link href="/track" className="inline-flex shrink-0 items-center whitespace-nowrap px-3 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-red-600">Track application</Link>
           </nav>
 
           <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
@@ -192,6 +194,7 @@ export default function Navigation() {
                 </div>
               ))}
               <Link href="/agencies" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Agencies</Link>
+              <Link href="/track" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Track an application</Link>
               <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 rounded-md bg-black px-4 py-3 text-center text-sm font-bold text-yellow-400">Start your investment journey</Link>
               {isAuthenticated ? (
                 <Link href="/profile" onClick={closeMenus} className="py-3 text-sm font-semibold text-neutral-800">My account</Link>

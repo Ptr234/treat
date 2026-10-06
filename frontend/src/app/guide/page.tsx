@@ -41,7 +41,7 @@ const STEPS = [
   {
     icon: BuildingLibraryIcon,
     title: 'Explore services & agencies',
-    body: 'The OneStop Centre brings 16+ government agencies — UIA, URSB, URA, NEMA, KCCA and more — into a single portal. Browse what each offers and how they can help your business.',
+    body: 'The OneStop Centre connects investors with public agencies such as UIA, URSB, URA, NEMA and KCCA. Browse agency services and find the right place to begin.',
     action: { label: 'Browse agencies', href: '/agencies' },
     secondary: { label: 'View all services', href: '/services' },
   },

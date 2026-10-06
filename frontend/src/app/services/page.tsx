@@ -9,38 +9,42 @@ const serviceCategories = [
       {
         id: 'business-registration',
         title: 'Business Registration & Company Formation',
-        description: 'Register your business legally with URSB including all required documentation.',
+        audience: 'Founders forming a company or registering a business entity.',
+        description: 'Complete the URSB company formation process and confirm requirements for your business type.',
         agency: 'URSB',
-        timeline: '6 weeks',
-        cost: 'From UGX 100,000',
+        timeline: 'Confirm with URSB',
+        cost: 'UGX 105,000 registration fee (nominal capital up to UGX 5M)',
         href: '/business/registration'
       },
       {
         id: 'tax-services',
         title: 'Tax Registration & Compliance',
+        audience: 'Businesses and taxpayers seeking a TIN or tax compliance guidance.',
         description: 'TIN registration and comprehensive tax compliance support through URA.',
         agency: 'URA',
-        timeline: '2-3 days',
-        cost: 'From UGX 35,000',
-        href: '/agencies'
+        timeline: 'Confirm current processing time with URA',
+        cost: 'Confirm current fees with URA',
+        href: '/agencies/ura'
       },
       {
         id: 'investment-licensing',
         title: 'Investment Licensing',
+        audience: 'Investors seeking UIA licensing, facilitation or advisory support.',
         description: 'Investment promotion, licensing, and facilitation services through UIA.',
         agency: 'UIA',
-        timeline: '7-14 days',
-        cost: 'From USD 100',
-        href: '/investments'
+        timeline: '24 working hours once the application is complete',
+        cost: 'Free of charge',
+        href: '/agencies/uia'
       },
       {
         id: 'trading-license',
         title: 'Trading License & Local Permits',
-        description: 'Trading licenses from local authorities required for all business operations.',
+        audience: 'Businesses that need local trading licences or operating permits.',
+        description: 'Apply for local trading licences or permits where required for your business operations.',
         agency: 'KCCA / Local Councils',
-        timeline: '7-14 days',
-        cost: 'UGX 50,000 - 500,000',
-        href: '/agencies'
+        timeline: 'Varies by local authority and licence type',
+        cost: 'Varies by local authority and business classification',
+        href: '/agencies/kcca'
       }
     ]
   },
@@ -51,29 +55,32 @@ const serviceCategories = [
       {
         id: 'compliance-monitoring',
         title: 'Compliance & Monitoring',
+        audience: 'Businesses seeking ongoing regulatory guidance or monitoring support.',
         description: 'Ongoing compliance support and regulatory monitoring services.',
         agency: 'Various',
-        timeline: 'Ongoing',
-        cost: 'Consultation based',
+        timeline: 'Depends on the service and agency',
+        cost: 'Confirm with the responsible agency',
         href: '/support'
       },
       {
         id: 'nssf-registration',
         title: 'NSSF Registration & Social Security',
+        audience: 'Employers who need guidance on employee social security registration.',
         description: 'Mandatory registration with National Social Security Fund for businesses with employees.',
         agency: 'NSSF',
-        timeline: '3-5 days',
-        cost: 'Free registration',
-        href: '/agencies'
+        timeline: 'Confirm current processing time with NSSF',
+        cost: 'Confirm current fees with NSSF',
+        href: '/agencies/nssf'
       },
       {
         id: 'environmental-clearance',
         title: 'Environmental Impact Assessment',
+        audience: 'Project developers whose plans may require environmental assessment.',
         description: 'Environmental clearance certificates for projects affecting the environment.',
         agency: 'NEMA',
-        timeline: '90-120 days',
-        cost: 'USD 500 - 5,000',
-        href: '/agencies'
+        timeline: 'Project-specific; confirm with NEMA',
+        cost: 'Project-specific; confirm with NEMA',
+        href: '/agencies/nema'
       }
     ]
   },
@@ -84,11 +91,12 @@ const serviceCategories = [
       {
         id: 'work-permits',
         title: 'Work Permits & Immigration Services',
+        audience: 'Employing organisations seeking work or residence permits for foreign staff.',
         description: 'Work permits, residence permits, and immigration services for foreign investors.',
         agency: 'DCIC',
-        timeline: '14-30 days',
-        cost: 'USD 1,000 - 2,000',
-        href: '/agencies'
+        timeline: 'Set by the Directorate; confirm when you apply',
+        cost: 'Confirm with the Directorate',
+        href: '/agencies/dcic'
       }
     ]
   }
@@ -141,8 +149,9 @@ export default function ServicesPage() {
 
               <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
                 {category.services.map((service) => (
-                  <article key={service.id}>
-                    <h4 className="text-lg font-bold leading-snug">
+                    <article key={service.id} className="border border-neutral-200 bg-white p-5 sm:p-6">
+                    <p className="text-xs font-bold uppercase tracking-[.14em] text-red-700">{category.title}</p>
+                    <h4 className="mt-2 text-lg font-bold leading-snug sm:text-xl">
                       <Link
                         href={service.href}
                         className="text-black hover:text-red-600 underline decoration-yellow-400 decoration-2 underline-offset-4 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
@@ -150,15 +159,21 @@ export default function ServicesPage() {
                         {service.title}
                       </Link>
                     </h4>
+                    <p className="mt-3 text-sm leading-6 text-neutral-700"><span className="font-semibold text-neutral-900">Who it is for:</span> {service.audience}</p>
                     <p className="mt-3 text-sm leading-7 text-neutral-700">{service.description}</p>
-                    <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-6 gap-y-1.5 border-l-4 border-yellow-400 bg-white py-3 pl-4 pr-3 text-sm">
-                      <dt className="font-semibold text-black">Agency</dt>
+                    <dl className="mt-5 grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-3 border-y border-neutral-200 py-4 text-sm">
+                      <dt className="font-semibold text-neutral-900">Responsible</dt>
                       <dd className="text-neutral-700">{service.agency}</dd>
-                      <dt className="font-semibold text-black">Timeline</dt>
+                      <dt className="font-semibold text-neutral-900">Processing time</dt>
                       <dd className="text-neutral-700">{service.timeline}</dd>
-                      <dt className="font-semibold text-black">Cost</dt>
+                      <dt className="font-semibold text-neutral-900">Fees</dt>
                       <dd className="text-neutral-700">{service.cost}</dd>
                     </dl>
+                    <p className="mt-4 text-xs leading-5 text-neutral-600">Before applying, confirm the current document checklist, fees and processing time with the responsible agency.</p>
+                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+                      <Link href="/tools/document-checklist" className={linkClass}>Document checklist</Link>
+                      <Link href={service.href} className={linkClass}>Next step</Link>
+                    </div>
                   </article>
                 ))}
               </div>
