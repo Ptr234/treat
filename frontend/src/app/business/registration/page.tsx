@@ -20,8 +20,7 @@ export default function BusinessRegistrationPage() {
               Business Registration Wizard
             </h1>
             <p className="mt-5 text-base leading-7 text-neutral-700 sm:text-lg">
-              Complete your business registration step by step with our guided wizard.
-              Review estimated costs, document guidance and process steps for your business type.
+              Use the guided steps to identify the registration path for your business and understand the information you may need to prepare. The wizard helps you review likely documents, process stages and estimated costs before you proceed. Take time to check names, ownership details and contact information as you enter them. This tool provides planning guidance; the final requirements, fees and filing decision are set by the responsible authorities.
             </p>
           </div>
           

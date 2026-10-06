@@ -102,20 +102,20 @@ export default function EventsPage() {
       <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Events and investment activities</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Connect with investors, industry leaders, and government officials at Uganda&apos;s premier investment events. Network, learn, and discover opportunities across all sectors.
+          Use the events calendar to find investment forums, missions, webinars and other activities involving Uganda’s business community. Search by title, location or organizer, then narrow the list by event category and status. Event listings include dates and participation details when those have been provided by the organizer. Check the event page for updates before making travel plans or sharing registration information.
         </p>
         <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
           <div className="border-l-4 border-yellow-400 pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Upcoming events</dt>
-            <dd className="mt-1 text-3xl font-bold">{stats.upcomingCount}</dd>
+            <dd className="font-data mt-1 text-3xl font-bold">{stats.upcomingCount}</dd>
           </div>
           <div className="border-l-4 border-yellow-400 pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Total events</dt>
-            <dd className="mt-1 text-3xl font-bold">{stats.totalCount}</dd>
+            <dd className="font-data mt-1 text-3xl font-bold">{stats.totalCount}</dd>
           </div>
           <div className="border-l-4 border-red-600 pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Past events</dt>
-            <dd className="mt-1 text-3xl font-bold">{stats.pastCount}</dd>
+            <dd className="font-data mt-1 text-3xl font-bold">{stats.pastCount}</dd>
           </div>
         </dl>
       </section>

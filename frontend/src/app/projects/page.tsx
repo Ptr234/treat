@@ -297,24 +297,24 @@ export default function ProjectsPage() {
         <header>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Licensed projects database</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-            Explore licensed investment projects across Uganda.
+            Explore the project records available in the Uganda investment directory and narrow them by sector, status, location or other listed details. The summary figures update with the filters, helping you compare the scale of the projects currently in view. Open an individual record for its available investment, employment and contact information. Treat directory details as a starting point for due diligence and confirm project status and terms with the listed agency or promoter.
           </p>
         </header>
 
         <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-6 border-y border-neutral-200 py-6 md:grid-cols-3">
           <div>
             <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Licensed projects</dt>
-            <dd className="mt-1 text-3xl font-bold text-black sm:text-4xl">{filteredProjects.length}</dd>
+            <dd className="font-data mt-1 text-3xl font-bold text-black sm:text-4xl">{filteredProjects.length}</dd>
             <p className="mt-1 text-sm text-neutral-600">of {projects.length} total projects</p>
           </div>
           <div>
             <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Total investment</dt>
-            <dd className="mt-1 text-3xl font-bold text-black sm:text-4xl">${(totalInvestment / 1000000000).toFixed(2)}B</dd>
+            <dd className="font-data mt-1 text-3xl font-bold text-black sm:text-4xl">${(totalInvestment / 1000000000).toFixed(2)}B</dd>
             <p className="mt-1 text-sm text-neutral-600">combined capital value</p>
           </div>
           <div>
             <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Total employment</dt>
-            <dd className="mt-1 text-3xl font-bold text-black sm:text-4xl">{totalEmployment.toLocaleString()}</dd>
+            <dd className="font-data mt-1 text-3xl font-bold text-black sm:text-4xl">{totalEmployment.toLocaleString()}</dd>
             <p className="mt-1 text-sm text-neutral-600">jobs created and planned</p>
           </div>
         </dl>

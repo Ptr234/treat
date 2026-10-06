@@ -63,7 +63,7 @@ const InvestmentOpportunities = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Invest in Uganda</h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-600 sm:text-lg">
-            Browse {opportunities.length} investment opportunities across {categories.length} sectors, and connect with the agencies that can guide your next step.
+            Browse {opportunities.length} published opportunities across {categories.length} sectors, from agriculture and tourism to energy, infrastructure and technology. Compare indicative investment ranges, expected timelines and reported returns, then open a project to review its description and lead agency. Use search and sector filters to narrow the list to the areas that fit your plans. Figures are provided for early research and should be confirmed with the responsible agency before you make an investment decision.
           </p>
         </div>
         <div className="relative hidden h-44 lg:block">

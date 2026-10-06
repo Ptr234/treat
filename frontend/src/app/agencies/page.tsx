@@ -258,8 +258,7 @@ export default function GovernmentAgencies() {
           OneStop Centre Agency Hub
         </h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-600 sm:text-lg">
-          Your single gateway to all government agencies facilitating business and investment in Uganda.
-          Search, explore, and connect with the right agency for your needs.
+          Find public agencies involved in business registration, investment facilitation, licensing and compliance. Search by agency name, acronym or service, or filter the directory by service area to locate the right starting point. Agency profiles bring together available contact details, office information and services in one place. Check directly with the agency before visiting, as office hours, appointment availability and requirements may change.
         </p>
 
         <div className="relative mt-8 max-w-2xl">

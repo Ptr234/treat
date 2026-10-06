@@ -170,7 +170,7 @@ export default function HomePage() {
               Invest in Uganda. <span className="text-yellow-300">Build what’s next.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-white/85 sm:text-lg sm:leading-8">
-              Official guidance for investors and businesses: explore projects, understand requirements and connect with the right public agency.
+              Use the OneStop Centre to understand the practical steps behind doing business in Uganda. Compare published investment opportunities, learn which public agencies handle key requirements, and find a clear next action for your plans. The directory brings project information, service guidance and support contacts together in one place, so you can move from early research to a more informed conversation.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
@@ -296,7 +296,7 @@ export default function HomePage() {
           ].map((fact) => (
             <div key={fact.label} className="border-l-4 border-yellow-400 pl-4 sm:ml-6 sm:first:ml-0 sm:pl-6">
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">{fact.label}</dt>
-              <dd className="mt-1 text-4xl font-semibold leading-none text-[#10283f] sm:text-5xl">{fact.value}</dd>
+              <dd className="font-data mt-1 text-4xl font-semibold leading-none text-[#10283f] sm:text-5xl">{fact.value}</dd>
               <p className="mt-1 text-xs leading-5 text-neutral-600">{fact.note}</p>
             </div>
           ))}
@@ -365,15 +365,15 @@ export default function HomePage() {
                 <dl className="mt-5 grid grid-cols-3 gap-3 border-l-4 border-yellow-400 bg-white py-3 pl-4 pr-2 text-sm">
                   <div>
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">Investment</dt>
-                    <dd className="mt-0.5 font-semibold text-black">{opp.investmentRange}</dd>
+                    <dd className="font-data mt-0.5 text-xs font-semibold text-black">{opp.investmentRange}</dd>
                   </div>
                   <div>
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">ROI</dt>
-                    <dd className="mt-0.5 font-semibold text-black">{opp.roi}</dd>
+                    <dd className="font-data mt-0.5 text-xs font-semibold text-black">{opp.roi}</dd>
                   </div>
                   <div>
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">Timeline</dt>
-                    <dd className="mt-0.5 font-semibold text-black">{opp.timeline}</dd>
+                    <dd className="font-data mt-0.5 text-xs font-semibold text-black">{opp.timeline}</dd>
                   </div>
                 </dl>
                 <p className="mt-4 text-xs text-neutral-600">Agency: {opp.agency}</p>
@@ -440,15 +440,15 @@ export default function HomePage() {
               <dl className="mt-6 grid grid-cols-3 gap-4 border-y border-neutral-200 py-5">
                 <div>
                   <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Projects listed</dt>
-                  <dd className="mt-1 text-2xl font-bold">{activeProjects.length}</dd>
+                  <dd className="font-data mt-1 text-2xl font-bold">{activeProjects.length}</dd>
                 </div>
                 <div>
                   <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">High priority</dt>
-                  <dd className="mt-1 text-2xl font-bold">{activeProjects.filter((o) => o.priority === 'High').length}</dd>
+                  <dd className="font-data mt-1 text-2xl font-bold">{activeProjects.filter((o) => o.priority === 'High').length}</dd>
                 </div>
                 <div>
                   <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Agencies involved</dt>
-                  <dd className="mt-1 text-2xl font-bold">{new Set(activeProjects.map((o) => o.agency)).size}</dd>
+                  <dd className="font-data mt-1 text-2xl font-bold">{new Set(activeProjects.map((o) => o.agency)).size}</dd>
                 </div>
               </dl>
 

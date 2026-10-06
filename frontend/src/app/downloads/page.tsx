@@ -115,8 +115,7 @@ export default function DownloadsPage() {
       <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Downloads and resources</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Download essential forms, guides, and resources for business registration and investment in Uganda.
-          All documents are official and up-to-date.
+          Browse downloadable forms and guidance for business registration, investment and related public services. Each available resource includes its file type and any published description, so you can check that it is relevant before opening it. Documents may be revised by their issuing agencies; confirm that you have the current version before filing an application. If the resource you need is not listed, contact the responsible agency or the support team for direction.
         </p>
       </section>
 
@@ -131,10 +130,14 @@ export default function DownloadsPage() {
         {/* Empty state */}
         {!loading && visibleCategories.length === 0 && (
           <div className="border-l-4 border-yellow-400 py-6 pl-6">
-            <h2 className="text-xl font-bold">Resources coming soon</h2>
+            <h2 className="text-xl font-bold">No downloadable resources are published yet</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-700">
-              Downloadable forms, guides, and documents are being prepared. Check back soon or contact support for immediate access.
+              The resource library is currently empty. For a form or document needed for a specific application, check the responsible agency’s website or contact its office to confirm the current version. You can also use the service directory to find agency contact details and browse the online user guide for help navigating the OneStop Centre.
             </p>
+            <div className="mt-4 flex flex-wrap gap-5 text-sm">
+              <Link href="/agencies" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">Find an agency</Link>
+              <Link href="/guide" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">Open the user guide</Link>
+            </div>
           </div>
         )}
 

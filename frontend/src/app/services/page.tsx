@@ -127,7 +127,7 @@ export default function ServicesPage() {
           Government services for your business
         </h1>
         <p className="mt-5 max-w-4xl text-base leading-7 text-neutral-600 sm:text-lg">
-          Find business registration, licensing and compliance services, with guidance on where to begin and which agencies can help.
+          Starting or expanding a business can involve several public agencies, each responsible for a different approval or service. Use this directory to identify the service that matches your next step, check which agency is responsible, and follow the link to its guidance or application process. Service pages include the available audience, fee and timing information where published. Requirements can change, so confirm the latest checklist and charges with the responsible agency before submitting documents or payment.
         </p>
         <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
           <Link href="/business/registration" className={linkClass}>Start business registration</Link>

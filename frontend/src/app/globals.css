@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Source+Serif+4:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 /* Tailwind v4 does not auto-load the v3 JS config — without this line the
    brand palettes (primary/secondary/brand, gold #FFD700, red #CE1126) and
@@ -69,6 +69,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --font-sans: 'Manrope', 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
 }
 
 /* Dark mode disabled — app uses light theme with explicit color classes */
@@ -94,7 +97,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   overflow-x: clip;
-  font-family: 'Public Sans', 'Segoe UI', sans-serif;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -139,9 +142,21 @@ html.low-bandwidth *, html.low-bandwidth *::before, html.low-bandwidth *::after 
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Source Serif 4', Georgia, serif;
-  letter-spacing: -0.025em;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  text-wrap: pretty;
 }
+
+/* Reserve the third face for figures, IDs and compact technical labels. */
+.font-data,
+[data-typography="data"] {
+  font-family: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.035em;
+}
+
+p { text-wrap: pretty; }
 
 button, input, select, textarea {
   font: inherit;

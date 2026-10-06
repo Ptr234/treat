@@ -101,15 +101,15 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
         <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-l-4 border-yellow-400 bg-neutral-50 py-5 pl-5 pr-4 md:grid-cols-4">
           <div>
             <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Investment range</dt>
-            <dd className="mt-1 font-bold text-black">{opportunity.investmentRange}</dd>
+            <dd className="font-data mt-1 text-sm font-bold text-black">{opportunity.investmentRange}</dd>
           </div>
           <div>
             <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Expected ROI</dt>
-            <dd className="mt-1 font-bold text-black">{opportunity.roi}</dd>
+            <dd className="font-data mt-1 text-sm font-bold text-black">{opportunity.roi}</dd>
           </div>
           <div>
             <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Timeline</dt>
-            <dd className="mt-1 font-bold text-black">{opportunity.timeline}</dd>
+            <dd className="font-data mt-1 text-sm font-bold text-black">{opportunity.timeline}</dd>
           </div>
           <div>
             <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Market size</dt>
