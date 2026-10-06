@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { ClockIcon, UserIcon } from '@heroicons/react/24/outline';
 import { SupportTicket, TicketStatus, TicketPriority } from '@/types';
 import SLAIndicator from './SLAIndicator';
@@ -49,50 +48,40 @@ export default function TicketCard({ ticket }: TicketCardProps) {
   const ticketNumber = ticket.id;
 
   return (
-    <Link href={`/tickets/${ticket.id}/`}>
-      <motion.div
-        whileHover={{ y: -4 }}
-        className="block bg-white rounded-lg border border-gray-200 p-5 transition-shadow hover:shadow-lg"
-      >
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-mono font-semibold text-gray-900">
-                {ticketNumber}
-              </span>
-              <span className={`px-2 py-0.5 text-xs font-medium rounded border ${statusColors[ticket.status]}`}>
-                {ticket.status.replace('_', ' ')}
-              </span>
-              <span className={`px-2 py-0.5 text-xs font-medium rounded border ${priorityColors[ticket.priority]}`}>
-                {ticket.priority.toUpperCase()}
-              </span>
-            </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1 line-clamp-2">
-              {ticket.title}
-            </h3>
-            <p className="text-sm text-gray-600">
-              {categoryLabels[ticket.category]}
-            </p>
-          </div>
-        </div>
+    <Link
+      href={`/tickets/${ticket.id}/`}
+      className="group block border-t-2 border-black py-6 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-data text-sm font-semibold text-black">{ticketNumber}</span>
+        <span className={`px-2 py-0.5 text-xs font-medium rounded border ${statusColors[ticket.status]}`}>
+          {ticket.status.replace('_', ' ')}
+        </span>
+        <span className={`px-2 py-0.5 text-xs font-medium rounded border ${priorityColors[ticket.priority]}`}>
+          {ticket.priority.toUpperCase()}
+        </span>
+      </div>
+      <h3 className="mt-3 line-clamp-2 font-display text-xl font-semibold leading-snug text-black group-hover:text-red-600">
+        {ticket.title}
+      </h3>
+      <p className="mt-1 text-sm text-neutral-700">{categoryLabels[ticket.category]}</p>
 
-        <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-neutral-600">
+        <div className="flex items-center gap-1">
+          <ClockIcon className="h-4 w-4" aria-hidden="true" />
+          <span>Created {formatDate(ticket.createdAt)}</span>
+        </div>
+        {ticket.assignee && (
           <div className="flex items-center gap-1">
-            <ClockIcon className="w-4 h-4" />
-            <span>Created {formatDate(ticket.createdAt)}</span>
+            <UserIcon className="h-4 w-4" aria-hidden="true" />
+            <span className="max-w-[150px] truncate">{ticket.assignee}</span>
           </div>
-          {ticket.assignee && (
-            <div className="flex items-center gap-1">
-              <UserIcon className="w-4 h-4" />
-              <span className="truncate max-w-[150px]">{ticket.assignee}</span>
-            </div>
-          )}
-        </div>
+        )}
+      </div>
 
-        <div className="pt-3 border-t border-gray-100">
-          <SLAIndicator deadline={ticket.slaDeadline} status={ticket.status} />
-        </div>
-      </motion.div>
+      <div className="mt-4 border-t border-neutral-200 pt-3">
+        <SLAIndicator deadline={ticket.slaDeadline} status={ticket.status} />
+      </div>
     </Link>
   );
 }

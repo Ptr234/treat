@@ -76,7 +76,7 @@ export default function LeafletMap({ projects, selectedProject, onSelectProject,
             pathOptions={{
               fillColor: color,
               fillOpacity: isSelected ? 1 : 0.7,
-              color: isSelected ? '#b45309' : '#fff',
+              color: isSelected ? '#CE1126' : '#fff',
               weight: isSelected ? 3 : 1,
             }}
             eventHandlers={{

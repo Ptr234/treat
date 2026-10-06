@@ -76,7 +76,7 @@ export default function NotificationSettings() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <div className="bg-white rounded-xl shadow-lg">
+      <div className="bg-white">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Notification Settings</h2>
           <p className="text-gray-600 mt-1">

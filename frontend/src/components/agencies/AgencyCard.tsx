@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -18,6 +17,13 @@ interface AgencyCardProps {
   className?: string;
 }
 
+const urgencyStyles = {
+  high: { color: 'bg-red-600 text-white', text: 'High Priority' },
+  medium: { color: 'bg-yellow-400 text-black', text: 'Medium Priority' },
+  low: { color: 'bg-neutral-200 text-black', text: 'Standard' }
+};
+
+/** Agency entry as a detail block: a rule, type and actions, no box. */
 export default function AgencyCard({ agency, className = '' }: AgencyCardProps) {
   const [showAppointmentModal, setShowAppointmentModal] = useState(false);
 
@@ -27,141 +33,96 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
     }));
   };
 
-  const getCategoryColor = (category: AgencyContact['category']) => {
-    const colors = {
-      investment: 'from-yellow-600 to-red-700',
-      registration: 'from-red-700 to-red-900',
-      taxation: 'from-yellow-500 to-yellow-700',
-      environment: 'from-red-600 to-yellow-700',
-      standards: 'from-neutral-800 to-red-900',
-      infrastructure: 'from-yellow-700 to-red-800',
-      immigration: 'from-red-800 to-neutral-900',
-      lands: 'from-yellow-600 to-red-700',
-      social_security: 'from-red-700 to-neutral-900',
-      finance: 'from-yellow-500 to-yellow-700',
-      tourism: 'from-red-600 to-red-800',
-      employers: 'from-neutral-800 to-red-900',
-      conservation: 'from-yellow-700 to-red-800'
-    };
-    return colors[category] || colors.investment;
-  };
-
-  const getUrgencyIndicator = (urgency: 'high' | 'medium' | 'low') => {
-    const indicators = {
-      high: { color: 'bg-red-600', text: 'High Priority' },
-      medium: { color: 'bg-yellow-500', text: 'Medium Priority' },
-      low: { color: 'bg-neutral-600', text: 'Standard' }
-    };
-    return indicators[urgency];
-  };
-
-  const urgencyInfo = getUrgencyIndicator(agency.urgencyLevel);
+  const urgency = urgencyStyles[agency.urgencyLevel];
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        whileHover={{ y: -2 }}
-        className={`bg-white rounded-md overflow-hidden border-2 border-neutral-200 hover:border-black transition-all duration-300 ${className}`}
-      >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${getCategoryColor(agency.category)} p-4 relative`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {agency.logo && (
-                <div className="w-12 h-12 p-2 border-t-2 border-black pt-5">
-                  <Image
-                    src={agency.logo}
-                    alt={`${agency.acronym} Logo`}
-                    width={48}
-                    height={48}
-                    className="w-full h-full object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/images/logos/default-agency.png';
-                    }}
-                  />
-                </div>
-              )}
-              <div>
-                <h3 className="text-xl font-bold text-black">{agency.acronym}</h3>
-                <p className="text-black/70 text-sm">{agency.category.charAt(0).toUpperCase() + agency.category.slice(1)}</p>
-              </div>
-            </div>
-            <div className={`${urgencyInfo.color} text-white text-xs px-2 py-1 rounded-full font-medium`}>
-              {urgencyInfo.text}
+      <article className={`flex h-full flex-col border-t-2 border-black pt-5 ${className}`}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            {agency.logo && (
+              <Image
+                src={agency.logo}
+                alt={`${agency.acronym} logo`}
+                width={48}
+                height={48}
+                className="h-12 w-12 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/images/logos/default-agency.png';
+                }}
+              />
+            )}
+            <div>
+              <h3 className="font-display text-2xl font-semibold text-black">{agency.acronym}</h3>
+              <p className="text-sm text-neutral-600">
+                {agency.category.charAt(0).toUpperCase() + agency.category.slice(1)}
+              </p>
             </div>
           </div>
+          <span className={`${urgency.color} rounded-full px-2.5 py-1 text-xs font-bold`}>
+            {urgency.text}
+          </span>
         </div>
 
-        {/* Content */}
-        <div className="p-4 sm:p-6">
-          <h4 className="text-lg font-semibold text-black mb-2">{agency.name}</h4>
-          <p className="text-neutral-700 text-sm mb-4 line-clamp-3">{agency.description}</p>
+        <h4 className="mt-5 text-lg font-bold leading-snug text-black">{agency.name}</h4>
+        <p className="mt-2 line-clamp-3 text-sm leading-6 text-neutral-700">{agency.description}</p>
 
-          {/* Services */}
-          <div className="mb-4">
-            <h5 className="text-sm font-medium text-yellow-500 mb-2">Key Services:</h5>
-            <div className="flex flex-wrap gap-2">
-              {agency.services.slice(0, 3).map((service, index) => (
-                <span
-                  key={index}
-                  className="text-neutral-700 text-xs px-2 py-1 border-t-2 border-black pt-5"
-                >
-                  {service}
-                </span>
-              ))}
-              {agency.services.length > 3 && (
-                <span className="text-red-600 text-xs">+{agency.services.length - 3} more</span>
-              )}
-            </div>
+        <div className="mt-4">
+          <h5 className="text-xs font-bold uppercase tracking-wider text-red-600">Key services</h5>
+          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-700">
+            {agency.services.slice(0, 3).map((service) => (
+              <li key={service}>{service}</li>
+            ))}
+            {agency.services.length > 3 && (
+              <li className="font-semibold text-red-600">+{agency.services.length - 3} more</li>
+            )}
+          </ul>
+        </div>
+
+        <dl className="mt-4 space-y-2 border-t border-neutral-200 pt-4 text-sm text-neutral-700">
+          <div className="flex items-center gap-2">
+            <ClockIcon className="h-4 w-4 text-neutral-600" aria-hidden="true" />
+            <dd>{agency.operatingHours}</dd>
           </div>
-
-          {/* Info */}
-          <div className="space-y-2 mb-4 text-sm text-neutral-700">
-            <div className="flex items-center space-x-2">
-              <ClockIcon className="w-4 h-4 text-neutral-600" />
-              <span>{agency.operatingHours}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <BuildingOfficeIcon className="w-4 h-4 text-neutral-600" />
-              <span className="truncate">{agency.contact.address}</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <BuildingOfficeIcon className="h-4 w-4 text-neutral-600" aria-hidden="true" />
+            <dd className="truncate">{agency.contact.address}</dd>
           </div>
+        </dl>
 
-          {/* Action Buttons */}
-          <div className="grid grid-cols-1 gap-2 mt-4">
-            <button
-              onClick={openAssistant}
-              className="flex items-center justify-center space-x-2 bg-yellow-500 text-black px-4 py-2.5 rounded-md hover:bg-yellow-400 transition-all font-bold min-h-[44px]"
+        <div className="mt-auto grid gap-2 pt-5">
+          <button
+            type="button"
+            onClick={openAssistant}
+            className="flex min-h-11 items-center justify-center gap-2 bg-yellow-400 px-4 py-2.5 font-bold text-black hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          >
+            <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
+            <span>Ask about {agency.acronym}</span>
+          </button>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={`/agencies/${agency.id}`}
+              className="flex min-h-11 items-center justify-center gap-2 border-2 border-black px-4 py-2 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
             >
-              <ChatBubbleLeftRightIcon className="w-5 h-5" />
-              <span>Ask About {agency.acronym}</span>
-            </button>
+              <BuildingOfficeIcon className="h-4 w-4" aria-hidden="true" />
+              <span>View services</span>
+            </Link>
 
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                href={`/agencies/${agency.id}`}
-                className="flex items-center justify-center space-x-2 bg-neutral-100 text-neutral-700 px-4 py-2 rounded-md hover:bg-red-600 hover:text-red-600 transition-all font-medium text-sm border border-neutral-200 min-h-[44px]"
+            {agency.hasAppointmentBooking && (
+              <button
+                type="button"
+                onClick={() => setShowAppointmentModal(true)}
+                className="flex min-h-11 items-center justify-center gap-2 bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
               >
-                <BuildingOfficeIcon className="w-4 h-4" />
-                <span>View Services</span>
-              </Link>
-
-              {agency.hasAppointmentBooking && (
-                <button
-                  onClick={() => setShowAppointmentModal(true)}
-                  className="flex items-center justify-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-500 transition-all font-medium text-sm min-h-[44px]"
-                >
-                  <CalendarIcon className="w-4 h-4" />
-                  <span>Book Appointment</span>
-                </button>
-              )}
-            </div>
+                <CalendarIcon className="h-4 w-4" aria-hidden="true" />
+                <span>Book appointment</span>
+              </button>
+            )}
           </div>
         </div>
-      </motion.div>
+      </article>
 
       {agency.hasAppointmentBooking && (
         <AppointmentModal

@@ -578,7 +578,7 @@ export default function AgencyChatPage() {
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
               lg:translate-x-0 lg:relative
               fixed inset-y-0 left-0 z-40 w-72 lg:w-72 flex-shrink-0
-              bg-white border border-neutral-200 rounded-none lg:rounded-md
+              bg-white lg:border-l lg:border-neutral-200
               transition-transform duration-200 ease-out
               flex flex-col overflow-hidden
             `}
@@ -676,7 +676,7 @@ export default function AgencyChatPage() {
           )}
 
           {/* ── Main chat area ────────────────────────────────────── */}
-          <div className="flex-1 flex flex-col bg-white border border-neutral-200 rounded-md overflow-hidden min-w-0">
+          <div className="flex-1 flex flex-col bg-white overflow-hidden min-w-0">
             {/* Channel header */}
             <div className="px-4 sm:px-6 py-4 border-b border-neutral-200 flex items-center gap-3">
               {activeChannel === 'general' ? (

@@ -281,7 +281,7 @@ export default function TaxCalculator() {
               height={24}
               className="object-cover mr-3 rounded shadow-md"
             />
-            <span className="inline-block px-4 py-2 bg-yellow-500/40 text-yellow-100 rounded-full text-sm font-medium backdrop-blur-sm border border-yellow-400/30">
+            <span className="inline-block px-4 py-2 bg-yellow-500/40 text-neutral-800 rounded-full text-sm font-medium backdrop-blur-sm border border-yellow-400/30">
               🧮 Official URA Tax Calculator
             </span>
             <Image
@@ -292,13 +292,13 @@ export default function TaxCalculator() {
               className="object-contain ml-3 opacity-80"
             />
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-50 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-800 mb-4">
             Uganda Tax Calculator
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-red-300 text-xl sm:text-2xl mt-2">
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-red-700 to-red-600 text-xl sm:text-2xl mt-2">
               &quot;For God and My Country&quot;
             </span>
           </h2>
-          <p className="text-lg sm:text-xl text-neutral-200">
+          <p className="text-lg sm:text-xl text-neutral-900">
             Official Uganda Revenue Authority (URA) tax calculation portal. Calculate PAYE, VAT, NSSF, and investment incentives accurately.
           </p>
         </motion.div>
@@ -308,21 +308,21 @@ export default function TaxCalculator() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
+            className="border-t-4 border-black pt-6"
           >
-            <h3 className="text-xl sm:text-2xl font-semibold text-yellow-400 mb-6">
+            <h3 className="text-xl sm:text-2xl font-semibold text-red-700 mb-6">
               Tax Calculation
             </h3>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-yellow-200/80 mb-2">
+                <label className="block text-sm font-medium text-neutral-800 mb-2">
                   Calculation Type
                 </label>
                 <select
                   value={calculationType}
                   onChange={(e) => setCalculationType(e.target.value as 'paye' | 'corporate' | 'investment')}
-                  className="w-full px-4 py-2 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-neutral-800 text-yellow-100"
+                  className="w-full px-4 py-2 border border-neutral-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-neutral-800"
                 >
                   <option value="paye">PAYE (Individual Income Tax)</option>
                   <option value="corporate">Corporate Tax</option>
@@ -333,33 +333,33 @@ export default function TaxCalculator() {
               {calculationType === 'paye' ? (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Monthly Income (UGX) <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                      Monthly Income (UGX) <span className="text-red-700">*</span>
                     </label>
                     <input
                       type="number"
                       value={income}
                       onChange={(e) => handleInputChange('income', e.target.value)}
                       placeholder="Enter your monthly income"
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 placeholder:text-neutral-500 ${
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white text-neutral-800 placeholder:text-neutral-600 ${
                         errors.income
                           ? 'border-red-500 focus:ring-red-500'
-                          : 'border-neutral-600 focus:ring-yellow-500'
+                          : 'border-neutral-400 focus:ring-yellow-500'
                       }`}
                     />
                     {errors.income && (
-                      <p className="text-red-400 text-sm mt-1">{errors.income}</p>
+                      <p className="text-red-700 text-sm mt-1">{errors.income}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Business Type
                     </label>
                     <select
                       value={businessType}
                       onChange={(e) => handleInputChange('businessType', e.target.value)}
-                      className="w-full px-4 py-2 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-neutral-800 text-yellow-100"
+                      className="w-full px-4 py-2 border border-neutral-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-neutral-800"
                     >
                       <option value="individual">Individual</option>
                       <option value="company">Company</option>
@@ -370,27 +370,27 @@ export default function TaxCalculator() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Annual Turnover (UGX) <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                      Annual Turnover (UGX) <span className="text-red-700">*</span>
                     </label>
                     <input
                       type="number"
                       value={annualTurnover}
                       onChange={(e) => handleInputChange('annualTurnover', e.target.value)}
                       placeholder="Enter annual business turnover"
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 placeholder:text-neutral-500 ${
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white text-neutral-800 placeholder:text-neutral-600 ${
                         errors.annualTurnover
                           ? 'border-red-500 focus:ring-red-500'
-                          : 'border-neutral-600 focus:ring-yellow-500'
+                          : 'border-neutral-400 focus:ring-yellow-500'
                       }`}
                     />
                     {errors.annualTurnover && (
-                      <p className="text-red-400 text-sm mt-1">{errors.annualTurnover}</p>
+                      <p className="text-red-700 text-sm mt-1">{errors.annualTurnover}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Number of Employees
                     </label>
                     <input
@@ -398,22 +398,22 @@ export default function TaxCalculator() {
                       value={employeeCount}
                       onChange={(e) => handleInputChange('employeeCount', e.target.value)}
                       placeholder="Enter number of employees"
-                      className="w-full px-4 py-2 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
+                      className="w-full px-4 py-2 border border-neutral-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-neutral-800 placeholder:text-neutral-600"
                     />
                   </div>
 
                   {calculationType === 'investment' && (
                     <div>
-                      <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                        Investment Sector (ATMS) <span className="text-red-400">*</span>
+                      <label className="block text-sm font-medium text-neutral-800 mb-2">
+                        Investment Sector (ATMS) <span className="text-red-700">*</span>
                       </label>
                       <select
                         value={investmentSector}
                         onChange={(e) => handleInputChange('investmentSector', e.target.value)}
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 ${
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white text-neutral-800 ${
                           errors.investmentSector
                             ? 'border-red-500 focus:ring-red-500'
-                            : 'border-neutral-600 focus:ring-yellow-500'
+                            : 'border-neutral-400 focus:ring-yellow-500'
                         }`}
                       >
                         <option value="">Select sector</option>
@@ -426,7 +426,7 @@ export default function TaxCalculator() {
                         <option value="other">Other Sectors (8%)</option>
                       </select>
                       {errors.investmentSector && (
-                        <p className="text-red-400 text-sm mt-1">{errors.investmentSector}</p>
+                        <p className="text-red-700 text-sm mt-1">{errors.investmentSector}</p>
                       )}
                     </div>
                   )}
@@ -440,9 +440,9 @@ export default function TaxCalculator() {
                   checked={vatApplicable || parseFloat(annualTurnover) >= 150000000}
                   onChange={(e) => setVatApplicable(e.target.checked)}
                   disabled={parseFloat(annualTurnover) >= 150000000}
-                  className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-neutral-500 rounded"
+                  className="h-4 w-4 text-red-700 focus:ring-yellow-500 border-neutral-400 rounded"
                 />
-                <label htmlFor="vat" className="ml-2 block text-sm text-neutral-300">
+                <label htmlFor="vat" className="ml-2 block text-sm text-neutral-700">
                   VAT Applicable {parseFloat(annualTurnover) >= 150000000 ? '(Mandatory - Turnover > UGX 150M)' : '(Annual turnover > UGX 150M)'}
                 </label>
               </div>
@@ -459,8 +459,8 @@ export default function TaxCalculator() {
 
               {Object.keys(errors).length > 0 && (
                 <div className="bg-red-900/20 border border-red-700/30 rounded-lg p-3 mt-4">
-                  <p className="text-red-400 text-sm font-medium">Please fix the following errors:</p>
-                  <ul className="list-disc list-inside text-red-400 text-sm mt-1">
+                  <p className="text-red-700 text-sm font-medium">Please fix the following errors:</p>
+                  <ul className="list-disc list-inside text-red-700 text-sm mt-1">
                     {Object.values(errors).map((error, index) => (
                       <li key={index}>{error}</li>
                     ))}
@@ -474,32 +474,32 @@ export default function TaxCalculator() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
+            className="border-t-4 border-black pt-6"
           >
-            <h3 className="text-xl sm:text-2xl font-semibold text-yellow-400 mb-6">
+            <h3 className="text-xl sm:text-2xl font-semibold text-red-700 mb-6">
               Tax Breakdown
             </h3>
 
             {results ? (
               <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                  <span className="text-neutral-400">{results.calculationType === 'paye' ? 'Gross Income:' : 'Annual Turnover:'}:</span>
-                  <span className="font-semibold text-yellow-300">UGX {results.grossIncome.toLocaleString()}</span>
+                <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                  <span className="text-neutral-600">{results.calculationType === 'paye' ? 'Gross Income:' : 'Annual Turnover:'}:</span>
+                  <span className="font-semibold text-neutral-800">UGX {results.grossIncome.toLocaleString()}</span>
                 </div>
 
                 {results.calculationType === 'paye' && (
                   <>
                     {results.incomeTax > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                        <span className="text-neutral-400">Income Tax (PAYE):</span>
-                        <span className="font-semibold text-red-400">-UGX {results.incomeTax.toLocaleString()}</span>
+                      <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                        <span className="text-neutral-600">Income Tax (PAYE):</span>
+                        <span className="font-semibold text-red-700">-UGX {results.incomeTax.toLocaleString()}</span>
                       </div>
                     )}
 
                     {results.nssf > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                        <span className="text-neutral-400">NSSF (5%):</span>
-                        <span className="font-semibold text-red-400">-UGX {results.nssf.toLocaleString()}</span>
+                      <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                        <span className="text-neutral-600">NSSF (5%):</span>
+                        <span className="font-semibold text-red-700">-UGX {results.nssf.toLocaleString()}</span>
                       </div>
                     )}
                   </>
@@ -508,70 +508,70 @@ export default function TaxCalculator() {
                 {(results.calculationType === 'corporate' || results.calculationType === 'investment') && (
                   <>
                     {results.corporateTax > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                        <span className="text-neutral-400">Corporate Tax (30%):</span>
-                        <span className="font-semibold text-red-400">-UGX {results.corporateTax.toLocaleString()}</span>
+                      <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                        <span className="text-neutral-600">Corporate Tax (30%):</span>
+                        <span className="font-semibold text-red-700">-UGX {results.corporateTax.toLocaleString()}</span>
                       </div>
                     )}
 
                     {results.lst > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                        <span className="text-neutral-400">Local Service Tax:</span>
-                        <span className="font-semibold text-red-400">-UGX {results.lst.toLocaleString()}</span>
+                      <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                        <span className="text-neutral-600">Local Service Tax:</span>
+                        <span className="font-semibold text-red-700">-UGX {results.lst.toLocaleString()}</span>
                       </div>
                     )}
 
                     {results.withholdingTax > 0 && (
-                      <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                        <span className="text-neutral-400">Withholding Tax (6%):</span>
-                        <span className="font-semibold text-red-400">-UGX {results.withholdingTax.toLocaleString()}</span>
+                      <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                        <span className="text-neutral-600">Withholding Tax (6%):</span>
+                        <span className="font-semibold text-red-700">-UGX {results.withholdingTax.toLocaleString()}</span>
                       </div>
                     )}
                   </>
                 )}
 
                 {results.vat > 0 && (
-                  <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                    <span className="text-neutral-400">VAT (18%):</span>
-                    <span className="font-semibold text-red-400">-UGX {results.vat.toLocaleString()}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-neutral-200">
+                    <span className="text-neutral-600">VAT (18%):</span>
+                    <span className="font-semibold text-red-700">-UGX {results.vat.toLocaleString()}</span>
                   </div>
                 )}
 
                 {results.investmentIncentive > 0 && (
-                  <div className="flex justify-between items-center py-2 border-b border-neutral-700 bg-yellow-900/20">
-                    <span className="text-yellow-300 font-medium">Investment Tax Credit:</span>
-                    <span className="font-semibold text-yellow-400">+UGX {results.investmentIncentive.toLocaleString()}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-neutral-200 bg-yellow-50">
+                    <span className="text-neutral-800 font-medium">Investment Tax Credit:</span>
+                    <span className="font-semibold text-red-700">+UGX {results.investmentIncentive.toLocaleString()}</span>
                   </div>
                 )}
 
-                <div className="flex justify-between items-center py-2 border-t-2 border-neutral-700 mt-4">
-                  <span className="text-lg font-semibold text-neutral-300">Net {results.calculationType === 'paye' ? 'Income' : 'Profit'}:</span>
-                  <span className="text-lg font-bold text-yellow-400">UGX {results.netIncome.toLocaleString()}</span>
+                <div className="flex justify-between items-center py-2 border-t-2 border-neutral-200 mt-4">
+                  <span className="text-lg font-semibold text-neutral-700">Net {results.calculationType === 'paye' ? 'Income' : 'Profit'}:</span>
+                  <span className="text-lg font-bold text-red-700">UGX {results.netIncome.toLocaleString()}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                   <div className="text-center">
-                    <span className="text-sm text-neutral-400 block">Total Deductions:</span>
-                    <span className="text-sm font-semibold text-red-400">UGX {results.totalDeductions.toLocaleString()}</span>
+                    <span className="text-sm text-neutral-600 block">Total Deductions:</span>
+                    <span className="text-sm font-semibold text-red-700">UGX {results.totalDeductions.toLocaleString()}</span>
                   </div>
                   {results.totalIncentives > 0 && (
                     <div className="text-center">
-                      <span className="text-sm text-neutral-400 block">Tax Incentives:</span>
-                      <span className="text-sm font-semibold text-yellow-400">UGX {results.totalIncentives.toLocaleString()}</span>
+                      <span className="text-sm text-neutral-600 block">Tax Incentives:</span>
+                      <span className="text-sm font-semibold text-red-700">UGX {results.totalIncentives.toLocaleString()}</span>
                     </div>
                   )}
                 </div>
 
                 {results.calculationType === 'investment' && results.investmentIncentive > 0 && (
-                  <div className="mt-4 p-3 bg-yellow-900/20 rounded-lg border border-yellow-700/30">
-                    <p className="text-sm text-yellow-200/80">
+                  <div className="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-700/30">
+                    <p className="text-sm text-neutral-800">
                       <strong>💡 Investment Benefit:</strong> Your {investmentSector} investment qualifies for significant tax credits under Uganda&apos;s ATMS program, saving you UGX {results.investmentIncentive.toLocaleString()} annually.
                     </p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="text-center py-12 text-neutral-400">
+              <div className="text-center py-12 text-neutral-600">
                 <div className="mb-6">
                   <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-2xl">🧮</span>
@@ -579,9 +579,9 @@ export default function TaxCalculator() {
                   <p className="text-lg">Enter your {calculationType === 'paye' ? 'income' : 'business'} details to see comprehensive tax breakdown</p>
                 </div>
 
-                <div className="bg-yellow-900/20 rounded-lg p-4 border border-yellow-700/30 text-left">
-                  <h4 className="font-semibold text-yellow-300 mb-2">💡 Tax Tips:</h4>
-                  <ul className="text-sm text-yellow-200/80 space-y-1">
+                <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-700/30 text-left">
+                  <h4 className="font-semibold text-neutral-800 mb-2">💡 Tax Tips:</h4>
+                  <ul className="text-sm text-neutral-800 space-y-1">
                     {calculationType === 'paye' ? (
                       <>
                         <li>• First UGX 235,000 monthly is tax-free</li>
@@ -601,12 +601,12 @@ export default function TaxCalculator() {
               </div>
             )}
 
-            <div className="mt-6 p-4 bg-yellow-900/30 rounded-lg border border-yellow-700/50">
-              <h4 className="font-semibold text-yellow-300 mb-2">Official URA Tax Rates (2024/2025):</h4>
+            <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-700/50">
+              <h4 className="font-semibold text-neutral-800 mb-2">Official URA Tax Rates (2024/2025):</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h5 className="font-medium text-yellow-300 mb-1">PAYE Rates:</h5>
-                  <ul className="text-sm text-neutral-300 space-y-1">
+                  <h5 className="font-medium text-neutral-800 mb-1">PAYE Rates:</h5>
+                  <ul className="text-sm text-neutral-700 space-y-1">
                     <li>• Up to UGX 235,000: 0%</li>
                     <li>• UGX 235,001 - 335,000: 10%</li>
                     <li>• UGX 335,001 - 410,000: 20%</li>
@@ -614,8 +614,8 @@ export default function TaxCalculator() {
                   </ul>
                 </div>
                 <div>
-                  <h5 className="font-medium text-yellow-300 mb-1">Corporate Rates:</h5>
-                  <ul className="text-sm text-neutral-300 space-y-1">
+                  <h5 className="font-medium text-neutral-800 mb-1">Corporate Rates:</h5>
+                  <ul className="text-sm text-neutral-700 space-y-1">
                     <li>• Small Business (&lt; UGX 50M): 20%</li>
                     <li>• Standard Rate: 30%</li>
                     <li>• VAT: 18% (UGX 150M+ turnover)</li>
@@ -625,8 +625,8 @@ export default function TaxCalculator() {
               </div>
               {calculationType === 'investment' && (
                 <div className="mt-3 pt-3 border-t border-yellow-700/30">
-                  <h5 className="font-medium text-yellow-300 mb-1">Enhanced ATMS Investment Incentives:</h5>
-                  <ul className="text-sm text-neutral-300 space-y-1">
+                  <h5 className="font-medium text-neutral-800 mb-1">Enhanced ATMS Investment Incentives:</h5>
+                  <ul className="text-sm text-neutral-700 space-y-1">
                     <li>• ICT & Digital Services: 25% tax credit</li>
                     <li>• Energy & Utilities: 22% tax credit</li>
                     <li>• Tourism & Hospitality: 20% tax credit</li>
