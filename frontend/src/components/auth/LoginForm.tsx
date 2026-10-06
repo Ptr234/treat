@@ -174,7 +174,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
         <button
           onClick={() => { setShowReset(false); setResetStep('email'); setResetError(''); setResetMessage(''); }}
-          className="text-sm text-yellow-700 hover:text-yellow-600"
+          className="text-sm text-red-700 hover:text-red-800"
         >
           &larr; Back to sign in
         </button>
@@ -222,7 +222,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <button
           type="button"
           onClick={() => { setMfaRequired(false); setMfaCode(''); setFormError(''); }}
-          className="text-sm text-yellow-700 hover:text-yellow-600"
+          className="text-sm text-red-700 hover:text-red-800"
         >
           &larr; Back to sign in
         </button>
@@ -246,7 +246,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
           <button
             type="button"
             onClick={() => setShowReset(true)}
-            className="text-xs text-yellow-700 hover:text-yellow-600 font-medium"
+            className="text-xs text-red-700 hover:text-red-800 font-medium"
           >
             Forgot password?
           </button>

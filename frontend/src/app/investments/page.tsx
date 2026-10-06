@@ -149,7 +149,7 @@ const InvestmentOpportunities = () => {
               <article key={opp.id} className="border-t border-neutral-200 pt-6">
                 <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider">
                   <span className="text-red-600">{opp.category?.split('&')[0]?.trim()}</span>
-                  <span className="text-neutral-500">· {opp.priority} priority</span>
+                  <span className="text-neutral-700">· {opp.priority} priority</span>
                 </div>
 
                 <h3 className="mt-2 text-lg font-bold leading-snug">

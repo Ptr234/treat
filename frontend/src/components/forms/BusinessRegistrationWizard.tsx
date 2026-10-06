@@ -477,7 +477,7 @@ export default function BusinessRegistrationWizard() {
                       />
                       <div>
                         <div className="font-medium text-black">{type.label}</div>
-                        <div className="text-sm text-neutral-600">{type.description}</div>
+                        <div className="text-sm text-neutral-700">{type.description}</div>
                       </div>
                     </div>
                   </div>

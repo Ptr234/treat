@@ -574,7 +574,7 @@ export default function ChatWidget() {
             className="fixed bottom-[4.5rem] right-4 sm:bottom-24 sm:right-6 z-50 bg-white rounded-xl shadow-xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-[180px] sm:max-w-[220px] border border-yellow-300"
           >
             <p className="text-xs sm:text-sm font-medium text-gray-800">How can I help you invest?</p>
-            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1">Ask me anything about Uganda</p>
+            <p className="text-[10px] sm:text-xs text-gray-700 mt-0.5 sm:mt-1">Ask me anything about Uganda</p>
             <div className="absolute -bottom-2 right-6 sm:right-8 w-3 h-3 sm:w-4 sm:h-4 bg-white border-r border-b border-yellow-300 rotate-45"></div>
           </motion.div>
         )}
