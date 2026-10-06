@@ -367,7 +367,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'the-giants-club',
     name: 'The Giants Club',
     acronym: 'The Giants Club',
-    description: 'The Giants Club is an initiative of Space for Giants that brings together visionary leaders of African states, philanthropists and scientists. Its purpose is to protect Africa\'s remaining wildernesses and the large species that depend on them. The Club links conservation goals with government leadership and private funding. Investors in conservation, eco-tourism and wildlife-related projects can engage with the Club as a partner.',
+    description: 'The Giants Club is an initiative of Space for Giants that brings together African heads of state, business leaders, philanthropists and conservationists. Its focus is securing Africa\'s elephant populations and the landscapes they depend on. It works against the illegal ivory trade by building agreement among leaders and private partners. Investors in conservation, eco-tourism and wildlife-related projects can follow its work as a point of contact.',
     services: [
         'Information on Tourism investment opportunities',
         'Promotion of conservation projects',
