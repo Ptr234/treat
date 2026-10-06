@@ -11,8 +11,6 @@ import {
   MapIcon,
   ChatBubbleLeftRightIcon,
   MagnifyingGlassIcon,
-  BuildingStorefrontIcon,
-  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import staticData from '@/data/investment-opportunities.json';
 import type { InvestmentOpportunity } from '@/types';
@@ -89,12 +87,6 @@ const SECTOR_CATEGORIES: Record<string, string[]> = {
   'Energy & minerals': ['Energy & Utilities', 'Mining & Minerals'],
   Healthcare: ['Healthcare'],
 };
-
-const PROJECT_VISUALS = [
-  { image: '/images/uganda-tea-plantation.webp', icon: BuildingStorefrontIcon, label: 'Ugandan tea plantation' },
-  { image: '/images/uganda-map-flag.jpg', icon: BuildingStorefrontIcon, label: 'Map of Uganda' },
-  { image: '/images/lake-bunyonyi-uganda.jpg', icon: GlobeAltIcon, label: 'Lake Bunyonyi in Uganda' },
-];
 
 export default function HomePage() {
   const [heroImages, setHeroImages] = useState(HERO_IMAGES);
@@ -343,29 +335,23 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className={sectionHeading}>High-priority opportunities</p>
               <h2 id="featured-heading" className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Projects open to investors now</h2>
             </div>
             <Link href="/investments" className={`${linkClass} text-sm`}>All investment opportunities</Link>
           </div>
-          <div className="grid gap-x-10 gap-y-10 md:grid-cols-3">
-            {featured.map((opp, index) => {
-              const visual = PROJECT_VISUALS[index % PROJECT_VISUALS.length]!;
-              const SectorIcon = visual.icon;
-              return <article key={opp.id} className="overflow-hidden border border-neutral-200 bg-white shadow-sm">
-                <div className="relative aspect-[16/9] bg-neutral-200">
-                  <Image src={visual.image} alt={visual.label} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
-                  <span className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded bg-white px-3 py-1.5 text-xs font-bold text-[#10283f] shadow">
-                    <SectorIcon className="h-4 w-4" aria-hidden="true" />{opp.category.split('&')[0]?.trim()}
-                  </span>
+          <div className="divide-y divide-neutral-200 border-y border-neutral-200">
+            {featured.map((opp) => (
+              <article key={opp.id} className="grid gap-5 py-7 md:grid-cols-[minmax(0,1fr)_auto] md:gap-10">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wider text-red-600">{opp.category.split('&')[0]?.trim()}</p>
+                  <h3 className="mt-2 text-xl font-bold leading-snug sm:text-2xl">
+                    <Link href={`/investments/${opp.id}`} className={linkClass}>{opp.title}</Link>
+                  </h3>
+                  <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-700">{opp.description}</p>
+                  <p className="mt-3 text-xs text-neutral-600">Lead agency: {opp.agency}</p>
                 </div>
-                <div className="p-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-red-600">{opp.category.split('&')[0]?.trim()}</p>
-                <h3 className="mt-3 text-lg font-bold leading-snug">
-                  <Link href={`/investments/${opp.id}`} className={linkClass}>{opp.title}</Link>
-                </h3>
-                <p className="mt-3 line-clamp-3 text-sm leading-6 text-neutral-700">{index === 0 ? 'Develop a fruit processing facility in the Luwero region, turning locally grown produce into products for domestic and regional markets.' : index === 1 ? 'Build a cassava processing facility in Pader, creating higher value products and supporting Northern Uganda’s agricultural supply chain.' : 'Develop cocoa processing capacity in Bundibugyo and supply value-added products to local and export markets.'}</p>
-                <dl className="mt-5 grid grid-cols-3 gap-3 border-l-4 border-yellow-400 bg-white py-3 pl-4 pr-2 text-sm">
+                <div className="md:w-80">
+                <dl className="grid grid-cols-3 gap-3 border-l-4 border-yellow-400 py-2 pl-4 text-sm">
                   <div>
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">Investment</dt>
                     <dd className="font-data mt-0.5 text-xs font-semibold text-black">{opp.investmentRange}</dd>
@@ -379,10 +365,10 @@ export default function HomePage() {
                     <dd className="font-data mt-0.5 text-xs font-semibold text-black">{opp.timeline}</dd>
                   </div>
                 </dl>
-                <p className="mt-4 text-xs text-neutral-600">Agency: {opp.agency}</p>
+                <Link href={`/investments/${opp.id}`} className={`${linkClass} mt-4 inline-block text-sm`}>View project details</Link>
                 </div>
-              </article>;
-            })}
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -492,7 +478,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 max-w-2xl">
             <p className={sectionHeading}>How it works</p>
-            <h2 id="journey-heading" className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Move forward in three steps</h2>
+          <h2 id="journey-heading" className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Move forward in three steps</h2>
             <p className="mt-4 leading-7 text-neutral-700">Find useful information and support for your next decision.</p>
           </div>
           <ol className="grid gap-10 md:grid-cols-3 md:gap-0 md:divide-x md:divide-neutral-200">

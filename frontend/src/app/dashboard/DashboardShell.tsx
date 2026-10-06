@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bars3Icon, XMarkIcon, ArrowRightOnRectangleIcon, HomeIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -19,6 +19,22 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const { isAuthenticated, user, isLoading, logout } = useAuth();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileOpen(false);
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileOpen]);
 
   const isStaff = isAuthenticated && STAFF_ROLES.includes(user?.role ?? '');
 
@@ -52,16 +68,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-label="Dashboard navigation">
           <div
-            className="absolute inset-0 bg-neutral-100"
+            className="absolute inset-0 bg-black/50 backdrop-blur-[1px]"
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="relative w-64 max-w-[80%] h-full">
+          <div className="relative h-full w-72 max-w-[85vw] bg-black shadow-2xl [height:100dvh]">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute -right-11 top-3 p-2 text-black bg-neutral-100 rounded-md"
+              className="absolute -right-12 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-black shadow-lg"
               aria-label="Close menu"
             >
               <XMarkIcon className="w-5 h-5" />
@@ -78,7 +94,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           <div className="flex items-center gap-3 px-4 sm:px-6 h-14">
             <button
               onClick={() => setMobileOpen(true)}
-              className="lg:hidden p-2 -ml-2 text-neutral-700 hover:text-black rounded-md hover:bg-neutral-100"
+              className="lg:hidden -ml-2 flex h-11 w-11 items-center justify-center rounded-md text-neutral-700 hover:bg-neutral-100 hover:text-black"
               aria-label="Open menu"
             >
               <Bars3Icon className="w-6 h-6" />
@@ -100,7 +116,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-neutral-800 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+              className="flex min-h-11 items-center gap-1.5 px-3 py-2 text-sm font-medium text-neutral-800 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
             >
               <ArrowRightOnRectangleIcon className="w-5 h-5" />
               <span className="hidden sm:inline">Sign out</span>

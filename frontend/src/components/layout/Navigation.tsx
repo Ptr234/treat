@@ -44,8 +44,8 @@ const MENU_PATHS: Record<string, string[]> = {
 function Brand() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600" aria-label="OneStop Centre Uganda home">
-      <Image src="/images/uganda-coat-of-arms.png" alt="Uganda flag with the crowned crane emblem" width={36} height={24} className="h-6 w-9 object-contain" priority />
-      <Image src="/images/oneStopCenter-logo.jpeg" alt="" width={42} height={42} className="h-10 w-10 object-contain" priority />
+      <Image src="/images/uganda-coat-of-arms.png" alt="Uganda flag with the crowned crane emblem" width={36} height={24} className="hidden h-6 w-9 object-contain min-[390px]:block" priority />
+      <Image src="/images/oneStopCenter-logo.jpeg" alt="" width={42} height={42} className="h-9 w-9 object-contain min-[390px]:h-10 min-[390px]:w-10" priority />
       <span className="leading-[1.05]">
         <span className="block text-sm font-extrabold tracking-tight text-black">OneStop Centre</span>
         <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.2em] text-red-600">Uganda Investment Authority</span>
@@ -82,8 +82,8 @@ export default function Navigation() {
       </div>
 
       <header id="site-header" className="sticky z-50 border-b border-neutral-200 bg-white" style={{ top: 'var(--newsbar-h, 0px)' }}>
-        <div className="mx-auto flex h-[76px] max-w-6xl items-stretch justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex shrink-0 items-center pr-2">
+        <div className="mx-auto flex min-h-[68px] max-w-6xl items-stretch justify-between gap-2 px-3 sm:h-[76px] sm:gap-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 shrink items-center pr-1 sm:shrink-0 sm:pr-2">
             <Brand />
           </div>
 
@@ -159,14 +159,14 @@ export default function Navigation() {
           </div>
 
           <div className="flex items-center xl:hidden">
-            <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} className="rounded p-2 text-black hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
+            <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} aria-controls="mobile-site-navigation" className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-black hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
               {mobileOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
         {mobileOpen && (
-          <nav aria-label="Mobile navigation" className="max-h-[calc(100vh-6rem)] overflow-y-auto border-t border-neutral-200 bg-white px-4 py-4 shadow-lg xl:hidden">
+          <nav id="mobile-site-navigation" aria-label="Mobile navigation" className="max-h-[calc(100dvh-6rem)] overscroll-contain overflow-y-auto border-t border-neutral-200 bg-white px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-lg xl:hidden">
             <div className="flex flex-col gap-1">
               {MENUS.map((menu) => (
                 <div key={menu.title} className="border-b border-neutral-200">
