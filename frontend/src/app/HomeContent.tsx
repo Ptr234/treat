@@ -19,20 +19,26 @@ type Sector = { title: string; blurb: string; image: string; link?: string };
 
 const OPPORTUNITIES = staticData as unknown as InvestmentOpportunity[];
 
+// Only genuine, unwatermarked Uganda photographs belong here. Several files in
+// public/images turned out to be stock photos with visible watermarks, an
+// infographic mislabeled as a background photo, or a photo of an identifiable
+// person — none of those are fit to publish. See PROGRESS.md.
 const HERO_IMAGES = [
-  '/images/Pride.webp',
   '/images/uganda-kampala-city-view.webp',
-  '/images/uganda-pearl-africa.jpg',
+  '/images/uganda-flag-city.jpg',
   '/images/lake-bunyonyi-uganda.jpg',
+  '/images/uganda-map-flag.jpg',
 ];
 
 const SECTORS: Sector[] = [
-  { title: 'Agriculture & agro-processing', blurb: 'Grow value across coffee, tea, dairy and food processing.', image: '/images/uganda-pearl-africa.jpg' },
+  { title: 'Agriculture & agro-processing', blurb: 'Grow value across coffee, tea, dairy and food processing.', image: '/images/Tourism.webp' },
   { title: 'Tourism & hospitality', blurb: 'Discover opportunities from the Nile to Uganda’s national parks.', image: '/images/lake-bunyonyi-uganda.jpg' },
-  { title: 'Infrastructure & real estate', blurb: 'Build for a growing economy with regional connections.', image: '/images/Infrastucture.webp' },
-  { title: 'ICT & innovation', blurb: 'Join a young, fast-growing and increasingly connected market.', image: '/images/uganda-kampala-city-view.webp' },
-  { title: 'Manufacturing', blurb: 'Serve local demand and reach markets across East Africa.', image: '/images/uganda-background.jpeg' },
-  { title: 'Energy & minerals', blurb: 'Explore opportunities in renewables, oil, gas and mining.', image: '/images/Tourism.webp' },
+  { title: 'Infrastructure & real estate', blurb: 'Build for a growing economy with regional connections.', image: '/images/uganda-kampala-city-view.webp' },
+  { title: 'ICT & innovation', blurb: 'Join a young, fast-growing and increasingly connected market.', image: '/images/uganda-flag-city.jpg' },
+  { title: 'Manufacturing', blurb: 'Serve local demand and reach markets across East Africa.', image: '/images/uganda-map-flag.jpg' },
+  // No dedicated energy/mining photo exists in the asset library; this repeats
+  // the infrastructure image rather than use another watermarked or mismatched one.
+  { title: 'Energy & minerals', blurb: 'Explore opportunities in renewables, oil, gas and mining.', image: '/images/uganda-kampala-city-view.webp' },
 ];
 
 const AGENCIES = [
@@ -159,7 +165,7 @@ export default function HomePage() {
           <div>
             <div className="relative aspect-[4/3] overflow-hidden bg-neutral-200">
               <Image
-                src={heroImages[heroIndex] ?? '/images/Pride.webp'}
+                src={heroImages[heroIndex] ?? '/images/uganda-kampala-city-view.webp'}
                 alt="Uganda, the Pearl of Africa"
                 fill
                 priority

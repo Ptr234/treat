@@ -83,12 +83,12 @@ export default function Navigation() {
       </div>
 
       <header className="sticky z-50 border-b border-neutral-200 bg-white" style={{ top: 'var(--newsbar-h, 0px)' }}>
-        <div className="mx-auto flex h-[76px] max-w-7xl items-stretch justify-between gap-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center pr-2">
+        <div className="mx-auto flex h-[76px] max-w-6xl items-stretch justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex shrink-0 items-center pr-2">
             <Brand />
           </div>
 
-          <nav aria-label="Main navigation" className="hidden items-stretch gap-1 lg:flex xl:gap-3">
+          <nav aria-label="Main navigation" className="hidden items-stretch gap-0.5 lg:flex xl:gap-1">
             {MENUS.map((menu) => {
               const isCurrent = pathname.startsWith(menu.title === 'Invest in Uganda' ? '/investments' : menu.title === 'Services' ? '/services' : menu.title === 'Resources' ? '/downloads' : '/business');
               const expanded = activeMenu === menu.title;
@@ -107,7 +107,7 @@ export default function Navigation() {
                     aria-controls={menuId}
                     onClick={() => setActiveMenu(menu.title)}
                     onFocus={() => setActiveMenu(menu.title)}
-                    className={`inline-flex items-center gap-2 px-6 text-base transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600 ${expanded || isCurrent ? 'bg-neutral-100 text-red-600' : 'text-neutral-800 hover:bg-neutral-50 hover:text-red-600'}`}
+                    className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-3.5 text-[15px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600 xl:px-4 ${expanded || isCurrent ? 'bg-neutral-100 text-red-600' : 'text-neutral-800 hover:bg-neutral-50 hover:text-red-600'}`}
                   >
                     {menu.title}
                   </button>
@@ -137,20 +137,20 @@ export default function Navigation() {
                 </div>
               );
             })}
-            <Link href="/agencies" className="inline-flex items-center px-6 text-base text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-red-600">Agencies</Link>
+            <Link href="/agencies" className="inline-flex shrink-0 items-center whitespace-nowrap px-3.5 text-[15px] text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-red-600 xl:px-4">Agencies</Link>
           </nav>
 
-          <div className="hidden items-center gap-3 lg:flex">
+          <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
             {isAuthenticated ? (
-              <Link href="/profile" className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-800 hover:text-red-600">
-                <UserCircleIcon className="h-5 w-5" aria-hidden="true" />
+              <Link href="/profile" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-neutral-800 hover:text-red-600">
+                <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {user?.name ?? 'My account'}
               </Link>
             ) : (
-              <button onClick={() => setShowAuthModal(true)} className="px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
+              <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
             )}
-            <Link href="/investments/onboarding" className="inline-flex items-center gap-2 rounded-md bg-black px-4 py-2.5 text-xs font-bold text-yellow-400 transition hover:bg-neutral-800">
-              Start here <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
+            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md bg-black px-4 py-2.5 text-xs font-bold text-yellow-400 transition hover:bg-neutral-800">
+              Start here <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Link>
           </div>
 
