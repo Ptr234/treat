@@ -91,7 +91,7 @@ export default function TicketsPage() {
   // what an authenticated admin was wrongly seeing on a fresh page load.
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="flex flex-col items-center gap-3 text-gray-500">
           <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm">Loading Issue Tracking System…</p>
@@ -103,7 +103,7 @@ export default function TicketsPage() {
   // Non-staff users see a restricted view directing them to create a ticket
   if (!isStaff) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldCheckIcon className="w-8 h-8 text-yellow-700" />
@@ -127,7 +127,7 @@ export default function TicketsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+ <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-yellow-700 via-yellow-600 to-yellow-500 text-white py-16">
         <div className="container mx-auto px-4">

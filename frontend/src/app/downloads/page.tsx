@@ -149,7 +149,7 @@ export default function DownloadsPage() {
   const visibleCategories = grouped.filter((g) => g.resources.length > 0);
 
   return (
-    <div className="min-h-screen bg-black">
+ <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative bg-cover bg-center bg-no-repeat py-20" style={{ backgroundImage: 'url(/images/uganda-flag-city.jpg)' }}>
         <div className="absolute inset-0 bg-black/65"></div>

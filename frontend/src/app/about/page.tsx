@@ -1,224 +1,138 @@
-'use client';
-
-import { 
-  RocketLaunchIcon, 
-  LightBulbIcon,
+import Link from 'next/link';
+import {
   BuildingOfficeIcon,
   CurrencyDollarIcon,
   UserGroupIcon,
   WrenchScrewdriverIcon,
-  UsersIcon,
-  CheckCircleIcon,
-  TrophyIcon
 } from '@heroicons/react/24/outline';
-import { useState, useEffect } from 'react';
 
-// Note: Next.js doesn't allow Metadata export in client components
-// This would need to be handled in a separate layout or server component
+const linkClass =
+  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+
+const OFFERINGS = [
+  {
+    icon: BuildingOfficeIcon,
+    title: 'Business registration',
+    description: 'Simplified digital business registration process with comprehensive support and guidance.',
+    href: '/business/registration',
+  },
+  {
+    icon: CurrencyDollarIcon,
+    title: 'Investment support',
+    description: 'Access to investment opportunities and professional facilitation services.',
+    href: '/investments',
+  },
+  {
+    icon: UserGroupIcon,
+    title: 'Government services',
+    description: 'Direct access to various government agencies and their specialized services.',
+    href: '/agencies',
+  },
+  {
+    icon: WrenchScrewdriverIcon,
+    title: 'Digital tools',
+    description: 'Professional calculators, forms, and tools to optimize business operations.',
+    href: '/tools',
+  },
+];
+
+// Figures as published. Sourced from the Uganda Investment Authority, October 2025.
+const IMPACT = [
+  { value: '1,425+', label: 'Projects facilitated' },
+  { value: '1.0M+', label: 'Jobs created' },
+  { value: '$2.5B+', label: 'FDI facilitated' },
+  { value: '98%', label: 'Success rate' },
+];
 
 export default function AboutPage() {
-  const [liveStats, setLiveStats] = useState({
-    projectsFacilitated: 1425,
-    jobsCreated: 1000000,
-    fdiFacilitated: 2.5,
-    successRate: 98
-  });
-
-  // Animate stats on mount
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveStats(prev => ({
-        projectsFacilitated: prev.projectsFacilitated + Math.floor(Math.random() * 2),
-        jobsCreated: prev.jobsCreated + Math.floor(Math.random() * 1000),
-        fdiFacilitated: Math.max(2.4, Math.min(2.6, prev.fdiFacilitated + (Math.random() - 0.5) * 0.01)),
-        successRate: Math.max(97, Math.min(99, prev.successRate + (Math.random() - 0.5) * 0.1))
-      }));
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="min-h-screen">
-      {/* Professional Page Header Section */}
-      <section className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: 'url(/images/lake-bunyonyi-uganda.jpg)'
-            }}
-          />
-          {/* Professional Dark Overlay */}
-          <div className="absolute inset-0 bg-black/60"></div>
-        </div>
+ <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">About</li>
+          </ol>
+        </nav>
+      </div>
 
-        {/* Header Content */}
-        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            <span className="block text-white font-light">About</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-200 font-black">
-              OneStopCentre Uganda
-            </span>
-          </h1>
-          <p className="text-xl md:text-2xl text-neutral-200 leading-relaxed font-light">
-            Simplifying government services and investment processes for a prosperous Uganda
-          </p>
-        </div>
+      {/* Title */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">About</p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">OneStopCentre Uganda</h1>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
+          Simplifying government services and investment processes for a prosperous Uganda.
+        </p>
       </section>
 
-      {/* Mission & Vision Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            
-            {/* Our Mission */}
-            <div className="text-center lg:text-left">
-              <div className="flex justify-center lg:justify-start mb-6">
-                <div className="w-16 h-16 bg-yellow-600 rounded-2xl flex items-center justify-center">
-                  <RocketLaunchIcon className="w-8 h-8 text-white" />
-                </div>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-black mb-6">Our Mission</h2>
-              <p className="text-lg text-neutral-700 leading-relaxed">
-                OneStopCentre Uganda serves as the digital gateway to streamlined government services, 
-                business registration, and investment opportunities. We are committed to making it easier 
-                for entrepreneurs, investors, and businesses to navigate Uganda&apos;s regulatory landscape 
-                with precision and efficiency.
-              </p>
-            </div>
-
-            {/* Our Vision */}
-            <div className="text-center lg:text-left">
-              <div className="flex justify-center lg:justify-start mb-6">
-                <div className="w-16 h-16 bg-yellow-600 rounded-2xl flex items-center justify-center">
-                  <LightBulbIcon className="w-8 h-8 text-white" />
-                </div>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-black mb-6">Our Vision</h2>
-              <p className="text-lg text-neutral-700 leading-relaxed">
-                To be the leading digital platform that empowers economic growth in Uganda by 
-                providing seamless access to government services and investment opportunities. 
-                We envision a future where businesses thrive through simplified processes and 
-                strategic government partnerships.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* What We Offer Section */}
-      <section className="py-20 bg-neutral-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-neutral-900 mb-4">
-              What We Offer
-            </h2>
-            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
-              Comprehensive services designed to facilitate your business journey in Uganda
+      {/* Mission and vision */}
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="mission-heading">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
+          <div className="border-t-2 border-black pt-6">
+            <h2 id="mission-heading" className="text-2xl font-bold sm:text-3xl">Our mission</h2>
+            <p className="mt-5 leading-7 text-neutral-700">
+              OneStopCentre Uganda serves as the digital gateway to streamlined government services,
+              business registration, and investment opportunities. We are committed to making it easier
+              for entrepreneurs, investors, and businesses to navigate Uganda&apos;s regulatory landscape
+              with precision and efficiency.
             </p>
           </div>
+          <div className="border-t-2 border-black pt-6">
+            <h2 className="text-2xl font-bold sm:text-3xl">Our vision</h2>
+            <p className="mt-5 leading-7 text-neutral-700">
+              To be the leading digital platform that empowers economic growth in Uganda by
+              providing seamless access to government services and investment opportunities.
+              We envision a future where businesses thrive through simplified processes and
+              strategic government partnerships.
+            </p>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                icon: BuildingOfficeIcon,
-                title: "Business Registration",
-                description: "Simplified digital business registration process with comprehensive support and guidance."
-              },
-              {
-                icon: CurrencyDollarIcon,
-                title: "Investment Support",
-                description: "Access to investment opportunities and professional facilitation services."
-              },
-              {
-                icon: UserGroupIcon,
-                title: "Government Services",
-                description: "Direct access to various government agencies and their specialized services."
-              },
-              {
-                icon: WrenchScrewdriverIcon,
-                title: "Digital Tools",
-                description: "Professional calculators, forms, and tools to optimize business operations."
-              }
-            ].map((service, index) => (
-              <div
-                key={index}
-                className="bg-white p-8 rounded-lg shadow-sm border border-neutral-200 hover:shadow-md transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="w-12 h-12 bg-yellow-600 rounded-lg flex items-center justify-center mb-6">
-                  <service.icon className="w-6 h-6 text-white" />
+      {/* What we offer */}
+      <section className="border-t border-neutral-200 bg-neutral-50 py-16" aria-labelledby="offer-heading">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">What we offer</p>
+            <h2 id="offer-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Services for your business journey in Uganda</h2>
+          </div>
+          <ul className="divide-y divide-neutral-200 border-y border-neutral-200">
+            {OFFERINGS.map((service) => (
+              <li key={service.title} className="grid gap-4 py-6 sm:grid-cols-[3rem_1fr_auto] sm:items-start sm:gap-6">
+                <service.icon className="h-7 w-7 text-red-600" aria-hidden="true" />
+                <div>
+                  <h3 className="text-lg font-bold">{service.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-700">{service.description}</p>
                 </div>
-                <h3 className="text-xl font-semibold text-neutral-900 mb-4">{service.title}</h3>
-                <p className="text-neutral-600 leading-relaxed">
-                  {service.description}
-                </p>
-              </div>
+                <Link href={service.href} className={`${linkClass} text-sm`}>
+                  Explore
+                  <span className="sr-only"> {service.title}</span>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* Our Impact Section */}
-      <section className="py-20 bg-neutral-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Our Impact
-            </h2>
-            <p className="text-lg text-neutral-300 max-w-3xl mx-auto">
-              Measurable results that demonstrate our commitment to Uganda&apos;s economic development
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                icon: UsersIcon,
-                number: liveStats.projectsFacilitated.toLocaleString() + '+',
-                label: 'Projects Facilitated',
-                color: 'text-yellow-400'
-              },
-              {
-                icon: CheckCircleIcon,
-                number: (liveStats.jobsCreated / 1000000).toFixed(1) + 'M+',
-                label: 'Jobs Created',
-                color: 'text-yellow-400'
-              },
-              {
-                icon: CurrencyDollarIcon,
-                number: '$' + liveStats.fdiFacilitated.toFixed(1) + 'B+',
-                label: 'FDI Facilitated',
-                color: 'text-yellow-400'
-              },
-              {
-                icon: TrophyIcon,
-                number: liveStats.successRate.toFixed(0) + '%',
-                label: 'Success Rate',
-                color: 'text-yellow-400'
-              }
-            ].map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-yellow-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <stat.icon className="w-8 h-8 text-yellow-400" />
-                </div>
-                <div className={`text-3xl md:text-4xl font-bold mb-2 ${stat.color}`}>
-                  {stat.number}
-                </div>
-                <div className="text-neutral-300 font-medium">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-sm text-neutral-400">
-              Data as of October 2025 | Source: Uganda Investment Authority
-            </p>
-          </div>
+      {/* Impact */}
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="impact-heading">
+        <div className="mb-10 max-w-2xl">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Our impact</p>
+          <h2 id="impact-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Measurable results for Uganda’s economic development</h2>
         </div>
+        <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-y border-neutral-200 py-10 lg:grid-cols-4">
+          {IMPACT.map((stat) => (
+            <div key={stat.label} className="border-l-4 border-yellow-400 pl-4">
+              <dt className="text-sm font-medium text-neutral-600">{stat.label}</dt>
+              <dd className="mt-2 text-3xl font-bold text-black sm:text-4xl">{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mt-4 text-xs text-neutral-600">Data as of October 2025. Source: Uganda Investment Authority.</p>
       </section>
     </div>
   );

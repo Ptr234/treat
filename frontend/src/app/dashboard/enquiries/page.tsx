@@ -111,7 +111,7 @@ export default function EnquiriesPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const json = await apiFetch<EnquiryStats>('/api/dashboard/enquiries?action=stats');
+      const json = await apiFetch<EnquiryStats>('/api/dashboard/enquiries/stats');
       // Normalise before it reaches the render tree: a missing breakdown must
       // show as "no data", never crash the whole dashboard page.
       if (json.success && json.data) {
@@ -158,7 +158,7 @@ export default function EnquiriesPage() {
     setSessionLoading(true);
     setSelectedSession(sessionId);
     try {
-      const json = await apiFetch<Enquiry[]>(`/api/dashboard/enquiries?action=session&sessionId=${encodeURIComponent(sessionId)}`);
+      const json = await apiFetch<Enquiry[]>(`/api/dashboard/enquiries/sessions/${encodeURIComponent(sessionId)}`);
       if (json.success) setSessionMessages(Array.isArray(json.data) ? json.data : []);
     } catch (err) {
       console.error('Failed to fetch session:', err);
@@ -186,7 +186,7 @@ export default function EnquiriesPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-strong p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
@@ -204,7 +204,7 @@ export default function EnquiriesPage() {
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8">
+ <div className="min-h-screen bg-white py-8">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

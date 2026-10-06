@@ -30,6 +30,12 @@ const MIGRATED_PREFIXES = [
   '/api/audit',
 ];
 
+// The ASP.NET backend's public routes are versioned (/api/v1/...); its
+// health check is an ops endpoint and stays unversioned by convention
+// (ApiDesign.MD §5/§17). Next.js's own fallback routes are unversioned too —
+// this prefix only applies once a path is routed to BACKEND_URL below.
+const UNVERSIONED_BACKEND_PATHS = ['/api/health'];
+
 /**
  * Resolve an /api path to the ASP.NET backend when configured, otherwise keep
  * it relative (Next.js route). Exported for callers that need a raw URL
@@ -37,10 +43,20 @@ const MIGRATED_PREFIXES = [
  */
 export function resolveApiUrl(path: string): string {
   if (BACKEND_URL && MIGRATED_PREFIXES.some((p) => path.startsWith(p))) {
-    return `${BACKEND_URL}${path}`;
+    const versioned = UNVERSIONED_BACKEND_PATHS.some((p) => path.startsWith(p))
+      ? path
+      : path.replace(/^\/api\//, '/api/v1/');
+    return `${BACKEND_URL}${versioned}`;
   }
   return path; // relative — same Next.js origin
 }
+
+// Without a ceiling, a slow/stalled backend (cold start, DB contention, a
+// dropped connection the browser never surfaces as an error) leaves the
+// caller's promise pending forever — e.g. a "Signing in..." button stuck
+// disabled indefinitely with no error and no way to retry. Callers that pass
+// their own `signal` are trusted to manage their own lifetime.
+const DEFAULT_TIMEOUT_MS = 20_000;
 
 export async function apiFetch<T = unknown>(
   path: string,
@@ -55,20 +71,38 @@ export async function apiFetch<T = unknown>(
     ? { ...options.headers }
     : { 'Content-Type': 'application/json', ...options.headers };
 
-  const res = await fetch(url, {
-    ...options,
-    credentials: 'include', // always send cookies cross-origin
-    headers,
-  });
+  const timeoutController = options.signal ? null : new AbortController();
+  const timeoutId = timeoutController
+    ? setTimeout(() => timeoutController.abort(), DEFAULT_TIMEOUT_MS)
+    : null;
 
-  const json = await res.json().catch(() => null);
+  try {
+    const res = await fetch(url, {
+      ...options,
+      credentials: 'include', // always send cookies cross-origin
+      headers,
+      signal: options.signal ?? timeoutController?.signal,
+    });
 
-  if (!res.ok) {
-    return {
-      success: false,
-      error: json?.error ?? `Request failed with status ${res.status}`,
-    };
+    const json = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      // ASP.NET backend errors are RFC 7807 problem+json ({ detail, title, ... });
+      // Next.js fallback routes still return the legacy { success, error } shape.
+      // Normalise both to the one error string callers read.
+      return {
+        success: false,
+        error: json?.detail ?? json?.error ?? json?.title ?? `Request failed with status ${res.status}`,
+      };
+    }
+
+    return json ?? { success: true };
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError' && !options.signal) {
+      return { success: false, error: 'Request timed out. Please check your connection and try again.' };
+    }
+    throw err;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
-
-  return json ?? { success: true };
 }

@@ -2,7 +2,7 @@
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+ <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="max-w-md w-full text-center px-4">
         <div className="mb-8">
           <h1 className="text-6xl font-bold text-yellow-600 mb-4">Offline</h1>

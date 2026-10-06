@@ -107,12 +107,12 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       <div
         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
           isUser
-            ? 'bg-neutral-800 border border-neutral-700'
+            ? 'bg-white border border-neutral-200'
             : 'bg-gradient-to-br from-yellow-400 to-red-600 shadow-yellow-500/20'
         }`}
       >
         {isUser ? (
-          <User className="w-4 h-4 text-neutral-300" />
+          <User className="w-4 h-4 text-neutral-700" />
         ) : (
           <Sparkles className="w-4 h-4 text-black" />
         )}
@@ -120,14 +120,14 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
       {/* Content */}
       <div className={`flex-1 min-w-0 ${isUser ? 'text-right' : ''}`}>
-        <p className={`text-xs font-semibold mb-1 ${isUser ? 'text-neutral-500' : 'text-yellow-500/80'}`}>
+        <p className={`text-xs font-semibold mb-1 ${isUser ? 'text-neutral-600' : 'text-red-600'}`}>
           {isUser ? 'You' : 'UIA Assistant'}
         </p>
         <div
           className={`text-sm leading-relaxed whitespace-pre-wrap ${
             isUser
-              ? 'inline-block text-left bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-2xl rounded-tr-sm px-4 py-3'
-              : 'text-white'
+              ? 'inline-block text-left bg-white border border-neutral-200 text-neutral-700 rounded-2xl rounded-tr-sm px-4 py-3'
+              : 'text-black'
           }`}
         >
           {isUser ? message.content : typedContent}

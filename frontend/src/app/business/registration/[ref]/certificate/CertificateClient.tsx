@@ -54,14 +54,14 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
   }, [authLoading, isStaff, emailParam, referenceNumber]);
 
   if (loading || authLoading) {
-    return <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+ return <div className="min-h-screen bg-white flex items-center justify-center">
       <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
     </div>;
   }
 
   if (error || !cert) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="text-center">
           <p className="text-gray-600 mb-4">{error}</p>
           <Link href={`/business/registration/${referenceNumber}/`} className="text-yellow-700 underline text-sm">
@@ -73,7 +73,7 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 print:bg-white print:py-0">
+ <div className="min-h-screen bg-white py-8 px-4 print:bg-white print:py-0">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6 print:hidden">
           <Link href={`/business/registration/${referenceNumber}/${emailParam ? `?email=${encodeURIComponent(emailParam)}` : ''}`} className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">

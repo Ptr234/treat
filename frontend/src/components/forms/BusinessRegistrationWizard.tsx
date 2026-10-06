@@ -908,8 +908,9 @@ export default function BusinessRegistrationWizard() {
             Reference Number: <strong>{submitResult.referenceNumber}</strong>
           </p>
           <p className="text-green-600 text-sm mt-2">
-            A confirmation has been sent to your email. URSB will review your business name next — you can
-            track progress and download your certificate once issued.
+            A confirmation has been sent to your email. URSB will review your business name next. The
+            registration fee can be paid from the tracking page below at any point — it must be settled
+            before your certificate can be issued.
           </p>
           <div className="mt-3 flex flex-wrap gap-3 items-center">
             <a
@@ -964,7 +965,13 @@ export default function BusinessRegistrationWizard() {
       </div>
 
       {/* Step Content */}
-      <AnimatePresence mode="wait">
+      {/* initial={false} on AnimatePresence: the first step is already visible
+          in the server-rendered HTML, so it must not depend on the mount
+          animation to reveal it — a hydration mismatch elsewhere in this
+          subtree (browser-injected autofill styling on the radio inputs) can
+          leave that initial animation stuck at opacity:0, permanently hiding
+          the step. Step-to-step transitions (key change) still animate. */}
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={currentStep}
           initial={{ opacity: 0, x: 20 }}

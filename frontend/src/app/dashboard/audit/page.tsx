@@ -58,7 +58,7 @@ export default function AuditPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -66,7 +66,7 @@ export default function AuditPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
@@ -80,7 +80,7 @@ export default function AuditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8">
+ <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-4">
           <ArrowLeftIcon className="w-4 h-4" /> Back to Dashboard

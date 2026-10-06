@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
+import Link from 'next/link';
 import { ugandaRegions } from '@/data/mock/projects';
 import { useProjects } from '@/hooks/useProjects';
 import { ProjectStatus } from '@/types';
@@ -30,17 +31,26 @@ const investmentRanges = [
 ];
 const statuses: ProjectStatus[] = ['active', 'under_construction', 'planned', 'completed'];
 
+const linkClass =
+  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+
+const inputClass =
+  'w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-black placeholder-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
+
+const checkboxClass = 'h-4 w-4 cursor-pointer accent-black';
+
 /** A single applied filter, removable on its own. */
 function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-neutral-700 bg-neutral-800 py-1 pl-3 pr-1 text-xs text-neutral-200">
+    <span className="inline-flex items-center gap-1 border border-black bg-white py-0.5 pl-2.5 pr-1 text-xs font-medium text-black">
       {label}
       <button
+        type="button"
         onClick={onRemove}
         aria-label={`Remove filter ${label}`}
-        className="rounded-full p-0.5 text-neutral-400 hover:bg-neutral-700 hover:text-white"
+        className="p-0.5 text-neutral-600 hover:text-red-600"
       >
-        <XMarkIcon className="h-3.5 w-3.5" />
+        <XMarkIcon className="h-3.5 w-3.5" aria-hidden="true" />
       </button>
     </span>
   );
@@ -173,14 +183,14 @@ export default function ProjectsPage() {
 
   const getStatusBadge = (status: ProjectStatus) => {
     const badges = {
-      active: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40',
-      under_construction: 'bg-red-500/20 text-red-400 border-red-500/40',
-      planned: 'bg-yellow-300/20 text-yellow-300 border-yellow-300/40',
-      completed: 'bg-neutral-500/20 text-neutral-400 border-neutral-500/40'
+      active: 'bg-yellow-100 text-black border-yellow-400',
+      under_construction: 'bg-red-50 text-red-700 border-red-300',
+      planned: 'bg-neutral-100 text-neutral-800 border-neutral-400',
+      completed: 'bg-white text-neutral-700 border-neutral-400'
     };
     const labels = {
       active: 'Active',
-      under_construction: 'Under Construction',
+      under_construction: 'Under construction',
       planned: 'Planned',
       completed: 'Completed'
     };
@@ -194,704 +204,533 @@ export default function ProjectsPage() {
     return `$${(value / 1000).toFixed(0)}K`;
   };
 
+  const openProject = (id: string, scrollToMap = false) => {
+    setSelectedProject(id);
+    if (scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  /** Sector dot + status badge + location, shared by every list view. */
+  const ProjectMeta = ({ project }: { project: (typeof sortedProjects)[number] }) => {
+    const badge = getStatusBadge(project.status);
+    return (
+      <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-700">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: getSectorColor(project.sector) }} aria-hidden="true" />
+          {project.sector}
+        </span>
+        <span className={`border px-2 py-0.5 font-semibold ${badge.className}`}>{badge.label}</span>
+        <span className="text-neutral-600">{project.district}, {project.region}</span>
+      </p>
+    );
+  };
+
+  /** Two-column detail list used for the cards view and the map's project list. */
+  const ProjectDetail = ({ project, onOpen }: { project: (typeof sortedProjects)[number]; onOpen: () => void }) => {
+    const isSelected = selectedProject === project.id;
+    return (
+      <article
+        onClick={onOpen}
+        className={`cursor-pointer border-t-2 pt-5 transition-colors ${isSelected ? 'border-red-600' : 'border-neutral-200 hover:border-black'}`}
+      >
+        <h3 className="text-base font-bold leading-snug text-black">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onOpen(); }}
+            className="text-left underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded-sm"
+          >
+            {project.name}
+          </button>
+        </h3>
+        {project.company !== project.name && (
+          <p className="mt-1 text-sm text-neutral-700">{project.company}</p>
+        )}
+        <ProjectMeta project={project} />
+        <dl className="mt-4 grid grid-cols-2 gap-4 border-l-4 border-yellow-400 bg-neutral-50 py-3 pl-4 pr-3 text-sm">
+          <div>
+            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Investment</dt>
+            <dd className="mt-0.5 font-bold text-black">{formatCurrency(project.investmentValue)}</dd>
+          </div>
+          <div>
+            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Employment</dt>
+            <dd className="mt-0.5 font-bold text-black">{project.plannedEmployment.toLocaleString()}</dd>
+          </div>
+        </dl>
+        {project.industrialPark && (
+          <p className="mt-3 text-xs text-neutral-600">{project.industrialPark}</p>
+        )}
+      </article>
+    );
+  };
+
+  const SortHeader = ({ field, label, align = 'left' }: { field: SortField; label: string; align?: 'left' | 'right' }) => (
+    <th scope="col" aria-sort={sortField === field ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'} className={`px-4 py-3 text-xs font-bold uppercase tracking-wider text-black ${align === 'right' ? 'text-right' : 'text-left'}`}>
+      <button
+        type="button"
+        onClick={() => handleSort(field)}
+        className={`inline-flex items-center gap-1 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${align === 'right' ? 'flex-row-reverse' : ''}`}
+      >
+        {label}
+        {sortField === field && (sortOrder === 'asc' ? <ArrowUpIcon className="h-3.5 w-3.5" aria-hidden="true" /> : <ArrowDownIcon className="h-3.5 w-3.5" aria-hidden="true" />)}
+      </button>
+    </th>
+  );
+
+  const selectedDetail = selectedProject ? sortedProjects.find((p) => p.id === selectedProject) : undefined;
+
   return (
-    <div className="min-h-screen bg-black py-6 sm:py-8 lg:py-12">
-      <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-2 h-12 bg-gradient-to-b from-yellow-400 via-red-600 to-black rounded-full" />
-            <div>
-              <h1 className="text-4xl font-bold text-white">Licensed Projects Database</h1>
-              <p className="text-lg text-neutral-400">
-                Explore licensed investment projects across Uganda
-              </p>
-            </div>
-          </div>
+ <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-[1800px] px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">Projects</li>
+          </ol>
+        </nav>
+      </div>
 
-          {/* Hero Summary Stats */}
-          <div className="bg-gradient-to-r from-neutral-900 via-neutral-900 to-red-950 rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-neutral-800">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              <div className="text-center md:text-left border-l-4 border-yellow-500 pl-4 sm:pl-6">
-                <p className="text-yellow-500 text-sm font-bold uppercase tracking-widest mb-2">Licensed Projects</p>
-                <p className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">{filteredProjects.length}</p>
-                <p className="text-neutral-500 text-sm mt-1">of {projects.length} total projects</p>
-              </div>
-              <div className="text-center md:text-left border-l-4 border-red-600 pl-4 sm:pl-6">
-                <p className="text-red-500 text-sm font-bold uppercase tracking-widest mb-2">Total Investment</p>
-                <p className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">${(totalInvestment / 1000000000).toFixed(2)}B</p>
-                <p className="text-neutral-500 text-sm mt-1">combined capital value</p>
-              </div>
-              <div className="text-center md:text-left border-l-4 border-yellow-500 pl-4 sm:pl-6">
-                <p className="text-yellow-500 text-sm font-bold uppercase tracking-widest mb-2">Total Employment</p>
-                <p className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-white">{totalEmployment.toLocaleString()}</p>
-                <p className="text-neutral-500 text-sm mt-1">jobs created &amp; planned</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="mx-auto max-w-[1800px] px-4 pb-20 pt-10 sm:px-6 lg:px-8 sm:pt-14">
+        {/* Title and summary */}
+        <header>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Licensed projects database</h1>
+          <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
+            Explore licensed investment projects across Uganda.
+          </p>
+        </header>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Filters Sidebar — mobile overlay drawer */}
+        <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-6 border-y border-neutral-200 py-6 md:grid-cols-3">
+          <div>
+            <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Licensed projects</dt>
+            <dd className="mt-1 text-3xl font-bold text-black sm:text-4xl">{filteredProjects.length}</dd>
+            <p className="mt-1 text-sm text-neutral-600">of {projects.length} total projects</p>
+          </div>
+          <div>
+            <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Total investment</dt>
+            <dd className="mt-1 text-3xl font-bold text-black sm:text-4xl">${(totalInvestment / 1000000000).toFixed(2)}B</dd>
+            <p className="mt-1 text-sm text-neutral-600">combined capital value</p>
+          </div>
+          <div>
+            <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Total employment</dt>
+            <dd className="mt-1 text-3xl font-bold text-black sm:text-4xl">{totalEmployment.toLocaleString()}</dd>
+            <p className="mt-1 text-sm text-neutral-600">jobs created and planned</p>
+          </div>
+        </dl>
+
+        <div className="mt-10 flex flex-col gap-10 lg:flex-row">
+          {/* Filters: plain column with rules; becomes a full-height drawer on mobile */}
           {showFilters && (
-            <div
-              className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-              onClick={() => setShowFilters(false)}
-            />
+            <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setShowFilters(false)} />
           )}
-          <aside className={`
-            ${showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            fixed inset-y-0 left-0 z-50 w-80 lg:relative lg:z-auto
-            ${showFilters ? 'lg:w-80' : 'lg:w-0 lg:overflow-hidden'}
-            transition-all duration-300
-          `}>
-            <div className="bg-neutral-900 h-full lg:h-auto lg:max-h-[calc(100vh-3rem)] rounded-none lg:rounded-xl shadow-lg p-6 overflow-y-auto lg:sticky lg:top-6 border-r lg:border border-neutral-800">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <FunnelIcon className="w-6 h-6 text-yellow-500" />
-                  Filters
-                </h2>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="text-neutral-400 hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center"
-                >
-                  <XMarkIcon className="w-5 h-5" />
-                </button>
-              </div>
+          <aside
+            aria-label="Project filters"
+            className={`${showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] overflow-y-auto border-r border-neutral-200 bg-white p-6 transition-all duration-300 lg:relative lg:z-auto lg:max-h-none lg:w-72 lg:shrink-0 lg:overflow-visible lg:border-0 lg:p-0 ${showFilters ? '' : 'lg:hidden'}`}
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-lg font-bold text-black">
+                <FunnelIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                Filters
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowFilters(false)}
+                aria-label="Hide filters"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center text-neutral-600 hover:text-red-600 lg:hidden"
+              >
+                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
 
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="search" className="block text-sm font-medium text-neutral-300 mb-2">
-                    Search
-                  </label>
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="w-5 h-5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      id="search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search projects..."
-                      className="w-full pl-10 pr-4 py-2 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-neutral-300 mb-3">Sector</p>
-                  <div className="space-y-2">
-                    {sectors.map((sector) => (
-                      <label key={sector} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedSectors.includes(sector)}
-                          onChange={() => toggleSector(sector)}
-                          className="w-4 h-4 text-yellow-500 bg-neutral-800 border-neutral-600 rounded focus:ring-yellow-500"
-                        />
-                        <span className="text-sm text-neutral-300 flex-1">{sector}</span>
-                        <span className="text-xs tabular-nums text-neutral-500">{counts.sector[sector] ?? 0}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-neutral-300 mb-3">Region</p>
-                  <div className="space-y-2">
-                    {ugandaRegions.map((region) => (
-                      <label key={region} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedRegions.includes(region)}
-                          onChange={() => toggleRegion(region)}
-                          className="w-4 h-4 text-yellow-500 bg-neutral-800 border-neutral-600 rounded focus:ring-yellow-500"
-                        />
-                        <span className="text-sm text-neutral-300 flex-1">{region}</span>
-                        <span className="text-xs tabular-nums text-neutral-500">{counts.region[region] ?? 0}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-neutral-300 mb-3">Investment Size</p>
-                  <div className="space-y-2">
-                    {investmentRanges.map((range) => (
-                      <label key={range.label} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="investment"
-                          checked={selectedInvestmentRange === range.label}
-                          onChange={() => setSelectedInvestmentRange(range.label)}
-                          className="w-4 h-4 text-yellow-500 bg-neutral-800 border-neutral-600 focus:ring-yellow-500"
-                        />
-                        <span className="text-sm text-neutral-300">{range.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-sm font-medium text-neutral-300 mb-3">Status</p>
-                  <div className="space-y-2">
-                    {statuses.map((status) => {
-                      const badge = getStatusBadge(status);
-                      return (
-                        <label key={status} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedStatuses.includes(status)}
-                            onChange={() => toggleStatus(status)}
-                            className="w-4 h-4 text-yellow-500 bg-neutral-800 border-neutral-600 rounded focus:ring-yellow-500"
-                          />
-                          <span className={`text-sm px-2 py-0.5 rounded border ${badge.className}`}>{badge.label}</span>
-                          <span className="ml-auto text-xs tabular-nums text-neutral-500">{counts.status[status] ?? 0}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-neutral-700">
-                  <p className="text-sm font-semibold text-yellow-500 mb-2">
-                    {filteredProjects.length} {filteredProjects.length === 1 ? 'Project' : 'Projects'} Found
-                  </p>
-                  {hasFilters && (
-                    <button
-                      onClick={clearFilters}
-                      className="text-sm text-red-400 hover:text-red-300 font-medium"
-                    >
-                      Clear all filters
-                    </button>
-                  )}
+            <div className="space-y-8">
+              <div>
+                <label htmlFor="search" className="mb-2 block text-sm font-bold text-black">Search</label>
+                <div className="relative">
+                  <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
+                  <input
+                    type="text"
+                    id="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search projects..."
+                    className={`${inputClass} pl-9`}
+                  />
                 </div>
               </div>
 
-              {/* Totals for the current filter selection. The full project
-                  list lives in the results area — repeating it here just
-                  duplicated the grid and made the panel scroll forever. */}
-              <div className="mt-6 pt-6 border-t border-neutral-700 space-y-3">
-                <h3 className="text-sm font-semibold text-neutral-300">Selection totals</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-lg bg-neutral-800 p-3">
-                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">Investment</p>
-                    <p className="text-lg font-bold text-yellow-400">
-                      ${(totalInvestment / 1_000_000_000).toFixed(2)}B
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-neutral-800 p-3">
-                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">Jobs</p>
-                    <p className="text-lg font-bold text-red-400">
-                      {totalEmployment.toLocaleString()}
-                    </p>
-                  </div>
+              <fieldset>
+                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Sector</legend>
+                <div className="space-y-2.5">
+                  {sectors.map((sector) => (
+                    <label key={sector} className="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-800">
+                      <input type="checkbox" checked={selectedSectors.includes(sector)} onChange={() => toggleSector(sector)} className={checkboxClass} />
+                      <span className="flex-1">{sector}</span>
+                      <span className="text-xs tabular-nums text-neutral-600">{counts.sector[sector] ?? 0}</span>
+                    </label>
+                  ))}
                 </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Region</legend>
+                <div className="space-y-2.5">
+                  {ugandaRegions.map((region) => (
+                    <label key={region} className="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-800">
+                      <input type="checkbox" checked={selectedRegions.includes(region)} onChange={() => toggleRegion(region)} className={checkboxClass} />
+                      <span className="flex-1">{region}</span>
+                      <span className="text-xs tabular-nums text-neutral-600">{counts.region[region] ?? 0}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Investment size</legend>
+                <div className="space-y-2.5">
+                  {investmentRanges.map((range) => (
+                    <label key={range.label} className="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-800">
+                      <input
+                        type="radio"
+                        name="investment"
+                        checked={selectedInvestmentRange === range.label}
+                        onChange={() => setSelectedInvestmentRange(range.label)}
+                        className={checkboxClass}
+                      />
+                      <span>{range.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Status</legend>
+                <div className="space-y-2.5">
+                  {statuses.map((status) => {
+                    const badge = getStatusBadge(status);
+                    return (
+                      <label key={status} className="flex cursor-pointer items-center gap-2.5 text-sm">
+                        <input type="checkbox" checked={selectedStatuses.includes(status)} onChange={() => toggleStatus(status)} className={checkboxClass} />
+                        <span className={`border px-2 py-0.5 text-xs font-semibold ${badge.className}`}>{badge.label}</span>
+                        <span className="ml-auto text-xs tabular-nums text-neutral-600">{counts.status[status] ?? 0}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+
+              <div className="border-t border-neutral-200 pt-6">
+                <p className="text-sm font-bold text-black" aria-live="polite">
+                  {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'} found
+                </p>
+                {hasFilters && (
+                  <button type="button" onClick={clearFilters} className={`${linkClass} mt-2 text-sm`}>
+                    Clear all filters
+                  </button>
+                )}
               </div>
             </div>
           </aside>
 
-          {/* Main Content */}
-          <main className="flex-1">
-            <div className="bg-neutral-900 rounded-xl shadow-lg overflow-hidden border border-neutral-800">
-              {/* View Toggle Bar */}
-              <div className="p-4 sm:p-6 border-b border-neutral-800">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">
+          {/* Main content */}
+          <main className="min-w-0 flex-1">
+            {/* Toolbar */}
+            <div className="flex flex-col gap-4 border-b-2 border-black pb-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div role="group" aria-label="View" className="flex items-center gap-1">
+                  {([
+                    { mode: 'map', label: 'Map', icon: MapIcon },
+                    { mode: 'table', label: 'Table', icon: TableCellsIcon },
+                    { mode: 'cards', label: 'Cards', icon: Squares2X2Icon },
+                  ] as const).map(({ mode, label, icon: Icon }) => (
                     <button
-                      onClick={() => setViewMode('map')}
-                      className={`px-3 sm:px-4 py-2 min-h-[44px] rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                        viewMode === 'map'
-                          ? 'bg-red-600 text-white'
-                          : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                      }`}
+                      key={mode}
+                      type="button"
+                      onClick={() => setViewMode(mode)}
+                      aria-pressed={viewMode === mode}
+                      className={`inline-flex min-h-[44px] items-center gap-2 border-b-2 px-3 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${viewMode === mode ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-700 hover:text-red-600'}`}
                     >
-                      <MapIcon className="w-5 h-5" />
-                      <span className="hidden sm:inline">Map View</span>
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                      {label}
                     </button>
-                    <button
-                      onClick={() => setViewMode('table')}
-                      className={`px-3 sm:px-4 py-2 min-h-[44px] rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                        viewMode === 'table'
-                          ? 'bg-red-600 text-white'
-                          : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                      }`}
-                    >
-                      <TableCellsIcon className="w-5 h-5" />
-                      <span className="hidden sm:inline">Table View</span>
-                    </button>
-                    <button
-                      onClick={() => setViewMode('cards')}
-                      className={`px-3 sm:px-4 py-2 min-h-[44px] rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                        viewMode === 'cards'
-                          ? 'bg-red-600 text-white'
-                          : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                      }`}
-                    >
-                      <Squares2X2Icon className="w-5 h-5" />
-                      <span className="hidden sm:inline">Cards View</span>
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-3 flex-wrap">
-                    {/* Sorting used to be reachable only through the table
-                        header, so map and card users could not reorder at all. */}
-                    <label className="flex items-center gap-2 text-sm text-neutral-400">
-                      <span className="hidden sm:inline">Sort</span>
-                      <select
-                        value={sortField}
-                        onChange={(e) => setSortField(e.target.value as SortField)}
-                        aria-label="Sort projects by"
-                        className="bg-neutral-800 border border-neutral-700 text-neutral-200 rounded-lg px-2 py-2 min-h-[44px] focus:ring-2 focus:ring-yellow-500"
-                      >
-                        <option value="investmentValue">Investment</option>
-                        <option value="plannedEmployment">Employment</option>
-                        <option value="name">Name</option>
-                        <option value="sector">Sector</option>
-                        <option value="region">Region</option>
-                      </select>
-                    </label>
-                    <button
-                      onClick={() => setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'))}
-                      aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
-                      title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
-                      className="px-3 py-2 min-h-[44px] bg-neutral-800 text-neutral-300 rounded-lg hover:bg-neutral-700 flex items-center"
-                    >
-                      {sortOrder === 'asc'
-                        ? <ArrowUpIcon className="w-5 h-5" />
-                        : <ArrowDownIcon className="w-5 h-5" />}
-                    </button>
-                    {!showFilters && (
-                      <button
-                        onClick={() => setShowFilters(true)}
-                        className="px-4 py-2 bg-neutral-800 text-neutral-300 rounded-lg hover:bg-neutral-700 font-medium flex items-center gap-2"
-                      >
-                        <FunnelIcon className="w-5 h-5" />
-                        Show Filters
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        const headers = ['Project Name', 'Company', 'Sector', 'Region', 'District', 'Investment Value (USD)', 'Employment', 'Status', 'Industrial Park'];
-                        const rows = sortedProjects.map((p) => [
-                          `"${p.name.replace(/"/g, '""')}"`,
-                          `"${p.company.replace(/"/g, '""')}"`,
-                          p.sector,
-                          p.region,
-                          p.district,
-                          p.investmentValue,
-                          p.plannedEmployment,
-                          p.status.replace('_', ' '),
-                          p.industrialPark || '',
-                        ]);
-                        const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-                        const blob = new Blob([csv], { type: 'text/csv' });
-                        const url = URL.createObjectURL(blob);
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `projects-export-${new Date().toISOString().split('T')[0]}.csv`;
-                        link.click();
-                        URL.revokeObjectURL(url);
-                      }}
-                      className="px-4 py-2 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400 font-bold flex items-center gap-2"
-                    >
-                      <DocumentArrowDownIcon className="w-5 h-5" />
-                      Export
-                    </button>
-                  </div>
+                  ))}
                 </div>
 
-                {/* Active filters — previously the only indication of what was
-                    applied lived in the sidebar, which is collapsible and off
-                    screen on mobile. Each chip removes just that one filter. */}
-                {hasFilters && (
-                  <div className="mt-4 flex items-center gap-2 flex-wrap">
-                    <span className="text-xs uppercase tracking-wide text-neutral-500">Filtered by</span>
-                    {searchQuery && (
-                      <FilterChip label={`“${searchQuery}”`} onRemove={() => setSearchQuery('')} />
-                    )}
-                    {selectedSectors.map((s) => (
-                      <FilterChip key={`s-${s}`} label={s} onRemove={() => toggleSector(s)} />
-                    ))}
-                    {selectedRegions.map((r) => (
-                      <FilterChip key={`r-${r}`} label={r} onRemove={() => toggleRegion(r)} />
-                    ))}
-                    {selectedInvestmentRange && (
-                      <FilterChip
-                        label={selectedInvestmentRange}
-                        onRemove={() => setSelectedInvestmentRange('')}
-                      />
-                    )}
-                    {selectedStatuses.map((st) => (
-                      <FilterChip
-                        key={`st-${st}`}
-                        label={getStatusBadge(st).label}
-                        onRemove={() => toggleStatus(st)}
-                      />
-                    ))}
-                    <button
-                      onClick={clearFilters}
-                      className="text-xs font-semibold text-yellow-500 hover:text-yellow-400 underline underline-offset-2 ml-1"
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="flex items-center gap-2 text-sm text-neutral-700">
+                    <span className="hidden sm:inline">Sort by</span>
+                    <select
+                      value={sortField}
+                      onChange={(e) => setSortField(e.target.value as SortField)}
+                      aria-label="Sort projects by"
+                      className="min-h-[44px] rounded-md border border-neutral-300 bg-white px-2 py-2 text-sm text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                     >
-                      Clear all
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* A filter combination that matches nothing previously rendered
-                  an empty panel with no explanation or way back. */}
-              {sortedProjects.length === 0 ? (
-                <div className="p-12 text-center">
-                  <MagnifyingGlassIcon className="mx-auto mb-4 h-12 w-12 text-neutral-700" />
-                  <h3 className="text-lg font-bold text-white">No projects match these filters</h3>
-                  <p className="mx-auto mt-2 max-w-md text-sm text-neutral-400">
-                    {projects.length === 0
-                      ? 'The licensed projects database is not available right now. Please try again shortly.'
-                      : `None of the ${projects.length} licensed projects match your current selection. Try removing a filter or broadening the investment range.`}
-                  </p>
-                  {hasFilters && (
+                      <option value="investmentValue">Investment</option>
+                      <option value="plannedEmployment">Employment</option>
+                      <option value="name">Name</option>
+                      <option value="sector">Sector</option>
+                      <option value="region">Region</option>
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'))}
+                    aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+                    title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+                    className="flex min-h-[44px] min-w-[44px] items-center justify-center border border-neutral-300 text-neutral-800 hover:border-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                  >
+                    {sortOrder === 'asc' ? <ArrowUpIcon className="h-4 w-4" aria-hidden="true" /> : <ArrowDownIcon className="h-4 w-4" aria-hidden="true" />}
+                  </button>
+                  {!showFilters && (
                     <button
-                      onClick={clearFilters}
-                      className="mt-5 rounded-lg bg-yellow-500 px-5 py-2.5 font-bold text-black hover:bg-yellow-400"
+                      type="button"
+                      onClick={() => setShowFilters(true)}
+                      className="inline-flex min-h-[44px] items-center gap-2 border border-neutral-300 px-3 text-sm font-semibold text-neutral-800 hover:border-black"
                     >
-                      Clear all filters
+                      <FunnelIcon className="h-4 w-4" aria-hidden="true" />
+                      Show filters
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const headers = ['Project Name', 'Company', 'Sector', 'Region', 'District', 'Investment Value (USD)', 'Employment', 'Status', 'Industrial Park'];
+                      const rows = sortedProjects.map((p) => [
+                        `"${p.name.replace(/"/g, '""')}"`,
+                        `"${p.company.replace(/"/g, '""')}"`,
+                        p.sector,
+                        p.region,
+                        p.district,
+                        p.investmentValue,
+                        p.plannedEmployment,
+                        p.status.replace('_', ' '),
+                        p.industrialPark || '',
+                      ]);
+                      const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+                      const blob = new Blob([csv], { type: 'text/csv' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `projects-export-${new Date().toISOString().split('T')[0]}.csv`;
+                      link.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="inline-flex min-h-[44px] items-center gap-2 bg-black px-4 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                  >
+                    <DocumentArrowDownIcon className="h-4 w-4" aria-hidden="true" />
+                    Export CSV
+                  </button>
+                </div>
+              </div>
+
+              <div className="relative max-w-md">
+                <label htmlFor="quick-search" className="sr-only">Search projects</label>
+                <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
+                <input
+                  id="quick-search"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name, company or district"
+                  className={`${inputClass} pl-9`}
+                />
+              </div>
+
+              {/* Active filters: each chip removes just that one filter */}
+              {hasFilters && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-600">Filtered by</span>
+                  {searchQuery && (
+                    <FilterChip label={`“${searchQuery}”`} onRemove={() => setSearchQuery('')} />
+                  )}
+                  {selectedSectors.map((s) => (
+                    <FilterChip key={`s-${s}`} label={s} onRemove={() => toggleSector(s)} />
+                  ))}
+                  {selectedRegions.map((r) => (
+                    <FilterChip key={`r-${r}`} label={r} onRemove={() => toggleRegion(r)} />
+                  ))}
+                  {selectedInvestmentRange && (
+                    <FilterChip label={selectedInvestmentRange} onRemove={() => setSelectedInvestmentRange('')} />
+                  )}
+                  {selectedStatuses.map((st) => (
+                    <FilterChip key={`st-${st}`} label={getStatusBadge(st).label} onRemove={() => toggleStatus(st)} />
+                  ))}
+                  <button type="button" onClick={clearFilters} className={`${linkClass} ml-1 text-xs`}>
+                    Clear all
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {sortedProjects.length === 0 ? (
+              <div className="border-l-4 border-red-600 bg-neutral-50 p-6 mt-8">
+                <h3 className="text-lg font-bold text-black">No projects match these filters</h3>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-700">
+                  {projects.length === 0
+                    ? 'The licensed projects database is not available right now. Please try again shortly.'
+                    : `None of the ${projects.length} licensed projects match your current selection. Try removing a filter or broadening the investment range.`}
+                </p>
+                {hasFilters && (
+                  <button type="button" onClick={clearFilters} className={`${linkClass} mt-4 inline-block text-sm`}>
+                    Clear all filters
+                  </button>
+                )}
+              </div>
+            ) : viewMode === 'cards' ? (
+              /* Cards view: detail list */
+              <div className="mt-10 grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
+                {sortedProjects.map((project) => (
+                  <ProjectDetail key={project.id} project={project} onOpen={() => openProject(project.id)} />
+                ))}
+              </div>
+            ) : viewMode === 'map' ? (
+              <div ref={mapRef} className="relative mt-8">
+                <DynamicLeafletMap
+                  projects={sortedProjects}
+                  selectedProject={selectedProject}
+                  onSelectProject={setSelectedProject}
+                  getSectorColor={getSectorColor}
+                  formatCurrency={formatCurrency}
+                />
+
+                {/* Selected project summary (mobile) */}
+                {selectedDetail && (
+                  <div className="absolute inset-x-0 bottom-0 z-[1000] border-t-4 border-yellow-400 bg-white p-4 shadow-lg sm:hidden">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-sm font-bold leading-tight text-black">{selectedDetail.name}</h3>
+                        {selectedDetail.company !== selectedDetail.name && (
+                          <p className="text-xs text-neutral-700">{selectedDetail.company}</p>
+                        )}
+                      </div>
+                      <button type="button" onClick={() => setSelectedProject(null)} aria-label="Close project summary" className="p-1 text-neutral-700 hover:text-red-600">
+                        <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                      </button>
+                    </div>
+                    <ProjectMeta project={selectedDetail} />
+                    <dl className="mt-3 flex items-center gap-6 text-sm">
+                      <div>
+                        <dt className="text-xs text-neutral-600">Investment</dt>
+                        <dd className="font-bold text-black">{formatCurrency(selectedDetail.investmentValue)}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-neutral-600">Employment</dt>
+                        <dd className="font-bold text-black">{selectedDetail.plannedEmployment.toLocaleString()}</dd>
+                      </div>
+                    </dl>
+                  </div>
+                )}
+
+                {/* Mobile: horizontal scrollable project chips */}
+                <div className="mt-4 overflow-x-auto border-t border-neutral-200 pt-4 sm:hidden">
+                  <div className="flex gap-2 pb-1" style={{ minWidth: 'max-content' }}>
+                    {sortedProjects.map((project) => (
+                      <button
+                        key={project.id}
+                        type="button"
+                        onClick={() => openProject(project.id, true)}
+                        aria-pressed={selectedProject === project.id}
+                        className={`flex-shrink-0 border px-3 py-2 text-left transition-colors ${selectedProject === project.id ? 'border-black bg-yellow-100' : 'border-neutral-300 bg-white hover:border-black'}`}
+                      >
+                        <p className="max-w-[160px] truncate text-xs font-semibold text-black">{project.name}</p>
+                        <p className="text-xs font-bold text-black">{formatCurrency(project.investmentValue)}</p>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-              /* === CARDS VIEW === */
-              ) : viewMode === 'cards' ? (
-                <div className="p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+                {/* Desktop: project list below the map */}
+                <section className="mt-10 hidden sm:block" aria-labelledby="all-projects-heading">
+                  <h3 id="all-projects-heading" className="mb-6 border-b border-neutral-200 pb-3 text-lg font-bold text-black">
+                    All projects ({sortedProjects.length})
+                  </h3>
+                  <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
+                    {sortedProjects.map((project) => (
+                      <ProjectDetail key={project.id} project={project} onOpen={() => openProject(project.id, true)} />
+                    ))}
+                  </div>
+                </section>
+              </div>
+            ) : (
+              <>
+                {/* Mobile: detail list */}
+                <div className="mt-8 md:hidden">
+                  <div className="divide-y divide-neutral-200">
                     {sortedProjects.map((project) => {
                       const badge = getStatusBadge(project.status);
                       return (
-                        <div
-                          key={project.id}
-                          onClick={() => setSelectedProject(project.id)}
-                          className={`flex h-full flex-col rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-lg hover:shadow-yellow-500/10 ${
-                            selectedProject === project.id
-                              ? 'border-yellow-500 bg-yellow-500/10 shadow-lg shadow-yellow-500/20'
-                              : 'border-neutral-700 bg-neutral-800 hover:border-yellow-600'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-white text-base leading-tight line-clamp-2">{project.name}</h3>
-                              {project.company !== project.name && (
-                                <p className="text-sm text-neutral-400 mt-1">{project.company}</p>
-                              )}
-                            </div>
+                        <article key={project.id} className="py-5">
+                          <div className="flex items-start justify-between gap-3">
+                            <h3 className="text-sm font-bold leading-tight text-black">{project.name}</h3>
+                            <span className={`shrink-0 border px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${badge.className}`}>{badge.label}</span>
                           </div>
-                          <div className="flex items-center gap-2 flex-wrap mb-4">
-                            <span
-                              className="px-2.5 py-1 text-xs font-semibold rounded-full"
-                              style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
-                            >
-                              {project.sector}
-                            </span>
-                            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${badge.className}`}>
-                              {badge.label}
-                            </span>
-                          </div>
-                          <div className="mt-auto grid grid-cols-2 gap-3 pt-3 border-t border-neutral-700">
+                          {project.company !== project.name && (
+                            <p className="mt-1 text-xs text-neutral-700">{project.company}</p>
+                          )}
+                          <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-700">
+                            <span className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: getSectorColor(project.sector) }} aria-hidden="true" />
+                            {project.sector} · {project.region} · {project.district}
+                          </p>
+                          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
                             <div>
-                              <p className="text-xs text-neutral-500 mb-0.5">Investment</p>
-                              <p className="text-lg font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
+                              <dt className="text-xs text-neutral-600">Investment</dt>
+                              <dd className="font-bold text-black">{formatCurrency(project.investmentValue)}</dd>
                             </div>
                             <div>
-                              <p className="text-xs text-neutral-500 mb-0.5">Employment</p>
-                              <p className="text-lg font-bold text-red-400">{project.plannedEmployment.toLocaleString()}</p>
+                              <dt className="text-xs text-neutral-600">Employment</dt>
+                              <dd className="font-bold text-black">{project.plannedEmployment.toLocaleString()}</dd>
                             </div>
-                          </div>
-                          <div className="mt-3 text-xs text-neutral-500">
-                            {project.district}, {project.region}
-                            {project.industrialPark && (
-                              <span className="block mt-0.5 text-yellow-600">{project.industrialPark}</span>
-                            )}
-                          </div>
-                        </div>
+                          </dl>
+                        </article>
                       );
                     })}
                   </div>
                 </div>
 
-              /* === MAP VIEW === */
-              ) : viewMode === 'map' ? (
-                <div ref={mapRef} className="relative">
-                  <DynamicLeafletMap
-                    projects={sortedProjects}
-                    selectedProject={selectedProject}
-                    onSelectProject={setSelectedProject}
-                    getSectorColor={getSectorColor}
-                    formatCurrency={formatCurrency}
-                  />
-
-                  {/* Selected project detail overlay (mobile) */}
-                  {selectedProject && (() => {
-                    const project = sortedProjects.find(p => p.id === selectedProject);
-                    if (!project) return null;
-                    const badge = getStatusBadge(project.status);
-                    return (
-                      <div className="sm:hidden absolute bottom-0 left-0 right-0 z-[1000] bg-neutral-900/95 backdrop-blur border-t border-neutral-700 p-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-white text-sm leading-tight truncate">{project.name}</h3>
-                            {project.company !== project.name && (
-                              <p className="text-xs text-neutral-400">{project.company}</p>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => setSelectedProject(null)}
-                            className="text-neutral-400 p-1"
-                          >
-                            <XMarkIcon className="w-5 h-5" />
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-3 mt-2">
-                          <span
-                            className="px-2 py-0.5 text-xs font-semibold rounded-full"
-                            style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
-                          >
-                            {project.sector}
-                          </span>
-                          <span className={`px-2 py-0.5 text-xs font-semibold rounded border ${badge.className}`}>
-                            {badge.label}
-                          </span>
-                          <span className="text-xs text-neutral-500">{project.district}, {project.region}</span>
-                        </div>
-                        <div className="flex items-center gap-6 mt-3">
-                          <div>
-                            <p className="text-xs text-neutral-500">Investment</p>
-                            <p className="text-base font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-neutral-500">Employment</p>
-                            <p className="text-base font-bold text-red-400">{project.plannedEmployment.toLocaleString()}</p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Mobile: horizontal scrollable project chips */}
-                  <div className="sm:hidden p-3 border-t border-neutral-800 overflow-x-auto">
-                    <div className="flex gap-2 pb-1" style={{ minWidth: 'max-content' }}>
-                      {sortedProjects.map((project) => (
-                        <button
-                          key={project.id}
-                          onClick={() => {
-                            setSelectedProject(project.id);
-                            mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                          }}
-                          className={`flex-shrink-0 px-3 py-2 rounded-lg border text-left transition-all ${
-                            selectedProject === project.id
-                              ? 'border-yellow-500 bg-yellow-500/10'
-                              : 'border-neutral-700 bg-neutral-800'
-                          }`}
-                        >
-                          <p className="text-xs font-semibold text-white truncate max-w-[160px]">{project.name}</p>
-                          <p className="text-xs text-yellow-400 font-bold">{formatCurrency(project.investmentValue)}</p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Desktop: full project cards grid below map */}
-                  <div className="hidden sm:block p-6 border-t border-neutral-800">
-                    <h3 className="text-lg font-bold text-white mb-4">All Projects ({sortedProjects.length})</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+                {/* Desktop: table */}
+                <div className="mt-8 hidden overflow-x-auto md:block">
+                  <table className="w-full border-collapse text-left">
+                    <thead className="border-b-2 border-black">
+                      <tr>
+                        <SortHeader field="name" label="Project name" />
+                        <th scope="col" className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-black">Company</th>
+                        <SortHeader field="sector" label="Sector" />
+                        <SortHeader field="region" label="Region" />
+                        <SortHeader field="investmentValue" label="Investment" align="right" />
+                        <th scope="col" className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-black">Status</th>
+                        <SortHeader field="plannedEmployment" label="Employment" align="right" />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-200">
                       {sortedProjects.map((project) => {
                         const badge = getStatusBadge(project.status);
                         return (
-                          <div
-                            key={project.id}
-                            onClick={() => {
-                              setSelectedProject(project.id);
-                              mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }}
-                            className={`flex h-full flex-col rounded-xl border-2 p-5 cursor-pointer transition-all hover:shadow-lg hover:shadow-yellow-500/10 ${
-                              selectedProject === project.id
-                                ? 'border-yellow-500 bg-yellow-500/10 shadow-lg shadow-yellow-500/20'
-                                : 'border-neutral-700 bg-neutral-800 hover:border-yellow-600'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-white text-base leading-tight line-clamp-2">{project.name}</h3>
-                                {project.company !== project.name && (
-                                  <p className="text-sm text-neutral-400 mt-1">{project.company}</p>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 flex-wrap mb-4">
-                              <span
-                                className="px-2.5 py-1 text-xs font-semibold rounded-full"
-                                style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
-                              >
+                          <tr key={project.id} className="transition-colors hover:bg-neutral-50">
+                            <td className="whitespace-nowrap px-4 py-4">
+                              <div className="text-sm font-semibold text-black">{project.name}</div>
+                              <div className="text-sm text-neutral-600">{project.district}</div>
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-4 text-sm text-neutral-800">{project.company}</td>
+                            <td className="whitespace-nowrap px-4 py-4">
+                              <span className="inline-flex items-center gap-1.5 text-sm text-neutral-800">
+                                <span className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: getSectorColor(project.sector) }} aria-hidden="true" />
                                 {project.sector}
                               </span>
-                              <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${badge.className}`}>
-                                {badge.label}
-                              </span>
-                            </div>
-                            <div className="mt-auto grid grid-cols-2 gap-3 pt-3 border-t border-neutral-700">
-                              <div>
-                                <p className="text-xs text-neutral-500 mb-0.5">Investment</p>
-                                <p className="text-lg font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
-                              </div>
-                              <div>
-                                <p className="text-xs text-neutral-500 mb-0.5">Employment</p>
-                                <p className="text-lg font-bold text-red-400">{project.plannedEmployment.toLocaleString()}</p>
-                              </div>
-                            </div>
-                            <div className="mt-3 text-xs text-neutral-500">
-                              {project.district}, {project.region}
-                              {project.industrialPark && (
-                                <span className="block mt-0.5 text-yellow-600">{project.industrialPark}</span>
-                              )}
-                            </div>
-                          </div>
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-4 text-sm text-neutral-800">{project.region}</td>
+                            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-black">{formatCurrency(project.investmentValue)}</td>
+                            <td className="whitespace-nowrap px-4 py-4 text-center">
+                              <span className={`inline-flex border px-2 py-0.5 text-xs font-semibold ${badge.className}`}>{badge.label}</span>
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-semibold text-black">{project.plannedEmployment.toLocaleString()}</td>
+                          </tr>
                         );
                       })}
-                    </div>
-                  </div>
+                    </tbody>
+                  </table>
                 </div>
-
-              /* === TABLE VIEW === */
-              ) : (
-                <>
-                  {/* Mobile card view for table */}
-                  <div className="md:hidden p-4 space-y-3">
-                    {sortedProjects.map((project) => {
-                      const badge = getStatusBadge(project.status);
-                      return (
-                        <div key={project.id} className="border border-neutral-700 rounded-lg p-4 bg-neutral-800">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-white text-sm leading-tight">{project.name}</h3>
-                              {project.company !== project.name && (
-                                <p className="text-xs text-neutral-400 mt-0.5">{project.company}</p>
-                              )}
-                            </div>
-                            <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded border whitespace-nowrap ${badge.className}`}>
-                              {badge.label}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 flex-wrap mb-3">
-                            <span
-                              className="px-2 py-0.5 text-xs font-semibold rounded-full"
-                              style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
-                            >
-                              {project.sector}
-                            </span>
-                            <span className="text-xs text-neutral-500">{project.region} · {project.district}</span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3 pt-2 border-t border-neutral-700">
-                            <div>
-                              <p className="text-xs text-neutral-500">Investment</p>
-                              <p className="text-base font-bold text-yellow-400">{formatCurrency(project.investmentValue)}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-neutral-500">Employment</p>
-                              <p className="text-base font-bold text-red-400">{project.plannedEmployment.toLocaleString()}</p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {/* Desktop table view */}
-                  <div className="hidden md:block overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-neutral-800 border-b border-neutral-700">
-                        <tr>
-                          <th
-                            onClick={() => handleSort('name')}
-                            className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                          >
-                            <div className="flex items-center gap-1">
-                              Project Name
-                              {sortField === 'name' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
-                            </div>
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider">Company</th>
-                          <th
-                            onClick={() => handleSort('sector')}
-                            className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                          >
-                            <div className="flex items-center gap-1">
-                              Sector
-                              {sortField === 'sector' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
-                            </div>
-                          </th>
-                          <th
-                            onClick={() => handleSort('region')}
-                            className="px-6 py-3 text-left text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                          >
-                            <div className="flex items-center gap-1">
-                              Region
-                              {sortField === 'region' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
-                            </div>
-                          </th>
-                          <th
-                            onClick={() => handleSort('investmentValue')}
-                            className="px-6 py-3 text-right text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                          >
-                            <div className="flex items-center justify-end gap-1">
-                              Investment
-                              {sortField === 'investmentValue' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
-                            </div>
-                          </th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-yellow-500 uppercase tracking-wider">Status</th>
-                          <th
-                            onClick={() => handleSort('plannedEmployment')}
-                            className="px-6 py-3 text-right text-xs font-medium text-yellow-500 uppercase tracking-wider cursor-pointer hover:bg-neutral-700"
-                          >
-                            <div className="flex items-center justify-end gap-1">
-                              Employment
-                              {sortField === 'plannedEmployment' && (sortOrder === 'asc' ? <ArrowUpIcon className="w-4 h-4" /> : <ArrowDownIcon className="w-4 h-4" />)}
-                            </div>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-neutral-800">
-                        {sortedProjects.map((project, idx) => {
-                          const badge = getStatusBadge(project.status);
-                          return (
-                            <tr key={project.id} className={`transition-colors hover:bg-neutral-800 ${idx % 2 === 0 ? 'bg-neutral-900' : 'bg-neutral-900/50'}`}>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-white">{project.name}</div>
-                                <div className="text-sm text-neutral-500">{project.district}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">{project.company}</td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span
-                                  className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                  style={{ backgroundColor: getSectorColor(project.sector) + '25', color: getSectorColor(project.sector) }}
-                                >
-                                  {project.sector}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">{project.region}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-yellow-400 text-right">
-                                {formatCurrency(project.investmentValue)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-center">
-                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded border ${badge.className}`}>
-                                  {badge.label}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-red-400 text-right">
-                                {project.plannedEmployment.toLocaleString()}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </div>
+              </>
+            )}
           </main>
         </div>
       </div>

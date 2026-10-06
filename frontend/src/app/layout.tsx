@@ -5,10 +5,10 @@ import LayoutShell from "@/components/layout/LayoutShell";
 
 export const metadata: Metadata = {
   title: {
-    default: "OneStopCentre Uganda",
+    default: "Invest in Uganda | OneStop Centre",
     template: "%s | OneStopCentre Uganda",
   },
-  description: "OneStopCentre Uganda - InvestUganda simplified. A modern platform providing streamlined access to government business services, investment opportunities, and professional support.",
+  description: "Find investment opportunities, government services and agency guidance for building a business in Uganda through the OneStop Centre.",
   keywords: [
     "Uganda",
     "Investment",
@@ -81,7 +81,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <meta name="theme-color" content="#ca8a04" />
+        <meta name="theme-color" content="#ffffff" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
@@ -91,7 +91,7 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body
-        className="font-sans antialiased bg-white text-gray-900 selection:bg-primary-100"
+        className="antialiased bg-white text-gray-900 selection:bg-primary-100"
         suppressHydrationWarning
       >
         <Providers>

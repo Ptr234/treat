@@ -14,7 +14,6 @@ import {
   DocumentTextIcon,
   ReceiptPercentIcon,
   ClipboardDocumentCheckIcon,
-  ArrowRightIcon,
   ShieldCheckIcon,
   LanguageIcon,
   ClockIcon,
@@ -26,6 +25,9 @@ export const metadata: Metadata = {
   description:
     'A step-by-step guide to using the Uganda Investment Authority OneStop Centre: services, investments, the AI assistant, inquiries, appointments and business tools.',
 };
+
+const linkClass =
+  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const STEPS = [
   {
@@ -99,155 +101,127 @@ const TIPS = [
 
 export default function GuidePage() {
   return (
-    <div className="min-h-screen bg-white">
-      {/* ── Hero ─────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-black text-white">
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 20% 20%, #FFD700 0%, transparent 35%), radial-gradient(circle at 85% 75%, #CE1126 0%, transparent 35%)',
-          }}
-        />
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 text-center">
-          <span className="inline-block text-yellow-400 font-semibold text-sm uppercase tracking-[0.2em] mb-4">
-            User Guide
-          </span>
-          <h1
-            className="text-3xl sm:text-5xl lg:text-6xl font-bold mb-5"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
-            How to use the OneStop Centre
-          </h1>
-          <p className="text-lg sm:text-xl text-neutral-300 max-w-2xl mx-auto leading-relaxed">
-            Everything you need — from your first visit to a fully facilitated investment — in eight simple steps.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/" className="px-6 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition-colors">
-              Go to the homepage
-            </Link>
-            <Link href="/chatbot" className="px-6 py-3 border border-white/40 text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
-              Ask the AI assistant
-            </Link>
-          </div>
-        </div>
-        <div className="h-1 w-full bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400" />
-      </section>
-
-      {/* ── Journey stepper ──────────────────────────────────────── */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-14">
-            <span className="inline-block text-yellow-600 font-semibold text-sm uppercase tracking-[0.18em] mb-3">
-              Your journey
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-neutral-900">From first visit to facilitated investment</h2>
-          </Reveal>
-
-          <ol className="relative border-l-2 border-neutral-200 ml-4 sm:ml-6 space-y-10">
-            {STEPS.map((step, i) => (
-              <Reveal key={step.title} delay={i * 0.05}>
-                <li className="relative pl-8 sm:pl-12">
-                  {/* Number badge on the line */}
-                  <span className="absolute -left-[1.15rem] sm:-left-[1.4rem] top-0 flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-black text-yellow-400 font-bold ring-4 ring-white shadow-md">
-                    {i + 1}
-                  </span>
-                  <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm hover:shadow-md transition-shadow p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
-                        <step.icon className="w-6 h-6 text-yellow-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <h3 className="text-lg sm:text-xl font-bold text-neutral-900 mb-1.5">{step.title}</h3>
-                        <p className="text-neutral-600 leading-relaxed">{step.body}</p>
-                        {step.note && (
-                          <p className="text-sm text-neutral-400 mt-2 italic">{step.note}</p>
-                        )}
-                        <div className="mt-4 flex flex-wrap items-center gap-4">
-                          <Link
-                            href={step.action.href}
-                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-yellow-700 hover:text-yellow-800"
-                          >
-                            {step.action.label}
-                            <ArrowRightIcon className="w-4 h-4" />
-                          </Link>
-                          {step.secondary && (
-                            <Link href={step.secondary.href} className="text-sm font-medium text-neutral-500 hover:text-neutral-800">
-                              {step.secondary.label}
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              </Reveal>
-            ))}
+ <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">User guide</li>
           </ol>
+        </nav>
+      </div>
+
+      {/* Hero */}
+      <section className="mx-auto max-w-6xl px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">User guide</p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">How to use the OneStop Centre</h1>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
+          Everything you need — from your first visit to a fully facilitated investment — in eight simple steps.
+        </p>
+        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm">
+          <Link href="/" className={linkClass}>Go to the homepage</Link>
+          <Link href="/chatbot" className={linkClass}>Ask the AI assistant</Link>
         </div>
       </section>
 
-      {/* ── Business tools ───────────────────────────────────────── */}
-      <section className="py-20 bg-neutral-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-12">
-            <span className="inline-block text-yellow-600 font-semibold text-sm uppercase tracking-[0.18em] mb-3">Plan with confidence</span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-neutral-900">Free business tools</h2>
-          </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TOOLS.map((tool, i) => (
-              <Reveal key={tool.title} delay={i * 0.06} className="h-full">
-                <Link
-                  href={tool.href}
-                  className="group block h-full bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm hover:shadow-lg hover:border-yellow-400/60 hover:-translate-y-1 transition-all"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-yellow-50 flex items-center justify-center mb-4 group-hover:bg-yellow-100 transition-colors">
-                    <tool.icon className="w-6 h-6 text-yellow-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-neutral-900 mb-1">{tool.title}</h3>
-                  <p className="text-sm text-neutral-600">{tool.body}</p>
-                </Link>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Journey */}
+      <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-16 sm:px-6 lg:px-8">
+        <Reveal className="mb-10">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Your journey</p>
+          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">From first visit to facilitated investment</h2>
+        </Reveal>
 
-      {/* ── Good to know ─────────────────────────────────────────── */}
-      <section className="py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-12">
-            <span className="inline-block text-yellow-600 font-semibold text-sm uppercase tracking-[0.18em] mb-3">Good to know</span>
-            <h2 className="text-2xl sm:text-4xl font-bold text-neutral-900">Little things that make it easier</h2>
-          </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {TIPS.map((tip, i) => (
-              <Reveal key={tip.title} delay={i * 0.06} className="h-full">
-                <div className="h-full bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
-                  <div className="w-11 h-11 rounded-xl bg-black flex items-center justify-center mb-4">
-                    <tip.icon className="w-6 h-6 text-yellow-400" />
+        <ol className="divide-y divide-neutral-200 border-y border-neutral-200">
+          {STEPS.map((step, i) => (
+            <Reveal key={step.title} delay={i * 0.04}>
+              <li className="grid gap-4 py-8 md:grid-cols-[4rem_1fr] md:gap-8">
+                <span className="text-3xl font-bold leading-none text-yellow-500" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="flex items-center gap-2.5 text-lg font-bold sm:text-xl">
+                    <step.icon className="h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 leading-7 text-neutral-700">{step.body}</p>
+                  {step.note && <p className="mt-2 text-sm italic text-neutral-600">{step.note}</p>}
+                  <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                    <Link href={step.action.href} className={linkClass}>{step.action.label}</Link>
+                    {step.secondary && (
+                      <Link href={step.secondary.href} className="font-medium text-neutral-700 underline underline-offset-4 hover:text-red-600">
+                        {step.secondary.label}
+                      </Link>
+                    )}
                   </div>
-                  <h3 className="font-semibold text-neutral-900 mb-1">{tip.title}</h3>
-                  <p className="text-sm text-neutral-600 leading-relaxed">{tip.body}</p>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+              </li>
+            </Reveal>
+          ))}
+        </ol>
+      </section>
+
+      {/* Business tools */}
+      <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-16 sm:px-6 lg:px-8">
+        <Reveal className="mb-10">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Plan with confidence</p>
+          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Free business tools</h2>
+        </Reveal>
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          {TOOLS.map((tool, i) => (
+            <Reveal key={tool.title} delay={i * 0.05} className="h-full">
+              <div className="h-full border-t-2 border-black pt-5">
+                <tool.icon className="h-6 w-6 text-red-600" aria-hidden="true" />
+                <h3 className="mt-4 text-lg font-bold">
+                  <Link href={tool.href} className={linkClass}>{tool.title}</Link>
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-700">{tool.body}</p>
+              </div>
+            </Reveal>
+          ))}
         </div>
       </section>
 
-      {/* ── Final CTA ────────────────────────────────────────────── */}
-      <section className="py-20 bg-black text-white">
-        <Reveal className="max-w-3xl mx-auto text-center px-4">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to begin?</h2>
-          <p className="text-lg text-neutral-300 mb-8">
+      {/* Good to know */}
+      <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-16 sm:px-6 lg:px-8">
+        <Reveal className="mb-10">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Good to know</p>
+          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Little things that make it easier</h2>
+        </Reveal>
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+          {TIPS.map((tip, i) => (
+            <Reveal key={tip.title} delay={i * 0.05} className="h-full">
+              <div className="h-full border-l-4 border-yellow-400 pl-5">
+                <tip.icon className="h-5 w-5 text-black" aria-hidden="true" />
+                <h3 className="mt-3 font-bold">{tip.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-700">{tip.body}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="border-t-4 border-yellow-400 bg-neutral-50">
+        <Reveal className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold sm:text-3xl">Ready to begin?</h2>
+          <p className="mt-3 max-w-2xl text-neutral-700">
             Start on the homepage, or ask the assistant anything — we&apos;ll guide you the rest of the way.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/investments/onboarding" className="px-7 py-3.5 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition-colors">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/investments/onboarding"
+              className="inline-flex items-center justify-center rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+            >
               Start your investment journey
             </Link>
-            <Link href="/support" className="px-7 py-3.5 border border-white/40 text-white font-semibold rounded-lg hover:bg-white hover:text-black transition-colors">
+            <Link
+              href="/support"
+              className="inline-flex items-center justify-center rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+            >
               Contact support
             </Link>
           </div>

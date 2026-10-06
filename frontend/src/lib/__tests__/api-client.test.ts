@@ -23,16 +23,25 @@ describe('apiFetch URL resolution', () => {
     return fn;
   }
 
-  it('routes migrated prefixes to the backend when BACKEND_URL is set', async () => {
+  it('routes migrated prefixes to the backend, versioned, when BACKEND_URL is set', async () => {
     const fetchMock = mockFetch({ success: true, data: 1 });
     const apiFetch = await load('http://backend:5082');
 
     await apiFetch('/api/tickets');
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'http://backend:5082/api/tickets',
+      'http://backend:5082/api/v1/tickets',
       expect.objectContaining({ credentials: 'include' }),
     );
+  });
+
+  it('keeps the backend health check unversioned', async () => {
+    const fetchMock = mockFetch({ success: true });
+    const apiFetch = await load('http://backend:5082');
+
+    await apiFetch('/api/health');
+
+    expect(fetchMock).toHaveBeenCalledWith('http://backend:5082/api/health', expect.anything());
   });
 
   it('keeps non-migrated (Sanity) routes on the same origin', async () => {
@@ -60,5 +69,40 @@ describe('apiFetch URL resolution', () => {
     const res = await apiFetch('/api/dashboard');
 
     expect(res).toEqual({ success: false, error: 'Authentication required' });
+  });
+
+  it('normalizes an RFC 7807 problem+json backend error into { success:false, error }', async () => {
+    mockFetch(
+      { type: 'about:blank', title: 'Not Found', status: 404, detail: 'Investor profile not found', instance: '/api/v1/investors/x' },
+      false,
+      404,
+    );
+    const apiFetch = await load('http://backend:5082');
+
+    const res = await apiFetch('/api/investors/x');
+
+    expect(res).toEqual({ success: false, error: 'Investor profile not found' });
+  });
+
+  it('times out a hung request instead of leaving callers stuck forever', async () => {
+    // Mirrors a fetch that never settles on its own (a stalled connection) —
+    // it only resolves/rejects if the signal it was given aborts.
+    global.fetch = jest.fn((_url, init?: RequestInit) => new Promise((resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => {
+        reject(new DOMException('The operation was aborted.', 'AbortError'));
+      });
+    })) as unknown as typeof fetch;
+    jest.useFakeTimers();
+    const apiFetch = await load('');
+
+    const pending = apiFetch('/api/dashboard');
+    await jest.advanceTimersByTimeAsync(20_000);
+    const res = await pending;
+
+    expect(res).toEqual({
+      success: false,
+      error: 'Request timed out. Please check your connection and try again.',
+    });
+    jest.useRealTimers();
   });
 });

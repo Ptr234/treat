@@ -291,7 +291,7 @@ export default function DashboardPage() {
   // flashing the "access denied" screen to an admin who is in fact authorized.
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Verifying access…</p>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
@@ -324,7 +324,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Loading dashboard data...</p>
@@ -335,7 +335,7 @@ export default function DashboardPage() {
 
   if (!metrics) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 font-medium">No dashboard data available yet.</p>
           <button onClick={refresh} className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-neutral-800">Refresh</button>
@@ -456,7 +456,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8">
+ <div className="min-h-screen bg-white py-8">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* ── Page Header ────────────────────────────────────────── */}
         <div className="mb-8">

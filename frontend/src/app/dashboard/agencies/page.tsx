@@ -110,7 +110,7 @@ export default function AgencyManagementPage() {
 
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-neutral-400">Admin access required.</p>
       </div>
     );
@@ -119,7 +119,7 @@ export default function AgencyManagementPage() {
   const inputClass = "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent";
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+ <div className="min-h-screen bg-white text-black">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">

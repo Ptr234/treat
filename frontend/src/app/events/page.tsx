@@ -85,7 +85,7 @@ export default function EventsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+ <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative bg-cover bg-center bg-no-repeat py-20" style={{ backgroundImage: 'url(/images/uganda-pearl-africa.jpg)' }}>
         <div className="absolute inset-0 bg-black/60"></div>

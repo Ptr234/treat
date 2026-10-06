@@ -291,7 +291,7 @@ export default function CreateTicketPage() {
   const selectedCategory = categories.find(c => c.value === formData.category);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+ <div className="min-h-screen bg-white py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="mb-8">
@@ -346,7 +346,12 @@ export default function CreateTicketPage() {
 
         {/* Form Steps */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
-          <AnimatePresence mode="wait">
+          {/* initial={false}: step 1 is already visible in the server-rendered
+              HTML, so it must not depend on the mount animation to reveal it —
+              a hydration mismatch elsewhere on the page (e.g. browser-injected
+              autofill styling on a form input) can leave that animation stuck
+              at opacity:0, permanently hiding the step. */}
+          <AnimatePresence mode="wait" initial={false}>
             {/* Step 1: Category Selection */}
             {currentStep === 1 && (
               <motion.div

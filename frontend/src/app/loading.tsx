@@ -2,7 +2,7 @@ import Image from 'next/image';
 
 export default function GlobalLoading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
+ <div className="min-h-screen flex items-center justify-center bg-white">
       {/* Self-contained keyframes so the loader needs no global CSS */}
       <style>{`
         @keyframes osc-slide { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }

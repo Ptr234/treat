@@ -63,6 +63,7 @@ export default function BusinessRegistrationsPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<RegistrationDetail | null>(null);
+  const [selectedPayment, setSelectedPayment] = useState<{ status: string; amount: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [rejectReasonDraft, setRejectReasonDraft] = useState('');
@@ -92,6 +93,8 @@ export default function BusinessRegistrationsPage() {
   const viewDetail = async (ref: string) => {
     const res = await apiFetch<RegistrationDetail>(`/api/business-registrations/${ref}`);
     if (res.success && res.data) setSelected(res.data);
+    const paymentRes = await apiFetch<{ status: string; amount: number }>(`/api/business-registrations/${ref}/payment`);
+    setSelectedPayment(paymentRes.success && paymentRes.data ? paymentRes.data : null);
   };
 
   const updateStatus = async (ref: string, status: string, rejectionReason?: string) => {
@@ -114,14 +117,14 @@ export default function BusinessRegistrationsPage() {
 
   if (!isAuthenticated || !isStaff(user?.role)) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-neutral-400">Staff access required.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+ <div className="min-h-screen bg-white text-black">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center gap-4 mb-8">
           <Link href="/dashboard" className="p-2 hover:bg-neutral-800 rounded-lg" aria-label="Back">
@@ -229,7 +232,7 @@ export default function BusinessRegistrationsPage() {
             <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 h-fit sticky top-8">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Registration Details</h2>
-                <button onClick={() => setSelected(null)} className="text-neutral-500 hover:text-white text-sm">Close</button>
+                <button onClick={() => { setSelected(null); setSelectedPayment(null); }} className="text-neutral-500 hover:text-white text-sm">Close</button>
               </div>
               <div className="space-y-3 text-sm">
                 <div>
@@ -245,6 +248,11 @@ export default function BusinessRegistrationsPage() {
                   ['Initial Capital', selected.initialCapital],
                   ['Projected Turnover', selected.projectedTurnover],
                   ['Status', STATUS_LABELS[selected.status] ?? selected.status],
+                  ['Registration Fee', selectedPayment
+                    ? selectedPayment.status === 'successful'
+                      ? `Paid (UGX ${selectedPayment.amount.toLocaleString()})`
+                      : `Not paid (UGX ${selectedPayment.amount.toLocaleString()} due) — certificate cannot be issued yet`
+                    : null],
                   ['Processing Time', selected.processingHours < 24 ? `${selected.processingHours}h` : `${(selected.processingHours / 24).toFixed(1)}d`],
                   ['Certificate #', selected.certificateNumber],
                   ['Rejection Reason', selected.rejectionReason],

@@ -150,7 +150,7 @@ export default function TaxCalculatorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
+ <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-brand-black to-brand-darkGreen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

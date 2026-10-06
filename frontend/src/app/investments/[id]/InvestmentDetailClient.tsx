@@ -17,26 +17,24 @@ export default function InvestmentDetailClient({ opportunity }: InvestmentDetail
   };
 
   return (
-    <div className="space-y-6">
-      {/* Quick Actions */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-        <div className="space-y-3">
-          <button
-            onClick={openAssistant}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black px-4 py-3 rounded-lg font-bold hover:from-yellow-500 hover:to-yellow-600 hover:shadow-lg transition-all duration-200"
-          >
-            <ChatBubbleLeftRightIcon className="w-5 h-5" />
-            Ask the AI Assistant
-          </button>
-          <Link
-            href="/investments/onboarding"
-            className="block w-full text-center border-2 border-yellow-400 text-yellow-600 px-4 py-3 rounded-lg font-medium hover:bg-yellow-50 transition-all duration-200"
-          >
-            Start Onboarding
-          </Link>
-        </div>
+    <section className="border-t border-neutral-200 pt-6" aria-labelledby="quick-actions-heading">
+      <h3 id="quick-actions-heading" className="text-lg font-bold text-black">Next steps</h3>
+      <div className="mt-4 space-y-3">
+        <button
+          type="button"
+          onClick={openAssistant}
+          className="flex w-full items-center justify-center gap-2 rounded-md bg-black px-4 py-3 text-sm font-bold text-yellow-400 transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+        >
+          <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
+          Ask the AI assistant
+        </button>
+        <Link
+          href="/investments/onboarding"
+          className="block w-full rounded-md border-2 border-black px-4 py-3 text-center text-sm font-bold text-black transition-colors hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+        >
+          Start onboarding
+        </Link>
       </div>
-    </div>
+    </section>
   );
 }

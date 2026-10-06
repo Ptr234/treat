@@ -582,7 +582,12 @@ export default function InvestmentOnboardingWizard() {
       </div>
 
       {/* Step Content */}
-      <AnimatePresence mode="wait">
+      {/* initial={false}: step 1 is already visible in the server-rendered
+          HTML, so it must not depend on the mount animation to reveal it —
+          a hydration mismatch elsewhere on the page (e.g. browser-injected
+          autofill styling on a form input) can leave that animation stuck
+          at opacity:0, permanently hiding the step. */}
+      <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={currentStep}
           initial={{ opacity: 0, x: 20 }}

@@ -315,7 +315,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   if (needsVerification) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+ <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
           <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <EnvelopeIcon className="w-7 h-7 text-yellow-700" />
@@ -364,7 +364,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Loading ticket details...</p>
@@ -377,7 +377,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   if (error || !ticket) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+ <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
           <ExclamationTriangleIcon className="w-12 h-12 text-orange-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-gray-900 mb-2">
@@ -402,7 +402,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
   const isSlaPassed = slaDeadline ? slaDeadline < new Date() : false;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+ <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="mb-6">

@@ -26,6 +26,9 @@ interface InvestorProfile {
   investmentAmount?: string;
   status: string;
   createdAt: string;
+  /** Reference of a completed URSB business registration matched by email +
+   * company name at creation time, or absent if none was found. */
+  linkedBusinessRegistrationRef?: string;
 }
 
 /** The sectors an investor registered interest in (primary first, de-duplicated). */
@@ -123,14 +126,14 @@ export default function InvestorsPage() {
 
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-neutral-400">Admin access required.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+ <div className="min-h-screen bg-white text-black">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -195,6 +198,15 @@ export default function InvestorsPage() {
                             {inv.referenceNumber} &middot; {inv.email}
                             {inv.companyName && ` · ${inv.companyName}`}
                           </div>
+                          {inv.linkedBusinessRegistrationRef && (
+                            <Link
+                              href={`/business/registration/${inv.linkedBusinessRegistrationRef}/`}
+                              className="inline-flex items-center gap-1 mt-1 text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 hover:bg-green-500/30 w-fit"
+                              title="This investor's company has a completed URSB registration — click to view it"
+                            >
+                              🔗 URSB: {inv.linkedBusinessRegistrationRef}
+                            </Link>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 ml-2 flex-shrink-0">
@@ -266,6 +278,23 @@ export default function InvestorsPage() {
                     <span className="text-white text-right">{value}</span>
                   </div>
                 ))}
+                {selectedInvestor.linkedBusinessRegistrationRef && (
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                    <span className="text-green-400 text-xs font-medium block mb-1">
+                      Linked URSB Registration
+                    </span>
+                    <p className="text-xs text-neutral-400 mb-2">
+                      Matched by email + company name — fundamentals below were
+                      already collected and verified by URSB, not re-entered here.
+                    </p>
+                    <Link
+                      href={`/business/registration/${selectedInvestor.linkedBusinessRegistrationRef}/`}
+                      className="text-xs text-yellow-500 hover:text-yellow-400 underline"
+                    >
+                      View {selectedInvestor.linkedBusinessRegistrationRef} &rarr;
+                    </Link>
+                  </div>
+                )}
                 {sectorsOf(selectedInvestor).length > 0 && (
                   <div>
                     <span className="text-neutral-500 block mb-1">Sectors</span>

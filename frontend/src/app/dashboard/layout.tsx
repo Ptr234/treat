@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // show a neutral loader rather than flashing the bare (unauthed) page.
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 lg:flex">
+ <div className="min-h-screen bg-white lg:flex">
       {/* Sidebar — static on desktop, slide-in drawer on mobile */}
       <aside className="hidden lg:block lg:w-64 lg:flex-shrink-0 lg:sticky lg:top-0 lg:h-screen">
         <DashboardSidebar role={user?.role} />

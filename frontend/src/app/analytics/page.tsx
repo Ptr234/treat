@@ -154,7 +154,7 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+ <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

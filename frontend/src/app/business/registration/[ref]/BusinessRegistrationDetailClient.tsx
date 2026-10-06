@@ -7,6 +7,7 @@ import {
   ArrowLeftIcon,
   BuildingOfficeIcon,
   CalendarIcon,
+  CreditCardIcon,
   DocumentCheckIcon,
   EnvelopeIcon,
 } from '@heroicons/react/24/outline';
@@ -45,6 +46,13 @@ interface RegistrationDetail {
   processingHours: number;
 }
 
+interface PaymentStatus {
+  status: 'not_initiated' | 'pending' | 'successful' | 'failed';
+  amount: number;
+  currency: string;
+  paidAt?: string;
+}
+
 // The stages a registration moves through on the happy path. Rejected /
 // NameRejected are terminal off-ramps, shown separately rather than in-line.
 const STAGES = ['Received', 'UnderReview', 'NameApproved', 'CertificateIssued'];
@@ -70,6 +78,10 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   const [error, setError] = useState<string | null>(null);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [verifyEmail, setVerifyEmail] = useState('');
+  const [payment, setPayment] = useState<PaymentStatus | null>(null);
+  const [payBusy, setPayBusy] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+  const returningFromCheckout = searchParams.get('payment') === 'callback';
 
   const fetchRegistration = useCallback(
     async (email: string | null) => {
@@ -90,6 +102,45 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
     [referenceNumber, isStaff]
   );
 
+  const fetchPayment = useCallback(async () => {
+    const res = await apiFetch<PaymentStatus>(`/api/business-registrations/${referenceNumber}/payment`);
+    if (res.success && res.data) setPayment(res.data);
+  }, [referenceNumber]);
+
+  useEffect(() => {
+    if (registration) fetchPayment();
+  }, [registration, fetchPayment]);
+
+  // Flutterwave redirects back here after checkout, but the redirect itself
+  // proves nothing — the webhook (verified server-to-server) is the source of
+  // truth and can lag slightly behind the browser redirect, so poll briefly
+  // rather than trusting the return URL's mere presence.
+  useEffect(() => {
+    if (!returningFromCheckout || !registration) return;
+    let attempts = 0;
+    const interval = setInterval(async () => {
+      attempts += 1;
+      await fetchPayment();
+      if (attempts >= 6) clearInterval(interval);
+    }, 2500);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [returningFromCheckout, registration]);
+
+  const payNow = async () => {
+    setPayBusy(true);
+    setPayError(null);
+    const res = await apiFetch<{ paymentLink: string }>(`/api/business-registrations/${referenceNumber}/payment/initiate`, {
+      method: 'POST',
+    });
+    if (res.success && res.data?.paymentLink) {
+      window.location.href = res.data.paymentLink;
+    } else {
+      setPayError(res.error ?? 'Could not start payment. Please try again.');
+      setPayBusy(false);
+    }
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (isStaff) {
@@ -105,7 +156,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -113,7 +164,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
 
   if (needsVerification) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <EnvelopeIcon className="w-10 h-10 text-yellow-600 mb-3" />
           <h1 className="text-lg font-bold text-gray-900 mb-2">Verify your email to track this registration</h1>
@@ -147,7 +198,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
 
   if (error || !registration) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-gray-600">{error ?? 'Registration not found'}</p>
       </div>
     );
@@ -158,7 +209,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   const currentStageIndex = STAGES.indexOf(r.status);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+ <div className="min-h-screen bg-white py-8 px-4">
       <div className="max-w-3xl mx-auto">
         <Link href="/business/registration/" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 mb-4">
           <ArrowLeftIcon className="w-4 h-4" /> Back to Registration
@@ -227,6 +278,43 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
             </div>
           )}
         </div>
+
+        {!isRejectedTrack && payment && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <CreditCardIcon className="w-5 h-5 text-gray-500" /> Registration Fee
+            </h2>
+            {payment.status === 'successful' ? (
+              <div className="flex items-center gap-2 text-green-700">
+                <DocumentCheckIcon className="w-5 h-5" />
+                <p className="text-sm font-medium">
+                  Paid — UGX {payment.amount.toLocaleString()}
+                  {payment.paidAt && ` on ${new Date(payment.paidAt).toLocaleDateString()}`}
+                </p>
+              </div>
+            ) : (
+              <div>
+                {returningFromCheckout && payment.status === 'pending' && (
+                  <p className="text-sm text-gray-500 mb-3">Confirming your payment with the provider — this can take a moment…</p>
+                )}
+                {payment.status === 'failed' && (
+                  <p className="text-sm text-red-600 mb-3">Your last payment attempt didn&apos;t go through. Please try again.</p>
+                )}
+                <p className="text-sm text-gray-600 mb-3">
+                  UGX {payment.amount.toLocaleString()} is due before a certificate can be issued.
+                </p>
+                {payError && <p className="text-sm text-red-600 mb-3">{payError}</p>}
+                <button
+                  onClick={payNow}
+                  disabled={payBusy}
+                  className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-800 disabled:opacity-50"
+                >
+                  {payBusy ? 'Redirecting to payment…' : `Pay Registration Fee (UGX ${payment.amount.toLocaleString()})`}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">

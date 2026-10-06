@@ -107,7 +107,7 @@ export default function AccountPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -115,7 +115,7 @@ export default function AccountPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
@@ -137,7 +137,7 @@ export default function AccountPage() {
   const totalCount = tickets.length + inquiries.length + appointments.length + (investor ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8">
+ <div className="min-h-screen bg-white py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">

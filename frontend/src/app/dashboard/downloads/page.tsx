@@ -128,7 +128,7 @@ export default function DownloadsManagementPage() {
 
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-neutral-400">Admin access required.</p>
       </div>
     );
@@ -138,7 +138,7 @@ export default function DownloadsManagementPage() {
   const getCategoryLabel = (val: string) => CATEGORIES.find(c => c.value === val)?.label || val;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white">
+ <div className="min-h-screen bg-white text-black">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">

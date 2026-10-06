@@ -105,7 +105,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+ <div className="min-h-screen bg-white">
       {/* Hero Banner */}
       <section className="relative h-96 bg-gradient-to-br from-neutral-900 to-yellow-700 overflow-hidden">
         {event.imageUrl && (

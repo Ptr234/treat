@@ -18,7 +18,7 @@ const languages: { code: ChatLanguage; label: string }[] = [
 
 export default function LanguageSelector({ currentLanguage, onLanguageChange }: LanguageSelectorProps) {
   return (
-    <div className="flex items-center gap-1 bg-neutral-900 border border-neutral-800 rounded-full p-1">
+    <div className="flex items-center gap-1 bg-white border border-neutral-200 rounded-full p-1">
       {languages.map((lang) => {
         const isActive = currentLanguage === lang.code;
 
@@ -29,7 +29,7 @@ export default function LanguageSelector({ currentLanguage, onLanguageChange }: 
             className={`relative px-3 py-1.5 text-xs font-semibold rounded-full transition-colors ${
               isActive
                 ? 'text-black'
-                : 'text-neutral-500 hover:text-yellow-500'
+                : 'text-neutral-600 hover:text-yellow-500'
             }`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

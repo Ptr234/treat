@@ -9,7 +9,7 @@ export default async function CertificatePage({ params }: PageProps) {
   const { ref } = await params;
 
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+ <Suspense fallback={<div className="min-h-screen bg-white" />}>
       <CertificateClient referenceNumber={ref} />
     </Suspense>
   );

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ROICalculatorPage() {
   return (
-    <div className="min-h-screen bg-black">
+ <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-gradient-to-r from-brand-black to-brand-darkGreen">
         <div className="container mx-auto px-4 py-16">

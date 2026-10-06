@@ -2,8 +2,17 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MessageSquare, Phone, Mail, MapPin } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
+
+const linkClass =
+  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+
+const inputClass =
+  'w-full rounded-md border bg-white px-3 py-2.5 text-sm text-black placeholder-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
+
+const labelClass = 'mb-2 block text-sm font-bold text-black';
 
 export default function SupportPage() {
   const [formData, setFormData] = useState({
@@ -89,35 +98,35 @@ export default function SupportPage() {
 
   const supportChannels = [
     {
-      title: 'Live Chat Support',
+      title: 'Live chat support',
       description: 'Get instant help from our support team',
-      icon: <MessageSquare className="w-8 h-8 text-yellow-600" />,
+      icon: MessageSquare,
       availability: 'Mon-Fri: 8AM-6PM',
-      action: 'Start Chat',
+      action: 'Start chat',
       href: '/chatbot'
     },
     {
-      title: 'Phone Support',
+      title: 'Phone support',
       description: 'Speak directly with our experts',
-      icon: <Phone className="w-8 h-8 text-yellow-700" />,
+      icon: Phone,
       availability: '+256 414 301 000',
-      action: 'Call Now',
+      action: 'Call now',
       href: 'tel:+256414301000'
     },
     {
-      title: 'Email Support',
+      title: 'Email support',
       description: 'Send us detailed questions',
-      icon: <Mail className="w-8 h-8 text-neutral-800" />,
+      icon: Mail,
       availability: 'support@onestopcentre.go.ug',
-      action: 'Send Email',
+      action: 'Send email',
       href: 'mailto:support@onestopcentre.go.ug'
     },
     {
-      title: 'Office Visits',
+      title: 'Office visits',
       description: 'Visit our physical location',
-      icon: <MapPin className="w-8 h-8 text-yellow-600" />,
+      icon: MapPin,
       availability: 'Kampala, Uganda Investment Authority',
-      action: 'Get Directions',
+      action: 'Get directions',
       href: 'https://www.google.com/maps/search/Uganda+Investment+Authority+Kampala'
     }
   ];
@@ -177,243 +186,205 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <section
-        className="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(/images/uganda-kampala-city-view.webp)'
-        }}
-      >
-        <div className="absolute inset-0 bg-black/60"></div>
+ <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">Support</li>
+          </ol>
+        </nav>
+      </div>
 
-        <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            <span className="block text-white font-light">Dedicated</span>
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 font-black">
-              Support Center
-            </span>
+      {/* Title and intro */}
+      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_.6fr] lg:px-8">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Dedicated support centre</p>
+          <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+            Your trusted partner for business and investment in Uganda
           </h1>
-          <p className="text-xl md:text-2xl text-neutral-200 leading-relaxed font-light">
-            Your trusted partner for seamless business and investment journeys in Uganda
+          <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-700 sm:text-lg">
+            Get help with registration, licensing, tax and investment questions from the OneStop Centre team.
           </p>
+        </div>
+        <div className="relative hidden h-44 lg:block">
+          <Image src="/images/uganda-kampala-city-view.webp" alt="Kampala city view" fill className="object-cover" sizes="(min-width: 1024px) 30vw, 0px" />
         </div>
       </section>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+      <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
+        {/* Support channels */}
+        <section aria-labelledby="channels-heading" className="mb-16">
+          <h2 id="channels-heading" className="mb-8 border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Ways to reach us</h2>
+          <ul className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
+            {supportChannels.map((channel) => (
+              <li key={channel.title} className="border-t-2 border-yellow-400 pt-5">
+                <channel.icon className="h-6 w-6 text-red-600" aria-hidden="true" />
+                <h3 className="mt-4 text-lg font-bold">{channel.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-700">{channel.description}</p>
+                <p className="mt-2 text-sm font-semibold text-black">{channel.availability}</p>
+                <Link
+                  href={channel.href}
+                  target={channel.href.startsWith('http') ? '_blank' : undefined}
+                  rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  className={`${linkClass} mt-4 inline-block text-sm`}
+                >
+                  {channel.action}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-        {/* Support Channels */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {supportChannels.map((channel, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 text-center hover:shadow-xl transition-shadow">
-              <div className="flex justify-center mb-4">
-                {channel.icon}
+        {/* Contact form */}
+        <section aria-labelledby="form-heading" className="mb-16 border-t border-neutral-200 pt-12">
+          <h2 id="form-heading" className="text-2xl font-bold sm:text-3xl">Send us a message</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-700">
+            Fields marked with * are required. Our team will respond within 24 hours.
+          </p>
+          <form onSubmit={handleSubmit} noValidate className="mt-8 grid grid-cols-1 gap-x-12 gap-y-6 lg:grid-cols-2">
+            <div className="space-y-6">
+              <div>
+                <label htmlFor="fullName" className={labelClass}>Full name *</label>
+                <input
+                  id="fullName"
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  aria-invalid={errors.fullName}
+                  className={`${inputClass} ${errors.fullName ? 'border-red-600' : 'border-neutral-400'}`}
+                  placeholder="Your full name"
+                />
+                {errors.fullName && <p className="mt-1 text-xs font-semibold text-red-600">Full name is required</p>}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {channel.title}
-              </h3>
-              <p className="text-gray-600 text-sm mb-4">
-                {channel.description}
-              </p>
-              <p className="text-gray-500 text-xs mb-4">
-                {channel.availability}
-              </p>
-              <Link
-                href={channel.href}
-                target={channel.href.startsWith('http') ? '_blank' : undefined}
-                rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                className="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-yellow-700 transition-colors"
-              >
-                {channel.action}
-              </Link>
+              <div>
+                <label htmlFor="email" className={labelClass}>Email address *</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  aria-invalid={errors.email}
+                  className={`${inputClass} ${errors.email ? 'border-red-600' : 'border-neutral-400'}`}
+                  placeholder="your.email@example.com"
+                />
+                {errors.email && <p className="mt-1 text-xs font-semibold text-red-600">Email is required</p>}
+              </div>
+              <div>
+                <label htmlFor="phone" className={labelClass}>Phone number</label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className={`${inputClass} border-neutral-400`}
+                  placeholder="+256 700 000 000"
+                />
+              </div>
+              <div>
+                <label htmlFor="category" className={labelClass}>Subject category</label>
+                <select
+                  id="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className={`${inputClass} border-neutral-400`}
+                >
+                  <option value="">Select a category</option>
+                  <option value="business-registration">Business Registration</option>
+                  <option value="investment-licensing">Investment Licensing</option>
+                  <option value="tax-registration">Tax Registration</option>
+                  <option value="technical-support">Technical Support</option>
+                  <option value="general-inquiry">General Inquiry</option>
+                </select>
+              </div>
             </div>
-          ))}
-        </div>
 
-        {/* Contact Form */}
-        <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-200 mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Send Us a Message
-          </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
               <div>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className={`w-full px-3 py-2 border ${errors.fullName ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black`}
-                      placeholder="Your full name"
-                    />
-                    {errors.fullName && (
-                      <p className="text-red-500 text-xs mt-1">Full name is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address *
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black`}
-                      placeholder="your.email@example.com"
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">Email is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black"
-                      placeholder="+256 700 000 000"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Subject Category
-                    </label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black"
-                    >
-                      <option value="">Select a category</option>
-                      <option value="business-registration">Business Registration</option>
-                      <option value="investment-licensing">Investment Licensing</option>
-                      <option value="tax-registration">Tax Registration</option>
-                      <option value="technical-support">Technical Support</option>
-                      <option value="general-inquiry">General Inquiry</option>
-                    </select>
-                  </div>
-                </div>
+                <label htmlFor="message" className={labelClass}>Message *</label>
+                <textarea
+                  id="message"
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  rows={8}
+                  aria-invalid={errors.message}
+                  className={`${inputClass} ${errors.message ? 'border-red-600' : 'border-neutral-400'}`}
+                  placeholder="Please describe your question or issue in detail..."
+                />
+                {errors.message && <p className="mt-1 text-xs font-semibold text-red-600">Message is required</p>}
               </div>
-              <div>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Message *
-                    </label>
-                    <textarea
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      rows={8}
-                      className={`w-full px-3 py-2 border ${errors.message ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black`}
-                      placeholder="Please describe your question or issue in detail..."
-                    />
-                    {errors.message && (
-                      <p className="text-red-500 text-xs mt-1">Message is required</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={formData.agreedToFollowUp}
-                        onChange={(e) => setFormData({ ...formData, agreedToFollowUp: e.target.checked })}
-                        className="mr-2"
-                      />
-                      <span className="text-sm text-gray-600">
-                        I agree to receive follow-up communications regarding my inquiry
-                      </span>
-                    </label>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-yellow-600 text-black py-3 rounded-lg font-semibold hover:bg-yellow-700 disabled:opacity-50 transition-colors"
-                  >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                  </button>
-                </div>
-              </div>
+              <label className="flex items-start gap-3 text-sm text-neutral-700">
+                <input
+                  type="checkbox"
+                  checked={formData.agreedToFollowUp}
+                  onChange={(e) => setFormData({ ...formData, agreedToFollowUp: e.target.checked })}
+                  className="mt-1 h-4 w-4 accent-black"
+                />
+                <span>I agree to receive follow-up communications regarding my inquiry</span>
+              </label>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Sending...' : 'Send message'}
+              </button>
             </div>
           </form>
-        </div>
+        </section>
 
-        {/* FAQ Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-8">
-            {faqCategories.map((category, categoryIndex) => (
-              <div key={categoryIndex} className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-xl font-bold text-gray-900">{category.title}</h3>
-                </div>
-                <div className="p-6">
-                  <div className="space-y-6">
-                    {category.questions.map((faq, faqIndex) => (
-                      <div key={faqIndex}>
-                        <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                          {faq.q}
-                        </h4>
-                        <p className="text-gray-600 leading-relaxed">
-                          {faq.a}
-                        </p>
-                        {faqIndex < category.questions.length - 1 && (
-                          <hr className="mt-6 border-gray-200" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+        {/* FAQ */}
+        <section aria-labelledby="faq-heading" className="mb-16 border-t border-neutral-200 pt-12">
+          <h2 id="faq-heading" className="mb-10 text-2xl font-bold sm:text-3xl">Frequently asked questions</h2>
+          <div className="space-y-12">
+            {faqCategories.map((category) => (
+              <div key={category.title}>
+                <h3 className="mb-6 border-l-4 border-yellow-400 pl-4 text-lg font-bold uppercase tracking-wide sm:text-xl">{category.title}</h3>
+                <dl className="divide-y divide-neutral-200 border-y border-neutral-200">
+                  {category.questions.map((faq) => (
+                    <div key={faq.q} className="grid gap-2 py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:gap-10">
+                      <dt className="font-bold text-black">{faq.q}</dt>
+                      <dd className="text-sm leading-7 text-neutral-700">{faq.a}</dd>
+                    </div>
+                  ))}
+                </dl>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        {/* Emergency Support */}
-        <div className="bg-red-50 rounded-xl p-8 border border-red-200 text-center">
-          <div className="flex justify-center mb-4">
-            <svg className="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h3 className="text-2xl font-bold text-red-900 mb-4">
-            Urgent Support Needed?
-          </h3>
-          <p className="text-red-700 mb-6 max-w-2xl mx-auto">
+        {/* Urgent support */}
+        <section aria-labelledby="urgent-heading" className="border-l-4 border-red-600 bg-neutral-50 p-6 sm:p-8">
+          <h2 id="urgent-heading" className="text-xl font-bold text-black sm:text-2xl">Urgent support needed?</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-700">
             If you have an urgent issue that requires immediate attention, please call our emergency support line.
             Available 24/7 for critical business matters.
           </p>
-          <Link
-            href="tel:+256800911911"
-            className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
-          >
-            Emergency Hotline: +256 800 911 911
+          <Link href="tel:+256800911911" className={`${linkClass} mt-5 inline-block text-base`}>
+            Emergency hotline: +256 800 911 911
           </Link>
-        </div>
+        </section>
       </div>
 
-      {/* Toast Notification */}
+      {/* Toast notification */}
       {toast.show && (
-        <div className={`fixed bottom-6 right-6 z-50 ${toast.type === 'success' ? 'bg-yellow-600' : 'bg-red-600'} text-white px-6 py-4 rounded-lg shadow-2xl max-w-md flex items-start gap-3 animate-slide-in`}>
-          <svg className="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            {toast.type === 'success' ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            )}
-          </svg>
+        <div
+          role="status"
+          aria-live="polite"
+          className={`fixed bottom-6 right-6 z-50 flex max-w-md items-start gap-3 border-l-4 bg-black px-5 py-4 text-white shadow-2xl animate-slide-in ${toast.type === 'success' ? 'border-yellow-400' : 'border-red-600'}`}
+        >
           <p className="flex-1 text-sm leading-relaxed">{toast.message}</p>
           <button
+            type="button"
             onClick={() => setToast({ show: false, message: '', type: 'success' })}
-            className="text-white hover:text-gray-200 flex-shrink-0"
+            aria-label="Dismiss notification"
+            className="flex-shrink-0 text-white hover:text-yellow-400"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

@@ -3,7 +3,7 @@ import { CalendarIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function EventNotFound() {
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
       <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
         <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <CalendarIcon className="w-8 h-8 text-yellow-700" />

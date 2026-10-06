@@ -5,6 +5,12 @@ function getChatbotBaseUrl(): string {
   return process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '';
 }
 
+// The ASP.NET backend's routes are versioned (/api/v1/...); the Next.js
+// fallback route it mirrors (used when no backend URL is configured) is not.
+function chatbotPath(suffix: '' | '/log', baseUrl: string): string {
+  return baseUrl ? `/api/v1/chatbot${suffix}` : `/api/chatbot${suffix}`;
+}
+
 // ===================== MULTILINGUAL KEYWORD MAP =====================
 // Maps non-English investment terms to their English KB equivalents.
 // This lets the KB fallback match queries in French, Swahili, Arabic, and Chinese.
@@ -324,7 +330,7 @@ function logEnquiry(
 ) {
   const baseUrl = getChatbotBaseUrl();
   // Fire-and-forget — don't block the chat response
-  fetch(`${baseUrl}/api/chatbot/log`, {
+  fetch(`${baseUrl}${chatbotPath('/log', baseUrl)}`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -360,7 +366,7 @@ export async function sendChatMessage(
   // Tier 1: Call API route (Groq / Llama 3.3)
   try {
     const baseUrl = getChatbotBaseUrl();
-    const res = await fetch(`${baseUrl}/api/chatbot`, {
+    const res = await fetch(`${baseUrl}${chatbotPath('', baseUrl)}`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -390,8 +396,9 @@ export async function sendChatMessage(
     if (data.code === 'QUOTA_EXCEEDED' || data.code === 'API_KEY_INVALID') {
       console.warn('[chatbot] AI service unavailable:', data.code);
       // Fall through to KB but note the issue
-    } else if (data.error) {
-      console.error('[chatbot] API error:', data.error);
+    } else if (data.error || data.detail) {
+      // data.error: Next.js fallback route. data.detail: ASP.NET's RFC 7807 problem+json.
+      console.error('[chatbot] API error:', data.error ?? data.detail);
     }
   } catch (error) {
     console.error('[chatbot] Network error, falling back to local KB:', error);

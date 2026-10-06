@@ -153,7 +153,7 @@ export default function ProfilePage() {
   // "sign in" screen to a user who is actually authenticated.
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+ <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600 font-medium">Loading your profile…</p>
@@ -165,7 +165,7 @@ export default function ProfilePage() {
   // Any signed-in account (admins and regular users) can view their profile.
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
@@ -273,7 +273,7 @@ export default function ProfilePage() {
     .slice(0, 2);
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8">
+ <div className="min-h-screen bg-white py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         {mfaSetupRequired && (
           <div className="mb-6 bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex items-start gap-3">

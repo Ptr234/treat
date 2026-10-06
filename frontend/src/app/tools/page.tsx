@@ -55,7 +55,7 @@ export default function ToolsPage() {
   ];
 
   return (
-    <div className="bg-black min-h-screen">
+ <div className="bg-white min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-cover bg-center bg-no-repeat py-20" style={{ backgroundImage: 'url(/images/Pride.webp)' }}>
         <div className="absolute inset-0 bg-black/65"></div>

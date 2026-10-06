@@ -179,6 +179,8 @@ export default function AgencyChatPage() {
   const [sendError, setSendError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [hasMoreMessages, setHasMoreMessages] = useState(false);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -270,10 +272,13 @@ export default function AgencyChatPage() {
   const fetchMessages = useCallback(async () => {
     try {
       setLoadingMessages(true);
-      const json = await apiFetch<Message[]>(`/api/messages/?channel=${encodeURIComponent(activeChannel)}`);
+      const json = await apiFetch<{ messages: Message[]; hasMore: boolean }>(
+        `/api/messages/?channel=${encodeURIComponent(activeChannel)}`
+      );
       if (json.success) {
-        const fetched: Message[] = (json.data as Message[]) ?? [];
+        const fetched: Message[] = json.data?.messages ?? [];
         setMessages(fetched);
+        setHasMoreMessages(json.data?.hasMore ?? false);
 
         // Track channel message counts for unread
         setChannelMsgCounts((prev) => ({ ...prev, [activeChannel]: fetched.length }));
@@ -288,6 +293,27 @@ export default function AgencyChatPage() {
   useEffect(() => {
     void fetchMessages();
   }, [fetchMessages]);
+
+  // ── Load earlier messages (paging backwards) ────────────────────────
+
+  const loadEarlierMessages = useCallback(async () => {
+    const oldest = messages[0]?.sentAt;
+    if (!oldest || loadingEarlier) return;
+    setLoadingEarlier(true);
+    try {
+      const json = await apiFetch<{ messages: Message[]; hasMore: boolean }>(
+        `/api/messages/?channel=${encodeURIComponent(activeChannel)}&before=${encodeURIComponent(oldest)}`
+      );
+      if (json.success) {
+        setMessages((prev) => [...(json.data?.messages ?? []), ...prev]);
+        setHasMoreMessages(json.data?.hasMore ?? false);
+      }
+    } catch (err) {
+      console.error('Failed to fetch earlier messages', err);
+    } finally {
+      setLoadingEarlier(false);
+    }
+  }, [activeChannel, messages, loadingEarlier]);
 
   // ── Poll every 10 seconds ──────────────────────────────────────────
 
@@ -496,7 +522,7 @@ export default function AgencyChatPage() {
 
   if (!canUseChat) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4">
+ <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
@@ -517,7 +543,7 @@ export default function AgencyChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+ <div className="min-h-screen bg-white">
       {/* Page header */}
       <div className="border-b border-neutral-800 bg-neutral-900/50">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -739,6 +765,19 @@ export default function AgencyChatPage() {
                   <div className="text-neutral-500 text-sm animate-pulse">
                     Loading messages...
                   </div>
+                </div>
+              )}
+
+              {!searchQuery && hasMoreMessages && messages.length > 0 && (
+                <div className="flex justify-center pb-2">
+                  <button
+                    type="button"
+                    onClick={() => void loadEarlierMessages()}
+                    disabled={loadingEarlier}
+                    className="text-xs font-medium text-red-700 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-full border border-red-200 hover:bg-red-50"
+                  >
+                    {loadingEarlier ? 'Loading…' : 'Load earlier messages'}
+                  </button>
                 </div>
               )}
 
