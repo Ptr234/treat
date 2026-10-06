@@ -95,6 +95,8 @@ builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddScoped<IReferenceNumberGenerator, ReferenceNumberGenerator>();
 builder.Services.AddHttpClient<IGroqClient, GroqClient>();
 builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();
+builder.Services.AddHttpClient<IFlutterwaveClient, FlutterwaveClient>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 // Redis cache (optional — falls back to in-memory if not configured).
 // NOTE: the rate limiter (below) and this cache are per-process. They are only
@@ -122,6 +124,7 @@ builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.Ticke
 builder.Services.AddScoped<OscApi.Services.IInvestorService, OscApi.Services.InvestorService>();
 builder.Services.AddScoped<OscApi.Services.IContactService, OscApi.Services.ContactService>();
 builder.Services.AddScoped<OscApi.Services.IBusinessRegistrationService, OscApi.Services.BusinessRegistrationService>();
+builder.Services.AddScoped<OscApi.Services.IPaymentService, OscApi.Services.PaymentService>();
 builder.Services.AddScoped<OscApi.Services.ISettingsService, OscApi.Services.SettingsService>();
 builder.Services.AddScoped<OscApi.Services.IDashboardService, OscApi.Services.DashboardService>();
 builder.Services.AddSingleton<OscApi.Services.IAnalyticsQueueService, OscApi.Services.AnalyticsQueueService>();
@@ -137,6 +140,12 @@ builder.Services.AddAuthentication("OscCookie")
     .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, OscApi.Middleware.CookieJwtAuthHandler>(
         "OscCookie", null);
 builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, OscApi.Common.MfaCompleteHandler>();
+// Makes [Authorize]/policy failures (401/403) return RFC 7807 problem+json
+// instead of an empty body — the one error path AddProblemDetails() alone
+// doesn't cover, since authorization middleware runs before any controller
+// action (and therefore before any Problem()/ValidationProblem() call).
+builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationMiddlewareResultHandler,
+    OscApi.Middleware.ProblemDetailsAuthorizationMiddlewareResultHandler>();
 builder.Services.AddAuthorization(options =>
 {
     // Admin-level: full back-office access (Director General + system admins).
@@ -152,6 +161,12 @@ builder.Services.AddAuthorization(options =>
         policy => policy.RequireRole(OscApi.Common.Roles.Staff)
             .AddRequirements(new OscApi.Common.MfaCompleteRequirement()));
 });
+
+// RFC 7807 problem+json for all client/server error responses (see
+// ApiDesign.MD §4). ControllerBase.Problem()/ValidationProblem() and the
+// built-in [ApiController] invalid-model-state handling both route through
+// this — Program.cs is the single place the shape is defined.
+builder.Services.AddProblemDetails();
 
 // Controllers + Swagger
 builder.Services.AddControllers()
@@ -175,6 +190,28 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = 429;
+
+    // Let throttled clients self-throttle (ApiDesign.MD §10) instead of
+    // guessing when to retry.
+    options.OnRejected = async (context, token) =>
+    {
+        var window = context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter)
+            ? retryAfter
+            : TimeSpan.FromMinutes(1);
+        context.HttpContext.Response.Headers.RetryAfter = ((int)window.TotalSeconds).ToString();
+        await context.HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Http.IProblemDetailsService>()
+            .WriteAsync(new Microsoft.AspNetCore.Http.ProblemDetailsContext
+            {
+                HttpContext = context.HttpContext,
+                ProblemDetails = new()
+                {
+                    Status = StatusCodes.Status429TooManyRequests,
+                    Title = "Too many requests.",
+                    Detail = "Rate limit exceeded. Retry after the interval in the Retry-After header.",
+                    Instance = context.HttpContext.Request.Path,
+                },
+            });
+    };
 
     options.AddPolicy("chatbot", httpContext =>
         RateLimitPartition.GetSlidingWindowLimiter(
@@ -231,6 +268,25 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidationExceptionMiddleware>();
 // Note: User-based rate limiting is available in UserRateLimitingMiddleware.cs
 // Currently using ASP.NET's RateLimiter policies instead (more flexible)
+
+// HSTS only — no UseHttpsRedirection(). Kestrel only ever listens on plain
+// HTTP here (ASPNETCORE_URLS=http://+:8080 in both render.yaml and
+// docker-compose.test.yml); Render's edge terminates TLS and forwards
+// X-Forwarded-Proto, which is already trusted above. An app-level HTTPS
+// redirect would have no HTTPS port to redirect to and would break the
+// plain-HTTP container healthcheck.
+if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+{
+    app.UseHsts();
+}
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    context.Response.Headers.Append("X-Frame-Options", "DENY");
+    context.Response.Headers.Append("Referrer-Policy", "no-referrer");
+    await next();
+});
 
 if (app.Environment.IsDevelopment())
 {

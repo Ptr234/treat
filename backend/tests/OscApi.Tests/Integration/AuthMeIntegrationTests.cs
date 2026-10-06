@@ -22,16 +22,16 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         object body = _adminMfaSecret is null
             ? new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword }
             : new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword, mfaCode = new Totp(Base32Encoding.ToBytes(_adminMfaSecret)).ComputeTotp() };
-        var login = await client.PostAsJsonAsync("/api/auth/login", body);
+        var login = await client.PostAsJsonAsync("/api/v1/auth/login", body);
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
 
         if (_adminMfaSecret is null)
         {
-            var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+            var enroll = await client.PostAsync("/api/v1/auth/mfa/enroll", null);
             _adminMfaSecret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
                 .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
             var code = new Totp(Base32Encoding.ToBytes(_adminMfaSecret)).ComputeTotp();
-            await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
+            await client.PostAsJsonAsync("/api/v1/auth/mfa/verify", new { code });
         }
     }
 
@@ -41,11 +41,11 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("user");
 
-        var signup = await client.PostAsJsonAsync("/api/auth/signup",
+        var signup = await client.PostAsJsonAsync("/api/v1/auth/signup",
             new { name = "Test User", email, password = "Passw0rd1" });
         Assert.Equal(HttpStatusCode.OK, signup.StatusCode);
 
-        var me = await client.GetAsync("/api/me/submissions");
+        var me = await client.GetAsync("/api/v1/me/submissions");
         Assert.Equal(HttpStatusCode.OK, me.StatusCode);
         var body = await me.Content.ReadAsStringAsync();
         Assert.Contains("\"tickets\"", body);
@@ -56,7 +56,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public async Task Signup_WeakPassword_Rejected()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/auth/signup",
+        var res = await client.PostAsJsonAsync("/api/v1/auth/signup",
             new { name = "Weak", email = NewEmail("weak"), password = "short" });
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
@@ -66,11 +66,11 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
         var email = NewEmail("dup");
-        var first = await client.PostAsJsonAsync("/api/auth/signup",
+        var first = await client.PostAsJsonAsync("/api/v1/auth/signup",
             new { name = "Dup", email, password = "Passw0rd1" });
         Assert.Equal(HttpStatusCode.OK, first.StatusCode);
 
-        var second = await client.PostAsJsonAsync("/api/auth/signup",
+        var second = await client.PostAsJsonAsync("/api/v1/auth/signup",
             new { name = "Dup2", email, password = "Passw0rd1" });
         Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
     }
@@ -79,7 +79,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public async Task Me_Unauthenticated_Returns401()
     {
         var client = _factory.CreateClient();
-        var res = await client.GetAsync("/api/me/submissions");
+        var res = await client.GetAsync("/api/v1/me/submissions");
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
 
@@ -89,7 +89,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         await LoginAdminWithMfaAsync(client);
 
-        var dash = await client.GetAsync("/api/dashboard");
+        var dash = await client.GetAsync("/api/v1/dashboard");
         Assert.Equal(HttpStatusCode.OK, dash.StatusCode);
     }
 
@@ -97,7 +97,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public async Task AdminLogin_WrongPassword_Unauthorized()
     {
         var client = _factory.CreateClient();
-        var login = await client.PostAsJsonAsync("/api/auth/login",
+        var login = await client.PostAsJsonAsync("/api/v1/auth/login",
             new { email = ApiFactory.AdminEmail, password = "wrong" });
         Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
     }
@@ -106,7 +106,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public async Task Dashboard_Unauthenticated_Returns401()
     {
         var client = _factory.CreateClient();
-        var res = await client.GetAsync("/api/dashboard");
+        var res = await client.GetAsync("/api/v1/dashboard");
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
 
@@ -114,14 +114,14 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public async Task Draft_SaveThenGet_RoundTrips()
     {
         var client = _factory.CreateClient();
-        await client.PostAsJsonAsync("/api/auth/signup",
+        await client.PostAsJsonAsync("/api/v1/auth/signup",
             new { name = "D", email = NewEmail("draft"), password = "Passw0rd1" });
 
-        var put = await client.PutAsJsonAsync("/api/me/drafts/investor_onboarding",
+        var put = await client.PutAsJsonAsync("/api/v1/me/drafts/investor_onboarding",
             new { step = 2, investorType = "foreign" });
         Assert.Equal(HttpStatusCode.OK, put.StatusCode);
 
-        var get = await client.GetAsync("/api/me/drafts/investor_onboarding");
+        var get = await client.GetAsync("/api/v1/me/drafts/investor_onboarding");
         Assert.Equal(HttpStatusCode.OK, get.StatusCode);
         Assert.Contains("foreign", await get.Content.ReadAsStringAsync());
     }
@@ -132,7 +132,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("owner");
 
-        var ticket = await client.PostAsJsonAsync("/api/tickets", new
+        var ticket = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "Integration ticket",
             description = "created during an integration test",
@@ -143,10 +143,10 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         });
         Assert.Equal(HttpStatusCode.Created, ticket.StatusCode);
 
-        await client.PostAsJsonAsync("/api/auth/signup",
+        await client.PostAsJsonAsync("/api/v1/auth/signup",
             new { name = "Owner", email, password = "Passw0rd1" });
 
-        var me = await client.GetAsync("/api/me/submissions");
+        var me = await client.GetAsync("/api/v1/me/submissions");
         Assert.Equal(HttpStatusCode.OK, me.StatusCode);
         Assert.Contains("Integration ticket", await me.Content.ReadAsStringAsync());
     }

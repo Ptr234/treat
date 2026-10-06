@@ -8,7 +8,7 @@ using OscApi.Services;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/investors")]
+[Route("api/v1/investors")]
 public class InvestorsController : ControllerBase
 {
     private readonly IInvestorService _investors;
@@ -22,7 +22,7 @@ public class InvestorsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> ListInvestors([FromQuery] int from = 0, [FromQuery] int to = 50, [FromQuery] string? status = null)
     {
-        if (!User.IsAdminLevel()) return StatusCode(403, new ApiResponse(false, "Admin access required"));
+        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: 403);
         var result = await _investors.ListAsync(from, to, status);
         return Ok(new ApiResponse<object>(true, result));
     }
@@ -35,8 +35,8 @@ public class InvestorsController : ControllerBase
         var result = await _investors.GetByRefAsync(refNumber, email, isAdmin);
         if (result is null)
             return isAdmin
-                ? NotFound(new ApiResponse(false, "Investor profile not found"))
-                : StatusCode(403, new ApiResponse(false, "Email does not match profile"));
+                ? Problem(detail: "Investor profile not found", statusCode: StatusCodes.Status404NotFound)
+                : Problem(detail: "Email does not match profile", statusCode: 403);
         return Ok(new ApiResponse<InvestorDetailResponse>(true, result));
     }
 
@@ -47,8 +47,8 @@ public class InvestorsController : ControllerBase
     {
         var (result, error) = await _investors.CreateAsync(request);
         if (error is not null)
-            return Conflict(new ApiResponse(false, error));
-        return Created($"/api/investors/{result!.ReferenceNumber}",
+            return Problem(detail: error, statusCode: StatusCodes.Status409Conflict);
+        return Created($"/api/v1/investors/{result!.ReferenceNumber}",
             new ApiResponse<InvestorResponse>(true, result));
     }
 
@@ -56,9 +56,9 @@ public class InvestorsController : ControllerBase
     [HttpPatch("{refNumber}")]
     public async Task<IActionResult> UpdateInvestor(string refNumber, [FromBody] UpdateInvestorRequest request)
     {
-        if (!User.IsAdminLevel()) return StatusCode(403, new ApiResponse(false, "Admin access required"));
+        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: 403);
         var result = await _investors.UpdateAsync(refNumber, request);
-        if (result is null) return NotFound(new ApiResponse(false, "Investor profile not found"));
+        if (result is null) return Problem(detail: "Investor profile not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<InvestorResponse>(true, result));
     }
 
@@ -66,9 +66,9 @@ public class InvestorsController : ControllerBase
     [HttpDelete("{refNumber}")]
     public async Task<IActionResult> DeleteInvestor(string refNumber)
     {
-        if (!User.IsAdminLevel()) return StatusCode(403, new ApiResponse(false, "Admin access required"));
+        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: 403);
         var deleted = await _investors.DeleteAsync(refNumber);
-        if (!deleted) return NotFound(new ApiResponse(false, "Investor profile not found"));
+        if (!deleted) return Problem(detail: "Investor profile not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse(true));
     }
 }

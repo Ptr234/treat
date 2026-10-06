@@ -133,3 +133,11 @@ public enum BusinessRegistrationStatus
     CertificateIssued,
     Rejected
 }
+
+/// <summary>Lifecycle of a single URSB registration-fee payment attempt.</summary>
+public enum PaymentStatus
+{
+    Pending,
+    Successful,
+    Failed
+}

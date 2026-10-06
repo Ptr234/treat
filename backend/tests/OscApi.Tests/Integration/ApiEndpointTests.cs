@@ -23,15 +23,15 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         object body = _adminMfaSecret is null
             ? new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword }
             : new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword, mfaCode = new Totp(Base32Encoding.ToBytes(_adminMfaSecret)).ComputeTotp() };
-        await client.PostAsJsonAsync("/api/auth/login", body);
+        await client.PostAsJsonAsync("/api/v1/auth/login", body);
 
         if (_adminMfaSecret is null)
         {
-            var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+            var enroll = await client.PostAsync("/api/v1/auth/mfa/enroll", null);
             _adminMfaSecret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
                 .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
             var code = new Totp(Base32Encoding.ToBytes(_adminMfaSecret)).ComputeTotp();
-            await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
+            await client.PostAsJsonAsync("/api/v1/auth/mfa/verify", new { code });
         }
     }
 
@@ -47,7 +47,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task InvalidRoute_Returns404()
     {
         var client = _factory.CreateClient();
-        var res = await client.GetAsync("/api/nonexistent");
+        var res = await client.GetAsync("/api/v1/nonexistent");
         Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
     }
 
@@ -55,7 +55,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task GetTickets_Unauthenticated_Returns401()
     {
         var client = _factory.CreateClient();
-        var res = await client.GetAsync("/api/tickets");
+        var res = await client.GetAsync("/api/v1/tickets");
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
 
@@ -63,7 +63,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task CreateTicket_WithoutAuth_CanSubmit()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/tickets", new
+        var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "Test ticket",
             description = "A test ticket",
@@ -79,7 +79,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task CreateTicket_InvalidCategory_BadRequest()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/tickets", new
+        var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "Test",
             description = "Test",
@@ -95,7 +95,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task CreateTicket_MissingRequired_BadRequest()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/tickets", new
+        var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "", // Missing required field
             description = "Test",
@@ -108,7 +108,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task Login_InvalidCredentials_Returns401()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/auth/login", new
+        var res = await client.PostAsJsonAsync("/api/v1/auth/login", new
         {
             email = "nonexistent@example.com",
             password = "password",
@@ -120,7 +120,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task Signup_ValidData_ReturnsOk()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/auth/signup", new
+        var res = await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test User",
             email = NewEmail("signup"),
@@ -133,7 +133,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task Signup_InvalidEmail_BadRequest()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/auth/signup", new
+        var res = await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email = "invalid-email",
@@ -146,7 +146,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task Signup_WeakPassword_BadRequest()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsJsonAsync("/api/auth/signup", new
+        var res = await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email = NewEmail("weak"),
@@ -159,7 +159,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
     public async Task Me_Unauthenticated_Returns401()
     {
         var client = _factory.CreateClient();
-        var res = await client.GetAsync("/api/me/profile");
+        var res = await client.GetAsync("/api/v1/me/profile");
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
 
@@ -170,7 +170,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var email = NewEmail("profile");
 
         // Signup
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email,
@@ -178,7 +178,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         });
 
         // Update profile
-        var res = await client.PutAsJsonAsync("/api/me/profile", new
+        var res = await client.PutAsJsonAsync("/api/v1/me/profile", new
         {
             name = "Updated Name",
             phone = "+256701234567",
@@ -193,18 +193,18 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("delete");
 
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email,
             password = "ValidPassword123!",
         });
 
-        var res = await client.PostAsync("/api/me/delete-account", null);
+        var res = await client.PostAsync("/api/v1/me/delete-account", null);
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
 
         // Verify user can't login
-        var loginRes = await client.PostAsJsonAsync("/api/auth/login", new
+        var loginRes = await client.PostAsJsonAsync("/api/v1/auth/login", new
         {
             email,
             password = "ValidPassword123!",
@@ -218,18 +218,18 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("logout");
 
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email,
             password = "ValidPassword123!",
         });
 
-        var logoutRes = await client.PostAsync("/api/auth/logout", null);
+        var logoutRes = await client.PostAsync("/api/v1/auth/logout", null);
         Assert.Equal(HttpStatusCode.OK, logoutRes.StatusCode);
 
         // Verify session is cleared
-        var meRes = await client.GetAsync("/api/me/profile");
+        var meRes = await client.GetAsync("/api/v1/me/profile");
         Assert.Equal(HttpStatusCode.Unauthorized, meRes.StatusCode);
     }
 
@@ -239,7 +239,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         await LoginAdminWithMfaAsync(client);
 
-        var res = await client.GetAsync("/api/tickets?page=1&pageSize=10");
+        var res = await client.GetAsync("/api/v1/tickets?page=1&pageSize=10");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
 
@@ -249,7 +249,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         await LoginAdminWithMfaAsync(client);
 
-        var res = await client.GetAsync("/api/tickets?page=1&pageSize=5000");
+        var res = await client.GetAsync("/api/v1/tickets?page=1&pageSize=5000");
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
@@ -260,14 +260,14 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var email1 = NewEmail("concurrent1");
         var email2 = NewEmail("concurrent2");
 
-        var task1 = client.PostAsJsonAsync("/api/auth/signup", new
+        var task1 = client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "User1",
             email = email1,
             password = "ValidPassword123!",
         });
 
-        var task2 = client.PostAsJsonAsync("/api/auth/signup", new
+        var task2 = client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "User2",
             email = email2,
@@ -286,7 +286,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var largeDescription = new string('x', 100000);
 
-        var res = await client.PostAsJsonAsync("/api/tickets", new
+        var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "Test",
             description = largeDescription,

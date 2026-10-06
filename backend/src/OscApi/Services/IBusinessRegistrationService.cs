@@ -13,6 +13,11 @@ public interface IBusinessRegistrationService
     Task<object> ListAsync(int from, int to, string? agencyScope);
 
     Task<BusinessRegistrationDetailResponse?> GetByRefAsync(string refNumber, string? email, bool isStaff);
-    Task<BusinessRegistrationDetailResponse?> UpdateAsync(string refNumber, UpdateBusinessRegistrationRequest request, string? agencyScope);
+
+    /// <summary>actorEmail/actorRole/ipAddress identify who made a staff decision, for
+    /// the audit trail — defaulted so existing callers that don't care (e.g. tests
+    /// exercising pure business-rule behavior) don't need to supply them.</summary>
+    Task<BusinessRegistrationDetailResponse?> UpdateAsync(string refNumber, UpdateBusinessRegistrationRequest request, string? agencyScope,
+        string actorEmail = "(unknown)", string actorRole = "-", string? ipAddress = null);
     Task<CertificateResponse?> GetCertificateAsync(string refNumber, string? email, bool isStaff);
 }

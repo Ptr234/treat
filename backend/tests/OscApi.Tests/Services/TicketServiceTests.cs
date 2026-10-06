@@ -208,6 +208,55 @@ public class TicketServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_ResolvedThenClosed_KeepsOriginalResolvedAt()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+
+        await svc.CreateAsync(new CreateTicketRequest("T1", "D1", "general_inquiry", "low",
+            "a@b.com", "A", null, null, null, null, false));
+
+        var db = TestDbFactory.Create(dbName);
+        var reference = db.Tickets.First().ReferenceNumber;
+
+        await svc.UpdateAsync(reference,
+            new UpdateTicketRequest(Status: "resolved", null, null, null, null, null, null));
+        var resolved = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
+        Assert.NotNull(resolved.ResolvedAt);
+        var resolvedAt = resolved.ResolvedAt;
+
+        // Closing a resolved ticket is the normal forward path, not a reopen — it
+        // must not wipe the original resolution timestamp that SLA/resolution-time
+        // aggregates in DashboardService depend on.
+        await svc.UpdateAsync(reference,
+            new UpdateTicketRequest(Status: "closed", null, null, null, null, null, null));
+        var closed = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
+        Assert.Equal(resolvedAt, closed.ResolvedAt);
+        Assert.NotNull(closed.ClosedAt);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ClosedDirectly_BackfillsResolvedAt()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+
+        await svc.CreateAsync(new CreateTicketRequest("T1", "D1", "general_inquiry", "low",
+            "a@b.com", "A", null, null, null, null, false));
+
+        var db = TestDbFactory.Create(dbName);
+        var reference = db.Tickets.First().ReferenceNumber;
+
+        // Closed without ever passing through Resolved — should still count as
+        // resolved for aggregates rather than looking like an open SLA breach.
+        await svc.UpdateAsync(reference,
+            new UpdateTicketRequest(Status: "closed", null, null, null, null, null, null));
+        var closed = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
+        Assert.NotNull(closed.ResolvedAt);
+        Assert.NotNull(closed.ClosedAt);
+    }
+
+    [Fact]
     public async Task UpdateAsync_ReturnsNullForMissing()
     {
         var svc = CreateService();

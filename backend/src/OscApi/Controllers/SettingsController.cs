@@ -7,7 +7,7 @@ using OscApi.Services;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/settings")]
+[Route("api/v1/settings")]
 [Authorize(Policy = "AdminOnly")]
 public class SettingsController : ControllerBase
 {
@@ -62,7 +62,7 @@ public class SettingsController : ControllerBase
             foreach (var email in emails)
             {
                 if (!email.Contains('@'))
-                    return BadRequest(new ApiResponse(false, $"Invalid email address: {email}"));
+                    return Problem(detail: $"Invalid email address: {email}", statusCode: StatusCodes.Status400BadRequest);
             }
         }
 

@@ -25,12 +25,16 @@ public class HealthController : ControllerBase
         }
         catch { /* DB not configured yet */ }
 
-        return Ok(new ApiResponse<object>(true, new
+        var body = new ApiResponse<object>(true, new
         {
-            status = "ok",
+            status = dbOk ? "ok" : "degraded",
             timestamp = DateTimeOffset.UtcNow,
             version = "1.0.0",
             database = dbOk ? "connected" : "unavailable",
-        }));
+        });
+
+        // 503 when a dependency is down, so load balancers/orchestrators stop
+        // routing traffic here instead of reading a 200 body to find out.
+        return dbOk ? Ok(body) : StatusCode(StatusCodes.Status503ServiceUnavailable, body);
     }
 }

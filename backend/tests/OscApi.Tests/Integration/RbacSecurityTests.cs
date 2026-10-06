@@ -25,15 +25,15 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         object body = _adminMfaSecret is null
             ? new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword }
             : new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword, mfaCode = Code(_adminMfaSecret) };
-        var login = await client.PostAsJsonAsync("/api/auth/login", body);
+        var login = await client.PostAsJsonAsync("/api/v1/auth/login", body);
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
 
         if (_adminMfaSecret is null)
         {
-            var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+            var enroll = await client.PostAsync("/api/v1/auth/mfa/enroll", null);
             _adminMfaSecret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
                 .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
-            await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code = Code(_adminMfaSecret) });
+            await client.PostAsJsonAsync("/api/v1/auth/mfa/verify", new { code = Code(_adminMfaSecret) });
         }
     }
 
@@ -44,7 +44,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var email = NewEmail("regular");
 
         // Create regular user
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Regular User",
             email,
@@ -52,7 +52,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         });
 
         // Try to access admin dashboard
-        var res = await client.GetAsync("/api/dashboard");
+        var res = await client.GetAsync("/api/v1/dashboard");
         Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
     }
 
@@ -62,7 +62,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         await LoginAdminWithMfaAsync(client);
 
-        var res = await client.GetAsync("/api/dashboard");
+        var res = await client.GetAsync("/api/v1/dashboard");
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
 
@@ -74,7 +74,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var email2 = NewEmail("user2");
 
         // Create first user
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "User 1",
             email = email1,
@@ -83,7 +83,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
 
         // Create second user
         var client2 = _factory.CreateClient();
-        await client2.PostAsJsonAsync("/api/auth/signup", new
+        await client2.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "User 2",
             email = email2,
@@ -91,7 +91,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         });
 
         // First user tries to access second user's submissions
-        var res = await client.GetAsync("/api/me/submissions");
+        var res = await client.GetAsync("/api/v1/me/submissions");
         var body = await res.Content.ReadAsStringAsync();
 
         // Should only see own submissions
@@ -104,7 +104,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("user");
 
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test User",
             email,
@@ -112,7 +112,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         });
 
         // Try to update with another user's email pattern
-        var res = await client.PutAsJsonAsync("/api/me/profile", new
+        var res = await client.PutAsJsonAsync("/api/v1/me/profile", new
         {
             email = "different@example.com",
             name = "Hacker",
@@ -124,7 +124,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
             res.StatusCode == HttpStatusCode.OK
         );
 
-        var profile = await client.GetAsync("/api/me/profile");
+        var profile = await client.GetAsync("/api/v1/me/profile");
         var profileBody = await profile.Content.ReadAsStringAsync();
         Assert.Contains(email, profileBody);
     }
@@ -135,14 +135,14 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("ticket");
 
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test User",
             email,
             password = "ValidPassword123!",
         });
 
-        await client.PostAsJsonAsync("/api/tickets", new
+        await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "My Ticket",
             description = "Private ticket",
@@ -152,7 +152,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
             contactName = "Test",
         });
 
-        var submissions = await client.GetAsync("/api/me/submissions");
+        var submissions = await client.GetAsync("/api/v1/me/submissions");
         var body = await submissions.Content.ReadAsStringAsync();
         Assert.Contains("My Ticket", body);
     }
@@ -163,7 +163,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("session");
 
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email,
@@ -176,7 +176,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         // Add invalid token to cookies (auth handler looks for "osc-session")
         tamperedClient.DefaultRequestHeaders.Add("Cookie", "osc-session=invalid-token-xyz");
 
-        var res = await tamperedClient.GetAsync("/api/me/profile");
+        var res = await tamperedClient.GetAsync("/api/v1/me/profile");
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
 
@@ -185,7 +185,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
 
-        var res = await client.PostAsJsonAsync("/api/auth/signup", new
+        var res = await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email = "test@example.com'; DROP TABLE users; --",
@@ -201,7 +201,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
 
-        var res = await client.PostAsJsonAsync("/api/tickets", new
+        var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "<script>alert('xss')</script>",
             description = "Test",
@@ -224,11 +224,11 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
 
-        // Authenticate as staff first (required for /api/tickets GET)
+        // Authenticate as staff first (required for /api/v1/tickets GET)
         await LoginAdminWithMfaAsync(client);
 
         // Get ticket list to verify authenticated access works
-        var formPage = await client.GetAsync("/api/tickets");
+        var formPage = await client.GetAsync("/api/v1/tickets");
         Assert.Equal(HttpStatusCode.OK, formPage.StatusCode);
     }
 
@@ -239,7 +239,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var email = NewEmail("hash");
         var password = "TestPassword123!";
 
-        await client.PostAsJsonAsync("/api/auth/signup", new
+        await client.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email,
@@ -248,7 +248,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
 
         // If we could access the DB, we'd verify the password is hashed
         // For now, verify login still works (password is correctly hashed/verified)
-        var login = await client.PostAsJsonAsync("/api/auth/login", new { email, password });
+        var login = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
     }
 
@@ -261,7 +261,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         // Make many rapid requests
         for (int i = 0; i < 50; i++)
         {
-            tasks.Add(client.GetAsync("/api/tickets"));
+            tasks.Add(client.GetAsync("/api/v1/tickets"));
         }
 
         var responses = await Task.WhenAll(tasks);
@@ -277,7 +277,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var largeTitle = new string('x', 10000);
 
-        var res = await client.PostAsJsonAsync("/api/tickets", new
+        var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = largeTitle,
             description = "Test",
@@ -298,7 +298,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var email = NewEmail("delete");
 
         // Create user
-        await userClient.PostAsJsonAsync("/api/auth/signup", new
+        await userClient.PostAsJsonAsync("/api/v1/auth/signup", new
         {
             name = "Test",
             email,
@@ -306,18 +306,18 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         });
 
         // Admin login
-        await adminClient.PostAsJsonAsync("/api/auth/login", new
+        await adminClient.PostAsJsonAsync("/api/v1/auth/login", new
         {
             email = ApiFactory.AdminEmail,
             password = ApiFactory.AdminPassword,
         });
 
         // User deletes own account
-        var deleteRes = await userClient.PostAsync("/api/me/delete-account", null);
+        var deleteRes = await userClient.PostAsync("/api/v1/me/delete-account", null);
         Assert.Equal(HttpStatusCode.OK, deleteRes.StatusCode);
 
         // Verify user cannot login
-        var loginRes = await userClient.PostAsJsonAsync("/api/auth/login", new
+        var loginRes = await userClient.PostAsJsonAsync("/api/v1/auth/login", new
         {
             email,
             password = "ValidPassword123!",
@@ -330,7 +330,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
 
-        var res = await client.GetAsync("/api/config");
+        var res = await client.GetAsync("/api/v1/config");
         if (res.StatusCode == HttpStatusCode.OK)
         {
             var body = await res.Content.ReadAsStringAsync();

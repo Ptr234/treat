@@ -12,15 +12,17 @@ public class BusinessRegistrationService : IBusinessRegistrationService
     private readonly OscDbContext _db;
     private readonly IEmailService _email;
     private readonly IReferenceNumberGenerator _refGen;
+    private readonly IAuditLogService _audit;
 
     /// <summary>Only URSB handles business registration today.</summary>
     private const string OwningAgencyCode = "URSB";
 
-    public BusinessRegistrationService(OscDbContext db, IEmailService email, IReferenceNumberGenerator refGen)
+    public BusinessRegistrationService(OscDbContext db, IEmailService email, IReferenceNumberGenerator refGen, IAuditLogService audit)
     {
         _db = db;
         _email = email;
         _refGen = refGen;
+        _audit = audit;
     }
 
     public async Task<NameCheckResponse> CheckNameAsync(string name)
@@ -50,6 +52,17 @@ public class BusinessRegistrationService : IBusinessRegistrationService
 
     public async Task<BusinessRegistrationResponse> CreateAsync(CreateBusinessRegistrationRequest request)
     {
+        // CheckNameAsync is also exposed as its own advisory GET for live-typing
+        // feedback, but that call happens well before submission — re-run it here,
+        // immediately before the insert, to close (not eliminate — true atomicity
+        // needs a DB-level constraint) the window where two near-simultaneous
+        // submissions for the same name both slip past the advisory check.
+        var nameCheck = await CheckNameAsync(request.BusinessName);
+        if (!nameCheck.Available)
+            throw new FluentValidation.ValidationException(
+                [new FluentValidation.Results.ValidationFailure("businessName",
+                    $"'{nameCheck.Name}' is already registered as {nameCheck.ConflictingReferenceNumber}")]);
+
         var registration = new BusinessRegistration
         {
             BusinessName = SanitizeHelper.StripHtml(request.BusinessName),
@@ -117,7 +130,8 @@ public class BusinessRegistrationService : IBusinessRegistrationService
         return ToDetailResponse(r);
     }
 
-    public async Task<BusinessRegistrationDetailResponse?> UpdateAsync(string refNumber, UpdateBusinessRegistrationRequest request, string? agencyScope)
+    public async Task<BusinessRegistrationDetailResponse?> UpdateAsync(string refNumber, UpdateBusinessRegistrationRequest request, string? agencyScope,
+        string actorEmail = "(unknown)", string actorRole = "-", string? ipAddress = null)
     {
         if (!string.IsNullOrEmpty(agencyScope) && agencyScope != OwningAgencyCode)
             return null;
@@ -144,7 +158,27 @@ public class BusinessRegistrationService : IBusinessRegistrationService
                 throw new FluentValidation.ValidationException(
                     [new FluentValidation.Results.ValidationFailure("status", "A certificate can only be issued for a registration whose name has been approved")]);
 
-            if (status == BusinessRegistrationStatus.Rejected && string.IsNullOrWhiteSpace(request.RejectionReason) && string.IsNullOrWhiteSpace(r.RejectionReason))
+            // The statutory fee must actually be paid — URSB does not issue a
+            // certificate on credit. Checked against Payment rows, never a
+            // client-supplied flag, so this can't be bypassed from the request body.
+            if (status == BusinessRegistrationStatus.CertificateIssued)
+            {
+                var feePaid = await _db.Payments.AnyAsync(p =>
+                    p.BusinessRegistrationRef == refNumber && p.Status == PaymentStatus.Successful);
+                if (!feePaid)
+                    throw new FluentValidation.ValidationException(
+                        [new FluentValidation.Results.ValidationFailure("status", "The registration fee must be paid before a certificate can be issued")]);
+            }
+
+            // A fresh rejection (an actual transition into Rejected) must carry its
+            // own reason — falling back to whatever RejectionReason is already on
+            // the record would silently reuse a stale reason left over from an
+            // earlier rejection cycle (e.g. Rejected -> UnderReview -> Rejected
+            // again for an unrelated cause). Re-sending the same Rejected status
+            // with no reason (statusChanged == false) is a no-op and doesn't
+            // require one.
+            var isFreshRejection = status == BusinessRegistrationStatus.Rejected && status != previousStatus;
+            if (isFreshRejection && string.IsNullOrWhiteSpace(request.RejectionReason))
                 throw new FluentValidation.ValidationException(
                     [new FluentValidation.Results.ValidationFailure("rejectionReason", "A rejection reason is required")]);
 
@@ -174,6 +208,12 @@ public class BusinessRegistrationService : IBusinessRegistrationService
             else
                 _ = _email.SendBusinessRegistrationStatusUpdateAsync(
                     r.ContactEmail, r.ContactName, r.ReferenceNumber, r.BusinessName, r.Status.ToString());
+
+            // Who made this call is legally material for a government registration
+            // decision (appeals, disputes over a rejection or an issued certificate)
+            // — record it, distinct from the free-text ReviewNotes an officer enters.
+            await _audit.LogAsync(actorEmail, actorRole, $"business_registrations.status.{r.Status.ToString().ToLowerInvariant()}",
+                $"{refNumber}: {previousStatus} -> {r.Status}", 200, ipAddress);
         }
 
         return ToDetailResponse(r);

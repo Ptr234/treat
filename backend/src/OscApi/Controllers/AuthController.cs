@@ -12,7 +12,7 @@ using OscApi.Models;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/v1/auth")]
 public class AuthController : ControllerBase
 {
     private readonly OscDbContext _db;
@@ -63,7 +63,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            return BadRequest(new ApiResponse(false, "Email and password are required"));
+            return Problem(detail: "Email and password are required", statusCode: StatusCodes.Status400BadRequest);
 
         var email = request.Email.ToLowerInvariant();
 
@@ -74,7 +74,7 @@ public class AuthController : ControllerBase
             if (admin.PasswordHash is null || !_password.VerifyPassword(request.Password, admin.PasswordHash))
             {
                 await AuditAsync(email, admin.Role, "auth.login.failed", "Invalid password", 401);
-                return Unauthorized(new ApiResponse(false, "Invalid credentials"));
+                return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
             }
 
             // Multi-factor: password is correct, but if the admin enrolled in TOTP
@@ -90,7 +90,7 @@ public class AuthController : ControllerBase
                 if (!_totp.Verify(admin.MfaSecret, request.MfaCode))
                 {
                     await AuditAsync(admin.Email, admin.Role, "auth.login.failed", "Invalid MFA code", 401);
-                    return Unauthorized(new ApiResponse(false, "Invalid authentication code"));
+                    return Problem(detail: "Invalid authentication code", statusCode: StatusCodes.Status401Unauthorized);
                 }
             }
 
@@ -106,7 +106,7 @@ public class AuthController : ControllerBase
         if (user is null || user.PasswordHash is null || !_password.VerifyPassword(request.Password, user.PasswordHash))
         {
             await AuditAsync(email, "user", "auth.login.failed", "Invalid credentials", 401);
-            return Unauthorized(new ApiResponse(false, "Invalid credentials"));
+            return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
         }
 
         var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture);
@@ -122,20 +122,20 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Signup([FromBody] SignupRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            return BadRequest(new ApiResponse(false, "Name, email and password are required"));
+            return Problem(detail: "Name, email and password are required", statusCode: StatusCodes.Status400BadRequest);
 
         var email = request.Email.ToLowerInvariant().Trim();
 
         // Validate email format - simple regex to allow only standard email characters
         if (!System.Text.RegularExpressions.Regex.IsMatch(email, @"^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"))
-            return BadRequest(new ApiResponse(false, "Invalid email format"));
+            return Problem(detail: "Invalid email format", statusCode: StatusCodes.Status400BadRequest);
 
         if (request.Password.Length < 8 || !request.Password.Any(char.IsUpper) || !request.Password.Any(char.IsDigit))
-            return BadRequest(new ApiResponse(false, "Password must be at least 8 characters and include an uppercase letter and a digit"));
+            return Problem(detail: "Password must be at least 8 characters and include an uppercase letter and a digit", statusCode: StatusCodes.Status400BadRequest);
 
         // Email must be unique across admins and users.
         if (await _db.AdminUsers.AnyAsync(a => a.Email == email) || await _db.Users.AnyAsync(u => u.Email == email))
-            return Conflict(new ApiResponse(false, "An account with this email already exists"));
+            return Problem(detail: "An account with this email already exists", statusCode: StatusCodes.Status409Conflict);
 
         var user = new User
         {
@@ -159,7 +159,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> GoogleAuth([FromBody] GoogleAuthRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.IdToken))
-            return BadRequest(new ApiResponse(false, "Google credential is required"));
+            return Problem(detail: "Google credential is required", statusCode: StatusCodes.Status400BadRequest);
 
         // Read through IConfiguration like every other setting, so "Google:ClientId"
         // in appsettings and the Google__ClientId environment convention both work.
@@ -168,7 +168,7 @@ public class AuthController : ControllerBase
         var clientId = _config["Google:ClientId"]
             ?? Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
         if (string.IsNullOrEmpty(clientId))
-            return StatusCode(500, new ApiResponse(false, "Google OAuth not configured"));
+            return Problem(detail: "Google OAuth not configured", statusCode: 500);
 
         Google.Apis.Auth.GoogleJsonWebSignature.Payload payload;
         try
@@ -178,7 +178,7 @@ public class AuthController : ControllerBase
         }
         catch
         {
-            return Unauthorized(new ApiResponse(false, "Invalid Google token"));
+            return Problem(detail: "Invalid Google token", statusCode: StatusCodes.Status401Unauthorized);
         }
 
         // Accounts here are matched to admin and user records *by email address*.
@@ -189,8 +189,8 @@ public class AuthController : ControllerBase
         {
             await AuditAsync(payload.Email ?? "(unknown)", "user", "auth.login.failed",
                 "Google account e-mail is not verified", 401);
-            return Unauthorized(new ApiResponse(false,
-                "Your Google account e-mail address is not verified"));
+            return Problem(detail: "Your Google account e-mail address is not verified",
+                statusCode: StatusCodes.Status401Unauthorized);
         }
 
         var email = payload.Email.ToLowerInvariant();
@@ -212,7 +212,7 @@ public class AuthController : ControllerBase
                 if (!_totp.Verify(admin.MfaSecret, request.MfaCode))
                 {
                     await AuditAsync(admin.Email, admin.Role, "auth.login.failed", "Invalid MFA code (Google)", 401);
-                    return Unauthorized(new ApiResponse(false, "Invalid authentication code"));
+                    return Problem(detail: "Invalid authentication code", statusCode: StatusCodes.Status401Unauthorized);
                 }
             }
 
@@ -272,11 +272,11 @@ public class AuthController : ControllerBase
     {
         var token = Request.Cookies["osc-session"];
         if (string.IsNullOrEmpty(token))
-            return Unauthorized(new ApiResponse(false, "Not authenticated"));
+            return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         var principal = _jwt.ValidateToken(token);
         if (principal is null)
-            return Unauthorized(new ApiResponse(false, "Invalid token"));
+            return Problem(detail: "Invalid token", statusCode: StatusCodes.Status401Unauthorized);
 
         var claims = principal.Claims.ToList();
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
@@ -295,16 +295,16 @@ public class AuthController : ControllerBase
     {
         var token = Request.Cookies["osc-session"];
         if (string.IsNullOrEmpty(token))
-            return Unauthorized(new ApiResponse(false, "Not authenticated"));
+            return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         var principal = _jwt.ValidateToken(token);
         if (principal is null)
-            return Unauthorized(new ApiResponse(false, "Invalid token"));
+            return Problem(detail: "Invalid token", statusCode: StatusCodes.Status401Unauthorized);
 
         var role = principal.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "user";
         var userIdStr = principal.Claims.First(c => c.Type == "sub" || c.Type == System.Security.Claims.ClaimTypes.NameIdentifier).Value;
         if (!Guid.TryParse(userIdStr, out var userId))
-            return BadRequest(new ApiResponse(false, "Profile is not available for this account"));
+            return Problem(detail: "Profile is not available for this account", statusCode: StatusCodes.Status400BadRequest);
 
         // Resolve the underlying account. All back-office roles (admin, dg,
         // agency_officer) live in admin_users; everyone else is a regular user.
@@ -312,7 +312,7 @@ public class AuthController : ControllerBase
         var admin = isBackOffice ? await _db.AdminUsers.FindAsync(userId) : null;
         var user = isBackOffice ? null : await _db.Users.FindAsync(userId);
         if (admin is null && user is null)
-            return NotFound(new ApiResponse(false, "Account not found"));
+            return Problem(detail: "Account not found", statusCode: StatusCodes.Status404NotFound);
 
         var newName = admin?.Name ?? user!.Name;
         var currentHash = admin?.PasswordHash ?? user?.PasswordHash;
@@ -328,14 +328,14 @@ public class AuthController : ControllerBase
             if (currentHash is not null)
             {
                 if (string.IsNullOrWhiteSpace(request.CurrentPassword) || !_password.VerifyPassword(request.CurrentPassword, currentHash))
-                    return BadRequest(new ApiResponse(false, "Current password is incorrect"));
+                    return Problem(detail: "Current password is incorrect", statusCode: StatusCodes.Status400BadRequest);
 
                 if (request.NewPassword == request.CurrentPassword)
-                    return BadRequest(new ApiResponse(false, "New password must be different from current password"));
+                    return Problem(detail: "New password must be different from current password", statusCode: StatusCodes.Status400BadRequest);
             }
 
             if (request.NewPassword.Length < 8 || !request.NewPassword.Any(char.IsUpper) || !request.NewPassword.Any(char.IsDigit))
-                return BadRequest(new ApiResponse(false, "New password must be at least 8 characters and include an uppercase letter and a digit"));
+                return Problem(detail: "New password must be at least 8 characters and include an uppercase letter and a digit", statusCode: StatusCodes.Status400BadRequest);
 
             newHash = _password.HashPassword(request.NewPassword);
         }
@@ -389,7 +389,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> MfaStatus()
     {
         var admin = await ResolveAdminAsync();
-        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        if (admin is null) return Problem(detail: "Admin session required", statusCode: StatusCodes.Status401Unauthorized);
         return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(admin.MfaEnabled)));
     }
 
@@ -402,9 +402,9 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> MfaEnroll()
     {
         var admin = await ResolveAdminAsync();
-        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        if (admin is null) return Problem(detail: "Admin session required", statusCode: StatusCodes.Status401Unauthorized);
         if (admin.MfaEnabled)
-            return BadRequest(new ApiResponse(false, "MFA is already enabled. Disable it first to re-enrol."));
+            return Problem(detail: "MFA is already enabled. Disable it first to re-enrol.", statusCode: StatusCodes.Status400BadRequest);
 
         var secret = _totp.GenerateSecret();
         admin.MfaSecret = secret;
@@ -421,12 +421,12 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> MfaVerify([FromBody] MfaVerifyRequest request)
     {
         var admin = await ResolveAdminAsync();
-        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        if (admin is null) return Problem(detail: "Admin session required", statusCode: StatusCodes.Status401Unauthorized);
         if (string.IsNullOrWhiteSpace(admin.MfaSecret))
-            return BadRequest(new ApiResponse(false, "Start enrolment first"));
+            return Problem(detail: "Start enrolment first", statusCode: StatusCodes.Status400BadRequest);
 
         if (!_totp.Verify(admin.MfaSecret, request.Code))
-            return BadRequest(new ApiResponse(false, "Invalid authentication code"));
+            return Problem(detail: "Invalid authentication code", statusCode: StatusCodes.Status400BadRequest);
 
         admin.MfaEnabled = true;
         admin.UpdatedAt = DateTimeOffset.UtcNow;
@@ -449,15 +449,15 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> MfaDisable([FromBody] MfaDisableRequest request)
     {
         var admin = await ResolveAdminAsync();
-        if (admin is null) return Unauthorized(new ApiResponse(false, "Admin session required"));
+        if (admin is null) return Problem(detail: "Admin session required", statusCode: StatusCodes.Status401Unauthorized);
         if (!admin.MfaEnabled)
-            return BadRequest(new ApiResponse(false, "MFA is not enabled"));
+            return Problem(detail: "MFA is not enabled", statusCode: StatusCodes.Status400BadRequest);
 
         if (admin.PasswordHash is null || !_password.VerifyPassword(request.Password, admin.PasswordHash))
-            return BadRequest(new ApiResponse(false, "Current password is incorrect"));
+            return Problem(detail: "Current password is incorrect", statusCode: StatusCodes.Status400BadRequest);
 
         if (!_totp.Verify(admin.MfaSecret, request.Code))
-            return BadRequest(new ApiResponse(false, "Invalid authentication code"));
+            return Problem(detail: "Invalid authentication code", statusCode: StatusCodes.Status400BadRequest);
 
         admin.MfaEnabled = false;
         admin.MfaSecret = null;
@@ -481,7 +481,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RequestPasswordReset([FromBody] PasswordResetRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Email))
-            return BadRequest(new ApiResponse(false, "Email is required"));
+            return Problem(detail: "Email is required", statusCode: StatusCodes.Status400BadRequest);
 
         // Always return success to prevent email enumeration
         var resetEmail = request.Email.ToLowerInvariant().Trim();
@@ -513,17 +513,17 @@ public class AuthController : ControllerBase
         // downgrade an account to a weaker password.
         if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8
             || !request.NewPassword.Any(char.IsUpper) || !request.NewPassword.Any(char.IsDigit))
-            return BadRequest(new ApiResponse(false, "Password must be at least 8 characters and include an uppercase letter and a digit"));
+            return Problem(detail: "Password must be at least 8 characters and include an uppercase letter and a digit", statusCode: StatusCodes.Status400BadRequest);
 
         if (string.IsNullOrWhiteSpace(request.Token))
-            return BadRequest(new ApiResponse(false, "Invalid or expired reset token"));
+            return Problem(detail: "Invalid or expired reset token", statusCode: StatusCodes.Status400BadRequest);
 
         var tokenHash = HashResetToken(request.Token);
         var admin = await _db.AdminUsers
             .FirstOrDefaultAsync(a => a.PasswordResetToken == tokenHash && a.IsActive);
 
         if (admin is null || admin.PasswordResetExpiresAt is null || admin.PasswordResetExpiresAt < DateTimeOffset.UtcNow)
-            return BadRequest(new ApiResponse(false, "Invalid or expired reset token"));
+            return Problem(detail: "Invalid or expired reset token", statusCode: StatusCodes.Status400BadRequest);
 
         admin.PasswordHash = _password.HashPassword(request.NewPassword);
         admin.PasswordResetToken = null;

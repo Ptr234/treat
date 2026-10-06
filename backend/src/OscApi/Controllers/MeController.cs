@@ -15,7 +15,7 @@ namespace OscApi.Controllers;
 /// Submissions are matched by the user's login email; drafts are owned by it.
 /// </summary>
 [ApiController]
-[Route("api/me")]
+[Route("api/v1/me")]
 [Authorize]
 public class MeController : ControllerBase
 {
@@ -30,7 +30,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> GetSubmissions()
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         var tickets = await _db.Tickets.AsNoTracking()
             .Where(t => t.ContactEmail == email)
@@ -101,7 +101,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> GetDraft(string formType)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         var draft = await _db.FormDrafts.AsNoTracking()
             .FirstOrDefaultAsync(d => d.UserEmail == email && d.FormType == formType);
@@ -119,14 +119,14 @@ public class MeController : ControllerBase
     public async Task<IActionResult> SaveDraft(string formType, [FromBody] JsonElement data)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         if (string.IsNullOrWhiteSpace(formType) || formType.Length > 50)
-            return BadRequest(new ApiResponse(false, "Invalid form type"));
+            return Problem(detail: "Invalid form type", statusCode: StatusCodes.Status400BadRequest);
 
         var raw = data.ValueKind == JsonValueKind.Undefined ? "{}" : data.GetRawText();
         if (raw.Length > 100_000)
-            return BadRequest(new ApiResponse(false, "Draft is too large"));
+            return Problem(detail: "Draft is too large", statusCode: StatusCodes.Status400BadRequest);
 
         var draft = await _db.FormDrafts.FirstOrDefaultAsync(d => d.UserEmail == email && d.FormType == formType);
         if (draft is null)
@@ -149,7 +149,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> DeleteDraft(string formType)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         var draft = await _db.FormDrafts.FirstOrDefaultAsync(d => d.UserEmail == email && d.FormType == formType);
         if (draft is not null)
@@ -166,7 +166,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> GetProfile()
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         var isBackOffice = Roles.BackOfficeRoles.Contains(User.GetRole());
         var name = isBackOffice
@@ -185,7 +185,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> UpdateProfile([FromBody] JsonElement data)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         if (data.ValueKind != JsonValueKind.Object || !data.TryGetProperty("name", out var nameProp)
             || nameProp.ValueKind != JsonValueKind.String)
@@ -193,20 +193,20 @@ public class MeController : ControllerBase
 
         var name = nameProp.GetString()!.Trim();
         if (name.Length < 2 || name.Length > 100)
-            return BadRequest(new ApiResponse(false, "Name must be 2-100 characters"));
+            return Problem(detail: "Name must be 2-100 characters", statusCode: StatusCodes.Status400BadRequest);
 
         var isBackOffice = Roles.BackOfficeRoles.Contains(User.GetRole());
         if (isBackOffice)
         {
             var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email);
-            if (admin is null) return NotFound(new ApiResponse(false, "Account not found"));
+            if (admin is null) return Problem(detail: "Account not found", statusCode: StatusCodes.Status404NotFound);
             admin.Name = name;
             admin.UpdatedAt = DateTimeOffset.UtcNow;
         }
         else
         {
             var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (user is null) return NotFound(new ApiResponse(false, "Account not found"));
+            if (user is null) return Problem(detail: "Account not found", statusCode: StatusCodes.Status404NotFound);
             user.Name = name;
         }
 
@@ -219,7 +219,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> DeleteAccount()
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(false, "Not authenticated"));
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
 
         // Delete investor profile
         var investor = await _db.InvestorProfiles.FirstOrDefaultAsync(p => p.Email == email);

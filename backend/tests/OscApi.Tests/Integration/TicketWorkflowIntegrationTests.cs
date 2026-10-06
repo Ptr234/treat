@@ -22,16 +22,16 @@ public class TicketWorkflowIntegrationTests
     /// so no secret caching is needed across calls.</summary>
     private static async Task LoginAdminWithMfaAsync(HttpClient client)
     {
-        await client.PostAsJsonAsync("/api/auth/login", new
+        await client.PostAsJsonAsync("/api/v1/auth/login", new
         {
             email = ApiFactory.AdminEmail,
             password = ApiFactory.AdminPassword,
         });
-        var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+        var enroll = await client.PostAsync("/api/v1/auth/mfa/enroll", null);
         var secret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
             .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
         var code = new Totp(Base32Encoding.ToBytes(secret)).ComputeTotp();
-        await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
+        await client.PostAsJsonAsync("/api/v1/auth/mfa/verify", new { code });
     }
 
     private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
@@ -46,7 +46,7 @@ public class TicketWorkflowIntegrationTests
         var client = _factory.CreateClient();
 
         var request = TestTickets.CreateBusinessRegistrationRequest();
-        var response = await client.PostAsJsonAsync("/api/tickets", request);
+        var response = await client.PostAsJsonAsync("/api/v1/tickets", request);
 
         Assert.True(response.StatusCode == System.Net.HttpStatusCode.Created ||
                    response.StatusCode == System.Net.HttpStatusCode.OK);
@@ -58,7 +58,7 @@ public class TicketWorkflowIntegrationTests
         var client = _factory.CreateClient();
 
         var request = TestTickets.CreateBusinessRegistrationRequest();
-        var createResponse = await client.PostAsJsonAsync("/api/tickets", request);
+        var createResponse = await client.PostAsJsonAsync("/api/v1/tickets", request);
         Assert.True(createResponse.IsSuccessStatusCode);
 
         var responseBody = await createResponse.Content.ReadAsStringAsync();
@@ -69,7 +69,7 @@ public class TicketWorkflowIntegrationTests
             .GetString();
 
         // Pass email as query parameter for unauthenticated access
-        var getResponse = await client.GetAsync($"/api/tickets/{referenceNumber}?email={request.ContactEmail}");
+        var getResponse = await client.GetAsync($"/api/v1/tickets/{referenceNumber}?email={request.ContactEmail}");
         Assert.True(getResponse.IsSuccessStatusCode);
     }
 
@@ -81,7 +81,7 @@ public class TicketWorkflowIntegrationTests
         // Authenticate as admin/staff first
         await LoginAdminWithMfaAsync(client);
 
-        var response = await client.GetAsync("/api/tickets");
+        var response = await client.GetAsync("/api/v1/tickets");
 
         Assert.True(response.IsSuccessStatusCode);
     }
@@ -92,7 +92,7 @@ public class TicketWorkflowIntegrationTests
         var client = _factory.CreateClient();
 
         var request = TestTickets.CreateBusinessRegistrationRequest();
-        var createResponse = await client.PostAsJsonAsync("/api/tickets", request);
+        var createResponse = await client.PostAsJsonAsync("/api/v1/tickets", request);
         Assert.True(createResponse.IsSuccessStatusCode);
 
         var responseBody = await createResponse.Content.ReadAsStringAsync();
@@ -104,7 +104,7 @@ public class TicketWorkflowIntegrationTests
 
         var updateData = new { status = "in_progress" };
         // Endpoint uses PATCH, not PUT
-        var updateResponse = await client.PatchAsJsonAsync($"/api/tickets/{referenceNumber}", updateData);
+        var updateResponse = await client.PatchAsJsonAsync($"/api/v1/tickets/{referenceNumber}", updateData);
 
         // Unauthenticated users cannot update tickets (requires staff auth)
         // Expect Unauthorized or other auth-related status codes
@@ -121,7 +121,7 @@ public class TicketWorkflowIntegrationTests
         var client = _factory.CreateClient();
 
         var request = TestTickets.CreateBusinessRegistrationRequest();
-        var createResponse = await client.PostAsJsonAsync("/api/tickets", request);
+        var createResponse = await client.PostAsJsonAsync("/api/v1/tickets", request);
         Assert.True(createResponse.IsSuccessStatusCode);
 
         var responseBody = await createResponse.Content.ReadAsStringAsync();
@@ -139,7 +139,7 @@ public class TicketWorkflowIntegrationTests
         foreach (var status in statuses)
         {
             var updateData = new { status };
-            var response = await client.PatchAsJsonAsync($"/api/tickets/{referenceNumber}", updateData);
+            var response = await client.PatchAsJsonAsync($"/api/v1/tickets/{referenceNumber}", updateData);
 
             Assert.True(response.StatusCode == System.Net.HttpStatusCode.OK ||
                        response.StatusCode == System.Net.HttpStatusCode.NoContent ||

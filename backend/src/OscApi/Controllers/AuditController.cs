@@ -7,7 +7,7 @@ using OscApi.Dtos.Common;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/audit")]
+[Route("api/v1/audit")]
 [Authorize(Policy = "AdminOnly")]
 public class AuditController : ControllerBase
 {

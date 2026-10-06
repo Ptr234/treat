@@ -7,7 +7,7 @@ using OscApi.Dtos.Common;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/tickets/{refNumber}/documents")]
+[Route("api/v1/tickets/{refNumber}/documents")]
 public class DocumentsController : ControllerBase
 {
     private readonly OscDbContext _db;
@@ -42,20 +42,20 @@ public class DocumentsController : ControllerBase
             .FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
 
         if (ticket is null)
-            return NotFound(new ApiResponse(false, "Ticket not found"));
+            return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
 
         var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
         if (!isStaff)
         {
             if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail)
-                return StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+                return Problem(detail: "Email does not match ticket", statusCode: 403);
         }
         else
         {
             var scope = AgencyScope(out var misconfigured);
             if (misconfigured) return Forbid();
             if (!string.IsNullOrEmpty(scope) && ticket.AssignedAgencyCode != scope)
-                return NotFound(new ApiResponse(false, "Ticket not found"));
+                return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
         }
 
         var docs = ticket.Documents
@@ -79,25 +79,25 @@ public class DocumentsController : ControllerBase
             .FirstOrDefaultAsync(d => d.Id == documentId && d.Ticket.ReferenceNumber == refNumber);
 
         if (doc is null)
-            return NotFound(new ApiResponse(false, "Document not found"));
+            return Problem(detail: "Document not found", statusCode: StatusCodes.Status404NotFound);
 
         var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
         if (!isStaff)
         {
             if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != doc.Ticket.ContactEmail)
-                return StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+                return Problem(detail: "Email does not match ticket", statusCode: 403);
         }
         else
         {
             var scope = AgencyScope(out var misconfigured);
             if (misconfigured) return Forbid();
             if (!string.IsNullOrEmpty(scope) && doc.Ticket.AssignedAgencyCode != scope)
-                return NotFound(new ApiResponse(false, "Document not found"));
+                return Problem(detail: "Document not found", statusCode: StatusCodes.Status404NotFound);
         }
 
         var filePath = Path.Combine(_env.ContentRootPath, doc.StorageUrl.TrimStart('/'));
         if (!System.IO.File.Exists(filePath))
-            return NotFound(new ApiResponse(false, "File is no longer available"));
+            return Problem(detail: "File is no longer available", statusCode: StatusCodes.Status404NotFound);
 
         var stream = System.IO.File.OpenRead(filePath);
         // Force download (attachment) so a mislabelled file can never render
@@ -109,14 +109,14 @@ public class DocumentsController : ControllerBase
     [HttpDelete("{documentId:guid}")]
     public async Task<IActionResult> DeleteDocument(string refNumber, Guid documentId)
     {
-        if (!User.IsAdminLevel()) return Unauthorized(new ApiResponse(false, "Admin access required"));
+        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: StatusCodes.Status401Unauthorized);
 
         var doc = await _db.TicketDocuments
             .Include(d => d.Ticket)
             .FirstOrDefaultAsync(d => d.Id == documentId && d.Ticket.ReferenceNumber == refNumber);
 
         if (doc is null)
-            return NotFound(new ApiResponse(false, "Document not found"));
+            return Problem(detail: "Document not found", statusCode: StatusCodes.Status404NotFound);
 
         // Delete physical file
         var filePath = Path.Combine(_env.ContentRootPath, doc.StorageUrl.TrimStart('/'));

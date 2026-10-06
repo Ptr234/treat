@@ -21,16 +21,16 @@ public class EndToEndScenarioTests
     /// here gets its own fresh ApiFactory/admin, so no secret caching is needed.</summary>
     private static async Task LoginAdminWithMfaAsync(HttpClient client)
     {
-        await client.PostAsJsonAsync("/api/auth/login", new
+        await client.PostAsJsonAsync("/api/v1/auth/login", new
         {
             email = ApiFactory.AdminEmail,
             password = ApiFactory.AdminPassword,
         });
-        var enroll = await client.PostAsync("/api/auth/mfa/enroll", null);
+        var enroll = await client.PostAsync("/api/v1/auth/mfa/enroll", null);
         var secret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
             .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
         var code = new Totp(Base32Encoding.ToBytes(secret)).ComputeTotp();
-        await client.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
+        await client.PostAsJsonAsync("/api/v1/auth/mfa/verify", new { code });
     }
 
     private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
@@ -45,12 +45,12 @@ public class EndToEndScenarioTests
         var client = _factory.CreateClient();
 
         // 1. Simulate investor signup (if endpoint exists)
-        // var signupResponse = await client.PostAsync("/api/auth/signup", signupContent);
+        // var signupResponse = await client.PostAsync("/api/v1/auth/signup", signupContent);
         // Assert.True(signupResponse.IsSuccessStatusCode);
 
         // 2. Create ticket as investor
         var request = TestTickets.CreateInvestmentInquiryRequest();
-        var ticketResponse = await client.PostAsJsonAsync("/api/tickets", request);
+        var ticketResponse = await client.PostAsJsonAsync("/api/v1/tickets", request);
         Assert.True(ticketResponse.IsSuccessStatusCode);
 
         // 3. Retrieve created ticket and extract reference number
@@ -62,7 +62,7 @@ public class EndToEndScenarioTests
             .GetString();
 
         // Pass email as query parameter for unauthenticated access
-        var getResponse = await client.GetAsync($"/api/tickets/{referenceNumber}?email={request.ContactEmail}");
+        var getResponse = await client.GetAsync($"/api/v1/tickets/{referenceNumber}?email={request.ContactEmail}");
         Assert.True(getResponse.IsSuccessStatusCode);
 
         // 4. Verify ticket data
@@ -85,7 +85,7 @@ public class EndToEndScenarioTests
         var successCount = 0;
         foreach (var request in requests)
         {
-            var response = await client.PostAsJsonAsync("/api/tickets", request);
+            var response = await client.PostAsJsonAsync("/api/v1/tickets", request);
 
             if (response.IsSuccessStatusCode)
                 successCount++;
@@ -101,14 +101,14 @@ public class EndToEndScenarioTests
 
         // Create tickets with different statuses
         var request = TestTickets.CreateBusinessRegistrationRequest();
-        var responsePending = await client.PostAsJsonAsync("/api/tickets", request);
+        var responsePending = await client.PostAsJsonAsync("/api/v1/tickets", request);
         Assert.True(responsePending.IsSuccessStatusCode);
 
         // Authenticate as admin to list tickets
         await LoginAdminWithMfaAsync(client);
 
         // Retrieve list and verify filtering capability
-        var listResponse = await client.GetAsync("/api/tickets?status=pending");
+        var listResponse = await client.GetAsync("/api/v1/tickets?status=pending");
         Assert.True(listResponse.IsSuccessStatusCode);
     }
 
@@ -129,7 +129,7 @@ public class EndToEndScenarioTests
                 System.Text.Encoding.UTF8,
                 "application/json");
 
-            var response = await client.PostAsync("/api/tickets", content);
+            var response = await client.PostAsync("/api/v1/tickets", content);
 
             Assert.True(response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.BadRequest);
         }
@@ -160,7 +160,7 @@ public class EndToEndScenarioTests
                 request.IsEscalated
             );
 
-            var response = await client.PostAsJsonAsync("/api/tickets", requestWithLocation);
+            var response = await client.PostAsJsonAsync("/api/v1/tickets", requestWithLocation);
 
             Assert.True(response.IsSuccessStatusCode);
         }

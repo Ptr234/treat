@@ -21,7 +21,7 @@ public class InvestorServiceTests
         var db = TestDbFactory.Create(dbName);
         var email = MockEmailService.Create();
         var refGen = new ReferenceNumberGenerator(db);
-        return new BusinessRegistrationService(db, email, refGen);
+        return new BusinessRegistrationService(db, email, refGen, new AuditLogService(db));
     }
 
     private static CreateInvestorRequest ValidRequest(string email = "inv@example.com") => new(
@@ -172,6 +172,17 @@ public class InvestorServiceTests
 
         await regSvc.UpdateAsync(registration.ReferenceNumber,
             new UpdateBusinessRegistrationRequest(Status: "name_approved", null, null), agencyScope: null);
+
+        var feeDb = TestDbFactory.Create(dbName);
+        feeDb.Payments.Add(new OscApi.Models.Payment
+        {
+            BusinessRegistrationRef = registration.ReferenceNumber,
+            TxRef = $"{registration.ReferenceNumber}-test",
+            Amount = 650_000m, Currency = "UGX",
+            Status = OscApi.Models.PaymentStatus.Successful, PaidAt = DateTimeOffset.UtcNow,
+        });
+        feeDb.SaveChanges();
+
         await regSvc.UpdateAsync(registration.ReferenceNumber,
             new UpdateBusinessRegistrationRequest(Status: "certificate_issued", null, null), agencyScope: null);
 

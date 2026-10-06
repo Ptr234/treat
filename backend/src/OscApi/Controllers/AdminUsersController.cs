@@ -10,7 +10,7 @@ using OscApi.Models;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/admin/users")]
+[Route("api/v1/admin/users")]
 [Authorize(Policy = "AdminOnly")]
 public class AdminUsersController : ControllerBase
 {
@@ -43,22 +43,22 @@ public class AdminUsersController : ControllerBase
         var email = request.Email.ToLowerInvariant().Trim();
 
         if (await _db.AdminUsers.AnyAsync(u => u.Email == email))
-            return Conflict(new ApiResponse(false, "A user with this email already exists"));
+            return Problem(detail: "A user with this email already exists", statusCode: StatusCodes.Status409Conflict);
 
         if (string.IsNullOrWhiteSpace(request.Password) || request.Password.Length < 8)
-            return BadRequest(new ApiResponse(false, "Password must be at least 8 characters"));
+            return Problem(detail: "Password must be at least 8 characters", statusCode: StatusCodes.Status400BadRequest);
 
         if (!request.Password.Any(char.IsUpper) || !request.Password.Any(char.IsDigit))
-            return BadRequest(new ApiResponse(false, "Password must contain at least one uppercase letter and one digit"));
+            return Problem(detail: "Password must contain at least one uppercase letter and one digit", statusCode: StatusCodes.Status400BadRequest);
 
         // Resolve/validate the requested role and its agency scope.
         var role = NormalizeRole(request.Role);
         if (role is null)
-            return BadRequest(new ApiResponse(false, "Role must be one of: dg, admin, agency_officer"));
+            return Problem(detail: "Role must be one of: dg, admin, agency_officer", statusCode: StatusCodes.Status400BadRequest);
 
         var agencyCode = role == Roles.AgencyOfficer ? request.AgencyCode?.Trim().ToUpperInvariant() : null;
         if (role == Roles.AgencyOfficer && string.IsNullOrWhiteSpace(agencyCode))
-            return BadRequest(new ApiResponse(false, "An agency code is required for agency officer accounts"));
+            return Problem(detail: "An agency code is required for agency officer accounts", statusCode: StatusCodes.Status400BadRequest);
 
         var user = new AdminUser
         {
@@ -73,7 +73,7 @@ public class AdminUsersController : ControllerBase
         _db.AdminUsers.Add(user);
         await _db.SaveChangesAsync();
 
-        return Created($"/api/admin/users/{user.Id}", new ApiResponse<AdminListItem>(true,
+        return Created($"/api/v1/admin/users/{user.Id}", new ApiResponse<AdminListItem>(true,
             new AdminListItem(user.Id.ToString(), user.Name, user.Email, user.Role, user.IsActive, user.CreatedAt, user.AgencyCode)));
     }
 
@@ -82,13 +82,13 @@ public class AdminUsersController : ControllerBase
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAdminRequest request)
     {
         var user = await _db.AdminUsers.FindAsync(id);
-        if (user is null) return NotFound(new ApiResponse(false, "User not found"));
+        if (user is null) return Problem(detail: "User not found", statusCode: StatusCodes.Status404NotFound);
 
         // Prevent deactivating yourself
         var currentUserId = User.FindFirst("sub")?.Value
             ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
         if (request.IsActive == false && user.Id.ToString() == currentUserId)
-            return BadRequest(new ApiResponse(false, "You cannot deactivate your own account"));
+            return Problem(detail: "You cannot deactivate your own account", statusCode: StatusCodes.Status400BadRequest);
 
         if (!string.IsNullOrWhiteSpace(request.Name))
             user.Name = SanitizeHelper.StripHtml(request.Name);
@@ -97,7 +97,7 @@ public class AdminUsersController : ControllerBase
         {
             var role = NormalizeRole(request.Role);
             if (role is null)
-                return BadRequest(new ApiResponse(false, "Role must be one of: dg, admin, agency_officer"));
+                return Problem(detail: "Role must be one of: dg, admin, agency_officer", statusCode: StatusCodes.Status400BadRequest);
             user.Role = role;
         }
 
@@ -107,7 +107,7 @@ public class AdminUsersController : ControllerBase
             if (request.AgencyCode is not null)
                 user.AgencyCode = request.AgencyCode.Trim().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(user.AgencyCode))
-                return BadRequest(new ApiResponse(false, "An agency code is required for agency officer accounts"));
+                return Problem(detail: "An agency code is required for agency officer accounts", statusCode: StatusCodes.Status400BadRequest);
         }
         else
         {
@@ -133,10 +133,10 @@ public class AdminUsersController : ControllerBase
             ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         if (id.ToString() == currentUserId)
-            return BadRequest(new ApiResponse(false, "You cannot delete your own account"));
+            return Problem(detail: "You cannot delete your own account", statusCode: StatusCodes.Status400BadRequest);
 
         var user = await _db.AdminUsers.FindAsync(id);
-        if (user is null) return NotFound(new ApiResponse(false, "User not found"));
+        if (user is null) return Problem(detail: "User not found", statusCode: StatusCodes.Status404NotFound);
 
         _db.AdminUsers.Remove(user);
         await _db.SaveChangesAsync();

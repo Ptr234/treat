@@ -8,7 +8,7 @@ using OscApi.Services;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/analytics")]
+[Route("api/v1/analytics")]
 public class AnalyticsController : ControllerBase
 {
     private readonly IAnalyticsQueueService _analyticsQueue;
@@ -24,11 +24,11 @@ public class AnalyticsController : ControllerBase
     public async Task<IActionResult> LogEvent([FromBody] LogEventRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.EventType) || string.IsNullOrWhiteSpace(request.EventName))
-            return BadRequest(new ApiResponse(false, "eventType and eventName are required"));
+            return Problem(detail: "eventType and eventName are required", statusCode: StatusCodes.Status400BadRequest);
 
         var allowed = new[] { "tool_usage", "download", "search" };
         if (!allowed.Contains(request.EventType))
-            return BadRequest(new ApiResponse(false, $"eventType must be one of: {string.Join(", ", allowed)}"));
+            return Problem(detail: $"eventType must be one of: {string.Join(", ", allowed)}", statusCode: StatusCodes.Status400BadRequest);
 
         // Clamp to column widths so an oversized value can't turn the insert into a 500
         static string? Clamp(string? v, int max) => v is null || v.Length <= max ? v : v[..max];

@@ -9,7 +9,7 @@ using OscApi.Services;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/contact")]
+[Route("api/v1/contact")]
 public class ContactController : ControllerBase
 {
     private readonly IContactService _contactService;
@@ -29,10 +29,10 @@ public class ContactController : ControllerBase
         [FromHeader(Name = "X-Recaptcha-Token")] string? recaptchaToken)
     {
         if (!await _recaptcha.VerifyAsync(recaptchaToken))
-            return BadRequest(new ApiResponse(false, "reCAPTCHA verification failed"));
+            return Problem(detail: "reCAPTCHA verification failed", statusCode: StatusCodes.Status400BadRequest);
 
         var result = await _contactService.CreateInquiryAsync(request);
-        return Created($"/api/contact/inquiries/{result.ReferenceNumber}",
+        return Created($"/api/v1/contact/inquiries/{result.ReferenceNumber}",
             new ApiResponse<ContactInquiryResponse>(true, result));
     }
 
@@ -44,10 +44,10 @@ public class ContactController : ControllerBase
         [FromHeader(Name = "X-Recaptcha-Token")] string? recaptchaToken)
     {
         if (!await _recaptcha.VerifyAsync(recaptchaToken))
-            return BadRequest(new ApiResponse(false, "reCAPTCHA verification failed"));
+            return Problem(detail: "reCAPTCHA verification failed", statusCode: StatusCodes.Status400BadRequest);
 
         var result = await _contactService.CreateAppointmentAsync(request);
-        return Created($"/api/contact/appointments/{result.ReferenceNumber}",
+        return Created($"/api/v1/contact/appointments/{result.ReferenceNumber}",
             new ApiResponse<AppointmentResponse>(true, result));
     }
 

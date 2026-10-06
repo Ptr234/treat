@@ -10,7 +10,7 @@ using OscApi.Models;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/messages")]
+[Route("api/v1/messages")]
 [Authorize(Policy = Roles.StaffPolicy)]
 public class MessagesController : ControllerBase
 {
@@ -34,9 +34,18 @@ public class MessagesController : ControllerBase
         return await _db.Tickets.AnyAsync(t => t.ReferenceNumber == channel && t.AssignedAgencyCode == agencyCode);
     }
 
-    /// <summary>Get messages (optionally filtered by channel).</summary>
+    // Bounded default page: a channel's history can grow without limit, so the
+    // client pages backwards from the newest message via `before` instead of
+    // always receiving the full thread (ApiDesign.MD §6 — never return an
+    // unbounded list).
+    private const int MessagesPageSize = 100;
+
+    /// <summary>Get messages (optionally filtered by channel). When filtered by
+    /// channel, returns the most recent <see cref="MessagesPageSize"/> messages,
+    /// or the <see cref="MessagesPageSize"/> immediately before <paramref name="before"/>
+    /// for paging further back.</summary>
     [HttpGet]
-    public async Task<IActionResult> GetMessages([FromQuery] string? channel)
+    public async Task<IActionResult> GetMessages([FromQuery] string? channel, [FromQuery] DateTimeOffset? before)
     {
         var isOfficer = User.IsAgencyOfficer();
 
@@ -70,11 +79,16 @@ public class MessagesController : ControllerBase
         }
 
         if (isOfficer && !await OfficerCanAccessChannelAsync(channel))
-            return NotFound(new ApiResponse(false, "Channel not found"));
+            return Problem(detail: "Channel not found", statusCode: StatusCodes.Status404NotFound);
 
-        var messages = await _db.AgencyMessages
-            .Where(m => m.Channel == channel)
-            .OrderBy(m => m.SentAt)
+        var query = _db.AgencyMessages.Where(m => m.Channel == channel);
+        if (before.HasValue) query = query.Where(m => m.SentAt < before.Value);
+
+        // Take the newest page first (so a bounded query always returns the
+        // most recent messages), then reverse to chronological order for display.
+        var page = await query
+            .OrderByDescending(m => m.SentAt)
+            .Take(MessagesPageSize)
             .Select(m => new
             {
                 _id = m.Id.ToString(),
@@ -87,8 +101,13 @@ public class MessagesController : ControllerBase
                 m.SentAt
             })
             .ToListAsync();
+        page.Reverse();
 
-        return Ok(new ApiResponse<object>(true, messages));
+        return Ok(new ApiResponse<object>(true, new
+        {
+            messages = page,
+            hasMore = page.Count == MessagesPageSize,
+        }));
     }
 
     /// <summary>Send a message to a channel.</summary>
@@ -96,7 +115,7 @@ public class MessagesController : ControllerBase
     public async Task<IActionResult> SendMessage([FromBody] SendMessageRequest request)
     {
         if (User.IsAgencyOfficer() && !await OfficerCanAccessChannelAsync(request.Channel))
-            return NotFound(new ApiResponse(false, "Channel not found"));
+            return Problem(detail: "Channel not found", statusCode: StatusCodes.Status404NotFound);
 
         var name = User.FindFirst("name")?.Value ?? "Unknown";
         var email = User.FindFirst("email")?.Value

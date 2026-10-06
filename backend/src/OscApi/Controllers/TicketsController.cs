@@ -9,7 +9,7 @@ using OscApi.Services;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/tickets")]
+[Route("api/v1/tickets")]
 public class TicketsController : ControllerBase
 {
     private readonly ITicketService _tickets;
@@ -47,7 +47,7 @@ public class TicketsController : ControllerBase
             var ps = pageSize ?? 50;
 
             if (p < 1 || ps < 1 || ps > Pagination.MaxPageSize)
-                return BadRequest(new ApiResponse(false, $"Invalid pagination parameters: page must be >= 1, pageSize must be between 1 and {Pagination.MaxPageSize}"));
+                return Problem(detail: $"Invalid pagination parameters: page must be >= 1, pageSize must be between 1 and {Pagination.MaxPageSize}", statusCode: StatusCodes.Status400BadRequest);
 
             start = (p - 1) * ps;
             end = start + ps;
@@ -85,8 +85,8 @@ public class TicketsController : ControllerBase
         var result = await _tickets.GetByRefAsync(refNumber, email, isStaff, scope);
         if (result is null)
             return isStaff
-                ? NotFound(new ApiResponse(false, "Ticket not found"))
-                : StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+                ? Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound)
+                : Problem(detail: "Email does not match ticket", statusCode: 403);
         return Ok(new ApiResponse<object>(true, result));
     }
 
@@ -99,7 +99,7 @@ public class TicketsController : ControllerBase
         if (misconfigured) return Forbid();
 
         var result = await _tickets.UpdateAsync(refNumber, request, scope);
-        if (result is null) return NotFound(new ApiResponse(false, "Ticket not found"));
+        if (result is null) return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<object>(true, result));
     }
 
@@ -112,7 +112,7 @@ public class TicketsController : ControllerBase
         if (misconfigured) return Forbid();
 
         var result = await _tickets.GetMessagesAsync(refNumber, email, isStaff, scope);
-        if (result is null) return NotFound(new ApiResponse(false, "Ticket not found"));
+        if (result is null) return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<object>(true, result));
     }
 
@@ -122,7 +122,7 @@ public class TicketsController : ControllerBase
     public async Task<IActionResult> PostStaffMessage(string refNumber, [FromBody] StaffMessageRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Content))
-            return BadRequest(new ApiResponse(false, "Message content is required"));
+            return Problem(detail: "Message content is required", statusCode: StatusCodes.Status400BadRequest);
 
         var scope = ResolveAgencyScope(out var misconfigured);
         if (misconfigured) return Forbid();
@@ -132,7 +132,7 @@ public class TicketsController : ControllerBase
             ?? User.FindFirst("email")?.Value;
 
         var result = await _tickets.PostStaffMessageAsync(refNumber, request.Content, name, email, request.IsInternal, scope);
-        if (result is null) return NotFound(new ApiResponse(false, "Ticket not found"));
+        if (result is null) return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
         return Created("", new ApiResponse<object>(true, result));
     }
 
@@ -142,12 +142,12 @@ public class TicketsController : ControllerBase
     public async Task<IActionResult> PostPublicComment(string refNumber, [FromBody] PublicCommentRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.Content))
-            return BadRequest(new ApiResponse(false, "Comment content is required"));
+            return Problem(detail: "Comment content is required", statusCode: StatusCodes.Status400BadRequest);
 
         var result = await _tickets.PostPublicCommentAsync(refNumber, request.Content, request.AuthorName, request.AuthorEmail);
         // A null result means the ticket is missing or the email doesn't match; a
         // single 403 avoids leaking which tickets exist.
-        if (result is null) return StatusCode(403, new ApiResponse(false, "Ticket not found or email does not match"));
+        if (result is null) return Problem(detail: "Ticket not found or email does not match", statusCode: 403);
         return Created("", new ApiResponse<object>(true, result));
     }
 
@@ -157,7 +157,7 @@ public class TicketsController : ControllerBase
     public async Task<IActionResult> PublicUpdate(string refNumber, [FromBody] PublicTicketUpdateRequest request)
     {
         var result = await _tickets.PublicUpdateAsync(refNumber, request);
-        if (result is null) return StatusCode(403, new ApiResponse(false, "Not permitted, or the action is not available for this ticket"));
+        if (result is null) return Problem(detail: "Not permitted, or the action is not available for this ticket", statusCode: 403);
         return Ok(new ApiResponse<object>(true, result));
     }
 }

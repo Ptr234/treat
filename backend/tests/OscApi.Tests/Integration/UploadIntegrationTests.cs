@@ -20,7 +20,7 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
 
     private async Task<string> CreateTicketAsync(HttpClient client)
     {
-        var res = await client.PostAsJsonAsync("/api/tickets", new
+        var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
             title = "Upload test", description = "d", category = "general_inquiry",
             priority = "low", contactEmail = FilerEmail, contactName = "Filer",
@@ -46,7 +46,7 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
     public async Task Upload_WithoutTicketRef_IsRejected()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsync("/api/upload", BuildUpload(null, FilerEmail));
+        var res = await client.PostAsync("/api/v1/upload", BuildUpload(null, FilerEmail));
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
@@ -56,7 +56,7 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var refNo = await CreateTicketAsync(client);
 
-        var res = await client.PostAsync("/api/upload", BuildUpload(refNo, "attacker@example.com"));
+        var res = await client.PostAsync("/api/v1/upload", BuildUpload(refNo, "attacker@example.com"));
         Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
     }
 
@@ -66,7 +66,7 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var refNo = await CreateTicketAsync(client);
 
-        var res = await client.PostAsync("/api/upload",
+        var res = await client.PostAsync("/api/v1/upload",
             BuildUpload(refNo, FilerEmail, mime: "application/x-msdownload", fileName: "evil.exe"));
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
@@ -78,11 +78,11 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
         var refNo = await CreateTicketAsync(client);
 
         // Owner uploads successfully.
-        var upload = await client.PostAsync("/api/upload", BuildUpload(refNo, FilerEmail));
+        var upload = await client.PostAsync("/api/v1/upload", BuildUpload(refNo, FilerEmail));
         Assert.Equal(HttpStatusCode.OK, upload.StatusCode);
 
         // Owner can list the document.
-        var list = await client.GetAsync($"/api/tickets/{refNo}/documents?email={FilerEmail}");
+        var list = await client.GetAsync($"/api/v1/tickets/{refNo}/documents?email={FilerEmail}");
         Assert.Equal(HttpStatusCode.OK, list.StatusCode);
         var docs = JsonDocument.Parse(await list.Content.ReadAsStringAsync())
             .RootElement.GetProperty("data");
@@ -90,13 +90,13 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
         Assert.False(string.IsNullOrEmpty(docId));
 
         // A stranger cannot list or download.
-        var strangerList = await client.GetAsync($"/api/tickets/{refNo}/documents?email=other@example.com");
+        var strangerList = await client.GetAsync($"/api/v1/tickets/{refNo}/documents?email=other@example.com");
         Assert.Equal(HttpStatusCode.Forbidden, strangerList.StatusCode);
-        var strangerDl = await client.GetAsync($"/api/tickets/{refNo}/documents/{docId}/content?email=other@example.com");
+        var strangerDl = await client.GetAsync($"/api/v1/tickets/{refNo}/documents/{docId}/content?email=other@example.com");
         Assert.Equal(HttpStatusCode.Forbidden, strangerDl.StatusCode);
 
         // The owner downloads the original bytes.
-        var download = await client.GetAsync($"/api/tickets/{refNo}/documents/{docId}/content?email={FilerEmail}");
+        var download = await client.GetAsync($"/api/v1/tickets/{refNo}/documents/{docId}/content?email={FilerEmail}");
         Assert.Equal(HttpStatusCode.OK, download.StatusCode);
         Assert.Equal("application/pdf", download.Content.Headers.ContentType?.MediaType);
         Assert.Equal("%PDF-1.4 test", await download.Content.ReadAsStringAsync());
@@ -106,20 +106,20 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
     public async Task StaffUpdate_WithInvalidStatus_Returns400Not500()
     {
         var admin = _factory.CreateClient();
-        var login = await admin.PostAsJsonAsync("/api/auth/login",
+        var login = await admin.PostAsJsonAsync("/api/v1/auth/login",
             new { email = ApiFactory.AdminEmail, password = ApiFactory.AdminPassword });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
 
-        // PATCH /api/tickets is Staff-policy — needs completed TOTP enrolment
+        // PATCH /api/v1/tickets is Staff-policy — needs completed TOTP enrolment
         // (MfaCompleteRequirement) or this 400 assertion would see 403 instead.
-        var enroll = await admin.PostAsync("/api/auth/mfa/enroll", null);
+        var enroll = await admin.PostAsync("/api/v1/auth/mfa/enroll", null);
         var secret = JsonDocument.Parse(await enroll.Content.ReadAsStringAsync())
             .RootElement.GetProperty("data").GetProperty("secret").GetString()!;
         var code = new Totp(Base32Encoding.ToBytes(secret)).ComputeTotp();
-        await admin.PostAsJsonAsync("/api/auth/mfa/verify", new { code });
+        await admin.PostAsJsonAsync("/api/v1/auth/mfa/verify", new { code });
 
         var refNo = await CreateTicketAsync(admin);
-        var res = await admin.PatchAsJsonAsync($"/api/tickets/{refNo}", new { status = "not_a_status" });
+        var res = await admin.PatchAsJsonAsync($"/api/v1/tickets/{refNo}", new { status = "not_a_status" });
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 }

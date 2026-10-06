@@ -141,13 +141,30 @@ public class TicketService : ITicketService
                 throw new FluentValidation.ValidationException(
                     [new FluentValidation.Results.ValidationFailure("status", $"Invalid status '{request.Status}'")]);
             ticket.Status = status;
-            // Clear (not just set) on every transition, so a reopened ticket doesn't
-            // keep a stale ResolvedAt/ClosedAt from a previous resolution — which
-            // would otherwise still count toward SLA compliance and mean-resolution-
-            // time averages in DashboardService, and still render on the ticket
-            // detail page, even though the ticket is open again.
-            ticket.ResolvedAt = status == TicketStatus.Resolved ? DateTimeOffset.UtcNow : null;
-            ticket.ClosedAt = status == TicketStatus.Closed ? DateTimeOffset.UtcNow : null;
+            // Reopening (moving to anything other than Resolved/Closed) must not
+            // leave a stale ResolvedAt/ClosedAt behind — otherwise it would still
+            // count toward SLA compliance and mean-resolution-time averages in
+            // DashboardService, and still render on the ticket detail page, even
+            // though the ticket is open again. But Resolved -> Closed is the normal
+            // forward path, not a reopen: it must keep the original ResolvedAt
+            // (backfilling it if the ticket was closed directly, without ever being
+            // marked Resolved) rather than wiping it just because the status is no
+            // longer literally "Resolved".
+            if (status == TicketStatus.Resolved)
+            {
+                ticket.ResolvedAt = DateTimeOffset.UtcNow;
+                ticket.ClosedAt = null;
+            }
+            else if (status == TicketStatus.Closed)
+            {
+                ticket.ClosedAt = DateTimeOffset.UtcNow;
+                ticket.ResolvedAt ??= DateTimeOffset.UtcNow;
+            }
+            else
+            {
+                ticket.ResolvedAt = null;
+                ticket.ClosedAt = null;
+            }
         }
 
         if (request.Priority is not null)

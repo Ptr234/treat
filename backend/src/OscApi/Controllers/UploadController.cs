@@ -11,7 +11,7 @@ using OscApi.Services;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/upload")]
+[Route("api/v1/upload")]
 public class UploadController : ControllerBase
 {
     private readonly OscDbContext _db;
@@ -92,19 +92,19 @@ public class UploadController : ControllerBase
         [FromForm] string? contactEmail)
     {
         if (files is null || files.Count == 0)
-            return BadRequest(new ApiResponse(false, "No files provided"));
+            return Problem(detail: "No files provided", statusCode: StatusCodes.Status400BadRequest);
 
         if (files.Count > MaxFilesPerRequest)
-            return BadRequest(new ApiResponse(false, $"Maximum {MaxFilesPerRequest} files per upload"));
+            return Problem(detail: $"Maximum {MaxFilesPerRequest} files per upload", statusCode: StatusCodes.Status400BadRequest);
 
         if (string.IsNullOrWhiteSpace(ticketRefNumber))
-            return BadRequest(new ApiResponse(false, "ticketRefNumber is required"));
+            return Problem(detail: "ticketRefNumber is required", statusCode: StatusCodes.Status400BadRequest);
 
         var ticket = await _db.Tickets
             .Include(t => t.Documents)
             .FirstOrDefaultAsync(t => t.ReferenceNumber == ticketRefNumber);
         if (ticket is null)
-            return NotFound(new ApiResponse(false, "Ticket not found"));
+            return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
 
         // ── Authorization ────────────────────────────────────────────────
         var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
@@ -115,7 +115,7 @@ public class UploadController : ControllerBase
                 var scope = User.GetAgencyCode();
                 if (string.IsNullOrEmpty(scope)) return Forbid();
                 if (ticket.AssignedAgencyCode != scope)
-                    return NotFound(new ApiResponse(false, "Ticket not found"));
+                    return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
             }
         }
         else
@@ -123,26 +123,26 @@ public class UploadController : ControllerBase
             // Public caller: must prove ownership with the filing email.
             if (string.IsNullOrWhiteSpace(contactEmail) ||
                 contactEmail.ToLowerInvariant().Trim() != ticket.ContactEmail)
-                return StatusCode(403, new ApiResponse(false, "Email does not match ticket"));
+                return Problem(detail: "Email does not match ticket", statusCode: 403);
         }
 
         if (ticket.Documents.Count + files.Count > MaxDocumentsPerTicket)
-            return BadRequest(new ApiResponse(false, $"A ticket can hold at most {MaxDocumentsPerTicket} documents"));
+            return Problem(detail: $"A ticket can hold at most {MaxDocumentsPerTicket} documents", statusCode: StatusCodes.Status400BadRequest);
 
         // ── Validate everything before writing anything ──────────────────
         foreach (var file in files)
         {
             if (file.Length == 0)
-                return BadRequest(new ApiResponse(false, $"File '{file.FileName}' is empty"));
+                return Problem(detail: $"File '{file.FileName}' is empty", statusCode: StatusCodes.Status400BadRequest);
 
             if (file.Length > MaxFileSize)
-                return BadRequest(new ApiResponse(false, $"File '{file.FileName}' exceeds {MaxFileSize / 1024 / 1024}MB limit"));
+                return Problem(detail: $"File '{file.FileName}' exceeds {MaxFileSize / 1024 / 1024}MB limit", statusCode: StatusCodes.Status400BadRequest);
 
             if (!MimeToExtension.ContainsKey(file.ContentType))
-                return BadRequest(new ApiResponse(false, $"File type '{file.ContentType}' is not allowed"));
+                return Problem(detail: $"File type '{file.ContentType}' is not allowed", statusCode: StatusCodes.Status400BadRequest);
 
             if (!await HasValidSignatureAsync(file))
-                return BadRequest(new ApiResponse(false, $"File '{file.FileName}' does not match its declared type '{file.ContentType}'"));
+                return Problem(detail: $"File '{file.FileName}' does not match its declared type '{file.ContentType}'", statusCode: StatusCodes.Status400BadRequest);
         }
 
         var results = new List<object>();
@@ -173,7 +173,7 @@ public class UploadController : ControllerBase
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to upload file {FileName}", file.FileName);
-                return StatusCode(500, new ApiResponse(false, $"Failed to upload {file.FileName}"));
+                return Problem(detail: $"Failed to upload {file.FileName}", statusCode: 500);
             }
         }
 

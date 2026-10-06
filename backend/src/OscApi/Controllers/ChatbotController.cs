@@ -10,7 +10,7 @@ using OscApi.Services;
 namespace OscApi.Controllers;
 
 [ApiController]
-[Route("api/chatbot")]
+[Route("api/v1/chatbot")]
 public class ChatbotController : ControllerBase
 {
     private readonly OscDbContext _db;
@@ -31,7 +31,7 @@ public class ChatbotController : ControllerBase
     public async Task<IActionResult> Chat([FromBody] ChatRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.SessionId))
-            return BadRequest(new ApiResponse(false, "sessionId is required"));
+            return Problem(detail: "sessionId is required", statusCode: StatusCodes.Status400BadRequest);
 
         var systemPrompt = BuildSystemPrompt(request.Language);
         var messages = new List<GroqClient.ChatMessage>
@@ -83,7 +83,7 @@ public class ChatbotController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Groq API call failed");
-            return StatusCode(502, new ApiResponse(false, "Chatbot temporarily unavailable"));
+            return Problem(detail: "Chatbot temporarily unavailable", statusCode: 502);
         }
     }
 
@@ -103,7 +103,7 @@ public class ChatbotController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.SessionId) ||
             string.IsNullOrWhiteSpace(request.UserMessage) ||
             string.IsNullOrWhiteSpace(request.BotResponse))
-            return BadRequest(new ApiResponse(false, "sessionId, userMessage and botResponse are required"));
+            return Problem(detail: "sessionId, userMessage and botResponse are required", statusCode: StatusCodes.Status400BadRequest);
 
         // Clamp free-text fields to the column widths so an oversized payload is
         // stored truncated instead of failing the insert with a 500.
@@ -132,7 +132,7 @@ public class ChatbotController : ControllerBase
     public async Task<IActionResult> ClearSession([FromBody] ClearSessionRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.SessionId))
-            return BadRequest(new ApiResponse(false, "sessionId is required"));
+            return Problem(detail: "sessionId is required", statusCode: StatusCodes.Status400BadRequest);
 
         await _sessions.ClearSessionAsync(request.SessionId);
         return Ok(new ApiResponse(true));

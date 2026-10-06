@@ -19,7 +19,7 @@ public class GoogleAuthIntegrationTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
 
-        var res = await client.PostAsJsonAsync("/api/auth/google", new { idToken = "" });
+        var res = await client.PostAsJsonAsync("/api/v1/auth/google", new { idToken = "" });
 
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
@@ -36,7 +36,7 @@ public class GoogleAuthIntegrationTests : IClassFixture<ApiFactory>
             "eyJlbWFpbCI6ImFkbWluQHVpYS5nby51ZyIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJzdWIiOiIxIn0." +
             "not-a-real-google-signature";
 
-        var res = await client.PostAsJsonAsync("/api/auth/google", new { idToken = forged });
+        var res = await client.PostAsJsonAsync("/api/v1/auth/google", new { idToken = forged });
 
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
     }
@@ -46,7 +46,7 @@ public class GoogleAuthIntegrationTests : IClassFixture<ApiFactory>
     {
         var client = _factory.CreateClient();
 
-        var res = await client.PostAsJsonAsync("/api/auth/google", new { idToken = "garbage" });
+        var res = await client.PostAsJsonAsync("/api/v1/auth/google", new { idToken = "garbage" });
 
         Assert.Equal(HttpStatusCode.Unauthorized, res.StatusCode);
         Assert.False(res.Headers.Contains("Set-Cookie"),

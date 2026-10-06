@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using OscApi.Common;
 using OscApi.Dtos.BusinessRegistrations;
 using OscApi.Dtos.Common;
+using OscApi.Dtos.Payments;
 using OscApi.Services;
 
 namespace OscApi.Controllers;
@@ -14,14 +15,16 @@ namespace OscApi.Controllers;
 /// ticket system. See BusinessRegistrationStatus for the state machine.
 /// </summary>
 [ApiController]
-[Route("api/business-registrations")]
+[Route("api/v1/business-registrations")]
 public class BusinessRegistrationsController : ControllerBase
 {
     private readonly IBusinessRegistrationService _registrations;
+    private readonly IPaymentService _payments;
 
-    public BusinessRegistrationsController(IBusinessRegistrationService registrations)
+    public BusinessRegistrationsController(IBusinessRegistrationService registrations, IPaymentService payments)
     {
         _registrations = registrations;
+        _payments = payments;
     }
 
     private string? ResolveAgencyScope(out bool misconfigured)
@@ -39,7 +42,7 @@ public class BusinessRegistrationsController : ControllerBase
     public async Task<IActionResult> CheckName([FromQuery] string name)
     {
         if (string.IsNullOrWhiteSpace(name))
-            return BadRequest(new ApiResponse(false, "name is required"));
+            return Problem(detail: "name is required", statusCode: StatusCodes.Status400BadRequest);
 
         var result = await _registrations.CheckNameAsync(name);
         return Ok(new ApiResponse<NameCheckResponse>(true, result));
@@ -51,7 +54,7 @@ public class BusinessRegistrationsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateBusinessRegistrationRequest request)
     {
         var result = await _registrations.CreateAsync(request);
-        return Created($"/api/business-registrations/{result.ReferenceNumber}",
+        return Created($"/api/v1/business-registrations/{result.ReferenceNumber}",
             new ApiResponse<BusinessRegistrationResponse>(true, result));
     }
 
@@ -75,8 +78,8 @@ public class BusinessRegistrationsController : ControllerBase
         var result = await _registrations.GetByRefAsync(refNumber, email, isStaff);
         if (result is null)
             return isStaff
-                ? NotFound(new ApiResponse(false, "Registration not found"))
-                : StatusCode(403, new ApiResponse(false, "Email does not match registration"));
+                ? Problem(detail: "Registration not found", statusCode: StatusCodes.Status404NotFound)
+                : Problem(detail: "Email does not match registration", statusCode: 403);
         return Ok(new ApiResponse<BusinessRegistrationDetailResponse>(true, result));
     }
 
@@ -88,9 +91,47 @@ public class BusinessRegistrationsController : ControllerBase
         var scope = ResolveAgencyScope(out var misconfigured);
         if (misconfigured) return Forbid();
 
-        var result = await _registrations.UpdateAsync(refNumber, request, scope);
-        if (result is null) return NotFound(new ApiResponse(false, "Registration not found"));
+        var actorEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+            ?? User.FindFirst("email")?.Value ?? "(unknown)";
+        var actorRole = User.GetRole() ?? "-";
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+
+        var result = await _registrations.UpdateAsync(refNumber, request, scope, actorEmail, actorRole, ip);
+        if (result is null) return Problem(detail: "Registration not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<BusinessRegistrationDetailResponse>(true, result));
+    }
+
+    /// <summary>Start payment of the registration fee, returning a Flutterwave hosted
+    /// checkout link. Idempotent: if the fee is already paid, returns that instead
+    /// of charging again.</summary>
+    [HttpPost("{refNumber}/payment/initiate")]
+    [EnableRateLimiting("public-form")]
+    public async Task<IActionResult> InitiatePayment(string refNumber)
+    {
+        try
+        {
+            var result = await _payments.InitiatePaymentAsync(refNumber);
+            return Ok(new ApiResponse<InitiatePaymentResponse>(true, result));
+        }
+        catch (KeyNotFoundException)
+        {
+            return Problem(detail: "Registration not found", statusCode: StatusCodes.Status404NotFound);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Problem(detail: ex.Message, statusCode: 503);
+        }
+    }
+
+    /// <summary>Current fee-payment status for a registration, for the applicant's
+    /// tracking page to poll after returning from checkout.</summary>
+    [HttpGet("{refNumber}/payment")]
+    [EnableRateLimiting("public-form")]
+    public async Task<IActionResult> PaymentStatus(string refNumber)
+    {
+        var result = await _payments.GetStatusAsync(refNumber);
+        if (result is null) return Problem(detail: "Registration not found", statusCode: StatusCodes.Status404NotFound);
+        return Ok(new ApiResponse<PaymentStatusResponse>(true, result));
     }
 
     /// <summary>Get the issued certificate. Only available once the registration reaches CertificateIssued.</summary>
@@ -100,7 +141,7 @@ public class BusinessRegistrationsController : ControllerBase
     {
         var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
         var result = await _registrations.GetCertificateAsync(refNumber, email, isStaff);
-        if (result is null) return NotFound(new ApiResponse(false, "Certificate not available"));
+        if (result is null) return Problem(detail: "Certificate not available", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<CertificateResponse>(true, result));
     }
 }

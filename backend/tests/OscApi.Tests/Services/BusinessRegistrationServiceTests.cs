@@ -12,7 +12,22 @@ public class BusinessRegistrationServiceTests
         var db = TestDbFactory.Create(dbName);
         var email = MockEmailService.Create();
         var refGen = new ReferenceNumberGenerator(db);
-        return new BusinessRegistrationService(db, email, refGen);
+        return new BusinessRegistrationService(db, email, refGen, new AuditLogService(db));
+    }
+
+    private static void MarkFeePaid(string dbName, string refNumber)
+    {
+        var db = TestDbFactory.Create(dbName);
+        db.Payments.Add(new OscApi.Models.Payment
+        {
+            BusinessRegistrationRef = refNumber,
+            TxRef = $"{refNumber}-test",
+            Amount = 250_000m,
+            Currency = "UGX",
+            Status = OscApi.Models.PaymentStatus.Successful,
+            PaidAt = DateTimeOffset.UtcNow,
+        });
+        db.SaveChanges();
     }
 
     private static CreateBusinessRegistrationRequest ValidRequest(string businessName = "Nakato Agro Processing Ltd", string email = "grace@example.com") => new(
@@ -48,6 +63,19 @@ public class BusinessRegistrationServiceTests
         // the whole point of not hardcoding a placeholder contact address.
         var detail = await svc.GetByRefAsync(stored.ReferenceNumber, "real.applicant@example.com", isStaff: false);
         Assert.NotNull(detail);
+    }
+
+    [Fact]
+    public async Task CreateAsync_RejectsDuplicateName_EvenWithoutCallingCheckNameFirst()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+        await svc.CreateAsync(ValidRequest(businessName: "Duplicate Traders Ltd"));
+
+        // A second submission for the same name, made without ever calling the
+        // advisory check-name endpoint, must still be rejected server-side.
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+            svc.CreateAsync(ValidRequest(businessName: "duplicate traders ltd")));
     }
 
     [Fact]
@@ -117,6 +145,22 @@ public class BusinessRegistrationServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_CertificateIssued_RequiresThePaidFee()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+        var created = await svc.CreateAsync(ValidRequest());
+
+        await svc.UpdateAsync(created.ReferenceNumber,
+            new UpdateBusinessRegistrationRequest(Status: "name_approved", null, null), agencyScope: null);
+
+        // Name approved but the fee was never paid — URSB does not issue on credit.
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+            svc.UpdateAsync(created.ReferenceNumber,
+                new UpdateBusinessRegistrationRequest(Status: "certificate_issued", null, null), agencyScope: null));
+    }
+
+    [Fact]
     public async Task UpdateAsync_CertificateIssued_AfterNameApproval_GeneratesCertificateNumber()
     {
         var dbName = Guid.NewGuid().ToString();
@@ -125,6 +169,7 @@ public class BusinessRegistrationServiceTests
 
         await svc.UpdateAsync(created.ReferenceNumber,
             new UpdateBusinessRegistrationRequest(Status: "name_approved", null, null), agencyScope: null);
+        MarkFeePaid(dbName, created.ReferenceNumber);
         var issued = await svc.UpdateAsync(created.ReferenceNumber,
             new UpdateBusinessRegistrationRequest(Status: "certificate_issued", null, null), agencyScope: null);
 
@@ -150,6 +195,34 @@ public class BusinessRegistrationServiceTests
             svc.UpdateAsync(created.ReferenceNumber,
                 new UpdateBusinessRegistrationRequest(Status: "rejected", null, RejectionReason: null),
                 agencyScope: null));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ReRejection_RequiresAFreshReason_NotTheStaleOne()
+    {
+        var dbName = Guid.NewGuid().ToString();
+        var svc = CreateService(dbName);
+        var created = await svc.CreateAsync(ValidRequest());
+
+        await svc.UpdateAsync(created.ReferenceNumber,
+            new UpdateBusinessRegistrationRequest(Status: "rejected", null, RejectionReason: "Duplicate submission"),
+            agencyScope: null);
+
+        // Bring it back into the pipeline, then reject again for a different
+        // reason. Omitting the new reason must not silently reuse "Duplicate
+        // submission" from the first rejection.
+        await svc.UpdateAsync(created.ReferenceNumber,
+            new UpdateBusinessRegistrationRequest(Status: "under_review", null, null), agencyScope: null);
+
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() =>
+            svc.UpdateAsync(created.ReferenceNumber,
+                new UpdateBusinessRegistrationRequest(Status: "rejected", null, RejectionReason: null),
+                agencyScope: null));
+
+        var result = await svc.UpdateAsync(created.ReferenceNumber,
+            new UpdateBusinessRegistrationRequest(Status: "rejected", null, RejectionReason: "Missing ownership documents"),
+            agencyScope: null);
+        Assert.Equal("Missing ownership documents", result!.RejectionReason);
     }
 
     [Fact]

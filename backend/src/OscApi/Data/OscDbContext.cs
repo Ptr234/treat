@@ -22,6 +22,7 @@ public class OscDbContext : DbContext
     public DbSet<AnalyticsEvent> AnalyticsEvents => Set<AnalyticsEvent>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<BusinessRegistration> BusinessRegistrations => Set<BusinessRegistration>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     public override int SaveChanges()
     {
@@ -180,6 +181,14 @@ public class OscDbContext : DbContext
             e.HasIndex(r => r.BusinessName);  // For the name-availability check
             e.HasIndex(r => r.AssignedAgencyCode);
             e.Property(r => r.Status).HasConversion<string>();
+        });
+
+        // Payment
+        modelBuilder.Entity<Payment>(e =>
+        {
+            e.HasIndex(p => p.TxRef).IsUnique();
+            e.HasIndex(p => p.BusinessRegistrationRef);
+            e.Property(p => p.Status).HasConversion<string>();
         });
 
         // Admin seeding handled in Program.cs (upsert-style) to avoid migration conflicts
