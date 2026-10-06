@@ -183,7 +183,7 @@ const config: Config = {
       },
 
       fontFamily: {
-        sans: ['Inter', 'Roboto', 'system-ui', 'sans-serif'],
+        sans: ['Source Sans 3', 'Arial', 'sans-serif'],
         serif: ['Georgia', 'serif'],
         mono: ['Menlo', 'Monaco', 'Consolas', 'monospace'],
       },

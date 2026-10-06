@@ -180,12 +180,12 @@ export default function Navigation() {
                     <ChevronDownIcon className={`h-4 w-4 transition-transform ${activeMobileMenu === menu.title ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
                   {activeMobileMenu === menu.title && (
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-5 pb-4">
+                    <div className="grid grid-cols-1 gap-y-4 pb-4 min-[420px]:grid-cols-2 min-[420px]:gap-x-4 min-[420px]:gap-y-5">
                       {menu.groups.map((group) => (
                         <div key={group.label}>
                           <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-neutral-500">{group.label}</p>
                           {group.links.map((link) => (
-                            <Link key={link.href + link.label} href={link.href} onClick={closeMenus} aria-current={pathname === link.href ? 'page' : undefined} className="block py-1.5 text-xs font-medium text-neutral-800 hover:text-red-600">
+                            <Link key={link.href + link.label} href={link.href} onClick={closeMenus} aria-current={pathname === link.href ? 'page' : undefined} className="block min-h-10 py-2 text-sm font-medium text-neutral-800 hover:text-red-600">
                               {link.label}
                             </Link>
                           ))}
