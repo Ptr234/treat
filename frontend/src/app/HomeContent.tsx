@@ -139,7 +139,10 @@ export default function HomePage() {
     const categories = SECTOR_CATEGORIES[title] ?? [];
     return OPPORTUNITIES.filter((o) => categories.includes(o.category));
   };
-  const visibleSectors = sectors.filter((sector) => projectsFor(sector.title).length > 0);
+  // Keep the CMS sector directory visible even when its titles do not match
+  // the local opportunity-category mapping. Empty matches get the existing
+  // no-projects state in the detail panel instead of leaving a blank column.
+  const visibleSectors = sectors;
   const activeSector = visibleSectors[activeSectorIndex] ?? visibleSectors[0] ?? SECTORS[0]!;
   const activeProjects = projectsFor(activeSector.title);
 
@@ -166,7 +169,7 @@ export default function HomePage() {
               <span className="h-1 w-10 bg-yellow-400" aria-hidden="true" />
               Uganda Investment Authority · OneStop Centre
             </p>
-            <h1 className="max-w-3xl text-5xl font-semibold leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl">
+            <h1 className="font-display max-w-3xl text-5xl font-semibold uppercase leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl">
               Invest in Uganda. <span className="text-yellow-300">Build what’s next.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-white/85 sm:text-lg sm:leading-8">
@@ -228,17 +231,17 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-yellow-300">News &amp; events</p>
-            <h2 className="mt-2 text-xl font-bold">Meet Uganda’s investment community</h2>
+            <h2 className="mt-2 font-display text-xl font-bold uppercase">Meet Uganda’s investment community</h2>
             <Link href="/events" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white underline decoration-yellow-300 underline-offset-4">View events <ArrowRightIcon className="h-4 w-4" aria-hidden="true" /></Link>
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-yellow-300">Common questions</p>
-            <h2 className="mt-2 text-xl font-bold">Get answers before you apply</h2>
+            <h2 className="mt-2 font-display text-xl font-bold uppercase">Get answers before you apply</h2>
             <Link href="/support#faq-heading" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white underline decoration-yellow-300 underline-offset-4">Browse investor FAQs <ArrowRightIcon className="h-4 w-4" aria-hidden="true" /></Link>
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-yellow-300">Investor guide</p>
-            <h2 className="mt-2 text-xl font-bold">Plan your next step in Uganda</h2>
+            <h2 className="mt-2 font-display text-xl font-bold uppercase">Plan your next step in Uganda</h2>
             <Link href="/guide" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white underline decoration-yellow-300 underline-offset-4">Read the investor guide <ArrowRightIcon className="h-4 w-4" aria-hidden="true" /></Link>
           </div>
         </div>
@@ -249,7 +252,7 @@ export default function HomePage() {
         <div className="flex flex-col gap-4 border-b-2 border-black pb-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className={sectionHeading}>Investor task finder</p>
-            <h2 id="task-heading" className="text-2xl font-bold sm:text-3xl">What would you like to do?</h2>
+            <h2 id="task-heading" className="font-display text-2xl font-bold uppercase sm:text-3xl">What would you like to do?</h2>
           </div>
           <label className="relative block w-full sm:max-w-sm">
             <span className="sr-only">Search investor tasks</span>
@@ -310,8 +313,8 @@ export default function HomePage() {
         <div className="grid gap-12 lg:grid-cols-[.7fr_1.3fr] lg:gap-16">
           <div>
             <p className={sectionHeading}>One coordinated entry point</p>
-            <h2 id="offer-heading" className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
-              Government support, made easier to navigate.
+            <h2 id="offer-heading" className="font-display text-3xl font-bold uppercase leading-tight tracking-tight sm:text-4xl">
+              Government Support, Made Easier to Navigate
             </h2>
             <p className="mt-5 leading-7 text-neutral-700">
               The OneStop Centre helps investors and businesses understand the steps, find the right agency and move forward with confidence.
@@ -341,7 +344,7 @@ export default function HomePage() {
           <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className={sectionHeading}>High-priority opportunities</p>
-              <h2 id="featured-heading" className="text-3xl font-bold tracking-tight sm:text-4xl">Projects open to investors now</h2>
+              <h2 id="featured-heading" className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Projects open to investors now</h2>
             </div>
             <Link href="/investments" className={`${linkClass} text-sm`}>All investment opportunities</Link>
           </div>
@@ -386,10 +389,10 @@ export default function HomePage() {
 
       {/* Sectors */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="sectors-heading">
-        <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-10 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
             <p className={sectionHeading}>Explore Uganda</p>
-            <h2 id="sectors-heading" className="text-3xl font-bold tracking-tight sm:text-4xl">Opportunities across priority sectors</h2>
+            <h2 id="sectors-heading" className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Opportunities across priority sectors</h2>
             <p className="mt-4 leading-7 text-neutral-700">
               Explore sectors supported by Uganda’s natural resources, skilled people and regional connections.
             </p>
@@ -489,7 +492,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mb-12 max-w-2xl">
             <p className={sectionHeading}>How it works</p>
-            <h2 id="journey-heading" className="text-3xl font-bold tracking-tight sm:text-4xl">Move forward in three steps</h2>
+            <h2 id="journey-heading" className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Move forward in three steps</h2>
             <p className="mt-4 leading-7 text-neutral-700">Find useful information and support for your next decision.</p>
           </div>
           <ol className="grid gap-10 md:grid-cols-3 md:gap-0 md:divide-x md:divide-neutral-200">
@@ -513,7 +516,7 @@ export default function HomePage() {
           <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className={sectionHeading}>Working together</p>
-              <h2 id="agencies-heading" className="text-2xl font-bold tracking-tight sm:text-3xl">Connected to Uganda’s public institutions</h2>
+              <h2 id="agencies-heading" className="font-display text-2xl font-bold uppercase tracking-tight sm:text-3xl">Connected to Uganda’s public institutions</h2>
             </div>
             <Link href="/agencies" className={`${linkClass} text-sm`}>View all agencies</Link>
           </div>
@@ -538,7 +541,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="max-w-2xl">
             <p className={sectionHeading}>Here to help</p>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Have a question about investing in Uganda?</h2>
+            <h2 className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Have a question about investing in Uganda?</h2>
             <p className="mt-4 leading-7 text-neutral-700">
               Speak with the OneStop Centre or get quick answers from our investment assistant.
             </p>

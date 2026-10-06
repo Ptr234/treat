@@ -1,6 +1,9 @@
 import { createClient, type SanityClient } from 'next-sanity';
 
-const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+// The public UIA Sanity dataset is the default used by this app's seed scripts
+// and deployment docs. Allow deployments to override it, but keep public reads
+// working when the optional environment variable is omitted.
+const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'juhrlluw';
 if (!projectId) {
   console.error('[sanity] NEXT_PUBLIC_SANITY_PROJECT_ID is not set — Sanity queries will fail');
 }

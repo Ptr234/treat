@@ -1,739 +1,183 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ugandaRegions } from '@/data/mock/projects';
 import { useProjects } from '@/hooks/useProjects';
-import { ProjectStatus } from '@/types';
+import type { LicensedProject, ProjectStatus } from '@/types';
 import DynamicLeafletMap from '@/components/projects/DynamicLeafletMap';
 import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  MapIcon,
-  TableCellsIcon,
-  Squares2X2Icon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  DocumentArrowDownIcon,
-  XMarkIcon
+  ArrowDownIcon, ArrowUpIcon, BuildingOffice2Icon, FunnelIcon, MapIcon,
+  MagnifyingGlassIcon, Squares2X2Icon, TableCellsIcon, XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-type ViewMode = 'map' | 'table' | 'cards';
+type ViewMode = 'map' | 'cards' | 'table';
 type SortField = 'name' | 'investmentValue' | 'plannedEmployment' | 'sector' | 'region';
-type SortOrder = 'asc' | 'desc';
-
-const sectors = ['Agriculture', 'Tourism', 'Mining', 'ICT', 'Manufacturing', 'Energy'];
-const investmentRanges = [
-  { label: 'Under $5M', min: 0, max: 5000000 },
-  { label: '$5M - $15M', min: 5000000, max: 15000000 },
-  { label: '$15M - $30M', min: 15000000, max: 30000000 },
-  { label: 'Over $30M', min: 30000000, max: Infinity }
-];
 const statuses: ProjectStatus[] = ['active', 'under_construction', 'planned', 'completed'];
+const statusLabels: Record<ProjectStatus, string> = {
+  active: 'Operational', under_construction: 'In progress', planned: 'Planned', completed: 'Completed',
+};
+const ranges = [
+  { label: 'Under $5M', min: 0, max: 5_000_000 },
+  { label: '$5M–$15M', min: 5_000_000, max: 15_000_000 },
+  { label: '$15M–$30M', min: 15_000_000, max: 30_000_000 },
+  { label: '$30M and above', min: 30_000_000, max: Infinity },
+];
+const statusStyle: Record<ProjectStatus, string> = {
+  active: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+  under_construction: 'bg-amber-50 text-amber-800 ring-amber-200',
+  planned: 'bg-sky-50 text-sky-800 ring-sky-200',
+  completed: 'bg-stone-100 text-stone-700 ring-stone-200',
+};
+const sectorColors: Record<string, string> = {
+  Agriculture: '#65a30d', Tourism: '#0d9488', Mining: '#d97706', ICT: '#2563eb',
+  Manufacturing: '#7c3aed', Energy: '#ea580c',
+};
+const currency = (value: number) => value >= 1_000_000
+  ? `$${(value / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 })}M`
+  : `$${(value / 1_000).toLocaleString(undefined, { maximumFractionDigits: 0 })}K`;
 
-const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
-
-const inputClass =
-  'w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-black placeholder-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
-
-const checkboxClass = 'h-4 w-4 cursor-pointer accent-black';
-
-/** A single applied filter, removable on its own. */
-function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
-  return (
-    <span className="inline-flex items-center gap-1 border border-black bg-white py-0.5 pl-2.5 pr-1 text-xs font-medium text-black">
-      {label}
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`Remove filter ${label}`}
-        className="p-0.5 text-neutral-600 hover:text-red-600"
-      >
-        <XMarkIcon className="h-3.5 w-3.5" aria-hidden="true" />
-      </button>
-    </span>
-  );
+function StatusPill({ status }: { status: ProjectStatus }) {
+  return <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusStyle[status]}`}>{statusLabels[status]}</span>;
 }
 
 export default function ProjectsPage() {
-  const { data: projects } = useProjects();
-  const [viewMode, setViewMode] = useState<ViewMode>('map');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
-  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
-  const [selectedInvestmentRange, setSelectedInvestmentRange] = useState<string>('');
-  const [selectedStatuses, setSelectedStatuses] = useState<ProjectStatus[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
+  const { data: projects, loading, error } = useProjects();
+  const [view, setView] = useState<ViewMode>('cards');
+  const [search, setSearch] = useState('');
+  const [sectors, setSectors] = useState<string[]>([]);
+  const [regions, setRegions] = useState<string[]>([]);
+  const [statusFilters, setStatusFilters] = useState<ProjectStatus[]>([]);
+  const [investmentRange, setInvestmentRange] = useState('');
   const [sortField, setSortField] = useState<SortField>('investmentValue');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [showFilters, setShowFilters] = useState(true);
+  const [descending, setDescending] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const filteredProjects = useMemo(() => {
-    return projects.filter((project) => {
-      const matchesSearch =
-        searchQuery === '' ||
-        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.district.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesSector = selectedSectors.length === 0 || selectedSectors.includes(project.sector);
-      const matchesRegion = selectedRegions.length === 0 || selectedRegions.includes(project.region);
-      const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(project.status);
-
-      let matchesInvestment = true;
-      if (selectedInvestmentRange) {
-        const range = investmentRanges.find((r) => r.label === selectedInvestmentRange);
-        if (range) {
-          matchesInvestment = project.investmentValue >= range.min && project.investmentValue < range.max;
-        }
-      }
-
-      return matchesSearch && matchesSector && matchesRegion && matchesStatus && matchesInvestment;
-    });
-  }, [projects, searchQuery, selectedSectors, selectedRegions, selectedInvestmentRange, selectedStatuses]);
-
-  const sortedProjects = useMemo(() => {
-    return [...filteredProjects].sort((a, b) => {
-      let aVal: string | number = a[sortField];
-      let bVal: string | number = b[sortField];
-
-      if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-      if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [filteredProjects, sortField, sortOrder]);
-
-  const totalInvestment = filteredProjects.reduce((sum, p) => sum + p.investmentValue, 0);
-  const totalEmployment = filteredProjects.reduce((sum, p) => sum + p.plannedEmployment, 0);
-
-  // How many projects each option would match, so a filter that can only ever
-  // return nothing is visibly empty before it is clicked.
-  const counts = useMemo(() => {
-    const tally = (pick: (p: (typeof projects)[number]) => string | undefined) =>
-      projects.reduce<Record<string, number>>((acc, p) => {
-        const k = pick(p);
-        if (k) acc[k] = (acc[k] ?? 0) + 1;
-        return acc;
-      }, {});
-    return {
-      sector: tally((p) => p.sector),
-      region: tally((p) => p.region),
-      status: tally((p) => p.status),
-    };
-  }, [projects]);
-
-  const toggleSector = (sector: string) => {
-    setSelectedSectors((prev) =>
-      prev.includes(sector) ? prev.filter((s) => s !== sector) : [...prev, sector]
-    );
+  const availableSectors = useMemo(() => [...new Set(projects.map((p) => p.sector))].sort(), [projects]);
+  const filtered = useMemo(() => projects.filter((p) => {
+    const term = search.trim().toLowerCase();
+    const range = ranges.find((r) => r.label === investmentRange);
+    return (!term || [p.name, p.company, p.district, p.region, p.sector].some((v) => v.toLowerCase().includes(term)))
+      && (!sectors.length || sectors.includes(p.sector))
+      && (!regions.length || regions.includes(p.region))
+      && (!statusFilters.length || statusFilters.includes(p.status))
+      && (!range || (p.investmentValue >= range.min && p.investmentValue < range.max));
+  }), [projects, search, sectors, regions, statusFilters, investmentRange]);
+  const sorted = useMemo(() => [...filtered].sort((a, b) => {
+    const av = a[sortField]; const bv = b[sortField];
+    const result = typeof av === 'string' && typeof bv === 'string'
+      ? av.localeCompare(bv) : Number(av) - Number(bv);
+    return descending ? -result : result;
+  }), [filtered, sortField, descending]);
+  const investment = filtered.reduce((sum, project) => sum + project.investmentValue, 0);
+  const jobs = filtered.reduce((sum, project) => sum + project.plannedEmployment, 0);
+  const hasFilters = Boolean(search || sectors.length || regions.length || statusFilters.length || investmentRange);
+  const clearFilters = () => { setSearch(''); setSectors([]); setRegions([]); setStatusFilters([]); setInvestmentRange(''); };
+  const toggle = <T,>(values: T[], value: T, setter: (next: T[]) => void) => setter(values.includes(value) ? values.filter((v) => v !== value) : [...values, value]);
+  const sectorColor = (sector: string) => sectorColors[sector] || '#64748b';
+  const setSort = (field: SortField) => {
+    if (sortField === field) setDescending((value) => !value);
+    else { setSortField(field); setDescending(field === 'investmentValue' || field === 'plannedEmployment'); }
+  };
+  const exportCsv = () => {
+    const headers = ['Project Name', 'Company', 'Sector', 'Region', 'District', 'Investment USD', 'Employment', 'Status'];
+    const rows = sorted.map((p) => [p.name, p.company, p.sector, p.region, p.district, p.investmentValue, p.plannedEmployment, statusLabels[p.status]]);
+    const escape = (value: string | number) => `"${String(value).replace(/"/g, '""')}"`;
+    const blob = new Blob([[headers, ...rows].map((row) => row.map(escape).join(',')).join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob); const anchor = document.createElement('a');
+    anchor.href = url; anchor.download = 'uganda-projects.csv'; anchor.click(); URL.revokeObjectURL(url);
   };
 
-  const toggleRegion = (region: string) => {
-    setSelectedRegions((prev) =>
-      prev.includes(region) ? prev.filter((r) => r !== region) : [...prev, region]
-    );
-  };
-
-  const toggleStatus = (status: ProjectStatus) => {
-    setSelectedStatuses((prev) =>
-      prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
-    );
-  };
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedSectors([]);
-    setSelectedRegions([]);
-    setSelectedInvestmentRange('');
-    setSelectedStatuses([]);
-  };
-
-  const hasFilters =
-    searchQuery !== '' ||
-    selectedSectors.length > 0 ||
-    selectedRegions.length > 0 ||
-    selectedInvestmentRange !== '' ||
-    selectedStatuses.length > 0;
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
-    } else {
-      setSortField(field);
-      setSortOrder('desc');
-    }
-  };
-
-  const getSectorColor = (sector: string): string => {
-    const colors: Record<string, string> = {
-      Agriculture: '#FBBF24',
-      Tourism: '#F97316',
-      Mining: '#EF4444',
-      ICT: '#FDE047',
-      Manufacturing: '#DC2626',
-      Energy: '#FB923C'
-    };
-    return colors[sector] || '#F59E0B';
-  };
-
-  const getStatusBadge = (status: ProjectStatus) => {
-    const badges = {
-      active: 'bg-yellow-100 text-black border-yellow-400',
-      under_construction: 'bg-red-50 text-red-700 border-red-300',
-      planned: 'bg-neutral-100 text-neutral-800 border-neutral-400',
-      completed: 'bg-white text-neutral-700 border-neutral-400'
-    };
-    const labels = {
-      active: 'Active',
-      under_construction: 'Under construction',
-      planned: 'Planned',
-      completed: 'Completed'
-    };
-    return { className: badges[status], label: labels[status] };
-  };
-
-  const formatCurrency = (value: number) => {
-    if (value >= 1000000) {
-      return `$${(value / 1000000).toFixed(1)}M`;
-    }
-    return `$${(value / 1000).toFixed(0)}K`;
-  };
-
-  const openProject = (id: string, scrollToMap = false) => {
-    setSelectedProject(id);
-    if (scrollToMap) mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  /** Sector dot + status badge + location, shared by every list view. */
-  const ProjectMeta = ({ project }: { project: (typeof sortedProjects)[number] }) => {
-    const badge = getStatusBadge(project.status);
-    return (
-      <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-700">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: getSectorColor(project.sector) }} aria-hidden="true" />
-          {project.sector}
+  const ProjectCard = ({ project }: { project: LicensedProject }) => (
+    <article className={`group border-b border-stone-200 py-5 transition-colors ${selectedProject === project.id ? 'border-l-2 border-l-emerald-700 pl-4' : ''}`}>
+      <div className="flex items-start justify-between gap-3">
+        <span className="inline-flex items-center gap-2 text-xs font-medium text-stone-600">
+          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: sectorColor(project.sector) }} />{project.sector}
         </span>
-        <span className={`border px-2 py-0.5 font-semibold ${badge.className}`}>{badge.label}</span>
-        <span className="text-neutral-600">{project.district}, {project.region}</span>
+        <StatusPill status={project.status} />
+      </div>
+      <h3 className="mt-5 font-display text-xl font-semibold leading-snug text-stone-900">{project.name}</h3>
+      <p className="mt-1 text-sm text-stone-500">{project.company}</p>
+      <p className="mt-4 flex items-center gap-1.5 text-sm text-stone-600">
+        <MapIcon className="h-4 w-4 text-stone-400" />{project.district}{project.district ? ', ' : ''}{project.region}
       </p>
-    );
-  };
-
-  /** Two-column detail list used for the cards view and the map's project list. */
-  const ProjectDetail = ({ project, onOpen }: { project: (typeof sortedProjects)[number]; onOpen: () => void }) => {
-    const isSelected = selectedProject === project.id;
-    return (
-      <article
-        onClick={onOpen}
-        className={`cursor-pointer border-t-2 pt-5 transition-colors ${isSelected ? 'border-red-600' : 'border-neutral-200 hover:border-black'}`}
-      >
-        <h3 className="text-base font-bold leading-snug text-black">
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onOpen(); }}
-            className="text-left underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded-sm"
-          >
-            {project.name}
-          </button>
-        </h3>
-        {project.company !== project.name && (
-          <p className="mt-1 text-sm text-neutral-700">{project.company}</p>
-        )}
-        <ProjectMeta project={project} />
-        <dl className="mt-4 grid grid-cols-2 gap-4 border-l-4 border-yellow-400 bg-neutral-50 py-3 pl-4 pr-3 text-sm">
-          <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Investment</dt>
-            <dd className="mt-0.5 font-bold text-black">{formatCurrency(project.investmentValue)}</dd>
-          </div>
-          <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Employment</dt>
-            <dd className="mt-0.5 font-bold text-black">{project.plannedEmployment.toLocaleString()}</dd>
-          </div>
-        </dl>
-        {project.industrialPark && (
-          <p className="mt-3 text-xs text-neutral-600">{project.industrialPark}</p>
-        )}
-      </article>
-    );
-  };
-
-  const SortHeader = ({ field, label, align = 'left' }: { field: SortField; label: string; align?: 'left' | 'right' }) => (
-    <th scope="col" aria-sort={sortField === field ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'} className={`px-4 py-3 text-xs font-bold uppercase tracking-wider text-black ${align === 'right' ? 'text-right' : 'text-left'}`}>
-      <button
-        type="button"
-        onClick={() => handleSort(field)}
-        className={`inline-flex items-center gap-1 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${align === 'right' ? 'flex-row-reverse' : ''}`}
-      >
-        {label}
-        {sortField === field && (sortOrder === 'asc' ? <ArrowUpIcon className="h-3.5 w-3.5" aria-hidden="true" /> : <ArrowDownIcon className="h-3.5 w-3.5" aria-hidden="true" />)}
-      </button>
-    </th>
+      <div className="mt-5 grid grid-cols-2 gap-3 border-t border-stone-200 pt-4">
+        <div><p className="text-xs font-medium uppercase tracking-wide text-stone-400">Investment</p><p className="mt-1 text-lg font-bold text-stone-900">{currency(project.investmentValue)}</p></div>
+        <div><p className="text-xs font-medium uppercase tracking-wide text-stone-400">Employment</p><p className="mt-1 text-lg font-bold text-stone-900">{project.plannedEmployment.toLocaleString()}</p></div>
+      </div>
+      {project.industrialPark && <p className="mt-4 border-t border-stone-100 pt-3 text-xs text-stone-500">{project.industrialPark}</p>}
+      <button type="button" onClick={() => { setSelectedProject(project.id); setView('map'); setTimeout(() => mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }} className="mt-4 text-sm font-semibold text-emerald-800 hover:text-emerald-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">View on map <span aria-hidden="true">→</span></button>
+    </article>
   );
 
-  const selectedDetail = selectedProject ? sortedProjects.find((p) => p.id === selectedProject) : undefined;
-
   return (
- <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-[1800px] px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Projects</li>
-          </ol>
+    <main className="min-h-screen bg-[#f7f7f3] text-stone-900">
+      <div className="border-b border-stone-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-7xl px-5 py-3 text-sm text-stone-500 sm:px-8">
+          <Link href="/" className="hover:text-emerald-800">Home</Link><span className="mx-2 text-stone-300">/</span><span className="font-medium text-stone-800" aria-current="page">Projects</span>
         </nav>
       </div>
 
-      <div className="mx-auto max-w-[1800px] px-4 pb-20 pt-10 sm:px-6 lg:px-8 sm:pt-14">
-        {/* Title and summary */}
-        <header>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Licensed projects database</h1>
-          <p className="mt-4 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-            Explore the project records available in the Uganda investment directory and narrow them by sector, status, location or other listed details. The summary figures update with the filters, helping you compare the scale of the projects currently in view. Open an individual record for its available investment, employment and contact information. Treat directory details as a starting point for due diligence and confirm project status and terms with the listed agency or promoter.
-          </p>
+      <div className="mx-auto max-w-7xl px-5 pb-20 pt-8 sm:px-8 sm:pt-12">
+        <header className="relative overflow-hidden bg-[#12382d] px-6 py-9 text-white sm:px-10 sm:py-12">
+          <div className="absolute -right-14 -top-24 h-72 w-72 rounded-full border-[40px] border-white/5" aria-hidden="true" />
+          <div className="relative max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-200">Uganda investment directory</p>
+            <h1 className="mt-3 font-display text-3xl font-bold uppercase tracking-tight sm:text-5xl">Find a Project to Invest In</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-emerald-50/80 sm:text-base sm:leading-7">Explore licensed projects across Uganda. Search by company, sector or location, compare investment and employment figures, and use the map to see where opportunities are based.</p>
+            <div className="mt-7 flex flex-wrap gap-3 text-sm">
+              <span className="rounded-full bg-white/10 px-3 py-1.5">Updated project directory</span>
+              <span className="rounded-full bg-white/10 px-3 py-1.5">Filter by sector and region</span>
+            </div>
+          </div>
         </header>
 
-        <dl className="mt-10 grid grid-cols-1 gap-x-10 gap-y-6 border-y border-neutral-200 py-6 md:grid-cols-3">
-          <div>
-            <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Licensed projects</dt>
-            <dd className="font-data mt-1 text-3xl font-bold text-black sm:text-4xl">{filteredProjects.length}</dd>
-            <p className="mt-1 text-sm text-neutral-600">of {projects.length} total projects</p>
-          </div>
-          <div>
-            <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Total investment</dt>
-            <dd className="font-data mt-1 text-3xl font-bold text-black sm:text-4xl">${(totalInvestment / 1000000000).toFixed(2)}B</dd>
-            <p className="mt-1 text-sm text-neutral-600">combined capital value</p>
-          </div>
-          <div>
-            <dt className="text-xs font-bold uppercase tracking-wider text-red-600">Total employment</dt>
-            <dd className="font-data mt-1 text-3xl font-bold text-black sm:text-4xl">{totalEmployment.toLocaleString()}</dd>
-            <p className="mt-1 text-sm text-neutral-600">jobs created and planned</p>
-          </div>
-        </dl>
+        <section aria-label="Project summary" className="grid grid-cols-1 border-b border-stone-300 sm:grid-cols-3">
+          {[
+            { label: 'Projects in View', value: loading ? '—' : filtered.length.toLocaleString(), note: `of ${projects.length.toLocaleString()} listed` },
+            { label: 'Investment Represented', value: loading ? '—' : `$${(investment / 1_000_000_000).toFixed(2)}B`, note: 'combined project value' },
+            { label: 'Employment', value: loading ? '—' : jobs.toLocaleString(), note: 'planned and current jobs' },
+          ].map((item) => <div key={item.label} className="border-b border-stone-200 py-5 sm:border-b-0 sm:border-r sm:px-6 sm:py-6 first:sm:pl-0 last:border-0"><p className="text-sm font-medium text-stone-500">{item.label}</p><p className="mt-2 text-3xl font-semibold tracking-tight text-stone-900">{item.value}</p><p className="mt-1 text-xs text-stone-400">{item.note}</p></div>)}
+        </section>
 
-        <div className="mt-10 flex flex-col gap-10 lg:flex-row">
-          {/* Filters: plain column with rules; becomes a full-height drawer on mobile */}
-          {showFilters && (
-            <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setShowFilters(false)} />
-          )}
-          <aside
-            aria-label="Project filters"
-            className={`${showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} fixed inset-y-0 left-0 z-50 w-80 max-w-[85vw] overflow-y-auto border-r border-neutral-200 bg-white p-6 transition-all duration-300 lg:relative lg:z-auto lg:max-h-none lg:w-72 lg:shrink-0 lg:overflow-visible lg:border-0 lg:p-0 ${showFilters ? '' : 'lg:hidden'}`}
-          >
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-bold text-black">
-                <FunnelIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
-                Filters
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowFilters(false)}
-                aria-label="Hide filters"
-                className="flex min-h-[44px] min-w-[44px] items-center justify-center text-neutral-600 hover:text-red-600 lg:hidden"
-              >
-                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-
-            <div className="space-y-8">
-              <div>
-                <label htmlFor="search" className="mb-2 block text-sm font-bold text-black">Search</label>
-                <div className="relative">
-                  <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
-                  <input
-                    type="text"
-                    id="search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search projects..."
-                    className={`${inputClass} pl-9`}
-                  />
-                </div>
-              </div>
-
-              <fieldset>
-                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Sector</legend>
-                <div className="space-y-2.5">
-                  {sectors.map((sector) => (
-                    <label key={sector} className="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-800">
-                      <input type="checkbox" checked={selectedSectors.includes(sector)} onChange={() => toggleSector(sector)} className={checkboxClass} />
-                      <span className="flex-1">{sector}</span>
-                      <span className="text-xs tabular-nums text-neutral-600">{counts.sector[sector] ?? 0}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Region</legend>
-                <div className="space-y-2.5">
-                  {ugandaRegions.map((region) => (
-                    <label key={region} className="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-800">
-                      <input type="checkbox" checked={selectedRegions.includes(region)} onChange={() => toggleRegion(region)} className={checkboxClass} />
-                      <span className="flex-1">{region}</span>
-                      <span className="text-xs tabular-nums text-neutral-600">{counts.region[region] ?? 0}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Investment size</legend>
-                <div className="space-y-2.5">
-                  {investmentRanges.map((range) => (
-                    <label key={range.label} className="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-800">
-                      <input
-                        type="radio"
-                        name="investment"
-                        checked={selectedInvestmentRange === range.label}
-                        onChange={() => setSelectedInvestmentRange(range.label)}
-                        className={checkboxClass}
-                      />
-                      <span>{range.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <fieldset>
-                <legend className="mb-3 border-b border-neutral-200 pb-2 text-sm font-bold text-black">Status</legend>
-                <div className="space-y-2.5">
-                  {statuses.map((status) => {
-                    const badge = getStatusBadge(status);
-                    return (
-                      <label key={status} className="flex cursor-pointer items-center gap-2.5 text-sm">
-                        <input type="checkbox" checked={selectedStatuses.includes(status)} onChange={() => toggleStatus(status)} className={checkboxClass} />
-                        <span className={`border px-2 py-0.5 text-xs font-semibold ${badge.className}`}>{badge.label}</span>
-                        <span className="ml-auto text-xs tabular-nums text-neutral-600">{counts.status[status] ?? 0}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </fieldset>
-
-              <div className="border-t border-neutral-200 pt-6">
-                <p className="text-sm font-bold text-black" aria-live="polite">
-                  {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'} found
-                </p>
-                {hasFilters && (
-                  <button type="button" onClick={clearFilters} className={`${linkClass} mt-2 text-sm`}>
-                    Clear all filters
-                  </button>
-                )}
-              </div>
-            </div>
+        <div className="mt-10 flex flex-col gap-6 lg:flex-row lg:items-start">
+          <aside className={`${filtersOpen ? 'block' : 'hidden'} w-full shrink-0 border-b border-stone-300 pb-6 lg:block lg:w-64 lg:border-b-0 lg:border-r lg:pr-6 lg:pb-0`} aria-label="Project filters">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-4"><h2 className="flex items-center gap-2 font-display text-lg font-semibold"> <FunnelIcon className="h-4 w-4 text-emerald-800" />Filters</h2>{hasFilters && <button onClick={clearFilters} className="text-xs font-semibold text-emerald-800 hover:underline">Reset</button>}</div>
+            <label htmlFor="project-search" className="mb-2 mt-5 block text-xs font-semibold uppercase tracking-wide text-stone-500">Search</label>
+            <div className="relative"><MagnifyingGlassIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" /><input id="project-search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Name, company, place" className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-700/15" /></div>
+            <fieldset className="mt-6"><legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">Sector</legend><div className="max-h-48 space-y-2 overflow-y-auto">{availableSectors.map((sector) => <label key={sector} className="flex cursor-pointer items-center gap-2.5 text-sm text-stone-700"><input type="checkbox" checked={sectors.includes(sector)} onChange={() => toggle(sectors, sector, setSectors)} className="h-4 w-4 accent-emerald-800" /><span className="h-2 w-2 rounded-full" style={{ backgroundColor: sectorColor(sector) }} />{sector}</label>)}</div></fieldset>
+            <fieldset className="mt-6 border-t border-stone-100 pt-5"><legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">Region</legend><div className="space-y-2">{ugandaRegions.map((region) => <label key={region} className="flex cursor-pointer items-center gap-2.5 text-sm text-stone-700"><input type="checkbox" checked={regions.includes(region)} onChange={() => toggle(regions, region, setRegions)} className="h-4 w-4 accent-emerald-800" />{region}</label>)}</div></fieldset>
+            <fieldset className="mt-6 border-t border-stone-100 pt-5"><legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">Investment Size</legend><select value={investmentRange} onChange={(e) => setInvestmentRange(e.target.value)} className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-700"><option value="">Any Investment</option>{ranges.map((range) => <option key={range.label} value={range.label}>{range.label}</option>)}</select></fieldset>
+            <fieldset className="mt-6 border-t border-stone-100 pt-5"><legend className="mb-3 text-xs font-semibold uppercase tracking-wide text-stone-500">Project Status</legend><div className="space-y-2.5">{statuses.map((status) => <label key={status} className="flex cursor-pointer items-center gap-2.5 text-sm text-stone-700"><input type="checkbox" checked={statusFilters.includes(status)} onChange={() => toggle(statusFilters, status, setStatusFilters)} className="h-4 w-4 accent-emerald-800" />{statusLabels[status]}</label>)}</div></fieldset>
           </aside>
 
-          {/* Main content */}
-          <main className="min-w-0 flex-1">
-            {/* Toolbar */}
-            <div className="flex flex-col gap-4 border-b-2 border-black pb-4">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div role="group" aria-label="View" className="flex items-center gap-1">
-                  {([
-                    { mode: 'map', label: 'Map', icon: MapIcon },
-                    { mode: 'table', label: 'Table', icon: TableCellsIcon },
-                    { mode: 'cards', label: 'Cards', icon: Squares2X2Icon },
-                  ] as const).map(({ mode, label, icon: Icon }) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      onClick={() => setViewMode(mode)}
-                      aria-pressed={viewMode === mode}
-                      className={`inline-flex min-h-[44px] items-center gap-2 border-b-2 px-3 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${viewMode === mode ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-700 hover:text-red-600'}`}
-                    >
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-2 text-sm text-neutral-700">
-                    <span className="hidden sm:inline">Sort by</span>
-                    <select
-                      value={sortField}
-                      onChange={(e) => setSortField(e.target.value as SortField)}
-                      aria-label="Sort projects by"
-                      className="min-h-[44px] rounded-md border border-neutral-300 bg-white px-2 py-2 text-sm text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                    >
-                      <option value="investmentValue">Investment</option>
-                      <option value="plannedEmployment">Employment</option>
-                      <option value="name">Name</option>
-                      <option value="sector">Sector</option>
-                      <option value="region">Region</option>
-                    </select>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setSortOrder((o) => (o === 'asc' ? 'desc' : 'asc'))}
-                    aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
-                    title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
-                    className="flex min-h-[44px] min-w-[44px] items-center justify-center border border-neutral-300 text-neutral-800 hover:border-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                  >
-                    {sortOrder === 'asc' ? <ArrowUpIcon className="h-4 w-4" aria-hidden="true" /> : <ArrowDownIcon className="h-4 w-4" aria-hidden="true" />}
-                  </button>
-                  {!showFilters && (
-                    <button
-                      type="button"
-                      onClick={() => setShowFilters(true)}
-                      className="inline-flex min-h-[44px] items-center gap-2 border border-neutral-300 px-3 text-sm font-semibold text-neutral-800 hover:border-black"
-                    >
-                      <FunnelIcon className="h-4 w-4" aria-hidden="true" />
-                      Show filters
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const headers = ['Project Name', 'Company', 'Sector', 'Region', 'District', 'Investment Value (USD)', 'Employment', 'Status', 'Industrial Park'];
-                      const rows = sortedProjects.map((p) => [
-                        `"${p.name.replace(/"/g, '""')}"`,
-                        `"${p.company.replace(/"/g, '""')}"`,
-                        p.sector,
-                        p.region,
-                        p.district,
-                        p.investmentValue,
-                        p.plannedEmployment,
-                        p.status.replace('_', ' '),
-                        p.industrialPark || '',
-                      ]);
-                      const csv = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-                      const blob = new Blob([csv], { type: 'text/csv' });
-                      const url = URL.createObjectURL(blob);
-                      const link = document.createElement('a');
-                      link.href = url;
-                      link.download = `projects-export-${new Date().toISOString().split('T')[0]}.csv`;
-                      link.click();
-                      URL.revokeObjectURL(url);
-                    }}
-                    className="inline-flex min-h-[44px] items-center gap-2 bg-black px-4 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-                  >
-                    <DocumentArrowDownIcon className="h-4 w-4" aria-hidden="true" />
-                    Export CSV
-                  </button>
-                </div>
-              </div>
-
-              <div className="relative max-w-md">
-                <label htmlFor="quick-search" className="sr-only">Search projects</label>
-                <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
-                <input
-                  id="quick-search"
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by name, company or district"
-                  className={`${inputClass} pl-9`}
-                />
-              </div>
-
-              {/* Active filters: each chip removes just that one filter */}
-              {hasFilters && (
+          <section className="min-w-0 flex-1" aria-label="Projects">
+            <div className="border-y border-stone-300 py-4">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+                <div><h2 className="font-display text-xl font-semibold uppercase">Explore Projects</h2><p className="mt-0.5 text-sm text-stone-500">{loading ? 'Loading directory…' : `${filtered.length} ${filtered.length === 1 ? 'project' : 'projects'} found`}</p></div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-600">Filtered by</span>
-                  {searchQuery && (
-                    <FilterChip label={`“${searchQuery}”`} onRemove={() => setSearchQuery('')} />
-                  )}
-                  {selectedSectors.map((s) => (
-                    <FilterChip key={`s-${s}`} label={s} onRemove={() => toggleSector(s)} />
-                  ))}
-                  {selectedRegions.map((r) => (
-                    <FilterChip key={`r-${r}`} label={r} onRemove={() => toggleRegion(r)} />
-                  ))}
-                  {selectedInvestmentRange && (
-                    <FilterChip label={selectedInvestmentRange} onRemove={() => setSelectedInvestmentRange('')} />
-                  )}
-                  {selectedStatuses.map((st) => (
-                    <FilterChip key={`st-${st}`} label={getStatusBadge(st).label} onRemove={() => toggleStatus(st)} />
-                  ))}
-                  <button type="button" onClick={clearFilters} className={`${linkClass} ml-1 text-xs`}>
-                    Clear all
-                  </button>
+                  <button type="button" onClick={() => setFiltersOpen((open) => !open)} className="inline-flex h-10 items-center gap-2 rounded-xl border border-stone-200 px-3 text-sm font-medium text-stone-700 hover:bg-stone-50 lg:hidden"><FunnelIcon className="h-4 w-4" />Filters</button>
+                <div role="group" aria-label="Display mode" className="flex border-b border-stone-200">{([{ mode: 'cards', label: 'List', Icon: Squares2X2Icon }, { mode: 'map', label: 'Map', Icon: MapIcon }, { mode: 'table', label: 'Table', Icon: TableCellsIcon }] as const).map(({ mode, label, Icon }) => <button key={mode} type="button" onClick={() => setView(mode)} aria-pressed={view === mode} className={`inline-flex h-10 items-center gap-1.5 border-b-2 px-2.5 text-xs font-semibold sm:px-3 ${view === mode ? 'border-emerald-800 text-emerald-900' : 'border-transparent text-stone-500 hover:text-stone-800'}`}><Icon className="h-4 w-4" /><span className="hidden sm:inline">{label}</span></button>)}</div>
+                  <label className="sr-only" htmlFor="sort-projects">Sort projects</label><select id="sort-projects" value={sortField} onChange={(e) => { setSortField(e.target.value as SortField); setDescending(e.target.value === 'investmentValue' || e.target.value === 'plannedEmployment'); }} className="h-10 rounded-xl border border-stone-200 bg-white px-3 text-sm text-stone-700 outline-none focus:border-emerald-700"><option value="investmentValue">Investment</option><option value="plannedEmployment">Employment</option><option value="name">Name</option><option value="sector">Sector</option><option value="region">Region</option></select>
+                  <button type="button" onClick={() => setDescending((value) => !value)} aria-label={descending ? 'Sort ascending' : 'Sort descending'} className="flex h-10 w-10 items-center justify-center rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50">{descending ? <ArrowDownIcon className="h-4 w-4" /> : <ArrowUpIcon className="h-4 w-4" />}</button>
+                  <button type="button" onClick={exportCsv} className="h-10 rounded-xl bg-[#12382d] px-4 text-sm font-semibold text-white hover:bg-emerald-900">Export CSV</button>
                 </div>
-              )}
+              </div>
+              {hasFilters && <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-stone-100 pt-3"><span className="mr-1 text-xs font-medium text-stone-400">Active filters</span>{search && <button onClick={() => setSearch('')} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700">{search} <XMarkIcon className="ml-1 inline h-3 w-3" /></button>}{sectors.map((v) => <button key={v} onClick={() => toggle(sectors, v, setSectors)} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700">{v} <XMarkIcon className="ml-1 inline h-3 w-3" /></button>)}{regions.map((v) => <button key={v} onClick={() => toggle(regions, v, setRegions)} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700">{v} <XMarkIcon className="ml-1 inline h-3 w-3" /></button>)}{investmentRange && <button onClick={() => setInvestmentRange('')} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700">{investmentRange} <XMarkIcon className="ml-1 inline h-3 w-3" /></button>}{statusFilters.map((v) => <button key={v} onClick={() => toggle(statusFilters, v, setStatusFilters)} className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-700">{statusLabels[v]} <XMarkIcon className="ml-1 inline h-3 w-3" /></button>)}<button onClick={clearFilters} className="px-2 text-xs font-semibold text-emerald-800">Clear all</button></div>}
             </div>
 
-            {sortedProjects.length === 0 ? (
-              <div className="border-l-4 border-red-600 bg-neutral-50 p-6 mt-8">
-                <h3 className="text-lg font-bold text-black">No projects match these filters</h3>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-700">
-                  {projects.length === 0
-                    ? 'The licensed projects database is not available right now. Please try again shortly.'
-                    : `None of the ${projects.length} licensed projects match your current selection. Try removing a filter or broadening the investment range.`}
-                </p>
-                {hasFilters && (
-                  <button type="button" onClick={clearFilters} className={`${linkClass} mt-4 inline-block text-sm`}>
-                    Clear all filters
-                  </button>
-                )}
-              </div>
-            ) : viewMode === 'cards' ? (
-              /* Cards view: detail list */
-              <div className="mt-10 grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
-                {sortedProjects.map((project) => (
-                  <ProjectDetail key={project.id} project={project} onOpen={() => openProject(project.id)} />
-                ))}
-              </div>
-            ) : viewMode === 'map' ? (
-              <div ref={mapRef} className="relative mt-8">
-                <DynamicLeafletMap
-                  projects={sortedProjects}
-                  selectedProject={selectedProject}
-                  onSelectProject={setSelectedProject}
-                  getSectorColor={getSectorColor}
-                  formatCurrency={formatCurrency}
-                />
-
-                {/* Selected project summary (mobile) */}
-                {selectedDetail && (
-                  <div className="absolute inset-x-0 bottom-0 z-[1000] border-t-4 border-yellow-400 bg-white p-4 shadow-lg sm:hidden">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-sm font-bold leading-tight text-black">{selectedDetail.name}</h3>
-                        {selectedDetail.company !== selectedDetail.name && (
-                          <p className="text-xs text-neutral-700">{selectedDetail.company}</p>
-                        )}
-                      </div>
-                      <button type="button" onClick={() => setSelectedProject(null)} aria-label="Close project summary" className="p-1 text-neutral-700 hover:text-red-600">
-                        <XMarkIcon className="h-5 w-5" aria-hidden="true" />
-                      </button>
-                    </div>
-                    <ProjectMeta project={selectedDetail} />
-                    <dl className="mt-3 flex items-center gap-6 text-sm">
-                      <div>
-                        <dt className="text-xs text-neutral-600">Investment</dt>
-                        <dd className="font-bold text-black">{formatCurrency(selectedDetail.investmentValue)}</dd>
-                      </div>
-                      <div>
-                        <dt className="text-xs text-neutral-600">Employment</dt>
-                        <dd className="font-bold text-black">{selectedDetail.plannedEmployment.toLocaleString()}</dd>
-                      </div>
-                    </dl>
-                  </div>
-                )}
-
-                {/* Mobile: horizontal scrollable project chips */}
-                <div className="mt-4 overflow-x-auto border-t border-neutral-200 pt-4 sm:hidden">
-                  <div className="flex gap-2 pb-1" style={{ minWidth: 'max-content' }}>
-                    {sortedProjects.map((project) => (
-                      <button
-                        key={project.id}
-                        type="button"
-                        onClick={() => openProject(project.id, true)}
-                        aria-pressed={selectedProject === project.id}
-                        className={`flex-shrink-0 border px-3 py-2 text-left transition-colors ${selectedProject === project.id ? 'border-black bg-yellow-100' : 'border-neutral-300 bg-white hover:border-black'}`}
-                      >
-                        <p className="max-w-[160px] truncate text-xs font-semibold text-black">{project.name}</p>
-                        <p className="text-xs font-bold text-black">{formatCurrency(project.investmentValue)}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Desktop: project list below the map */}
-                <section className="mt-10 hidden sm:block" aria-labelledby="all-projects-heading">
-                  <h3 id="all-projects-heading" className="mb-6 border-b border-neutral-200 pb-3 text-lg font-bold text-black">
-                    All projects ({sortedProjects.length})
-                  </h3>
-                  <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
-                    {sortedProjects.map((project) => (
-                      <ProjectDetail key={project.id} project={project} onOpen={() => openProject(project.id, true)} />
-                    ))}
-                  </div>
-                </section>
-              </div>
-            ) : (
-              <>
-                {/* Mobile: detail list */}
-                <div className="mt-8 md:hidden">
-                  <div className="divide-y divide-neutral-200">
-                    {sortedProjects.map((project) => {
-                      const badge = getStatusBadge(project.status);
-                      return (
-                        <article key={project.id} className="py-5">
-                          <div className="flex items-start justify-between gap-3">
-                            <h3 className="text-sm font-bold leading-tight text-black">{project.name}</h3>
-                            <span className={`shrink-0 border px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${badge.className}`}>{badge.label}</span>
-                          </div>
-                          {project.company !== project.name && (
-                            <p className="mt-1 text-xs text-neutral-700">{project.company}</p>
-                          )}
-                          <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-700">
-                            <span className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: getSectorColor(project.sector) }} aria-hidden="true" />
-                            {project.sector} · {project.region} · {project.district}
-                          </p>
-                          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                              <dt className="text-xs text-neutral-600">Investment</dt>
-                              <dd className="font-bold text-black">{formatCurrency(project.investmentValue)}</dd>
-                            </div>
-                            <div>
-                              <dt className="text-xs text-neutral-600">Employment</dt>
-                              <dd className="font-bold text-black">{project.plannedEmployment.toLocaleString()}</dd>
-                            </div>
-                          </dl>
-                        </article>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Desktop: table */}
-                <div className="mt-8 hidden overflow-x-auto md:block">
-                  <table className="w-full border-collapse text-left">
-                    <thead className="border-b-2 border-black">
-                      <tr>
-                        <SortHeader field="name" label="Project name" />
-                        <th scope="col" className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-black">Company</th>
-                        <SortHeader field="sector" label="Sector" />
-                        <SortHeader field="region" label="Region" />
-                        <SortHeader field="investmentValue" label="Investment" align="right" />
-                        <th scope="col" className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-black">Status</th>
-                        <SortHeader field="plannedEmployment" label="Employment" align="right" />
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-neutral-200">
-                      {sortedProjects.map((project) => {
-                        const badge = getStatusBadge(project.status);
-                        return (
-                          <tr key={project.id} className="transition-colors hover:bg-neutral-50">
-                            <td className="whitespace-nowrap px-4 py-4">
-                              <div className="text-sm font-semibold text-black">{project.name}</div>
-                              <div className="text-sm text-neutral-600">{project.district}</div>
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-4 text-sm text-neutral-800">{project.company}</td>
-                            <td className="whitespace-nowrap px-4 py-4">
-                              <span className="inline-flex items-center gap-1.5 text-sm text-neutral-800">
-                                <span className="h-2.5 w-2.5 shrink-0" style={{ backgroundColor: getSectorColor(project.sector) }} aria-hidden="true" />
-                                {project.sector}
-                              </span>
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-4 text-sm text-neutral-800">{project.region}</td>
-                            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-bold text-black">{formatCurrency(project.investmentValue)}</td>
-                            <td className="whitespace-nowrap px-4 py-4 text-center">
-                              <span className={`inline-flex border px-2 py-0.5 text-xs font-semibold ${badge.className}`}>{badge.label}</span>
-                            </td>
-                            <td className="whitespace-nowrap px-4 py-4 text-right text-sm font-semibold text-black">{project.plannedEmployment.toLocaleString()}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-          </main>
+            {error && <div role="status" className="mt-5 border-l-2 border-amber-600 bg-amber-50 p-4 text-sm text-amber-900">Project Data Could Not Be Loaded. Please try again shortly.</div>}
+            {loading ? <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, i) => <div key={i} className="h-64 animate-pulse rounded-2xl bg-stone-200/70" />)}</div>
+              : sorted.length === 0 ? <div className="mt-6 border-y border-stone-300 px-6 py-16 text-center"><BuildingOffice2Icon className="mx-auto h-10 w-10 text-stone-300" /><h2 className="mt-4 font-display text-xl font-semibold">{projects.length ? 'No Projects Match These Filters' : 'No Project Records Available'}</h2><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-stone-500">{projects.length ? 'Try changing your search or removing a filter.' : 'Project listings will appear here when data is available.'}</p>{hasFilters && <button onClick={clearFilters} className="mt-4 text-sm font-semibold text-emerald-800 hover:underline">Clear Filters</button>}</div>
+              : view === 'cards' ? <div className="mt-5 grid gap-x-8 sm:grid-cols-2 xl:grid-cols-3">{sorted.map((project) => <ProjectCard key={project.id} project={project} />)}</div>
+              : view === 'map' ? <div ref={mapRef} className="mt-5 border-y border-stone-300 py-2"><DynamicLeafletMap projects={sorted} selectedProject={selectedProject} onSelectProject={setSelectedProject} getSectorColor={sectorColor} formatCurrency={currency} /><div className="mt-3 divide-y divide-stone-200 border-t border-stone-200 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:divide-y-0">{sorted.slice(0, 6).map((p) => <button key={p.id} onClick={() => setSelectedProject(p.id)} className={`flex justify-between gap-4 py-3 text-left ${selectedProject === p.id ? 'text-emerald-900' : 'text-stone-700'}`}><span className="truncate text-sm font-semibold">{p.name}</span><span className="shrink-0 text-xs text-stone-500">{p.region} · {currency(p.investmentValue)}</span></button>)}</div></div>
+              : <div className="mt-5 overflow-x-auto border-y border-stone-300"><table className="w-full min-w-[760px] text-left"><thead className="border-b border-stone-300 text-xs uppercase tracking-wide text-stone-500"><tr>{([['name', 'Project'], ['sector', 'Sector'], ['region', 'Region'], ['investmentValue', 'Investment'], ['plannedEmployment', 'Employment']] as [SortField, string][]).map(([field, label]) => <th key={field} className="px-5 py-4 font-semibold"><button onClick={() => setSort(field)} className="inline-flex items-center gap-1.5 hover:text-emerald-800">{label}{sortField === field && (descending ? <ArrowDownIcon className="h-3.5 w-3.5" /> : <ArrowUpIcon className="h-3.5 w-3.5" />)}</button></th>)}<th className="px-5 py-4 font-semibold">Status</th></tr></thead><tbody className="divide-y divide-stone-200">{sorted.map((p) => <tr key={p.id} className="hover:bg-stone-100/60"><td className="px-5 py-4"><p className="font-semibold text-stone-900">{p.name}</p><p className="mt-0.5 text-xs text-stone-500">{p.company} · {p.district}</p></td><td className="px-5 py-4 text-sm">{p.sector}</td><td className="px-5 py-4 text-sm">{p.region}</td><td className="px-5 py-4 text-sm font-semibold">{currency(p.investmentValue)}</td><td className="px-5 py-4 text-sm">{p.plannedEmployment.toLocaleString()}</td><td className="px-5 py-4"><StatusPill status={p.status} /></td></tr>)}</tbody></table></div>}
+            <p className="mt-5 text-xs leading-5 text-stone-400">Directory figures are provided for initial exploration. Confirm project status, investment terms and other details with the relevant agency or project promoter.</p>
+          </section>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
