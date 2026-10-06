@@ -37,7 +37,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
 
   return (
     <>
-      <article className={`flex h-full flex-col border-t-2 border-black pt-5 ${className}`}>
+      <article className={`flex h-full flex-col border-t border-neutral-200 pt-5 ${className}`}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             {agency.logo && (

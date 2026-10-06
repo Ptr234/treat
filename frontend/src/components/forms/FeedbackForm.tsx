@@ -360,7 +360,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <div className="border-t-2 border-black pt-5">
+      <div className="border-t border-neutral-200 pt-5">
         <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between">
             <div>

@@ -98,7 +98,7 @@ export default function AppointmentsPage() {
         ) : (
           <div className="space-y-3">
             {appointments.map((apt) => (
-              <div key={apt.id} className="p-5 border-t-2 border-black pt-5">
+              <div key={apt.id} className="p-5 border-t border-neutral-200 pt-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">

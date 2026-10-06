@@ -9,7 +9,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import InvestmentDetailClient from './InvestmentDetailClient';
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const sectionClass = 'border-t border-neutral-200 pt-6';
 const sectionHeadingClass = 'text-lg font-bold text-black sm:text-xl';
@@ -98,7 +98,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
         </header>
 
         {/* Key metrics row */}
-        <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 border-l-4 border-yellow-400 bg-neutral-50 py-5 pl-5 pr-4 md:grid-cols-4">
+        <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 bg-neutral-50 py-5 pl-5 pr-4 md:grid-cols-4">
           <div>
             <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Investment range</dt>
             <dd className="font-data mt-1 text-sm font-bold text-black">{opportunity.investmentRange}</dd>

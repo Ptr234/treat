@@ -134,7 +134,7 @@ export default function UserManagementPage() {
 
         {/* Create Form */}
         {showCreate && (
-          <div className="p-6 mb-8 border-t-2 border-black pt-5">
+          <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-lg font-semibold mb-4">Create New User</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>

@@ -17,7 +17,7 @@ export async function generateStaticParams() {
 }
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const SECTION_LINKS = [
   { href: '#services', label: 'Services' },
@@ -115,15 +115,15 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
       {/* Quick facts */}
       <section aria-label="Quick facts" className="mx-auto mt-12 max-w-6xl px-4 sm:px-6 lg:px-8">
         <dl className="grid grid-cols-2 gap-6 border-y border-neutral-200 py-6 md:grid-cols-4">
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Services</dt>
             <dd className="mt-1 text-2xl font-bold">{agency.services.length}</dd>
           </div>
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Operating hours</dt>
             <dd className="mt-1 text-sm font-bold leading-6">{agency.operatingHours}</dd>
           </div>
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Appointments</dt>
             <dd className="mt-1 text-sm font-bold leading-6">{agency.hasAppointmentBooking ? 'Bookable online' : 'Contact to arrange'}</dd>
           </div>
@@ -148,14 +148,13 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
         {/* Services */}
         <section id="services" aria-labelledby="services-heading" className="scroll-mt-24">
-          <h2 id="services-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Services offered</h2>
+          <h2 id="services-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Services offered</h2>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-700">
             Requirements, fees and processing times depend on the service. Contact the agency to confirm the current details before applying.
           </p>
           <ol className="mt-4 divide-y divide-neutral-200">
             {agency.services.map((service, index) => (
-              <li key={index} className="grid gap-2 py-5 sm:grid-cols-[3rem_1fr_auto] sm:items-baseline sm:gap-6">
-                <span className="text-sm font-bold text-red-600">{String(index + 1).padStart(2, '0')}</span>
+              <li key={index} className="grid gap-2 py-5 sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-6">
                 <p className="font-bold leading-snug">{service}</p>
                 <p className="text-sm text-neutral-700 sm:text-right">
                   <span className="font-semibold text-black">Current details:</span> Confirm with agency
@@ -167,19 +166,19 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
 
         {/* Contact */}
         <section id="contact" aria-labelledby="contact-heading" className="mt-16 scroll-mt-24">
-          <h2 id="contact-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Contact information</h2>
+          <h2 id="contact-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Contact information</h2>
           <p className="mt-4 text-sm text-neutral-600">Contact information is listed for convenience. Confirm details on the agency&apos;s website before visiting.</p>
           <dl className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-2">
-            <div className="border-l-4 border-yellow-400 pl-4">
+            <div className=" pl-4">
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Email</dt>
               <dd className="mt-1"><a href={`mailto:${agency.contact.email}`} className={linkClass}>{agency.contact.email}</a></dd>
             </div>
-            <div className="border-l-4 border-yellow-400 pl-4">
+            <div className=" pl-4">
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Phone</dt>
               <dd className="mt-1"><a href={`tel:${agency.contact.phone}`} className={linkClass}>{agency.contact.phone}</a></dd>
             </div>
             {agency.contact.website && (
-              <div className="border-l-4 border-yellow-400 pl-4">
+              <div className=" pl-4">
                 <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Website</dt>
                 <dd className="mt-1">
                   <a href={agency.contact.website} target="_blank" rel="noopener noreferrer" className={`${linkClass} break-all`}>{agency.contact.website}</a>
@@ -200,10 +199,10 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
         {/* Related agencies */}
         {relatedAgencies.length > 0 && (
           <section aria-labelledby="related-heading" className="mt-16">
-            <h2 id="related-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Related agencies</h2>
+            <h2 id="related-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Related agencies</h2>
             <ul className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-3">
               {relatedAgencies.map((related) => (
-                <li key={related.id} className="border-t-2 border-yellow-400 pt-4">
+                <li key={related.id} className=" pt-4">
                   <p className="text-xs font-bold uppercase tracking-wider text-red-600">{related.acronym}</p>
                   <h3 className="mt-1 font-bold leading-snug">
                     <Link href={`/agencies/${related.id}/`} className={linkClass}>{related.name}</Link>
@@ -216,7 +215,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
         )}
 
         {/* Request a service */}
-        <section id="request" aria-labelledby="request-heading" className="mt-16 scroll-mt-24 border-t-4 border-yellow-400 pt-10">
+        <section id="request" aria-labelledby="request-heading" className="mt-16 scroll-mt-24 pt-10">
           <h2 id="request-heading" className="text-xl font-bold sm:text-2xl">Request a service</h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-700">
             Send a request to {agency.name}. Keep the reference number provided for follow-up; the agency will confirm the next steps and processing time.

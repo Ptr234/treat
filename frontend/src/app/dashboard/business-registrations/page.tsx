@@ -211,7 +211,7 @@ export default function BusinessRegistrationsPage() {
                           value={rejectReasonDraft}
                           onChange={(e) => setRejectReasonDraft(e.target.value)}
                           placeholder="Reason for rejection (required)"
-                          className="flex-1 text-sm text-black px-3 py-1.5 border-t-2 border-black pt-5"
+                          className="flex-1 text-sm text-black px-3 py-1.5 border-t border-neutral-200 pt-5"
                         />
                         <button
                           disabled={busy || !rejectReasonDraft.trim()}
@@ -229,7 +229,7 @@ export default function BusinessRegistrationsPage() {
           </div>
 
           {selected && (
-            <div className="p-6 h-fit sticky top-8 border-t-2 border-black pt-5">
+            <div className="p-6 h-fit sticky top-8 border-t border-neutral-200 pt-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Registration Details</h2>
                 <button onClick={() => { setSelected(null); setSelectedPayment(null); }} className="text-neutral-600 hover:text-red-600 text-sm">Close</button>

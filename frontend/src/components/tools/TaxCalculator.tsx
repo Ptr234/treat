@@ -308,7 +308,7 @@ export default function TaxCalculator() {
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="border-t-4 border-black pt-6"
+            className="border-t border-neutral-200 pt-6"
           >
             <h3 className="text-xl sm:text-2xl font-semibold text-red-700 mb-6">
               Tax Calculation
@@ -474,7 +474,7 @@ export default function TaxCalculator() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="border-t-4 border-black pt-6"
+            className="border-t border-neutral-200 pt-6"
           >
             <h3 className="text-xl sm:text-2xl font-semibold text-red-700 mb-6">
               Tax Breakdown

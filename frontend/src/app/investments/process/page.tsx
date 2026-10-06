@@ -1,11 +1,10 @@
 import Link from 'next/link';
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const STEPS = [
   {
-    number: '01',
     title: 'Register your company with URSB',
     agency: 'Uganda Registration Services Bureau (URSB)',
     summary:
@@ -18,7 +17,6 @@ const STEPS = [
     source: { label: 'URSB, business, company and document registration fees', href: 'https://ursb.go.ug/business-company-and-document-registration-fees/' },
   },
   {
-    number: '02',
     title: 'Register for tax with URA',
     agency: 'Uganda Revenue Authority (URA)',
     summary: 'After incorporation, the company obtains a Tax Identification Number (TIN) from URA before it starts operating.',
@@ -26,7 +24,6 @@ const STEPS = [
     source: { label: 'UIA, Getting Started (Investment Process)', href: 'https://ugandainvest.go.ug/getting-started/' },
   },
   {
-    number: '03',
     title: 'Apply for the investment licence',
     agency: 'Uganda Investment Authority (UIA)',
     summary:
@@ -38,7 +35,6 @@ const STEPS = [
     source: { label: 'UIA, how to apply for an investment licence', href: 'https://ugandainvest.go.ug/investing-in-uganda-how-to-apply-for-an-investment-license-certificate/' },
   },
   {
-    number: '04',
     title: 'Obtain secondary licences for your sector',
     agency: 'Relevant sector regulators',
     summary:
@@ -47,7 +43,6 @@ const STEPS = [
     source: { label: 'UIA, Getting Started (Investment Process)', href: 'https://ugandainvest.go.ug/getting-started/' },
   },
   {
-    number: '05',
     title: 'Secure work permits for foreign staff',
     agency: 'Directorate of Citizenship and Immigration Control',
     summary:
@@ -90,11 +85,11 @@ export default function InvestmentProcessPage() {
           Each step is handled by a different agency, so this page shows who to contact and what to prepare.
         </p>
         <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Steps</dt>
             <dd className="mt-1 text-2xl font-bold">5</dd>
           </div>
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Investment licence fee</dt>
             <dd className="mt-1 text-2xl font-bold">Free of charge</dd>
           </div>
@@ -107,11 +102,10 @@ export default function InvestmentProcessPage() {
 
       {/* Steps */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-labelledby="steps-heading">
-        <h2 id="steps-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">The steps</h2>
+        <h2 id="steps-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">The steps</h2>
         <ol className="mt-2 divide-y divide-neutral-200">
           {STEPS.map((step) => (
-            <li key={step.number} className="grid gap-6 py-8 lg:grid-cols-[5rem_1fr_1.2fr]">
-              <p className="text-3xl font-bold leading-none text-yellow-500" aria-hidden="true">{step.number}</p>
+            <li key={step.title} className="grid gap-6 py-8 lg:grid-cols-[1fr_1.2fr]">
               <div>
                 <h3 className="text-lg font-bold leading-snug">{step.title}</h3>
                 <p className="mt-2 text-xs font-bold uppercase tracking-wider text-red-600">{step.agency}</p>
@@ -135,7 +129,7 @@ export default function InvestmentProcessPage() {
 
       {/* Next steps */}
       <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8" aria-labelledby="process-next-heading">
-        <div className="grid gap-10 border-t-4 border-yellow-400 pt-10 lg:grid-cols-2">
+        <div className="grid gap-10 pt-10 lg:grid-cols-2">
           <div>
             <h2 id="process-next-heading" className="text-xl font-bold sm:text-2xl">Prepare before you start</h2>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-neutral-700">

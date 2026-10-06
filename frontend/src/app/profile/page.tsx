@@ -166,7 +166,7 @@ export default function ProfilePage() {
   if (!isAuthenticated) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="max-w-md w-full text-center border-t-4 border-yellow-400 pt-8">
+        <div className="max-w-md w-full text-center pt-8">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
             <LockClosedIcon className="w-8 h-8 text-red-600" />
           </div>
@@ -276,7 +276,7 @@ export default function ProfilePage() {
  <div className="min-h-screen bg-white py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         {mfaSetupRequired && (
-          <div className="mb-6 border-l-4 border-yellow-400 pl-4 py-2 flex items-start gap-3">
+          <div className="mb-6 pl-4 py-2 flex items-start gap-3">
             <DevicePhoneMobileIcon className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-yellow-900">Set up two-factor authentication to continue</p>
@@ -289,7 +289,7 @@ export default function ProfilePage() {
         )}
 
         {/* Header */}
-        <div className="border-t-2 border-black pt-6 mb-6">
+        <div className="border-t border-neutral-200 pt-6 mb-6">
           <div className="flex items-center gap-5">
             <div className="flex h-16 w-16 items-center justify-center flex-shrink-0">
               <span className="text-2xl font-bold text-red-600">{initials}</span>
@@ -308,7 +308,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Personal Information */}
-        <div className="border-t-2 border-black pt-6 mb-6">
+        <div className="border-t border-neutral-200 pt-6 mb-6">
           <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
             <h2 className="text-lg font-bold text-black flex items-center gap-2">
               <UserCircleIcon className="w-5 h-5 text-neutral-600" />
@@ -325,7 +325,7 @@ export default function ProfilePage() {
           </div>
           <div className="p-6 space-y-4">
             {profileSuccess && (
-              <div className="flex items-center gap-2 py-2 border-l-4 border-black pl-4 text-sm">
+              <div className="flex items-center gap-2 py-2 border-l border-neutral-200 pl-4 text-sm">
                 <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {profileSuccess}
               </div>
@@ -385,7 +385,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Security */}
-        <div className="border-t-2 border-black pt-6 mb-6">
+        <div className="border-t border-neutral-200 pt-6 mb-6">
           <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
             <h2 className="text-lg font-bold text-black flex items-center gap-2">
               <LockClosedIcon className="w-5 h-5 text-neutral-600" />
@@ -406,7 +406,7 @@ export default function ProfilePage() {
           </div>
           <div className="p-6">
             {passwordSuccess && (
-              <div className="flex items-center gap-2 py-2 mb-4 border-l-4 border-black pl-4 text-sm">
+              <div className="flex items-center gap-2 py-2 mb-4 border-l border-neutral-200 pl-4 text-sm">
                 <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {passwordSuccess}
               </div>
@@ -500,7 +500,7 @@ export default function ProfilePage() {
 
         {/* Two-factor authentication (back-office roles only) */}
         {canUseMfa && (
-          <div className="border-t-2 border-black pt-6 mb-6">
+          <div className="border-t border-neutral-200 pt-6 mb-6">
             <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
               <h2 className="text-lg font-bold text-black flex items-center gap-2">
                 <DevicePhoneMobileIcon className="w-5 h-5 text-neutral-600" />
@@ -518,7 +518,7 @@ export default function ProfilePage() {
             </div>
             <div className="p-6">
               {mfaSuccess && (
-                <div className="flex items-center gap-2 py-2 mb-4 border-l-4 border-black pl-4 text-sm">
+                <div className="flex items-center gap-2 py-2 mb-4 border-l border-neutral-200 pl-4 text-sm">
                   <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                   {mfaSuccess}
                 </div>
@@ -662,7 +662,7 @@ export default function ProfilePage() {
         )}
 
         {/* Quick links */}
-        <div className="border-t-2 border-black pt-6">
+        <div className="border-t border-neutral-200 pt-6">
           <h2 className="text-lg font-bold text-black mb-4">Quick Links</h2>
           <div className="grid grid-cols-2 gap-3">
             <Link

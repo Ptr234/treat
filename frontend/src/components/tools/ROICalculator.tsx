@@ -221,7 +221,7 @@ export default function ROICalculator() {
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
         {/* Input form */}
         <section aria-labelledby="roi-inputs-heading">
-          <h2 id="roi-inputs-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">
+          <h2 id="roi-inputs-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">
             Investment details
           </h2>
 
@@ -391,7 +391,7 @@ export default function ROICalculator() {
 
         {/* Results */}
         <section aria-labelledby="roi-results-heading">
-          <h2 id="roi-results-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">
+          <h2 id="roi-results-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">
             Investment analysis
           </h2>
 
@@ -399,7 +399,7 @@ export default function ROICalculator() {
             <div className="mt-6 space-y-8">
               {/* Key metrics */}
               <dl className="grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-2">
-                <div className="border-l-4 border-yellow-400 pl-4">
+                <div className=" pl-4">
                   <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Total ROI</dt>
                   <dd className="mt-1 text-3xl font-bold text-black">{results.roi.toFixed(1)}%</dd>
                 </div>
@@ -427,7 +427,7 @@ export default function ROICalculator() {
                   <dt className="text-neutral-700">Net annual cash flow</dt>
                   <dd className="font-semibold text-black">UGX {results.netAnnualCashFlow.toLocaleString()}</dd>
                 </div>
-                <div className="flex justify-between gap-4 border-t-2 border-black py-4">
+                <div className="flex justify-between gap-4 border-t border-neutral-200 py-4">
                   <dt className="font-bold text-black">Total profit ({results.duration} years)</dt>
                   <dd className="font-bold text-black">UGX {results.totalProfit.toLocaleString()}</dd>
                 </div>
@@ -482,7 +482,7 @@ export default function ROICalculator() {
           ) : (
             <div className="mt-6">
               <p className="text-base text-neutral-700">Enter your investment details to see a comprehensive ROI analysis.</p>
-              <div className="mt-6 border-l-4 border-yellow-400 pl-4">
+              <div className="mt-6 pl-4">
                 <h3 className="font-bold text-black">Pro tips</h3>
                 <ul className="mt-2 space-y-1.5 text-sm text-neutral-700">
                   <li>Use realistic revenue and cost projections.</li>
@@ -501,7 +501,7 @@ export default function ROICalculator() {
         <h2 id="roi-sectors-heading" className="text-xl font-bold sm:text-2xl">Uganda investment sectors</h2>
         <ul className="mt-8 grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
           {SECTORS.map((sector) => (
-            <li key={sector.name} className="border-t-2 border-yellow-400 pt-4">
+            <li key={sector.name} className=" pt-4">
               <h3 className="font-bold">{sector.name}</h3>
               <p className="mt-2 text-sm leading-6 text-neutral-700">{sector.detail}</p>
             </li>

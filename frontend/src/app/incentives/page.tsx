@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 interface Incentive {
   title: string;
@@ -132,19 +132,19 @@ export default function IncentivesPage() {
 
       {/* Eligibility */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-labelledby="eligibility-heading">
-        <h2 id="eligibility-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Who qualifies</h2>
+        <h2 id="eligibility-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Who qualifies</h2>
         <ol className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-3">
-          <li className="border-t-2 border-yellow-400 pt-4">
+          <li className=" pt-4">
             <p className="text-xs font-bold uppercase tracking-wider text-red-600">01</p>
             <h3 className="mt-2 font-bold">Started after the Act took effect</h3>
             <p className="mt-2 text-sm leading-6 text-neutral-700">The investment must commence after the Investment Code Act 2019 came into force on 29 March 2019.</p>
           </li>
-          <li className="border-t-2 border-yellow-400 pt-4">
+          <li className=" pt-4">
             <p className="text-xs font-bold uppercase tracking-wider text-red-600">02</p>
             <h3 className="mt-2 font-bold">Meets the minimum capital</h3>
             <p className="mt-2 text-sm leading-6 text-neutral-700">The minimum investment capital is set by the Minister through statutory instrument, separately for domestic and foreign investors. Confirm the current amount with UIA.</p>
           </li>
-          <li className="border-t-2 border-yellow-400 pt-4">
+          <li className=" pt-4">
             <p className="text-xs font-bold uppercase tracking-wider text-red-600">03</p>
             <h3 className="mt-2 font-bold">Works in a priority area</h3>
             <p className="mt-2 text-sm leading-6 text-neutral-700">The activity must fall within the priority areas listed in Schedule 2 of the Investment Code Act 2019.</p>
@@ -154,7 +154,7 @@ export default function IncentivesPage() {
 
       {/* Incentive list */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-labelledby="list-heading">
-        <h2 id="list-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Incentives</h2>
+        <h2 id="list-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Incentives</h2>
         <ul className="mt-2 divide-y divide-neutral-200">
           {INCENTIVES.map((item) => (
             <li key={item.title} className="grid gap-6 py-8 lg:grid-cols-[1fr_1.4fr]">
@@ -162,7 +162,7 @@ export default function IncentivesPage() {
                 <h3 className="text-lg font-bold leading-snug">{item.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-neutral-700">{item.who}</p>
               </div>
-              <dl className="space-y-3 border-l-4 border-yellow-400 bg-neutral-50 py-4 pl-5 pr-4 text-sm">
+              <dl className="space-y-3 bg-neutral-50 py-4 pl-5 pr-4 text-sm">
                 <div>
                   <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Benefit</dt>
                   <dd className="mt-1 font-semibold text-black">{item.benefit}</dd>
@@ -201,7 +201,7 @@ export default function IncentivesPage() {
 
       {/* Next steps and disclaimer */}
       <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8" aria-labelledby="next-heading">
-        <div className="grid gap-10 border-t-4 border-yellow-400 pt-10 lg:grid-cols-2">
+        <div className="grid gap-10 pt-10 lg:grid-cols-2">
           <div>
             <h2 id="next-heading" className="text-xl font-bold sm:text-2xl">How to apply</h2>
             <p className="mt-3 text-sm leading-6 text-neutral-700">

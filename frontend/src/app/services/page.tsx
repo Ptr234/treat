@@ -10,7 +10,7 @@ const serviceCategories = [
         id: 'business-registration',
         title: 'Business Registration & Company Formation',
         audience: 'Founders forming a company or registering a business entity.',
-        description: 'Complete the URSB company formation process and confirm requirements for your business type.',
+        description: 'Company formation is the first legal step for most businesses in Uganda. The process covers name reservation, registration of the company and the filing of the required forms. Confirm the requirements for your business type before you apply, as they differ between companies, partnerships and sole proprietors. Once registered, the business can open accounts and apply for tax numbers and licences.',
         agency: 'URSB',
         timeline: 'Confirm with URSB',
         cost: 'UGX 105,000 registration fee (nominal capital up to UGX 5M)',
@@ -20,7 +20,7 @@ const serviceCategories = [
         id: 'tax-services',
         title: 'Tax Registration & Compliance',
         audience: 'Businesses and taxpayers seeking a TIN or tax compliance guidance.',
-        description: 'TIN registration and comprehensive tax compliance support through URA.',
+        description: 'A Tax Identification Number (TIN) is required before most business dealings with government and banks. URA issues TINs to individuals and non-individuals and provides the tax information you need to comply. Support covers registration and the ongoing filing obligations that follow. Consider tax incentives and advisory services before you finalise your business plan.',
         agency: 'URA',
         timeline: 'Confirm current processing time with URA',
         cost: 'Confirm current fees with URA',
@@ -30,7 +30,7 @@ const serviceCategories = [
         id: 'investment-licensing',
         title: 'Investment Licensing',
         audience: 'Investors seeking UIA licensing, facilitation or advisory support.',
-        description: 'Investment promotion, licensing, and facilitation services through UIA.',
+        description: 'The Uganda Investment Authority promotes investment and facilitates projects from the first enquiry to licensing. It issues investment licences and provides advisory services to domestic and foreign investors. Aftercare and monitoring continue once a project is operating. Contact UIA early to understand which licences your project needs.',
         agency: 'UIA',
         timeline: '24 working hours once the application is complete',
         cost: 'Free of charge',
@@ -40,7 +40,7 @@ const serviceCategories = [
         id: 'trading-license',
         title: 'Trading License & Local Permits',
         audience: 'Businesses that need local trading licences or operating permits.',
-        description: 'Apply for local trading licences or permits where required for your business operations.',
+        description: 'Local trading licences or permits may be required depending on the kind of business and where it operates. Requirements are set locally, so check with the relevant local authority for your site. Operating without the required licence can lead to penalties or closure. Plan for licence costs and renewal dates in your business budget.',
         agency: 'KCCA / Local Councils',
         timeline: 'Varies by local authority and licence type',
         cost: 'Varies by local authority and business classification',
@@ -56,7 +56,7 @@ const serviceCategories = [
         id: 'compliance-monitoring',
         title: 'Compliance & Monitoring',
         audience: 'Businesses seeking ongoing regulatory guidance or monitoring support.',
-        description: 'Ongoing compliance support and regulatory monitoring services.',
+        description: 'Compliance continues after a business is registered and licensed. Regular filings, tax returns and renewals must be kept up to date. Regulatory monitoring helps you spot changes in requirements that affect your business. Use these support services to keep your business in good standing.',
         agency: 'Various',
         timeline: 'Depends on the service and agency',
         cost: 'Confirm with the responsible agency',
@@ -66,7 +66,7 @@ const serviceCategories = [
         id: 'nssf-registration',
         title: 'NSSF Registration & Social Security',
         audience: 'Employers who need guidance on employee social security registration.',
-        description: 'Mandatory registration with National Social Security Fund for businesses with employees.',
+        description: 'Businesses with employees must register with the National Social Security Fund. Employers register their staff and remit contributions on their behalf. Registration is mandatory, so it should be part of payroll planning from the start. Contributions build retirement savings for workers.',
         agency: 'NSSF',
         timeline: 'Confirm current processing time with NSSF',
         cost: 'Confirm current fees with NSSF',
@@ -76,7 +76,7 @@ const serviceCategories = [
         id: 'environmental-clearance',
         title: 'Environmental Impact Assessment',
         audience: 'Project developers whose plans may require environmental assessment.',
-        description: 'Environmental clearance certificates for projects affecting the environment.',
+        description: 'Projects that affect land, water, air or wildlife may need an environmental clearance certificate. NEMA reviews the Environmental and Social Impact Assessment (ESIA) before approving most large projects. Early environmental planning avoids redesign and delays in construction. Keep records of your monitoring and compliance audits.',
         agency: 'NEMA',
         timeline: 'Project-specific; confirm with NEMA',
         cost: 'Project-specific; confirm with NEMA',
@@ -92,7 +92,7 @@ const serviceCategories = [
         id: 'work-permits',
         title: 'Work Permits & Immigration Services',
         audience: 'Employing organisations seeking work or residence permits for foreign staff.',
-        description: 'Work permits, residence permits, and immigration services for foreign investors.',
+        description: 'Foreign investors and staff may need work permits, residence permits or other immigration approvals. The Directorate of Citizenship and Immigration Control handles these applications. Plan permit timelines early, since they affect when key staff can start work. Keep the documents supporting each application ready before you submit.',
         agency: 'DCIC',
         timeline: 'Set by the Directorate; confirm when you apply',
         cost: 'Confirm with the Directorate',
@@ -103,7 +103,7 @@ const serviceCategories = [
 ];
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 export default function ServicesPage() {
   return (
@@ -142,7 +142,7 @@ export default function ServicesPage() {
         <div className="space-y-14">
           {serviceCategories.map((category) => (
             <div key={category.key}>
-              <h3 className="mb-8 border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">
+              <h3 className="mb-8 border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">
                 <span className="mr-3 inline-block h-4 w-4 bg-red-600 align-middle" aria-hidden="true" />
                 {category.title}
               </h3>
@@ -154,7 +154,7 @@ export default function ServicesPage() {
                     <h4 className="mt-2 text-lg font-bold leading-snug sm:text-xl">
                       <Link
                         href={service.href}
-                        className="text-black hover:text-red-600 underline decoration-yellow-400 decoration-2 underline-offset-4 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
+                        className="text-black hover:text-red-600 underline decoration-2 underline-offset-4 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
                       >
                         {service.title}
                       </Link>

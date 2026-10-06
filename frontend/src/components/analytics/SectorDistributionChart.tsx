@@ -30,7 +30,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as SectorAnalyticsData;
       return (
-        <div className="p-4 border-t-2 border-black pt-5">
+        <div className="p-4 border-t border-neutral-200 pt-5">
           <p className="font-semibold text-black mb-2">{data.sector}</p>
           <p className="text-sm text-neutral-700">Count: <span className="font-medium">{data.count}</span></p>
           <p className="text-sm text-neutral-700">Percentage: <span className="font-medium">{data.percentage.toFixed(1)}%</span></p>

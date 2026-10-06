@@ -50,7 +50,7 @@ export default function TicketCard({ ticket }: TicketCardProps) {
   return (
     <Link
       href={`/tickets/${ticket.id}/`}
-      className="group block border-t-2 border-black py-6 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+      className="group block border-t border-neutral-200 py-6 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-data text-sm font-semibold text-black">{ticketNumber}</span>

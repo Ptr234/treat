@@ -7,7 +7,7 @@ import { MessageSquare, Phone, Mail, MapPin } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const inputClass =
   'w-full rounded-md border bg-white px-3 py-2.5 text-sm text-black placeholder-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
@@ -219,10 +219,10 @@ export default function SupportPage() {
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
         {/* Support channels */}
         <section aria-labelledby="channels-heading" className="mb-16">
-          <h2 id="channels-heading" className="mb-8 border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Ways to reach us</h2>
+          <h2 id="channels-heading" className="mb-8 border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Ways to reach us</h2>
           <ul className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
             {supportChannels.map((channel) => (
-              <li key={channel.title} className="border-t-2 border-yellow-400 pt-5">
+              <li key={channel.title} className=" pt-5">
                 <channel.icon className="h-6 w-6 text-red-600" aria-hidden="true" />
                 <h3 className="mt-4 text-lg font-bold">{channel.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-neutral-700">{channel.description}</p>
@@ -343,7 +343,7 @@ export default function SupportPage() {
           <div className="space-y-12">
             {faqCategories.map((category) => (
               <div key={category.title}>
-                <h3 className="mb-6 border-l-4 border-yellow-400 pl-4 text-lg font-bold uppercase tracking-wide sm:text-xl">{category.title}</h3>
+                <h3 className="mb-6 pl-4 text-lg font-bold uppercase tracking-wide sm:text-xl">{category.title}</h3>
                 <dl className="divide-y divide-neutral-200 border-y border-neutral-200">
                   {category.questions.map((faq) => (
                     <div key={faq.q} className="grid gap-2 py-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] md:gap-10">
@@ -375,7 +375,7 @@ export default function SupportPage() {
         <div
           role="status"
           aria-live="polite"
-          className={`fixed bottom-6 right-6 z-50 flex max-w-md items-start gap-3 border-l-4 bg-black px-5 py-4 text-white shadow-2xl animate-slide-in ${toast.type === 'success' ? 'border-yellow-400' : 'border-red-600'}`}
+          className={`fixed bottom-6 right-6 z-50 flex max-w-md items-start gap-3 border-l-4 bg-black px-5 py-4 text-white shadow-2xl animate-slide-in ${toast.type === 'success' ? 'border-white/40' : 'border-red-600'}`}
         >
           <p className="flex-1 text-sm leading-relaxed">{toast.message}</p>
           <button

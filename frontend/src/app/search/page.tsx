@@ -63,25 +63,25 @@ export default function SearchPage() {
   const searchCategories = [
     {
       title: 'Services',
-      description: 'Find government services and procedures',
+      description: 'Search for the services and procedures you need to run a business in Uganda. Results explain what each procedure involves and which agency handles it. You can move from a procedure to the forms and guides that support it. Use this when you know the outcome you need but not the agency responsible.',
       icon: <Settings className="w-8 h-8 text-blue-600" />,
       count: '150+ services'
     },
     {
       title: 'Agencies',
-      description: 'Government agencies and departments',
+      description: 'Find the public agencies and departments involved in business and investment. Each agency entry lists its services, contact details and operating hours. This helps you identify the right office before you call or visit. Use it when you need to know who regulates or supports a particular activity.',
       icon: <Building2 className="w-8 h-8 text-yellow-600" />,
       count: '25+ agencies'
     },
     {
       title: 'Documents',
-      description: 'Forms, guides, and templates',
+      description: 'Find the forms, step-by-step guides and templates that support your applications. Documents are grouped so you can see what each one is for. Downloading the right template early saves time when you complete an application. Start with the document checklist if you are unsure which form you need.',
       icon: <FileText className="w-8 h-8 text-purple-600" />,
       count: '200+ documents'
     },
     {
       title: 'Help & Guides',
-      description: 'Tutorials and step-by-step guides',
+      description: 'Learn how to complete common tasks through short, step-by-step tutorials. Each guide walks through the process in the order you will need it. Tutorials are useful if you are new to registration, tax or investment processes. Use them alongside the services list to see the full picture.',
       icon: <HelpCircle className="w-8 h-8 text-orange-600" />,
       count: '50+ guides'
     }
@@ -217,7 +217,7 @@ export default function SearchPage() {
         id: 'business-reg',
         title: 'Business Registration Process',
         type: 'Service' as const,
-        description: 'Complete guide to registering your business in Uganda, including required documents and fees.',
+        description: 'This guide explains how to register a business in Uganda, step by step. It lists the documents you will need and the fees that apply at each stage. Following the sequence avoids returned applications and repeated visits. Read it before you approach the Uganda Registration Services Bureau.',
         url: '/business/registration',
         category: 'Registration'
       },
@@ -225,7 +225,7 @@ export default function SearchPage() {
         id: 'tax-cert',
         title: 'Tax Registration Certificate',
         type: 'Service' as const,
-        description: 'Obtain your Tax Identification Number (TIN) and tax registration certificate from URA.',
+        description: 'Obtain your Tax Identification Number (TIN) and tax registration certificate from the Uganda Revenue Authority. You will need a TIN before most business dealings with government and banks. The process confirms your tax identity for filing returns and paying taxes. Keep the certificate with your business records once it is issued.',
         url: '/services/tax-registration',
         category: 'Taxation'
       },
@@ -233,7 +233,7 @@ export default function SearchPage() {
         id: 'work-permit',
         title: 'Work Permit Application',
         type: 'Service' as const,
-        description: 'Apply for work permits and special passes for foreign employees in Uganda.',
+        description: 'Apply for work permits and special passes for foreign employees working in Uganda. Plan these applications early, because they determine when key staff can begin work. The Directorate of Citizenship and Immigration Control handles the process. Check the documents required for each role before you submit.',
         url: '/services/work-permit',
         category: 'Immigration'
       }
@@ -383,7 +383,7 @@ export default function SearchPage() {
         {/* Search Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {searchCategories.map((category, index) => (
-            <div key={index} className="border-t-2 border-black pt-6 text-left transition-colors hover:border-red-600">
+            <div key={index} className="border-t border-neutral-200 pt-6 text-left transition-colors hover:border-red-600">
               <div className="mb-4">
                 {category.icon}
               </div>
@@ -403,7 +403,7 @@ export default function SearchPage() {
         {/* Search Results */}
         {searchResults.length > 0 && (
           <div className="mb-12">
-            <div className="border-b-2 border-black pb-3 mb-6">
+            <div className="border-b border-neutral-200 pb-3 mb-6">
               <h2 className="text-xl font-bold text-black">Search results</h2>
               <p className="text-neutral-700 text-sm mt-1">
                 Showing {searchResults.length} results for &quot;{searchQuery}&quot;
@@ -417,7 +417,7 @@ export default function SearchPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center mb-2">
-                          <Link href={result.url} className="text-xl font-bold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">
+                          <Link href={result.url} className="text-xl font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600">
                             {result.title}
                           </Link>
                           <span className="ml-3 text-xs font-bold uppercase tracking-wider text-red-600">
@@ -480,7 +480,7 @@ export default function SearchPage() {
                                 href={result.contact.website} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-sm font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600"
+                                className="flex items-center gap-1 text-sm font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
                               >
                                 <ExternalLink className="w-4 h-4" />
                                 <span>Website</span>
@@ -520,7 +520,7 @@ export default function SearchPage() {
                 setSearchQuery('');
                 setSearchResults([]);
               }}
-              className="font-bold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600"
+              className="font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
             >
               Clear search
             </button>
@@ -530,7 +530,7 @@ export default function SearchPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Recent Searches */}
           <div>
-            <div className="border-b-2 border-black pb-3">
+            <div className="border-b border-neutral-200 pb-3">
               <h3 className="text-lg font-bold text-black">Recent searches</h3>
             </div>
             <div className="pt-4">
@@ -554,7 +554,7 @@ export default function SearchPage() {
 
           {/* Popular Searches */}
           <div>
-            <div className="border-b-2 border-black pb-3">
+            <div className="border-b border-neutral-200 pb-3">
               <h3 className="text-lg font-bold text-black">Popular searches</h3>
             </div>
             <div className="pt-4">
@@ -578,7 +578,7 @@ export default function SearchPage() {
         </div>
 
         {/* Search Tips */}
-        <div className="mt-16 border-t-4 border-yellow-400 pt-8">
+        <div className="mt-16 pt-8">
           <h3 className="text-lg font-bold text-black mb-6">Search tips</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
             <div>

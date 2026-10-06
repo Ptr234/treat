@@ -345,7 +345,7 @@ export default function CreateTicketPage() {
         </div>
 
         {/* Form Steps */}
-        <div className="border-t-2 border-black pt-6 md:pt-8">
+        <div className="border-t border-neutral-200 pt-6 md:pt-8">
           {/* initial={false}: step 1 is already visible in the server-rendered
               HTML, so it must not depend on the mount animation to reveal it —
               a hydration mismatch elsewhere on the page (e.g. browser-injected
@@ -640,7 +640,7 @@ export default function CreateTicketPage() {
 
                   <div>
                     <h3 className="font-semibold text-black mb-2">Issue Details</h3>
-                    <div className="border-l-4 border-yellow-400 pl-4 py-2">
+                    <div className=" pl-4 py-2">
                       <p className="font-medium text-black mb-2">{formData.title}</p>
                       <p className="text-sm text-neutral-800 whitespace-pre-wrap">{formData.description}</p>
                       <div className="mt-3">
@@ -658,7 +658,7 @@ export default function CreateTicketPage() {
 
                   <div>
                     <h3 className="font-semibold text-black mb-2">Contact Information</h3>
-                    <div className="border-l-4 border-yellow-400 pl-4 py-2 space-y-2">
+                    <div className=" pl-4 py-2 space-y-2">
                       <p className="text-sm"><span className="font-medium">Name:</span> {formData.contactName}</p>
                       <p className="text-sm"><span className="font-medium">Email:</span> {formData.contactEmail}</p>
                       <p className="text-sm"><span className="font-medium">Phone:</span> {formData.contactPhone}</p>
@@ -668,7 +668,7 @@ export default function CreateTicketPage() {
                   {formData.attachments.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-black mb-2">Attachments</h3>
-                      <div className="border-l-4 border-yellow-400 pl-4 py-2">
+                      <div className=" pl-4 py-2">
                         <ul className="space-y-1">
                           {formData.attachments.map((att) => (
                             <li key={att.id} className="flex items-center gap-2 text-sm text-neutral-800">

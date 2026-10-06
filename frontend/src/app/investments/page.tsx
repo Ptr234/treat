@@ -10,7 +10,7 @@ import type { InvestmentOpportunity } from '@/types';
 const opportunitiesData = staticData as unknown as InvestmentOpportunity[];
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const InvestmentOpportunities = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -152,7 +152,7 @@ const InvestmentOpportunities = () => {
                 <h3 className="mt-2 text-lg font-bold leading-snug">
                   <Link
                     href={`/investments/${opp.id}`}
-                    className="text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
+                    className="text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
                   >
                     {opp.title}
                   </Link>
@@ -160,7 +160,7 @@ const InvestmentOpportunities = () => {
 
                 <p className="mt-3 text-sm leading-7 text-neutral-700">{opp.description}</p>
 
-                <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5 border-l-4 border-yellow-400 bg-neutral-50 py-3 pl-4 pr-3 text-sm sm:grid-cols-4">
+                <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5 bg-neutral-50 py-3 pl-4 pr-3 text-sm sm:grid-cols-4">
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Investment</p>
                     <p className="mt-0.5 font-semibold text-black">{opp.investmentRange}</p>

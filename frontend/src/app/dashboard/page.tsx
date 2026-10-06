@@ -303,7 +303,7 @@ export default function DashboardPage() {
   if (!isAdmin) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="p-8 max-w-md w-full text-center border-t-2 border-black pt-5">
+        <div className="p-8 max-w-md w-full text-center border-t border-neutral-200 pt-5">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-red-600" />
           </div>
@@ -371,8 +371,8 @@ export default function DashboardPage() {
     switch (severity) {
       case 'critical': return 'border-l-4 border-red-600 bg-red-50';
       case 'high': return 'border-l-4 border-orange-600 bg-orange-50';
-      case 'medium': return 'border-l-4 border-yellow-400 bg-yellow-50';
-      case 'low': return 'border-l-4 border-yellow-400 bg-yellow-50';
+      case 'medium': return ' bg-yellow-50';
+      case 'low': return ' bg-yellow-50';
     }
   };
 
@@ -485,7 +485,7 @@ export default function DashboardPage() {
               </span>
 
               {/* Refresh interval selector */}
-              <div className="flex items-center overflow-hidden border-t-2 border-black pt-5">
+              <div className="flex items-center overflow-hidden border-t border-neutral-200 pt-5">
                 {INTERVAL_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
@@ -592,14 +592,14 @@ export default function DashboardPage() {
 
         {/* ── Escalated Tickets ───────────────────────────────────── */}
         {(metrics.escalatedTickets?.length ?? 0) > 0 && (
-          <div className="bg-red-50 p-6 mb-8 border-t-2 border-black pt-5">
+          <div className="bg-red-50 p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
               <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
               Escalated Tickets — Needs Assignment
             </h2>
             <div className="space-y-3">
               {metrics.escalatedTickets!.map((t) => (
-                <div key={t.referenceNumber} className="flex items-center justify-between p-4 border-t-2 border-black pt-5">
+                <div key={t.referenceNumber} className="flex items-center justify-between p-4 border-t border-neutral-200 pt-5">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-mono font-bold text-sm text-red-700">{t.referenceNumber}</span>
@@ -624,7 +624,7 @@ export default function DashboardPage() {
 
         {/* ── Performance Gauges + Agency Scorecard ───────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="p-6 border-t-2 border-black pt-5">
+          <div className="p-6 border-t border-neutral-200 pt-5">
             <h2 className="text-xl font-bold text-black mb-6">Performance Gauges</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <CircularProgress value={metrics.responseRate} label="Response Rate" progressDelta={delta?.responseRate} />
@@ -635,7 +635,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Agency Scorecard (sortable) */}
-          <div className="p-4 sm:p-6 border-t-2 border-black pt-5">
+          <div className="p-4 sm:p-6 border-t border-neutral-200 pt-5">
             <h2 className="text-xl font-bold text-black mb-4">Agency Scorecard</h2>
 
             {/* Mobile card view */}
@@ -730,7 +730,7 @@ export default function DashboardPage() {
 
         {/* ── Alerts + Activity ───────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="p-6 border-t-2 border-black pt-5">
+          <div className="p-6 border-t border-neutral-200 pt-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-black flex items-center gap-2">
                 <BellAlertIcon className="w-6 h-6 text-red-600" />
@@ -792,7 +792,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="p-6 border-t-2 border-black pt-5">
+          <div className="p-6 border-t border-neutral-200 pt-5">
             <h2 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
               <ClockIcon className="w-6 h-6 text-red-600" />
               Recent Activity
@@ -859,7 +859,7 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Engagement Stats ──────────────────────────────────── */}
-        <div className="p-6 mb-8 border-t-2 border-black pt-5">
+        <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
           <h2 className="text-lg font-bold text-black mb-4">Platform Engagement (Last 30 Days)</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
@@ -996,7 +996,7 @@ export default function DashboardPage() {
         </Link>
 
         {/* ── Executive Actions ────────────────────────────────────── */}
-        <div className="p-6 border-t-2 border-black pt-5">
+        <div className="p-6 border-t border-neutral-200 pt-5">
           <h2 className="text-xl font-bold text-black mb-4">Executive Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button onClick={() => { setActionModal('flag'); setActionInput(''); }} className="bg-white/10 hover:bg-white/20 backdrop- text-black p-4 rounded-md transition-all flex items-center gap-3">
@@ -1021,7 +1021,7 @@ export default function DashboardPage() {
         {/* ── Action Modal ──────────────────────────────────────── */}
         {actionModal && (
           <div className="fixed inset-0 bg-neutral-100 flex items-center justify-center z-50 p-4">
-            <div className="max-w-md w-full p-4 sm:p-6 max-h-[85vh] overflow-y-auto border-t-2 border-black pt-5">
+            <div className="max-w-md w-full p-4 sm:p-6 max-h-[85vh] overflow-y-auto border-t border-neutral-200 pt-5">
               <h3 className="text-lg font-bold text-black mb-2">
                 {actionModal === 'flag' ? 'Flag Priority Case' : actionModal === 'message' ? 'Send Team Message' : 'Schedule Review'}
               </h3>

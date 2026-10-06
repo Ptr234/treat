@@ -105,11 +105,11 @@ export default function EventsPage() {
           Use the events calendar to find investment forums, missions, webinars and other activities involving Uganda’s business community. Search by title, location or organizer, then narrow the list by event category and status. Event listings include dates and participation details when those have been provided by the organizer. Check the event page for updates before making travel plans or sharing registration information.
         </p>
         <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Upcoming events</dt>
             <dd className="font-data mt-1 text-3xl font-bold">{stats.upcomingCount}</dd>
           </div>
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Total events</dt>
             <dd className="font-data mt-1 text-3xl font-bold">{stats.totalCount}</dd>
           </div>
@@ -168,7 +168,7 @@ export default function EventsPage() {
 
       {/* Upcoming events */}
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8" aria-labelledby="upcoming-heading">
-        <h2 id="upcoming-heading" className="mb-8 border-b-2 border-black pb-3 text-2xl font-bold">Upcoming events</h2>
+        <h2 id="upcoming-heading" className="mb-8 border-b border-neutral-200 pb-3 text-2xl font-bold">Upcoming events</h2>
 
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">

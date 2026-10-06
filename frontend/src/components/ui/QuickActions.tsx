@@ -162,7 +162,7 @@ export default function QuickActions() {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="absolute bottom-16 right-0 backdrop- p-2 min-w-72 border-t-2 border-black pt-5"
+              className="absolute bottom-16 right-0 backdrop- p-2 min-w-72 border-t border-neutral-200 pt-5"
             >
               {/* Header */}
               <div className="p-3 border-b border-neutral-200/50">

@@ -50,7 +50,7 @@ export default function LoginPage() {
           </span>
         </Link>
 
-        <div className="border-t-4 border-yellow-400 pt-8">
+        <div className=" pt-8">
           <h1 className="text-2xl font-bold text-black mb-4">Admin sign in</h1>
 
           <div className="flex items-start gap-3 mb-6 border-l-4 border-red-600 pl-4">
@@ -85,7 +85,7 @@ export default function LoginPage() {
         </div>
 
         <p className="mt-8 text-center text-sm text-neutral-700">
-          <Link href="/" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">
+          <Link href="/" className="font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600">
             &larr; Back to homepage
           </Link>
         </p>

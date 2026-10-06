@@ -229,7 +229,7 @@ export default function DocumentChecklistPage() {
 
             return (
               <section key={checklist.category} aria-labelledby={`checklist-${checklist.category}`}>
-                <div className="flex flex-col gap-2 border-b-2 border-black pb-3 sm:flex-row sm:items-baseline sm:justify-between">
+                <div className="flex flex-col gap-2 border-b border-neutral-200 pb-3 sm:flex-row sm:items-baseline sm:justify-between">
                   <h2 id={`checklist-${checklist.category}`} className="text-xl font-bold sm:text-2xl">{checklist.title}</h2>
                   <p className="text-sm text-neutral-700">
                     {progress.checked}/{progress.total} ({categoryPercentage}%)
@@ -285,7 +285,7 @@ export default function DocumentChecklistPage() {
         </div>
 
         {/* Next steps */}
-        <section className="mt-16 border-t-4 border-yellow-400 pt-8" aria-labelledby="checklist-next-heading">
+        <section className="mt-16 pt-8" aria-labelledby="checklist-next-heading">
           <h2 id="checklist-next-heading" className="text-2xl font-bold">Ready to start your application?</h2>
           <p className="mt-3 max-w-2xl leading-7 text-neutral-700">
             Once you have gathered all the required documents, you can begin your business registration

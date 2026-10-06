@@ -32,7 +32,7 @@ export default function TrackApplicationPage() {
         </ol>
       </nav>
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="max-w-2xl border-l-4 border-yellow-400 pl-6 sm:pl-9">
+        <div className="max-w-2xl pl-6 sm:pl-9">
           <p className="text-xs font-bold uppercase tracking-[.16em] text-red-700">Application services</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Track your business registration</h1>
           <p className="mt-4 leading-7 text-neutral-700">Enter the reference number from your registration confirmation. You may be asked to verify the email address used when you applied.</p>
@@ -59,7 +59,7 @@ export default function TrackApplicationPage() {
           </form>
           <div className="mt-8 border-t border-neutral-200 pt-5 text-sm">
             <p className="font-semibold">Need to submit a new application?</p>
-            <Link href="/business/registration" className="mt-2 inline-block font-semibold text-red-700 underline decoration-yellow-400 decoration-2 underline-offset-4">Start business registration</Link>
+            <Link href="/business/registration" className="mt-2 inline-block font-semibold text-red-700 underline decoration-2 underline-offset-4">Start business registration</Link>
           </div>
         </div>
       </main>

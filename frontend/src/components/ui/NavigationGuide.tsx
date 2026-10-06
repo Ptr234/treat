@@ -214,7 +214,7 @@ export default function NavigationGuide() {
         exit={{ opacity: 0, y: 50, scale: 0.9 }}
         className="fixed bottom-6 right-6 z-50 max-w-sm"
       >
-        <div className="backdrop- overflow-hidden border-t-2 border-black pt-5">
+        <div className="backdrop- overflow-hidden border-t border-neutral-200 pt-5">
           {/* Header */}
           <div className="bg-white text-black p-4 relative">
             <button

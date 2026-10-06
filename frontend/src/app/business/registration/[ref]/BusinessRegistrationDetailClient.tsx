@@ -169,7 +169,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   if (needsVerification) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full border-t-4 border-yellow-400 pt-6">
+        <div className="max-w-md w-full pt-6">
           <EnvelopeIcon className="w-10 h-10 text-red-600 mb-3" />
           <h1 className="text-lg font-bold text-black mb-2">Verify your email to track this registration</h1>
           <p className="text-sm text-neutral-700 mb-4">
@@ -219,7 +219,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           <ArrowLeftIcon className="w-4 h-4" /> Back to Registration
         </Link>
 
-        <div className="border-t-2 border-black pt-6 mb-6">
+        <div className="border-t border-neutral-200 pt-6 mb-6">
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
               <p className="text-sm text-neutral-600">{r.referenceNumber}</p>
@@ -265,7 +265,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           )}
 
           {r.status === 'CertificateIssued' && r.certificateNumber && (
-            <div className="mt-4 border-l-4 border-black pl-4 py-2 flex items-center justify-between flex-wrap gap-3">
+            <div className="mt-4 border-l border-neutral-200 pl-4 py-2 flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2">
                 <DocumentCheckIcon className="w-6 h-6 text-green-700" />
                 <div>
@@ -284,7 +284,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
         </div>
 
         {!isRejectedTrack && payment && (
-          <div className="border-t-2 border-black pt-6 mb-6">
+          <div className="border-t border-neutral-200 pt-6 mb-6">
             <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
               <CreditCardIcon className="w-5 h-5 text-neutral-600" /> Registration Fee
             </h2>
@@ -320,7 +320,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           </div>
         )}
 
-        <div className="border-t-2 border-black pt-6 mb-6">
+        <div className="border-t border-neutral-200 pt-6 mb-6">
           <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
             <BuildingOfficeIcon className="w-5 h-5 text-neutral-600" /> Business Details
           </h2>
@@ -345,7 +345,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           </div>
         </div>
 
-        <div className="border-t-2 border-black pt-6">
+        <div className="border-t border-neutral-200 pt-6">
           <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
             <CalendarIcon className="w-5 h-5 text-neutral-600" /> Timeline
           </h2>

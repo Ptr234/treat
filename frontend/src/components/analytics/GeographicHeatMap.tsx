@@ -48,7 +48,7 @@ export default function GeographicHeatMap({ data }: GeographicHeatMapProps) {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-yellow-50 border-t-2 border-black pt-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-yellow-50 border-t border-neutral-200 pt-5">
         <div>
           <p className="text-xs font-medium text-neutral-700 uppercase">Countries</p>
           <p className="text-2xl font-bold text-red-600 mt-1">{totalCountries}</p>
@@ -73,7 +73,7 @@ export default function GeographicHeatMap({ data }: GeographicHeatMapProps) {
           {sortedData.slice(0, 5).map((country) => (
             <div
               key={country.countryCode}
-              className="p-4 border-t-2 border-black pt-5"
+              className="p-4 border-t border-neutral-200 pt-5"
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
@@ -91,7 +91,7 @@ export default function GeographicHeatMap({ data }: GeographicHeatMapProps) {
               <div className="flex items-center gap-3">
                 <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
                   <div
-                    className="h-full transition-all border-t-2 border-black pt-5"
+                    className="h-full transition-all border-t border-neutral-200 pt-5"
                     style={{ width: `${(country.inquiries / maxInquiries) * 100}%` }}
                   />
                 </div>
@@ -113,7 +113,7 @@ export default function GeographicHeatMap({ data }: GeographicHeatMapProps) {
             const regionInvestment = countries.reduce((sum, c) => sum + c.investmentValue, 0);
 
             return (
-              <div key={region} className="overflow-hidden border-t-2 border-black pt-5">
+              <div key={region} className="overflow-hidden border-t border-neutral-200 pt-5">
                 {/* Region Header */}
                 <div className="bg-neutral-50 px-4 py-3 border-b border-neutral-200">
                   <div className="flex items-center justify-between">

@@ -286,7 +286,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
         return (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-black">Schedule Preferences</h3>
-            <div className="bg-yellow-50 p-3 border-t-2 border-black pt-5">
+            <div className="bg-yellow-50 p-3 border-t border-neutral-200 pt-5">
               <p className="text-sm text-red-600">
                 Please provide your preferred appointment time and an alternative option.
                 Operating hours: {agency.operatingHours}
@@ -368,7 +368,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-black">Review & Submit</h3>
 
-            <div className="p-4 space-y-3 border-t-2 border-black pt-5">
+            <div className="p-4 space-y-3 border-t border-neutral-200 pt-5">
               <div className="flex items-center space-x-2">
                 <UserIcon className="w-5 h-5 text-yellow-500" />
                 <span className="font-medium text-black">{appointmentData.name}</span>
@@ -403,7 +403,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
               />
             </div>
 
-            <div className="bg-red-50 p-3 border-t-2 border-black pt-5">
+            <div className="bg-red-50 p-3 border-t border-neutral-200 pt-5">
               <p className="text-sm text-red-400">
                 By submitting this request, you agree that {agency.acronym} may contact you to confirm
                 appointment details. You will receive confirmation within 24 hours.
@@ -426,10 +426,10 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
+          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t border-neutral-200 pt-5"
         >
           {/* Header */}
-          <div className="text-black p-4 sm:p-6 border-t-2 border-black pt-5">
+          <div className="text-black p-4 sm:p-6 border-t border-neutral-200 pt-5">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold">Book Appointment</h2>

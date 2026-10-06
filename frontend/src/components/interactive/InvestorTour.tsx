@@ -165,10 +165,10 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="max-w-4xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
+        className="max-w-4xl w-full max-h-[90vh] overflow-y-auto border-t border-neutral-200 pt-5"
       >
         {/* Header */}
-        <div className="p-6 -b text-black border-t-2 border-black pt-5">
+        <div className="p-6 -b text-black border-t border-neutral-200 pt-5">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">{currentStepData?.title}</h2>
@@ -268,7 +268,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                         <div className="space-y-2">
                           {profile.benefits.map((benefit, benefitIndex) => (
                             <div key={benefitIndex} className="flex items-center space-x-2">
-                              <div className="w-1.5 h-1.5 border-t-2 border-black pt-5"></div>
+                              <div className="w-1.5 h-1.5 border-t border-neutral-200 pt-5"></div>
                               <span className="text-sm">{benefit}</span>
                             </div>
                           ))}
@@ -281,7 +281,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
 
               {/* Results/Summary */}
               {showResults && userProfile && (
-                <div className="mb-8 bg-yellow-50 p-6 border-t-2 border-black pt-5">
+                <div className="mb-8 bg-yellow-50 p-6 border-t border-neutral-200 pt-5">
                   <h3 className="text-2xl font-bold text-neutral-900 mb-4">
                     🎉 Congratulations! You qualify for {userProfile.tier} status
                   </h3>
@@ -289,7 +289,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                     Based on your investment level, you have access to premium benefits and fast-track services.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 border-t-2 border-black pt-5">
+                    <div className="p-4 border-t border-neutral-200 pt-5">
                       <h4 className="font-semibold text-black mb-2">Your Benefits:</h4>
                       <ul className="space-y-1">
                         {userProfile.benefits.map((benefit, index) => (
@@ -300,7 +300,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                         ))}
                       </ul>
                     </div>
-                    <div className="p-4 border-t-2 border-black pt-5">
+                    <div className="p-4 border-t border-neutral-200 pt-5">
                       <h4 className="font-semibold text-black mb-2">Next Steps:</h4>
                       <ul className="space-y-1 text-sm text-neutral-800">
                         <li className="flex items-center space-x-2">
@@ -325,7 +325,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 -t border-t-2 border-black pt-5">
+        <div className="p-6 -t border-t border-neutral-200 pt-5">
           {showResults ? (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button

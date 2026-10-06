@@ -218,7 +218,7 @@ export default function ContextualHelp() {
         exit={{ opacity: 0, x: 100, scale: 0.9 }}
         className="fixed top-1/2 right-6 transform -translate-y-1/2 z-50 max-w-sm"
       >
-        <div className="backdrop- overflow-hidden border-t-2 border-black pt-5">
+        <div className="backdrop- overflow-hidden border-t border-neutral-200 pt-5">
           {/* Header */}
           <div className="bg-white text-black p-4 relative">
             <button

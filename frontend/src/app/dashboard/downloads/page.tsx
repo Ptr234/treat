@@ -164,7 +164,7 @@ export default function DownloadsManagementPage() {
         )}
 
         {showForm && (
-          <div className="p-6 mb-8 border-t-2 border-black pt-5">
+          <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Resource' : 'Add New Resource'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="md:col-span-2">

@@ -15,7 +15,7 @@ export default function MapLegend() {
   ];
 
   return (
-    <div className="p-4 max-w-xs border-t-2 border-black pt-5">
+    <div className="p-4 max-w-xs border-t border-neutral-200 pt-5">
       <h3 className="font-bold text-yellow-500 text-sm mb-3">Map Legend</h3>
 
       <div className="mb-4">

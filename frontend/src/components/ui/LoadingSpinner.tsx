@@ -43,7 +43,7 @@ export function LoadingSpinner({
 export function PageLoadingSpinner() {
   return (
     <div className="fixed inset-0 bg-white/90 flex items-center justify-center z-50">
-      <div className="flex flex-col items-center border-t-4 border-yellow-400 pt-6">
+      <div className="flex flex-col items-center pt-6">
         <LoadingSpinner size="xl" color="yellow" className="mb-4" />
         <p className="text-lg font-bold text-black">Loading Uganda Investment Portal...</p>
       </div>

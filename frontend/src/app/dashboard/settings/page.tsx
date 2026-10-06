@@ -130,7 +130,7 @@ export default function SettingsPage() {
         ) : (
           <div className="space-y-8">
             {/* Escalation Email Recipients */}
-            <div className="p-6 border-t-2 border-black pt-5">
+            <div className="p-6 border-t border-neutral-200 pt-5">
               <label className="block text-sm font-semibold text-black mb-2">
                 Escalation Email Recipients
               </label>
@@ -169,7 +169,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Default Assignee */}
-            <div className="p-6 border-t-2 border-black pt-5">
+            <div className="p-6 border-t border-neutral-200 pt-5">
               <label className="block text-sm font-semibold text-black mb-2">
                 Default Escalation Officer
               </label>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Custom Escalation Message */}
-            <div className="p-6 border-t-2 border-black pt-5">
+            <div className="p-6 border-t border-neutral-200 pt-5">
               <label className="block text-sm font-semibold text-black mb-2">
                 Escalation Notification Message
               </label>

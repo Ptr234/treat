@@ -107,7 +107,7 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
         onClick={onNavigate}
         className="flex items-center gap-3 px-5 py-5 border-b border-neutral-200"
       >
-        <div className="w-9 h-9 flex items-center justify-center flex-shrink-0 border-t-2 border-black pt-5">
+        <div className="w-9 h-9 flex items-center justify-center flex-shrink-0 border-t border-neutral-200 pt-5">
           <Squares2X2Icon className="w-5 h-5 text-black" />
         </div>
         <div className="min-w-0">

@@ -19,7 +19,7 @@ export const INVESTMENT_CATEGORIES: InvestmentCategory[] = [
   {
     id: 'agriculture-agribusiness',
     name: 'Agriculture & Agribusiness',
-    description: 'Food production, processing, and agricultural value chains with strong export potential',
+    description: 'Uganda\'s fertile land supports food production, processing and agricultural value chains. Opportunities range from primary processing to packaging and export-ready products. Export potential is strong for commodities such as coffee, cocoa and cotton. Projects in this category often qualify for agro-processing incentives.',
     icon: 'AGR',
     color: 'green',
     sectors: ['Agriculture', 'Food Processing', 'Livestock', 'Fisheries', 'Forestry'],
@@ -38,7 +38,7 @@ export const INVESTMENT_CATEGORIES: InvestmentCategory[] = [
   {
     id: 'tourism-hospitality',
     name: 'Tourism & Hospitality',
-    description: 'Tourism infrastructure, eco-lodges, and hospitality services leveraging Uganda\'s natural beauty',
+    description: 'Uganda\'s natural beauty supports tourism infrastructure, eco-lodges and hospitality services. Opportunities include hotels, visitor centres, adventure facilities and attractions at national parks and natural sites. Demand is supported by the country\'s recognition as a travel destination. Tourism projects usually need tourism licences and environmental approvals.',
     icon: 'TOU',
     color: 'amber',
     sectors: ['Eco-Tourism', 'Hotels & Lodges', 'Adventure Tourism', 'Cultural Tourism', 'MICE Tourism'],
@@ -57,7 +57,7 @@ export const INVESTMENT_CATEGORIES: InvestmentCategory[] = [
   {
     id: 'mining-minerals',
     name: 'Mining & Minerals',
-    description: 'Mineral extraction, processing, and value addition with significant untapped potential',
+    description: 'Uganda has mineral resources that can be extracted and processed into higher-value products. Opportunities include cement, lime, glass and iron processing alongside extraction. Value addition keeps more of the income in the country. Mining leases and environmental certificates are central to these projects.',
     icon: 'MIN',
     color: 'gray',
     sectors: ['Gold Mining', 'Rare Earth Minerals', 'Construction Materials', 'Industrial Minerals', 'Gemstones'],
@@ -76,7 +76,7 @@ export const INVESTMENT_CATEGORIES: InvestmentCategory[] = [
   {
     id: 'ict-technology',
     name: 'ICT & Technology',
-    description: 'Information technology, telecommunications, and digital services for East African market',
+    description: 'Uganda\'s young, English-speaking workforce supports information technology, telecommunications and digital services. Opportunities include IT and business process outsourcing parks, software services and technology companies. National ICT policy supports entrepreneurship and skills development. Projects in this category should plan early for licences and talent recruitment.',
     icon: 'ICT',
     color: 'blue',
     sectors: ['Data Centers', 'FinTech', 'Telecommunications', 'Software Development', 'Digital Services'],
@@ -95,7 +95,7 @@ export const INVESTMENT_CATEGORIES: InvestmentCategory[] = [
   {
     id: 'manufacturing-industrial',
     name: 'Manufacturing & Industrial',
-    description: 'Industrial production, manufacturing, and value addition with AGOA market access',
+    description: 'Industrial production and manufacturing turn local raw materials into goods for domestic and regional markets. Value addition in manufacturing creates jobs and reduces imports. Some products can access duty-free trade under AGOA. Manufacturers should check licensing and industrial park incentives before they set up.',
     icon: 'MAN',
     color: 'indigo',
     sectors: ['Textiles & Garments', 'Pharmaceuticals', 'Food Processing', 'Construction Materials', 'Electronics'],
@@ -114,7 +114,7 @@ export const INVESTMENT_CATEGORIES: InvestmentCategory[] = [
   {
     id: 'energy-utilities',
     name: 'Energy & Utilities',
-    description: 'Power generation, renewable energy, and utility services with growing regional demand',
+    description: 'Uganda\'s hydropower, solar and other renewable resources support power generation and utility services. Regional demand for electricity is growing, which supports new projects. Opportunities include small hydro plants, floating solar and rehabilitation of existing plants. Water use permits, generation licences and environmental approvals are the key steps.',
     icon: 'ENE',
     color: 'yellow',
     sectors: ['Solar Energy', 'Hydroelectric', 'Waste-to-Energy', 'Grid Infrastructure', 'Energy Storage'],

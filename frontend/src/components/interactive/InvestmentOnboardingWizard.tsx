@@ -630,7 +630,7 @@ export default function InvestmentOnboardingWizard() {
 
       {/* Success result */}
       {submitResult && (
-        <div className="mt-6 border-t-4 border-black pt-6 text-center">
+        <div className="mt-6 border-t border-neutral-200 pt-6 text-center">
           <div className="text-green-800 font-bold text-lg mb-2">
             {submitResult.existing ? 'Profile Found' : 'Profile Created Successfully'}
           </div>

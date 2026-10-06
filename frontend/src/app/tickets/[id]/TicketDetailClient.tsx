@@ -316,7 +316,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
   if (needsVerification) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="max-w-md w-full border-t-4 border-yellow-400 pt-8">
+        <div className="max-w-md w-full pt-8">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
             <EnvelopeIcon className="w-7 h-7 text-red-600" />
           </div>
@@ -378,7 +378,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
   if (error || !ticket) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="max-w-md w-full border-t-4 border-yellow-400 pt-8 text-center">
+        <div className="max-w-md w-full pt-8 text-center">
           <ExclamationTriangleIcon className="w-12 h-12 text-orange-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-black mb-2">
             Unable to Load Ticket
@@ -486,7 +486,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Description */}
-            <div className="border-t-2 border-black pt-6">
+            <div className="border-t border-neutral-200 pt-6">
               <h3 className="text-lg font-semibold text-black mb-3">
                 Description
               </h3>
@@ -496,7 +496,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
             </div>
 
             {/* Messages */}
-            <div className="border-t-2 border-black pt-6">
+            <div className="border-t border-neutral-200 pt-6">
               <h3 className="text-lg font-semibold text-black mb-4">
                 Messages & Updates
               </h3>
@@ -549,12 +549,12 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
             {/* Add Comment */}
             {!isResolved && (
-              <div className="border-t-2 border-black pt-6">
+              <div className="border-t border-neutral-200 pt-6">
                 <h3 className="text-lg font-semibold text-black mb-4">
                   Add Comment
                 </h3>
                 {commentSuccess && (
-                  <div className="border-l-4 border-black pl-4 py-2 mb-4">
+                  <div className="border-l border-neutral-200 pl-4 py-2 mb-4">
                     <p className="text-sm text-green-700">
                       Comment added successfully!
                     </p>
@@ -594,7 +594,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
           {/* Right Column: Sidebar */}
           <div className="space-y-6">
             {/* Ticket Details */}
-            <div className="border-t-2 border-black pt-6">
+            <div className="border-t border-neutral-200 pt-6">
               <h3 className="text-lg font-semibold text-black mb-4">
                 Ticket Details
               </h3>
@@ -702,7 +702,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
             {/* Satisfaction Rating */}
             {isResolved && (
-              <div className="border-t-2 border-black pt-6">
+              <div className="border-t border-neutral-200 pt-6">
                 <h3 className="text-lg font-semibold text-black mb-3">
                   Rate This Service
                 </h3>
@@ -794,7 +794,7 @@ function TicketDocuments({ ticketId, emailParam, isStaff }: { ticketId: string; 
   if (docs.length === 0) return null;
 
   return (
-    <div className="border-t-2 border-black pt-6">
+    <div className="border-t border-neutral-200 pt-6">
       <h3 className="text-lg font-semibold text-black mb-4">Attached Documents</h3>
       <div className="space-y-2">
         {docs.map((doc) => (

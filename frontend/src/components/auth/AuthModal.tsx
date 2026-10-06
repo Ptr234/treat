@@ -30,7 +30,7 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="w-full max-w-md max-h-screen overflow-y-auto bg-white border-t-4 border-yellow-400">
+      <div className="w-full max-w-md max-h-screen overflow-y-auto bg-white">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-black">
@@ -49,7 +49,7 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
           {isUser ? (
             /* ─── User mode: Google Sign-In only ─── */
             <>
-              <div className="flex items-start gap-3 mb-6 border-l-4 border-black pl-4">
+              <div className="flex items-start gap-3 mb-6 border-l border-neutral-200 pl-4">
                 <UserCircleIcon className="mt-0.5 w-5 h-5 text-black flex-shrink-0" />
                 <p className="text-sm text-neutral-800">
                   Sign in to access the AI Investment Assistant and personalised services.

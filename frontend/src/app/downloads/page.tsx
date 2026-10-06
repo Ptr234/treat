@@ -36,7 +36,7 @@ const CATEGORIES: CategoryConfig[] = [
 ];
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -129,14 +129,14 @@ export default function DownloadsPage() {
 
         {/* Empty state */}
         {!loading && visibleCategories.length === 0 && (
-          <div className="border-l-4 border-yellow-400 py-6 pl-6">
+          <div className=" py-6 pl-6">
             <h2 className="text-xl font-bold">No downloadable resources are published yet</h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-700">
               The resource library is currently empty. For a form or document needed for a specific application, check the responsible agency’s website or contact its office to confirm the current version. You can also use the service directory to find agency contact details and browse the online user guide for help navigating the OneStop Centre.
             </p>
             <div className="mt-4 flex flex-wrap gap-5 text-sm">
-              <Link href="/agencies" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">Find an agency</Link>
-              <Link href="/guide" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">Open the user guide</Link>
+              <Link href="/agencies" className="font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600">Find an agency</Link>
+              <Link href="/guide" className="font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600">Open the user guide</Link>
             </div>
           </div>
         )}
@@ -146,7 +146,7 @@ export default function DownloadsPage() {
           <div className="space-y-14">
             {visibleCategories.map((category) => (
               <section key={category.key} aria-labelledby={`downloads-${category.key}`}>
-                <div className="flex flex-col gap-2 border-b-2 border-black pb-3 sm:flex-row sm:items-baseline sm:justify-between">
+                <div className="flex flex-col gap-2 border-b border-neutral-200 pb-3 sm:flex-row sm:items-baseline sm:justify-between">
                   <div>
                     <h2 id={`downloads-${category.key}`} className="text-xl font-bold sm:text-2xl">{category.title}</h2>
                     <p className="mt-1 text-sm text-neutral-700">{category.description}</p>
@@ -185,7 +185,7 @@ export default function DownloadsPage() {
         )}
 
         {/* Help */}
-        <section className="mt-16 border-t-4 border-yellow-400 pt-8" aria-labelledby="downloads-help-heading">
+        <section className="mt-16 pt-8" aria-labelledby="downloads-help-heading">
           <h2 id="downloads-help-heading" className="text-2xl font-bold">Need help with documents?</h2>
           <p className="mt-3 max-w-2xl leading-7 text-neutral-700">
             Our support team can help you understand which documents you need and guide you through the completion process.
@@ -211,7 +211,7 @@ export default function DownloadsPage() {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex max-w-md items-start gap-3 border-l-4 border-yellow-400 bg-black px-5 py-4 text-white shadow-2xl"
+          className="fixed bottom-6 right-6 z-50 flex max-w-md items-start gap-3 bg-black px-5 py-4 text-white shadow-2xl"
         >
           <p className="flex-1 text-sm leading-relaxed">{toast.message}</p>
           <button

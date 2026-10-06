@@ -160,7 +160,7 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
+        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t border-neutral-200 pt-5"
       >
         {/* Header */}
         <div className="p-6 border-b border-neutral-200">

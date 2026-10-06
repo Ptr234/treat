@@ -28,7 +28,7 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const STEPS = [
   {
@@ -139,10 +139,7 @@ export default function GuidePage() {
         <ol className="divide-y divide-neutral-200 border-y border-neutral-200">
           {STEPS.map((step, i) => (
             <Reveal key={step.title} delay={i * 0.04}>
-              <li className="grid gap-4 py-8 md:grid-cols-[4rem_1fr] md:gap-8">
-                <span className="text-3xl font-bold leading-none text-yellow-500" aria-hidden="true">
-                  {String(i + 1).padStart(2, '0')}
-                </span>
+              <li className="grid gap-4 py-8 md:gap-8">
                 <div className="min-w-0">
                   <h3 className="flex items-center gap-2.5 text-lg font-bold sm:text-xl">
                     <step.icon className="h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
@@ -174,7 +171,7 @@ export default function GuidePage() {
         <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {TOOLS.map((tool, i) => (
             <Reveal key={tool.title} delay={i * 0.05} className="h-full">
-              <div className="h-full border-t-2 border-black pt-5">
+              <div className="h-full border-t border-neutral-200 pt-5">
                 <tool.icon className="h-6 w-6 text-red-600" aria-hidden="true" />
                 <h3 className="mt-4 text-lg font-bold">
                   <Link href={tool.href} className={linkClass}>{tool.title}</Link>
@@ -195,7 +192,7 @@ export default function GuidePage() {
         <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {TIPS.map((tip, i) => (
             <Reveal key={tip.title} delay={i * 0.05} className="h-full">
-              <div className="h-full border-l-4 border-yellow-400 pl-5">
+              <div className="h-full pl-5">
                 <tip.icon className="h-5 w-5 text-black" aria-hidden="true" />
                 <h3 className="mt-3 font-bold">{tip.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-neutral-700">{tip.body}</p>
@@ -206,7 +203,7 @@ export default function GuidePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="border-t-4 border-yellow-400 bg-neutral-50">
+      <section className=" bg-neutral-50">
         <Reveal className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold sm:text-3xl">Ready to begin?</h2>
           <p className="mt-3 max-w-2xl text-neutral-700">

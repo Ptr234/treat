@@ -145,7 +145,7 @@ export default function AgencyManagementPage() {
         )}
 
         {showForm && (
-          <div className="p-6 mb-8 border-t-2 border-black pt-5">
+          <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Agency' : 'Add New Agency'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
@@ -205,7 +205,7 @@ export default function AgencyManagementPage() {
         ) : (
           <div className="space-y-3">
             {agencies.map(a => (
-              <div key={a._id} className="p-4 flex items-center justify-between border-t-2 border-black pt-5">
+              <div key={a._id} className="p-4 flex items-center justify-between border-t border-neutral-200 pt-5">
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold flex items-center gap-2 flex-wrap">
                     <span className="truncate">{a.name}</span>

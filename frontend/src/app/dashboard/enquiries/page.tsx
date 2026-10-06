@@ -187,7 +187,7 @@ export default function EnquiriesPage() {
   if (!isAdmin) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="p-8 max-w-md w-full text-center border-t-2 border-black pt-5">
+        <div className="p-8 max-w-md w-full text-center border-t border-neutral-200 pt-5">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-red-600" />
           </div>
@@ -232,22 +232,22 @@ export default function EnquiriesPage() {
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="p-5 border-t-2 border-black pt-5">
+            <div className="p-5 border-t border-neutral-200 pt-5">
               <p className="text-sm text-neutral-600 font-medium">Total Enquiries</p>
               <p className="text-3xl font-bold text-black mt-1">{stats.total}</p>
               <p className="text-xs text-neutral-500 mt-1">{stats.uniqueSessions} conversations</p>
             </div>
-            <div className="p-5 border-t-2 border-black pt-5">
+            <div className="p-5 border-t border-neutral-200 pt-5">
               <p className="text-sm text-neutral-600 font-medium">Today</p>
               <p className="text-3xl font-bold text-red-600 mt-1">{stats.today}</p>
               <p className="text-xs text-neutral-500 mt-1">messages today</p>
             </div>
-            <div className="p-5 border-t-2 border-black pt-5">
+            <div className="p-5 border-t border-neutral-200 pt-5">
               <p className="text-sm text-neutral-600 font-medium">This Week</p>
               <p className="text-3xl font-bold text-black mt-1">{stats.thisWeek}</p>
               <p className="text-xs text-neutral-500 mt-1">last 7 days</p>
             </div>
-            <div className="p-5 border-t-2 border-black pt-5">
+            <div className="p-5 border-t border-neutral-200 pt-5">
               <p className="text-sm text-neutral-600 font-medium">AI Success Rate</p>
               <p className="text-3xl font-bold text-green-600 mt-1">
                 {stats.total > 0 ? Math.round(((stats.byTier.ai ?? 0) / stats.total) * 100) : 0}%
@@ -261,7 +261,7 @@ export default function EnquiriesPage() {
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             {/* Language breakdown */}
-            <div className="p-5 border-t-2 border-black pt-5">
+            <div className="p-5 border-t border-neutral-200 pt-5">
               <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
                 <GlobeAltIcon className="w-4 h-4" /> By Language
               </h3>
@@ -278,7 +278,7 @@ export default function EnquiriesPage() {
             </div>
 
             {/* Sentiment breakdown */}
-            <div className="p-5 border-t-2 border-black pt-5">
+            <div className="p-5 border-t border-neutral-200 pt-5">
               <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
                 <FaceSmileIcon className="w-4 h-4" /> By Sentiment
               </h3>
@@ -298,7 +298,7 @@ export default function EnquiriesPage() {
             </div>
 
             {/* Tier breakdown */}
-            <div className="p-5 border-t-2 border-black pt-5">
+            <div className="p-5 border-t border-neutral-200 pt-5">
               <h3 className="text-sm font-semibold text-neutral-800 mb-3 flex items-center gap-2">
                 <CpuChipIcon className="w-4 h-4" /> By Response Tier
               </h3>
@@ -320,7 +320,7 @@ export default function EnquiriesPage() {
         )}
 
         {/* Enquiries Table */}
-        <div className="overflow-hidden border-t-2 border-black pt-5">
+        <div className="overflow-hidden border-t border-neutral-200 pt-5">
           <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
             <h2 className="text-lg font-bold text-black">Recent Enquiries</h2>
             <span className="text-sm text-neutral-600">{total} total</span>
@@ -443,7 +443,7 @@ export default function EnquiriesPage() {
       {/* Conversation Viewer Modal */}
       {selectedSession && (
         <div className="fixed inset-0 bg-neutral-100 z-50 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full max-h-[80vh] flex flex-col border-t-2 border-black pt-5">
+          <div className="max-w-2xl w-full max-h-[80vh] flex flex-col border-t border-neutral-200 pt-5">
             <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-black">Conversation</h3>
@@ -509,7 +509,7 @@ export default function EnquiriesPage() {
                   <div key={msg._id} className="space-y-2">
                     {/* User message */}
                     <div className="flex justify-end">
-                      <div className="bg-yellow-50 px-4 py-2.5 max-w-[85%] border-t-2 border-black pt-5">
+                      <div className="bg-yellow-50 px-4 py-2.5 max-w-[85%] border-t border-neutral-200 pt-5">
                         <p className="text-sm text-neutral-800">{msg.userMessage}</p>
                         <p className="text-xs text-neutral-500 mt-1 text-right">
                           {new Date(msg.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}

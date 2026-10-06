@@ -23,7 +23,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'uia',
     name: 'Uganda Investment Authority',
     acronym: 'UIA',
-    description: 'The principal government agency responsible for promoting, facilitating and monitoring investment in Uganda.',
+    description: 'The Uganda Investment Authority is the principal government agency responsible for promoting, facilitating and monitoring investment in Uganda. It licenses investment projects and provides coordination and advisory services to both domestic and foreign investors. It also promotes Uganda as an investment destination and runs monitoring, evaluation and aftercare services once projects are operating. Investors who are unsure where to start usually begin here, as it is the single point of contact for most investment questions.',
     services: [
       'Promoting Uganda as Investment destination of choice',
       'Investment Licensing, Facilitation, Coordination and Advisory Services',
@@ -46,7 +46,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'ursb',
     name: 'Uganda Registration Services Bureau',
     acronym: 'URSB',
-    description: 'Responsible for business registration, company formation and intellectual property registration.',
+    description: 'The Uganda Registration Services Bureau handles business registration, company formation and intellectual property registration. Entrepreneurs can reserve a company or business name before registering, then file the forms needed to form a new company. The Bureau also processes business name registrations for sole traders and partnerships. Registration here is usually the first legal step for a business that wants to trade in Uganda.',
     services: [
       'Reservation of business or company name',
       'Registration of a new company',
@@ -69,7 +69,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'ura',
     name: 'Uganda Revenue Authority',
     acronym: 'URA',
-    description: 'Responsible for tax administration and collection in Uganda.',
+    description: 'The Uganda Revenue Authority administers and collects taxes in Uganda. It issues Tax Identification Numbers (TINs) for individuals and non-individuals, which businesses need before most dealings with government. The Authority also provides tax information, advisory services and guidance on tax incentives under their stated terms and conditions. Investors should confirm their tax position with URA before committing to a project.',
     services: [
       'Tax Incentives based on terms and conditions',
       'Tax information',
@@ -92,7 +92,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'kcca',
     name: 'Kampala Capital City Authority',
     acronym: 'KCCA',
-    description: 'Local government authority for Kampala city administration and services.',
+    description: 'The Kampala Capital City Authority is the local government body that administers Kampala, the country\'s capital and main commercial centre. It manages city services and the local administration that affects businesses operating within the city. Companies planning to set up or expand in Kampala should check with the Authority on local requirements for their site. Its role is distinct from national agencies, so it is often consulted alongside them.',
     services: [
         'Application for City Operators Identification Number (COIN)',
         'Application and processing of Trading License'
@@ -113,7 +113,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'dcic',
     name: 'Directorate of Citizenship and Immigration Control',
     acronym: 'DCIC',
-    description: 'Responsible for managing migration to and from Uganda.',
+    description: 'The Directorate of Citizenship and Immigration Control manages migration into and out of Uganda. It is responsible for citizenship matters and the control of immigration, including the entry and status of foreign nationals. Investors and expatriate staff who need work or residence permits will deal with this Directorate. Early engagement helps avoid delays in bringing key personnel into a project.',
     services: [
         'Processing and Issuance of organization code',
         'Processing and Issuance of work permits',
@@ -140,7 +140,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'nema',
     name: 'National Environment Management Authority',
     acronym: 'NEMA',
-    description: 'Responsible for environmental management and protection in Uganda.',
+    description: 'The National Environment Management Authority is responsible for environmental management and protection in Uganda. It gives technical guidance on the permits and licences a project needs and on the Environmental and Social Impact Assessment (ESIA) certificate. The Authority also carries out environmental monitoring, inspections and compliance audits. Most investment projects that affect land, water or emissions must engage with NEMA before construction begins.',
     services: [
       'Technical guidance on obtaining relevant permits and licenses',
       'Technical guidance on obtaining certificate of approval of Environmental and Social Impact Assessment (ESIA)',
@@ -164,7 +164,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'unbs',
     name: 'Uganda National Bureau of Standards',
     acronym: 'UNBS',
-    description: 'Responsible for standards development, conformity assessment and quality assurance.',
+    description: 'The Uganda National Bureau of Standards develops national standards and assesses whether products and services conform to them. It runs quality assurance programmes that help businesses meet the requirements for their products to be sold. Manufacturers and exporters use the Bureau to certify conformity before entering domestic or regional markets. Engaging early with standards requirements avoids costly redesign later in production.',
     services: [
         'Application for product certification',
         'Guide to submitting sample products for testing',
@@ -186,7 +186,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'mlhud',
     name: 'Ministry of Lands, Housing and Urban Development',
     acronym: 'MLHUD',
-    description: 'Responsible for land management, housing and urban development.',
+    description: 'The Ministry of Lands, Housing and Urban Development is responsible for land management, housing and urban development in Uganda. It oversees land titles, land use and planning that determine where investments can be sited. Projects involving land acquisition or large developments need the Ministry\'s approvals and clearances. Investors should verify land title and planning status before committing funds to a site.',
     services: [
         'Verification of land titles',
         'Advisory on land acquisition',
@@ -208,7 +208,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'nssf',
     name: 'National Social Security Fund',
     acronym: 'NSSF',
-    description: 'A National Saving Scheme mandated by Government through the NSSF Act.',
+    description: 'The National Social Security Fund is a national savings scheme mandated by Government through the NSSF Act. Employers register their staff and remit contributions on their behalf, which builds retirement savings for workers. The Fund is an obligation for most formal employers, so payroll compliance is part of setting up a business. Investors should factor these contributions into staffing costs and payroll planning.',
     services: [
         'Employee / Employer Registration',
         'Clearance Certificate application',
@@ -231,7 +231,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'cma',
     name: 'Capital Markets Authority',
     acronym: 'CMA',
-    description: 'A statutory body responsible for promoting, developing and regulating the capital markets industry in Uganda.',
+    description: 'The Capital Markets Authority is a statutory body that promotes, develops and regulates the capital markets industry in Uganda. It oversees securities markets, the firms that operate in them and the protection of investors who buy and sell securities. Companies considering a listing or a public share offer must meet the Authority\'s requirements. The Authority is a key reference for investors seeking to raise capital through the local market.',
     services: [
         'Investing in Capital Markets',
         'Licensing requirements',
@@ -254,7 +254,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'umeme',
     name: 'UMEME',
     acronym: 'UMEME',
-    description: "Uganda's main electricity distribution company.",
+    description: 'UMEME is Uganda\'s main electricity distribution company, supplying power to homes, businesses and industry across the country. Industrial and commercial projects must agree a grid connection and supply arrangement with the company. Reliable power is a major operating cost for many investments, so connection timelines should be planned early. Businesses should confirm connection, metering and tariff arrangements directly with UMEME.',
     services: [
         'Site inspection',
         'Connection/reconnection',
@@ -278,7 +278,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'nwsc',
     name: 'National Water and Sewerage Corporation',
     acronym: 'NWSC',
-    description: 'Provides water and sewerage services in urban areas of Uganda.',
+    description: 'The National Water and Sewerage Corporation provides water and sewerage services in urban areas of Uganda. It processes applications for industrial water connections and advises on the requirements for water and sewerage services. Customers can report faults and receive notice of planned interruptions that might affect operations. Factories and hotels should secure their water supply with the Corporation before commissioning.',
     services: [
       'Application and processing of Industrial water connections',
       'Faults resolutions',
@@ -301,7 +301,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'utb',
     name: 'Uganda Tourism Board',
     acronym: 'UTB',
-    description: 'The official tourism promotion agency of Uganda.',
+    description: 'The Uganda Tourism Board is the official tourism promotion agency of Uganda. It markets Uganda as a destination to international visitors and supports the wider tourism sector. Investors in hotels, lodges and attractions can work with the Board on promotion and marketing support. The Board\'s promotion of destinations such as the national parks directly supports demand for new tourism investments.',
     services: [
         'Provide Information on Tourism Investment Opportunities in Uganda',
         'Registration of Tourism Establishment in Uganda',
@@ -324,7 +324,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'ufza',
     name: 'Uganda Free Zones Authority',
     acronym: 'UFZA',
-    description: 'Manages and promotes free zones for industrial and commercial development.',
+    description: 'The Uganda Free Zones Authority manages and promotes free zones for industrial and commercial development. It issues free zone licences, which allow qualifying businesses to operate under the Authority\'s special arrangements. Free zones are designed to attract export-oriented manufacturing and commercial activity. Companies that plan to export or import large volumes of goods should assess whether a free zone licence suits their model.',
     services: [
       'Issuance of free zones licenses'
     ],
@@ -344,7 +344,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'fue',
     name: 'Federation of Uganda Employers',
     acronym: 'FUE',
-    description: 'The voice of employers in Uganda on all social and economic policy issues.',
+    description: 'The Federation of Uganda Employers represents employers in Uganda on social and economic policy issues. It engages government and other stakeholders on matters that affect the business environment, such as labour and productivity. Member employers receive advocacy, information and advice on workforce policy. Investors who want to understand the employer perspective on policy can use the Federation as a key point of contact.',
     services: [
         'Employment relations and legal services',
         'Research, policy & advocacy – as per ILO mandate',
@@ -367,7 +367,7 @@ export const ugandaAgencies: AgencyContact[] = [
     id: 'the-giants-club',
     name: 'The Giants Club',
     acronym: 'The Giants Club',
-    description: 'An initiative of Space for Giants, that unites visionary leaders of African states with philanthropists, and scientists to protect Africa’s remaining wildernesses.',
+    description: 'The Giants Club is an initiative of Space for Giants that brings together visionary leaders of African states, philanthropists and scientists. Its purpose is to protect Africa\'s remaining wildernesses and the large species that depend on them. The Club links conservation goals with government leadership and private funding. Investors in conservation, eco-tourism and wildlife-related projects can engage with the Club as a partner.',
     services: [
         'Information on Tourism investment opportunities',
         'Promotion of conservation projects',

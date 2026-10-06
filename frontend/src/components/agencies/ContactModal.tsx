@@ -105,7 +105,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
+          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t border-neutral-200 pt-5"
         >
           {/* Header */}
           <div className="bg-black text-yellow-400 p-4 sm:p-6 rounded-t-xl">
@@ -259,7 +259,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
               <label className="block text-sm font-medium text-neutral-800 mb-2">
                 Attachments (Optional)
               </label>
-              <div className="-2 -dashed p-4 border-t-2 border-black pt-5">
+              <div className="-2 -dashed p-4 border-t border-neutral-200 pt-5">
                 <input
                   type="file"
                   multiple

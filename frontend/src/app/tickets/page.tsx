@@ -104,7 +104,7 @@ export default function TicketsPage() {
   if (!isStaff) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="max-w-lg w-full text-center border-t-4 border-yellow-400 pt-8">
+        <div className="max-w-lg w-full text-center pt-8">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
             <ShieldCheckIcon className="w-8 h-8 text-red-600" />
           </div>

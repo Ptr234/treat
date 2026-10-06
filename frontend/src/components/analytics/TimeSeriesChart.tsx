@@ -32,7 +32,7 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as TimeSeriesPoint;
       return (
-        <div className="p-4 border-t-2 border-black pt-5">
+        <div className="p-4 border-t border-neutral-200 pt-5">
           <p className="font-semibold text-black mb-3">{formatMonth(label ?? '')}</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -123,19 +123,19 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
 
           return (
             <>
-              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+              <div className="p-4 bg-yellow-50 border-t border-neutral-200 pt-5">
                 <p className="text-xs font-medium text-neutral-700 uppercase">Total Inquiries</p>
                 <p className="text-2xl font-bold text-red-600 mt-1">{totalInquiries.toLocaleString()}</p>
               </div>
-              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+              <div className="p-4 bg-yellow-50 border-t border-neutral-200 pt-5">
                 <p className="text-xs font-medium text-neutral-700 uppercase">Total Conversions</p>
                 <p className="text-2xl font-bold text-red-600 mt-1">{totalConversions}</p>
               </div>
-              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+              <div className="p-4 bg-yellow-50 border-t border-neutral-200 pt-5">
                 <p className="text-xs font-medium text-neutral-700 uppercase">Avg Monthly Inquiries</p>
                 <p className="text-2xl font-bold text-red-600 mt-1">{avgInquiries}</p>
               </div>
-              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+              <div className="p-4 bg-yellow-50 border-t border-neutral-200 pt-5">
                 <p className="text-xs font-medium text-neutral-700 uppercase">Conversion Rate</p>
                 <p className="text-2xl font-bold text-red-600 mt-1">{conversionRate}%</p>
               </div>

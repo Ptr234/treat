@@ -114,7 +114,7 @@ export default function InvoiceGeneratorPage() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           {/* Invoice form */}
           <section aria-labelledby="invoice-form-heading">
-            <h2 id="invoice-form-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Invoice details</h2>
+            <h2 id="invoice-form-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Invoice details</h2>
 
             <div className="mt-8 space-y-10">
               {/* Business information */}
@@ -177,7 +177,7 @@ export default function InvoiceGeneratorPage() {
                   <button
                     type="button"
                     onClick={addLineItem}
-                    className="border-b-2 border-yellow-400 px-1 text-sm font-bold text-black hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                    className=" px-1 text-sm font-bold text-black hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                   >
                     + Add item
                   </button>
@@ -234,17 +234,17 @@ export default function InvoiceGeneratorPage() {
 
           {/* Preview */}
           <section aria-labelledby="invoice-preview-heading">
-            <h2 id="invoice-preview-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Invoice preview</h2>
+            <h2 id="invoice-preview-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Invoice preview</h2>
 
             {!showPreview ? (
-              <div className="mt-8 border-l-4 border-yellow-400 py-8 pl-6">
+              <div className="mt-8 py-8 pl-6">
                 <p className="text-lg font-bold text-black">Invoice preview</p>
                 <p className="mt-2 text-sm text-neutral-700">Fill out the form and click Generate invoice.</p>
               </div>
             ) : (
               <div className="mt-8 min-h-96">
                 {/* Invoice header */}
-                <div className="border-b-2 border-black pb-4">
+                <div className="border-b border-neutral-200 pb-4">
                   <h3 className="text-3xl font-bold tracking-tight">INVOICE</h3>
                   <p className="mt-1 text-sm text-neutral-700">Invoice #{invoiceNumber}</p>
                 </div>
@@ -284,7 +284,7 @@ export default function InvoiceGeneratorPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b-2 border-black">
+                      <tr className="border-b border-neutral-200">
                         <th scope="col" className="py-2 text-left font-bold">Description</th>
                         <th scope="col" className="py-2 text-right font-bold">Qty</th>
                         <th scope="col" className="py-2 text-right font-bold">Rate</th>
@@ -315,7 +315,7 @@ export default function InvoiceGeneratorPage() {
                       <dt className="text-neutral-700">VAT (18%)</dt>
                       <dd className="font-semibold">UGX {calculateTax().toLocaleString()}</dd>
                     </div>
-                    <div className="flex justify-between border-t-2 border-black pt-3 text-lg">
+                    <div className="flex justify-between border-t border-neutral-200 pt-3 text-lg">
                       <dt className="font-bold">Total</dt>
                       <dd className="font-bold text-red-600">UGX {calculateTotal().toLocaleString()}</dd>
                     </div>
@@ -330,15 +330,15 @@ export default function InvoiceGeneratorPage() {
         <section className="mt-16 border-t border-neutral-200 pt-10" aria-labelledby="invoice-features-heading">
           <h2 id="invoice-features-heading" className="text-lg font-bold">Invoice features</h2>
           <ul className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-3">
-            <li className="border-t-2 border-yellow-400 pt-4">
+            <li className=" pt-4">
               <h3 className="font-bold">Professional design</h3>
               <p className="mt-2 text-sm leading-6 text-neutral-700">Clean, professional invoice templates that look great.</p>
             </li>
-            <li className="border-t-2 border-yellow-400 pt-4">
+            <li className=" pt-4">
               <h3 className="font-bold">Multiple formats</h3>
               <p className="mt-2 text-sm leading-6 text-neutral-700">Download as PDF, send via email, or print directly.</p>
             </li>
-            <li className="border-t-2 border-yellow-400 pt-4">
+            <li className=" pt-4">
               <h3 className="font-bold">Tax compliance</h3>
               <p className="mt-2 text-sm leading-6 text-neutral-700">Automatically calculates taxes according to Uganda regulations.</p>
             </li>

@@ -500,7 +500,7 @@ export default function InvoiceGenerator() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="border-t-4 border-black pt-6"
+          className="border-t border-neutral-200 pt-6"
         >
           <h3 className="text-xl sm:text-2xl font-semibold text-neutral-800 mb-6">
             Invoice Details
@@ -782,13 +782,13 @@ export default function InvoiceGenerator() {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="border-t-4 border-black pt-6"
+          className="border-t border-neutral-200 pt-6"
         >
           <h3 className="text-xl sm:text-2xl font-semibold text-red-700 mb-6">
             Invoice Preview
           </h3>
 
-          <div className="space-y-6 border-y-2 border-black py-6">
+          <div className="space-y-6 border-y border-neutral-200 py-6">
             {/* Invoice Header */}
             <div className="text-center border-b border-neutral-400 pb-6">
               <h2 className="text-3xl font-bold text-red-700">INVOICE</h2>

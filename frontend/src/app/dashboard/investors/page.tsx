@@ -213,7 +213,7 @@ export default function InvestorsPage() {
                         <select
                           value={statusKey(inv)}
                           onChange={(e) => handleStatusChange(inv, e.target.value)}
-                          className="text-xs text-black px-2 py-1 border-t-2 border-black pt-5"
+                          className="text-xs text-black px-2 py-1 border-t border-neutral-200 pt-5"
                         >
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
@@ -248,7 +248,7 @@ export default function InvestorsPage() {
 
           {/* Detail Panel */}
           {selectedInvestor && (
-            <div className="p-6 h-fit sticky top-8 border-t-2 border-black pt-5">
+            <div className="p-6 h-fit sticky top-8 border-t border-neutral-200 pt-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Investor Details</h2>
                 <button onClick={() => setSelectedInvestor(null)} className="text-neutral-600 hover:text-red-600 text-sm">Close</button>
@@ -279,7 +279,7 @@ export default function InvestorsPage() {
                   </div>
                 ))}
                 {selectedInvestor.linkedBusinessRegistrationRef && (
-                  <div className="bg-green-500/10 p-3 border-t-2 border-black pt-5">
+                  <div className="bg-green-500/10 p-3 border-t border-neutral-200 pt-5">
                     <span className="text-green-400 text-xs font-medium block mb-1">
                       Linked URSB Registration
                     </span>

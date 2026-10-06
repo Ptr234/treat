@@ -116,7 +116,7 @@ export default function AccountPage() {
   if (!isAuthenticated) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="max-w-md w-full text-center border-t-4 border-yellow-400 pt-8">
+        <div className="max-w-md w-full text-center pt-8">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
             <LockClosedIcon className="w-8 h-8 text-black" />
           </div>
@@ -149,7 +149,7 @@ export default function AccountPage() {
           </div>
           <button
             onClick={load}
-            className="inline-flex items-center gap-2 border-b-2 border-yellow-400 pb-0.5 text-sm font-bold text-black hover:text-red-600 self-start"
+            className="inline-flex items-center gap-2 pb-0.5 text-sm font-bold text-black hover:text-red-600 self-start"
           >
             <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -168,7 +168,7 @@ export default function AccountPage() {
         )}
 
         {!loading && !error && totalCount === 0 && (
-          <div className="border-t-4 border-yellow-400 pt-10 text-center">
+          <div className=" pt-10 text-center">
             <p className="text-black font-bold mb-2">You haven&apos;t submitted anything yet.</p>
             <p className="text-neutral-600 mb-6">Start an inquiry, book an appointment, or register as an investor.</p>
             <div className="flex flex-wrap gap-3 justify-center">
@@ -182,7 +182,7 @@ export default function AccountPage() {
           <div className="space-y-8">
             {/* Investor application */}
             {investor && (
-              <section className="border-t-2 border-black pt-5">
+              <section className="border-t border-neutral-200 pt-5">
                 <div className="flex items-center gap-2 mb-4">
                   <BriefcaseIcon className="w-5 h-5 text-red-600" />
                   <h2 className="text-lg font-bold text-black">Investor Application</h2>
@@ -210,7 +210,7 @@ export default function AccountPage() {
 
             {/* Tickets */}
             {tickets.length > 0 && (
-              <section className="border-t-2 border-black pt-5">
+              <section className="border-t border-neutral-200 pt-5">
                 <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
                   <TicketIcon className="w-5 h-5 text-red-600" />
                   <h2 className="text-lg font-bold text-black">Inquiries &amp; Tickets</h2>
@@ -229,7 +229,7 @@ export default function AccountPage() {
                       <StatusBadge status={t.status} />
                       <Link
                         href={`/tickets/${t.referenceNumber}?email=${encodeURIComponent(user?.email || '')}`}
-                        className="inline-flex items-center gap-1 text-sm font-bold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600"
+                        className="inline-flex items-center gap-1 text-sm font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
                       >
                         Track <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                       </Link>
@@ -241,7 +241,7 @@ export default function AccountPage() {
 
             {/* Inquiries (agency contact) */}
             {inquiries.length > 0 && (
-              <section className="border-t-2 border-black pt-5">
+              <section className="border-t border-neutral-200 pt-5">
                 <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
                   <ChatBubbleLeftRightIcon className="w-5 h-5 text-red-600" />
                   <h2 className="text-lg font-bold text-black">Agency Inquiries</h2>
@@ -263,7 +263,7 @@ export default function AccountPage() {
 
             {/* Appointments */}
             {appointments.length > 0 && (
-              <section className="border-t-2 border-black pt-5">
+              <section className="border-t border-neutral-200 pt-5">
                 <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
                   <CalendarDaysIcon className="w-5 h-5 text-red-600" />
                   <h2 className="text-lg font-bold text-black">Appointments</h2>

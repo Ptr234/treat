@@ -188,11 +188,11 @@ export default function TaxCalculatorPage() {
           Calculate your tax obligations using official URA rates. Individual income tax, corporate tax, and VAT calculations.
         </p>
         <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Individual tax</dt>
             <dd className="mt-1 text-xl font-bold">0–40%</dd>
           </div>
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Corporate tax</dt>
             <dd className="mt-1 text-xl font-bold">20–30%</dd>
           </div>
@@ -206,7 +206,7 @@ export default function TaxCalculatorPage() {
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
         {/* Inputs */}
         <section className="lg:col-span-2" aria-labelledby="tax-inputs-heading">
-          <h2 id="tax-inputs-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Tax calculator</h2>
+          <h2 id="tax-inputs-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Tax calculator</h2>
 
           {/* Calculator type */}
           <div role="group" aria-label="Calculator type" className="mt-6 grid grid-cols-3 gap-2">
@@ -331,7 +331,7 @@ export default function TaxCalculatorPage() {
                   className={inputClass}
                 />
               </div>
-              <div className="flex items-start gap-3 border-l-4 border-yellow-400 pl-4 text-sm">
+              <div className="flex items-start gap-3 pl-4 text-sm">
                 <InformationCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" aria-hidden="true" />
                 <div>
                   <p className="font-bold text-black">VAT registration threshold</p>
@@ -349,7 +349,7 @@ export default function TaxCalculatorPage() {
         <aside className="space-y-12" aria-label="Results and information">
           {calculation && (
             <section aria-labelledby="tax-results-heading">
-              <h2 id="tax-results-heading" className="flex items-center gap-2 border-b-2 border-black pb-3 text-lg font-bold">
+              <h2 id="tax-results-heading" className="flex items-center gap-2 border-b border-neutral-200 pb-3 text-lg font-bold">
                 <CalculatorIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
                 Tax calculation results
               </h2>
@@ -389,7 +389,7 @@ export default function TaxCalculatorPage() {
           )}
 
           <section aria-labelledby="tax-info-heading">
-            <h2 id="tax-info-heading" className="flex items-center gap-2 border-b-2 border-black pb-3 text-lg font-bold">
+            <h2 id="tax-info-heading" className="flex items-center gap-2 border-b border-neutral-200 pb-3 text-lg font-bold">
               <InformationCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
               Tax information
             </h2>
@@ -418,13 +418,13 @@ export default function TaxCalculatorPage() {
             </ul>
           </section>
 
-          <section aria-labelledby="ura-heading" className="border-t-4 border-yellow-400 pt-6">
+          <section aria-labelledby="ura-heading" className=" pt-6">
             <h2 id="ura-heading" className="text-lg font-bold">Need tax assistance?</h2>
             <p className="mt-2 text-sm leading-6 text-neutral-700">Contact Uganda Revenue Authority for official tax guidance.</p>
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex gap-2"><dt className="font-bold text-black">Phone:</dt><dd className="text-neutral-700">+256 417 444 602</dd></div>
               <div className="flex gap-2"><dt className="font-bold text-black">Toll free:</dt><dd className="text-neutral-700">0800 117 000</dd></div>
-              <div className="flex gap-2"><dt className="font-bold text-black">Email:</dt><dd><a href="mailto:info@ura.go.ug" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">info@ura.go.ug</a></dd></div>
+              <div className="flex gap-2"><dt className="font-bold text-black">Email:</dt><dd><a href="mailto:info@ura.go.ug" className="font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600">info@ura.go.ug</a></dd></div>
             </dl>
           </section>
         </aside>

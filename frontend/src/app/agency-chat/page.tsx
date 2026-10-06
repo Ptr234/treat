@@ -523,7 +523,7 @@ export default function AgencyChatPage() {
   if (!canUseChat) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="max-w-md w-full text-center border-t-4 border-yellow-400 pt-8">
+        <div className="max-w-md w-full text-center pt-8">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
           </div>
@@ -915,7 +915,7 @@ export default function AgencyChatPage() {
             <div className="px-4 sm:px-6 py-3 border-t border-neutral-200 bg-white">
               {/* Reply preview */}
               {replyTarget && (
-                <div className="mb-2 flex items-start gap-2 px-3 py-2 bg-neutral-100 border-l-2 border-yellow-400 rounded-r-lg">
+                <div className="mb-2 flex items-start gap-2 px-3 py-2 bg-neutral-100 rounded-r-lg">
                   <ArrowUturnLeftIcon className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-red-600">

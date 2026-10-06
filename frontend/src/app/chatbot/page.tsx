@@ -426,7 +426,7 @@ function ChatbotPageInner() {
         {/* Input Area */}
         <div className="flex-shrink-0 pb-4 pt-2 px-4 md:px-6">
           <div className="max-w-3xl mx-auto">
-            <div className="relative flex items-end border-b-2 border-black focus-within:border-red-600 transition-colors">
+            <div className="relative flex items-end border-b border-neutral-200 focus-within:border-red-600 transition-colors">
               <textarea
                 ref={textareaRef}
                 value={inputValue}
@@ -485,7 +485,7 @@ function ChatbotPageInner() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white border-t-4 border-yellow-400 p-6 max-w-md w-full"
+              className="bg-white p-6 max-w-md w-full"
             >
               <div className="flex items-center gap-3 mb-4">
                 <AlertCircle className="w-6 h-6 text-red-600" />

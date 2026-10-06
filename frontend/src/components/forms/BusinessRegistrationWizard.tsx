@@ -690,7 +690,7 @@ export default function BusinessRegistrationWizard() {
               </div>
             )}
             
-            <div className="border-l-4 border-black pl-4 py-2">
+            <div className="border-l border-neutral-200 pl-4 py-2">
               <p className="text-blue-700 text-sm">
                 Current Total Ownership: {businessData.owners.reduce((sum, owner) => {
                   const percentage = parseFloat(owner.percentage) || 0;
@@ -850,7 +850,7 @@ export default function BusinessRegistrationWizard() {
           <div className="space-y-6">
             <h3 className="text-xl sm:text-2xl font-bold text-black">Registration Requirements</h3>
             
-            <div className="border-l-4 border-black pl-4 py-2">
+            <div className="border-l border-neutral-200 pl-4 py-2">
               <h4 className="text-lg font-medium text-blue-900 mb-2">
                 Estimated Cost: UGX {businessData.estimatedCost.toLocaleString()}
               </h4>
@@ -880,7 +880,7 @@ export default function BusinessRegistrationWizard() {
               </div>
             </div>
 
-            <div className="border-l-4 border-yellow-400 pl-4 py-2">
+            <div className=" pl-4 py-2">
               <h4 className="text-lg font-medium text-neutral-900 mb-2">Next Steps</h4>
               <ol className="list-decimal list-inside space-y-2 text-red-600">
                 <li>Prepare all required documents</li>
@@ -902,7 +902,7 @@ export default function BusinessRegistrationWizard() {
     <div className="max-w-4xl mx-auto p-4 sm:p-6">
       {/* Success Banner */}
       {submitResult && (
-        <div className="mb-6 border-l-4 border-black pl-4 py-2">
+        <div className="mb-6 border-l border-neutral-200 pl-4 py-2">
           <h4 className="text-lg font-semibold text-green-800">Registration Submitted Successfully!</h4>
           <p className="text-green-700 mt-1">
             Reference Number: <strong>{submitResult.referenceNumber}</strong>

@@ -12,7 +12,7 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
     if (active && payload && payload.length) {
       const stage = payload[0]?.payload as FunnelStage;
       return (
-        <div className="p-4 border-t-2 border-black pt-5">
+        <div className="p-4 border-t border-neutral-200 pt-5">
           <p className="font-semibold text-black mb-2">{stage.stage}</p>
           <p className="text-sm text-neutral-700">Count: <span className="font-medium">{stage.count}</span></p>
           <p className="text-sm text-neutral-700">Conversion: <span className="font-medium">{stage.conversionRate.toFixed(1)}%</span></p>
@@ -113,7 +113,7 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
       </div>
 
       {/* Overall Conversion Summary */}
-      <div className="mt-6 p-4 bg-yellow-50 border-t-2 border-black pt-5">
+      <div className="mt-6 p-4 bg-yellow-50 border-t border-neutral-200 pt-5">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-neutral-800">Overall Conversion Rate</p>

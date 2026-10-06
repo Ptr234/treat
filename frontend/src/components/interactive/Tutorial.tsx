@@ -132,7 +132,7 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
       {/* Highlight */}
       {highlightElement && (
         <div
-          className="fixed -4 pointer-events-none z-[60] animate-pulse border-t-2 border-black pt-5"
+          className="fixed -4 pointer-events-none z-[60] animate-pulse border-t border-neutral-200 pt-5"
           style={{
             top: highlightElement.offsetTop - 4,
             left: highlightElement.offsetLeft - 4,

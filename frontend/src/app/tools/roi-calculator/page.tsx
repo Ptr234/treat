@@ -66,9 +66,8 @@ export default function ROICalculatorPage() {
           Calculate your return on investment for Uganda business opportunities with sector-specific incentives and ATMS tax benefits.
         </p>
         <ul className="mt-10 grid gap-8 border-y border-neutral-200 py-8 md:grid-cols-3">
-          {FEATURES.map((feature, index) => (
-            <li key={feature.title} className="border-l-4 border-yellow-400 pl-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-red-600">{String(index + 1).padStart(2, '0')}</p>
+          {FEATURES.map((feature) => (
+            <li key={feature.title} className=" pl-4">
               <h2 className="mt-1 font-bold">{feature.title}</h2>
               <p className="mt-1 text-sm leading-6 text-neutral-700">{feature.body}</p>
             </li>
@@ -87,7 +86,7 @@ export default function ROICalculatorPage() {
         <h2 id="why-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Realistic projections for Uganda</h2>
         <ul className="mt-10 grid gap-10 md:grid-cols-3">
           {WHY.map((item) => (
-            <li key={item.title} className="border-t-2 border-black pt-5">
+            <li key={item.title} className="border-t border-neutral-200 pt-5">
               <h3 className="text-lg font-bold">{item.title}</h3>
               <p className="mt-2 text-sm leading-6 text-neutral-700">{item.body}</p>
             </li>
@@ -103,7 +102,7 @@ export default function ROICalculatorPage() {
           It measures the amount of return on an investment relative to the investment&apos;s cost.
         </p>
         <dl className="mt-10 grid gap-8 md:grid-cols-3">
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-sm font-bold uppercase tracking-wider text-neutral-600">Formula</dt>
             <dd className="mt-2 font-semibold">ROI = (Gain − Cost) / Cost × 100%</dd>
           </div>
@@ -111,7 +110,7 @@ export default function ROICalculatorPage() {
             <dt className="text-sm font-bold uppercase tracking-wider text-neutral-600">Good ROI</dt>
             <dd className="mt-2 font-semibold">15–25% annually in Uganda’s growth sectors</dd>
           </div>
-          <div className="border-l-4 border-yellow-400 pl-4">
+          <div className=" pl-4">
             <dt className="text-sm font-bold uppercase tracking-wider text-neutral-600">Factors</dt>
             <dd className="mt-2 font-semibold">Sector multipliers, tax incentives, location risk</dd>
           </div>

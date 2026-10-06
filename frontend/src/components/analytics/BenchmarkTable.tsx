@@ -46,7 +46,7 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
       <div className="hidden lg:block overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-yellow-50 border-b-2 border-yellow-400">
+            <tr className="bg-yellow-50">
               <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-800">Metric</th>
               <th className="text-center py-3 px-4 text-sm font-semibold text-neutral-800">Current</th>
               <th className="text-center py-3 px-4 text-sm font-semibold text-neutral-800">Target</th>

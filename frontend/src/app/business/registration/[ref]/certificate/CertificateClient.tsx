@@ -89,7 +89,7 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
 
         {/* The certificate itself */}
         <div className="bg-white border-8 border-double border-yellow-600 p-10 print:border-4">
-          <div className="text-center border-b-2 border-black pb-6 mb-6">
+          <div className="text-center border-b border-neutral-200 pb-6 mb-6">
             <p className="text-xs tracking-[0.3em] text-red-700 font-bold uppercase">Republic of Uganda</p>
             <h1 className="text-2xl font-black text-black mt-2">Uganda Registration Services Bureau</h1>
             <p className="text-sm text-neutral-700 mt-1">Certificate of Business Registration</p>

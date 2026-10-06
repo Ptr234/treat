@@ -67,7 +67,7 @@ export default function AuditPage() {
   if (!isAdmin) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="p-8 max-w-md w-full text-center border-t-2 border-black pt-5">
+        <div className="p-8 max-w-md w-full text-center border-t border-neutral-200 pt-5">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-red-600" />
           </div>
@@ -116,7 +116,7 @@ export default function AuditPage() {
           />
         </div>
 
-        <div className="overflow-x-auto border-t-2 border-black pt-5">
+        <div className="overflow-x-auto border-t border-neutral-200 pt-5">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-neutral-600 border-b border-neutral-200">

@@ -22,7 +22,7 @@ interface EventDetailClientProps {
 }
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const inputClass =
   'w-full rounded-md border border-neutral-400 bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
@@ -133,7 +133,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         {/* Main content */}
         <div className="space-y-12 lg:col-span-2">
           <section aria-labelledby="event-details-heading">
-            <h2 id="event-details-heading" className="border-b-2 border-black pb-3 text-2xl font-bold">Event details</h2>
+            <h2 id="event-details-heading" className="border-b border-neutral-200 pb-3 text-2xl font-bold">Event details</h2>
 
             <dl className="mt-6 space-y-6">
               <div className="flex items-start gap-4">
@@ -205,7 +205,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
               <h2 id="speakers-heading" className="text-2xl font-bold">Speakers</h2>
               <ul className="mt-6 grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2">
                 {event.speakers.map((speaker, index) => (
-                  <li key={index} className="border-l-4 border-yellow-400 pl-4">
+                  <li key={index} className=" pl-4">
                     <h3 className="font-bold">{speaker.name}</h3>
                     <p className="mt-1 text-sm text-neutral-700">{speaker.title}</p>
                     <p className="text-sm text-neutral-600">{speaker.organization}</p>
@@ -243,18 +243,18 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         {/* Sidebar */}
         <aside className="space-y-12">
           <section aria-labelledby="calendar-heading">
-            <h2 id="calendar-heading" className="border-b-2 border-black pb-3 text-lg font-bold">Add to calendar</h2>
+            <h2 id="calendar-heading" className="border-b border-neutral-200 pb-3 text-lg font-bold">Add to calendar</h2>
             <div className="mt-4">
               <CalendarExport event={event} />
             </div>
           </section>
 
           {isUpcoming && (
-            <section aria-labelledby="register-heading" className="border-t-4 border-yellow-400 pt-6">
+            <section aria-labelledby="register-heading" className=" pt-6">
               <h2 id="register-heading" className="text-lg font-bold">Register for this event</h2>
 
               {registrationStatus === 'success' && (
-                <div role="status" className="mt-4 flex items-start gap-3 border-l-4 border-black bg-neutral-50 p-4">
+                <div role="status" className="mt-4 flex items-start gap-3 border-l border-neutral-200 bg-neutral-50 p-4">
                   <CheckCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-black" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-bold">Registration successful</p>

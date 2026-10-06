@@ -293,21 +293,21 @@ export default function AnalyticsPage() {
               className="space-y-6"
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+                <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                   <GeographicHeatMap data={mockAnalytics.geographic} />
                 </motion.div>
-                <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+                <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                   <SectorDistributionChart data={mockAnalytics.sectorDistribution} />
                 </motion.div>
               </div>
-              <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+              <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                 <TimeSeriesChart data={mockAnalytics.timeSeries} />
               </motion.div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+                <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                   <InvestmentFunnel data={mockAnalytics.funnelData} />
                 </motion.div>
-                <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+                <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                   <BenchmarkTable data={mockAnalytics.benchmarks} />
                 </motion.div>
               </div>
@@ -330,7 +330,7 @@ export default function AnalyticsPage() {
                   { label: 'Planned Employment', value: `${(projectAnalysis.overview.totalPlannedEmployment).toLocaleString()}`, sub: 'Jobs created' },
                   { label: 'Bankable Projects', value: projectAnalysis.overview.activeBankableProjects.toString(), sub: `$${projectAnalysis.overview.bankableInvestmentValue}B pipeline` },
                 ].map((card) => (
-                  <motion.div key={card.label} variants={itemVariants} className="p-5 border-t-2 border-black pt-5">
+                  <motion.div key={card.label} variants={itemVariants} className="p-5 border-t border-neutral-200 pt-5">
                     <p className="text-xs font-medium text-neutral-600 uppercase tracking-wide mb-1">{card.label}</p>
                     <p className="text-2xl sm:text-3xl font-bold text-black">{card.value}</p>
                     <p className="text-sm text-red-600 font-medium mt-1">{card.sub}</p>
@@ -339,7 +339,7 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Licensed Projects by Decade */}
-              <motion.div variants={itemVariants} className="p-4 sm:p-6 border-t-2 border-black pt-5">
+              <motion.div variants={itemVariants} className="p-4 sm:p-6 border-t border-neutral-200 pt-5">
                 <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
                   <CalendarIcon className="w-5 h-5 text-red-600" />
                   Licensed Projects by Period
@@ -414,7 +414,7 @@ export default function AnalyticsPage() {
 
               {/* Recent Financial Years Performance */}
               {projectAnalysis.recentFYData && (
-                <motion.div variants={itemVariants} className="p-4 sm:p-6 border-t-2 border-black pt-5">
+                <motion.div variants={itemVariants} className="p-4 sm:p-6 border-t border-neutral-200 pt-5">
                   <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
                     <ArrowTrendingUpIcon className="w-5 h-5 text-red-600" />
                     Recent Performance (Last 5 Financial Years)
@@ -474,7 +474,7 @@ export default function AnalyticsPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Sector Breakdown */}
-                <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+                <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                   <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
                     <BuildingOffice2Icon className="w-5 h-5 text-red-600" />
                     Licensed Projects by Sector
@@ -496,7 +496,7 @@ export default function AnalyticsPage() {
                 </motion.div>
 
                 {/* Regional Distribution */}
-                <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+                <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                   <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
                     <MapIcon className="w-5 h-5 text-red-600" />
                     Distribution by Region
@@ -533,7 +533,7 @@ export default function AnalyticsPage() {
               </div>
 
               {/* Bankable Projects Pipeline */}
-              <motion.div variants={itemVariants} className="p-4 sm:p-6 border-t-2 border-black pt-5">
+              <motion.div variants={itemVariants} className="p-4 sm:p-6 border-t border-neutral-200 pt-5">
                 <h3 className="text-lg font-bold text-black mb-2 flex items-center gap-2">
                   <CurrencyDollarIcon className="w-5 h-5 text-red-600" />
                   Bankable Projects Pipeline — 2025
@@ -600,7 +600,7 @@ export default function AnalyticsPage() {
               </motion.div>
 
               {/* Yearly Trend */}
-              <motion.div variants={itemVariants} className="p-6 border-t-2 border-black pt-5">
+              <motion.div variants={itemVariants} className="p-6 border-t border-neutral-200 pt-5">
                 <h3 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
                   <ArrowTrendingUpIcon className="w-5 h-5 text-red-600" />
                   Annual Licensing Trend (2018–2025)
@@ -634,7 +634,7 @@ export default function AnalyticsPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
-          className="mt-8 p-4 bg-yellow-50 border-t-2 border-black pt-5"
+          className="mt-8 p-4 bg-yellow-50 border-t border-neutral-200 pt-5"
         >
           <p className="text-sm text-neutral-800 text-center">
             {activeTab === 'projects' ? (

@@ -73,9 +73,8 @@ export default function InvestmentOnboardingPage() {
       <section className="mx-auto mt-12 max-w-6xl border-y border-neutral-200 px-4 py-10 sm:px-6 lg:px-8" aria-labelledby="benefits-heading">
         <h2 id="benefits-heading" className="sr-only">Benefits of onboarding</h2>
         <ul className="grid grid-cols-1 gap-10 md:grid-cols-3">
-          {BENEFITS.map((benefit, index) => (
-            <li key={benefit.title} className="border-t-2 border-yellow-400 pt-5">
-              <p className="text-xs font-bold uppercase tracking-wider text-red-600">{String(index + 1).padStart(2, '0')}</p>
+          {BENEFITS.map((benefit) => (
+            <li key={benefit.title} className=" pt-5">
               <h3 className="mt-2 text-lg font-bold">{benefit.title}</h3>
               <p className="mt-2 text-sm leading-6 text-neutral-700">{benefit.body}</p>
             </li>
@@ -97,7 +96,7 @@ export default function InvestmentOnboardingPage() {
           </p>
           <ul className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-3">
             {TRUST.map((item) => (
-              <li key={item.title} className="border-l-4 border-black pl-5">
+              <li key={item.title} className="border-l border-neutral-200 pl-5">
                 <h3 className="font-bold">{item.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-neutral-700">{item.body}</p>
               </li>

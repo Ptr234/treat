@@ -7,31 +7,31 @@ import {
 } from '@heroicons/react/24/outline';
 
 const linkClass =
-  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const OFFERINGS = [
   {
     icon: BuildingOfficeIcon,
     title: 'Business registration',
-    description: 'Simplified digital business registration process with comprehensive support and guidance.',
+    description: 'Register your business online through a simplified process designed for first-time founders and experienced investors alike. The system guides you through each step, so you know which information and documents are needed. Support and guidance are available at the points where applications commonly stall. You can track your registration after submission.',
     href: '/business/registration',
   },
   {
     icon: CurrencyDollarIcon,
     title: 'Investment support',
-    description: 'Access to investment opportunities and professional facilitation services.',
+    description: 'Explore investment opportunities and get professional help to take a project from idea to licence. Listings show the sector, investment range, lead agency and incentives for each project. Facilitation services connect you with the right officials and reduce the time spent on paperwork. Investors can contact the lead agency directly for the next steps.',
     href: '/investments',
   },
   {
     icon: UserGroupIcon,
     title: 'Government services',
-    description: 'Direct access to various government agencies and their specialized services.',
+    description: 'Contact the government agencies that regulate and support business in Uganda through one directory. Each agency entry explains its services and gives its contact details and operating hours. This saves time when you need to know which office handles a specific licence or tax question. Use the services guide to see which agency to approach at each step.',
     href: '/agencies',
   },
   {
     icon: WrenchScrewdriverIcon,
     title: 'Digital tools',
-    description: 'Professional calculators, forms, and tools to optimize business operations.',
+    description: 'Use calculators, forms and checklists that help you plan and run your business. The tax calculator estimates your obligations, and the ROI calculator helps you compare opportunities. The invoice generator and document checklist support everyday paperwork. Each tool is designed around the requirements that apply in Uganda.',
     href: '/tools',
   },
 ];
@@ -72,7 +72,7 @@ export default function AboutPage() {
       {/* Mission and vision */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="mission-heading">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
-          <div className="border-t-2 border-black pt-6">
+          <div className="border-t border-neutral-200 pt-6">
             <h2 id="mission-heading" className="text-2xl font-bold sm:text-3xl">Our mission</h2>
             <p className="mt-5 leading-7 text-neutral-700">
               OneStop Centre Uganda serves as the digital gateway to streamlined government services,
@@ -81,7 +81,7 @@ export default function AboutPage() {
               with precision and efficiency.
             </p>
           </div>
-          <div className="border-t-2 border-black pt-6">
+          <div className="border-t border-neutral-200 pt-6">
             <h2 className="text-2xl font-bold sm:text-3xl">Our vision</h2>
             <p className="mt-5 leading-7 text-neutral-700">
               To be the leading digital platform that empowers economic growth in Uganda by
@@ -126,7 +126,7 @@ export default function AboutPage() {
         </div>
         <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-y border-neutral-200 py-10 lg:grid-cols-4">
           {IMPACT.map((stat) => (
-            <div key={stat.label} className="border-l-4 border-yellow-400 pl-4">
+            <div key={stat.label} className=" pl-4">
               <dt className="text-sm font-medium text-neutral-600">{stat.label}</dt>
               <dd className="mt-2 text-3xl font-bold text-black sm:text-4xl">{stat.value}</dd>
             </div>
