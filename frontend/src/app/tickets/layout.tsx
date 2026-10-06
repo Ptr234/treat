@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
   title: "Track tickets",
-  description: "Track and manage your OneStopCentre support tickets.",
+  description: "Track and manage your OneStop Centre support tickets.",
   path: "/tickets/",
   noIndex: true,
 });

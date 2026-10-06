@@ -467,7 +467,7 @@ export default function InvoiceGenerator() {
       <span class="flag-yellow"></span>
       <span class="flag-red"></span>
     </div>
-    <p><strong>Uganda OneStopCentre</strong> &mdash; Official Invoice Document</p>
+    <p><strong>Uganda OneStop Centre</strong> &mdash; Official Invoice Document</p>
     <p>For inquiries contact the issuing agency or visit onestopcentre.go.ug</p>
     <p>Generated on ${new Date().toLocaleDateString('en-UG', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
   </div>

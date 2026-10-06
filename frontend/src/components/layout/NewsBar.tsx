@@ -19,7 +19,7 @@ export default function NewsBar() {
   // The bar is position:fixed, so it takes no layout space of its own. Publish
   // its height as a CSS variable and let the sidebar / mobile header / main
   // column offset by it — otherwise the strip sits *on top of* the sidebar and
-  // clips the OneStopCentre logo instead of sitting above it.
+  // clips the OneStop Centre logo instead of sitting above it.
   useEffect(() => {
     const root = document.documentElement;
     root.style.setProperty('--newsbar-h', isDismissed ? '0px' : NEWSBAR_HEIGHT);

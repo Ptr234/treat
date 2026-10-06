@@ -1,4 +1,4 @@
-// API Client for OneStopCentre Uganda Next.js Application
+// API Client for OneStop Centre Uganda Next.js Application
 import { APIResponse, PaginatedResponse, BusinessRegistration, Investment, Service } from '@/types';
 
 class APIClient {

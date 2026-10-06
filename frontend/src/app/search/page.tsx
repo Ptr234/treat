@@ -8,7 +8,7 @@ import investmentOpportunities from '@/data/investment-opportunities.json';
 
 // export const metadata: Metadata = {
 //   title: 'Search',
-//   description: 'Search for services, agencies, documents, and information across OneStopCentre Uganda.',
+//   description: 'Search for services, agencies, documents, and information across OneStop Centre Uganda.',
 // };
 
 type SearchResult = {
@@ -302,7 +302,7 @@ export default function SearchPage() {
         {/* Search Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight text-black mb-6">
-            Search OneStopCentre
+            Search OneStop Centre
           </h1>
           <p className="text-lg text-neutral-700 mb-8">
             Find services, agencies, documents, and information to help with your business needs.

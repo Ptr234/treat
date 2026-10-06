@@ -11,6 +11,8 @@ import {
   MapIcon,
   ChatBubbleLeftRightIcon,
   MagnifyingGlassIcon,
+  BuildingStorefrontIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import staticData from '@/data/investment-opportunities.json';
 import type { InvestmentOpportunity } from '@/types';
@@ -31,7 +33,7 @@ const HERO_IMAGES = [
 ];
 
 const SECTORS: Sector[] = [
-  { title: 'Agriculture & agro-processing', blurb: 'Grow value across coffee, tea, dairy and food processing.', image: '/images/Tourism.webp' },
+  { title: 'Agriculture & agro-processing', blurb: 'Grow value across coffee, tea, dairy and food processing.', image: '/images/uganda-tea-plantation.webp' },
   { title: 'Tourism & hospitality', blurb: 'Discover opportunities from the Nile to Uganda’s national parks.', image: '/images/lake-bunyonyi-uganda.jpg' },
   { title: 'Infrastructure & real estate', blurb: 'Build for a growing economy with regional connections.', image: '/images/uganda-kampala-city-view.webp' },
   { title: 'ICT & innovation', blurb: 'Join a young, fast-growing and increasingly connected market.', image: '/images/uganda-flag-city.jpg' },
@@ -39,6 +41,7 @@ const SECTORS: Sector[] = [
   // No dedicated energy/mining photo exists in the asset library; this repeats
   // the infrastructure image rather than use another watermarked or mismatched one.
   { title: 'Energy & minerals', blurb: 'Explore opportunities in renewables, oil, gas and mining.', image: '/images/uganda-kampala-city-view.webp' },
+  { title: 'Healthcare', blurb: 'Explore investment in health services and essential care.', image: '/images/uganda-flag-city.jpg' },
 ];
 
 const AGENCIES = [
@@ -76,7 +79,7 @@ const linkClass =
 const sectionHeading = 'mb-3 text-xs font-bold uppercase tracking-[0.18em] text-red-600';
 
 // Which investment-data categories feed each homepage sector.
-// Manufacturing has no listed projects in the data file, so it shows none.
+// Every published project is mapped once; empty categories are left out of the homepage list.
 const SECTOR_CATEGORIES: Record<string, string[]> = {
   'Agriculture & agro-processing': ['Agriculture & Agribusiness'],
   'Tourism & hospitality': ['Tourism & Hospitality'],
@@ -84,7 +87,14 @@ const SECTOR_CATEGORIES: Record<string, string[]> = {
   'ICT & innovation': ['ICT & Technology'],
   'Manufacturing': [],
   'Energy & minerals': ['Energy & Utilities', 'Mining & Minerals'],
+  Healthcare: ['Healthcare'],
 };
+
+const PROJECT_VISUALS = [
+  { image: '/images/uganda-tea-plantation.webp', icon: BuildingStorefrontIcon, label: 'Ugandan tea plantation' },
+  { image: '/images/uganda-map-flag.jpg', icon: BuildingStorefrontIcon, label: 'Map of Uganda' },
+  { image: '/images/lake-bunyonyi-uganda.jpg', icon: GlobeAltIcon, label: 'Lake Bunyonyi in Uganda' },
+];
 
 export default function HomePage() {
   const [heroImages, setHeroImages] = useState(HERO_IMAGES);
@@ -121,8 +131,6 @@ export default function HomePage() {
   const matchingActions = QUICK_ACTIONS.filter((action) =>
     `${action.title} ${action.detail} ${action.keywords}`.toLowerCase().includes(taskSearch.trim().toLowerCase()),
   );
-  const activeSector = sectors[activeSectorIndex] ?? SECTORS[0]!;
-
   const categoryCount = new Set(OPPORTUNITIES.map((o) => o.category)).size;
   const highPriority = OPPORTUNITIES.filter((o) => o.priority === 'High');
   const featured = highPriority.slice(0, 3);
@@ -131,6 +139,8 @@ export default function HomePage() {
     const categories = SECTOR_CATEGORIES[title] ?? [];
     return OPPORTUNITIES.filter((o) => categories.includes(o.category));
   };
+  const visibleSectors = sectors.filter((sector) => projectsFor(sector.title).length > 0);
+  const activeSector = visibleSectors[activeSectorIndex] ?? visibleSectors[0] ?? SECTORS[0]!;
   const activeProjects = projectsFor(activeSector.title);
 
   return (
@@ -209,6 +219,27 @@ export default function HomePage() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Events, answers and practical investor resources */}
+      <section className="border-y border-neutral-200 bg-[#10283f] py-12 text-white" aria-label="Investor updates and help">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-yellow-300">News &amp; events</p>
+            <h2 className="mt-2 text-xl font-bold">Meet Uganda’s investment community</h2>
+            <Link href="/events" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white underline decoration-yellow-300 underline-offset-4">View events <ArrowRightIcon className="h-4 w-4" aria-hidden="true" /></Link>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-yellow-300">Common questions</p>
+            <h2 className="mt-2 text-xl font-bold">Get answers before you apply</h2>
+            <Link href="/support#faq-heading" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white underline decoration-yellow-300 underline-offset-4">Browse investor FAQs <ArrowRightIcon className="h-4 w-4" aria-hidden="true" /></Link>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-yellow-300">Investor guide</p>
+            <h2 className="mt-2 text-xl font-bold">Plan your next step in Uganda</h2>
+            <Link href="/guide" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white underline decoration-yellow-300 underline-offset-4">Read the investor guide <ArrowRightIcon className="h-4 w-4" aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
@@ -315,13 +346,22 @@ export default function HomePage() {
             <Link href="/investments" className={`${linkClass} text-sm`}>All investment opportunities</Link>
           </div>
           <div className="grid gap-x-10 gap-y-10 md:grid-cols-3">
-            {featured.map((opp) => (
-              <article key={opp.id} className="border-t-2 border-black pt-6">
+            {featured.map((opp, index) => {
+              const visual = PROJECT_VISUALS[index % PROJECT_VISUALS.length]!;
+              const SectorIcon = visual.icon;
+              return <article key={opp.id} className="overflow-hidden border border-neutral-200 bg-white shadow-sm">
+                <div className="relative aspect-[16/9] bg-neutral-200">
+                  <Image src={visual.image} alt={visual.label} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover" />
+                  <span className="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded bg-white px-3 py-1.5 text-xs font-bold text-[#10283f] shadow">
+                    <SectorIcon className="h-4 w-4" aria-hidden="true" />{opp.category.split('&')[0]?.trim()}
+                  </span>
+                </div>
+                <div className="p-5">
                 <p className="text-xs font-bold uppercase tracking-wider text-red-600">{opp.category.split('&')[0]?.trim()}</p>
                 <h3 className="mt-3 text-lg font-bold leading-snug">
                   <Link href={`/investments/${opp.id}`} className={linkClass}>{opp.title}</Link>
                 </h3>
-                <p className="mt-3 line-clamp-3 text-sm leading-6 text-neutral-700">{opp.description}</p>
+                <p className="mt-3 line-clamp-3 text-sm leading-6 text-neutral-700">{index === 0 ? 'Develop a fruit processing facility in the Luwero region, turning locally grown produce into products for domestic and regional markets.' : index === 1 ? 'Build a cassava processing facility in Pader, creating higher value products and supporting Northern Uganda’s agricultural supply chain.' : 'Develop cocoa processing capacity in Bundibugyo and supply value-added products to local and export markets.'}</p>
                 <dl className="mt-5 grid grid-cols-3 gap-3 border-l-4 border-yellow-400 bg-white py-3 pl-4 pr-2 text-sm">
                   <div>
                     <dt className="text-[10px] font-bold uppercase tracking-wider text-neutral-600">Investment</dt>
@@ -337,8 +377,9 @@ export default function HomePage() {
                   </div>
                 </dl>
                 <p className="mt-4 text-xs text-neutral-600">Agency: {opp.agency}</p>
-              </article>
-            ))}
+                </div>
+              </article>;
+            })}
           </div>
         </div>
       </section>
@@ -358,7 +399,7 @@ export default function HomePage() {
 
         <div className="grid gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-12">
           <ul className="divide-y divide-neutral-200 border-y border-neutral-200">
-            {sectors.slice(0, 6).map((sector, index) => {
+            {visibleSectors.map((sector, index) => {
               const isActive = activeSectorIndex === index;
               const count = projectsFor(sector.title).length;
               return (
@@ -375,7 +416,7 @@ export default function HomePage() {
                         <span className="block font-bold">{sector.title}</span>
                         <span className="mt-1 block text-sm leading-6 text-neutral-700">{sector.blurb}</span>
                         <span className="mt-2 block text-xs font-bold uppercase tracking-wider text-neutral-600">
-                          {count > 0 ? `${count} listed ${count === 1 ? 'project' : 'projects'}` : 'Projects coming soon'}
+                          {count > 0 ? `${count} listed ${count === 1 ? 'project' : 'projects'}` : 'No published projects'}
                         </span>
                       </span>
                     </span>

@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
   title: "Search",
-  description: "Search services, agencies, investment opportunities, documents and guides on the OneStopCentre.",
+  description: "Search services, agencies, investment opportunities, documents and guides on the OneStop Centre.",
   path: "/search/",
 });
 

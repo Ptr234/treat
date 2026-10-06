@@ -1,4 +1,4 @@
-// Core application types for OneStopCentre Uganda
+// Core application types for OneStop Centre Uganda
 
 export interface User {
   id: string;

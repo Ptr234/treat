@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
   title: "Profile",
-  description: "Your OneStopCentre profile.",
+  description: "Your OneStop Centre profile.",
   path: "/profile/",
   noIndex: true,
 });

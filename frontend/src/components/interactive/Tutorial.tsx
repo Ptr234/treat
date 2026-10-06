@@ -27,7 +27,7 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
   const defaultSteps: TutorialStep[] = [
     {
       id: 'welcome',
-      title: 'Welcome to OneStopCentre Uganda',
+      title: 'Welcome to OneStop Centre Uganda',
       content: 'Let us guide you through the features of Uganda\'s official investment and business services portal.',
       target: null,
       position: 'center'

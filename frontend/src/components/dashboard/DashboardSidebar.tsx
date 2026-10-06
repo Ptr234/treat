@@ -111,7 +111,7 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
           <Squares2X2Icon className="w-5 h-5 text-black" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-black leading-tight truncate">OneStopCentre</p>
+          <p className="text-sm font-bold text-black leading-tight truncate">OneStop Centre</p>
           <p className="text-[11px] text-neutral-600 leading-tight">Admin Console</p>
         </div>
       </Link>

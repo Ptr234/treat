@@ -13,34 +13,27 @@ const FOOTER_SECTIONS = [
   {
     title: 'Explore',
     links: [
-      { label: 'Home', href: '/' },
-      { label: 'Investments', href: '/investments' },
       { label: 'Projects Map', href: '/projects' },
       { label: 'Investment Incentives', href: '/incentives' },
       { label: 'Investment Process', href: '/investments/process' },
       { label: 'Events Calendar', href: '/events' },
-      { label: 'OSC Hub', href: '/agencies' },
+      { label: 'Agency directory', href: '/agencies' },
     ],
   },
   {
     title: 'Services',
     links: [
-      { label: 'All Services', href: '/services' },
       { label: 'Business Registration', href: '/business/registration' },
       { label: 'Track an Application', href: '/track' },
-      { label: 'Investment Facilitation', href: '/investments/onboarding' },
-      { label: 'Tools & Calculators', href: '/tools' },
       { label: 'Investor Aftercare', href: '/support' },
     ],
   },
   {
     title: 'Resources',
     links: [
-      { label: 'Market Data', href: '/analytics' },
       { label: 'User Guide', href: '/guide' },
       { label: 'Downloads', href: '/downloads' },
       { label: 'AI Assistant', href: '/chatbot' },
-      { label: 'Support Tickets', href: '/tickets' },
     ],
   },
 ];
@@ -83,14 +76,14 @@ export default function Footer() {
             <Link href="/" className="inline-flex items-center gap-3 mb-4 group focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded-sm">
               <Image
                 src="/images/oneStopCenter-logo.jpeg"
-                alt="OneStopCentre Uganda logo"
+                alt="OneStop Centre Uganda logo"
                 width={44}
                 height={44}
                 className="rounded-lg object-contain bg-white flex-shrink-0"
               />
               <span className="leading-tight">
                 <span className="block text-base font-extrabold tracking-tight text-black group-hover:text-red-600 transition-colors">
-                  OneStopCentre
+                  OneStop Centre
                 </span>
                 <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-yellow-400">
                   Uganda

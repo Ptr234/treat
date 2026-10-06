@@ -1,4 +1,4 @@
-// Investment Categories and Sector Classifications for OneStopCentre Uganda
+// Investment Categories and Sector Classifications for OneStop Centre Uganda
 
 export interface InvestmentCategory {
   id: string;

@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
   title: "Support",
-  description: "Contact the OneStopCentre support team by live chat, phone, email or in person, read answers to common questions, and request urgent help.",
+  description: "Contact the OneStop Centre support team by live chat, phone, email or in person, read answers to common questions, and request urgent help.",
   path: "/support/",
 });
 

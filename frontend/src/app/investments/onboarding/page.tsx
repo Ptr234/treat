@@ -31,7 +31,7 @@ const TRUST = [
   },
   {
     title: 'Government verified',
-    body: 'Official OneStopCentre Uganda platform.',
+    body: 'Official OneStop Centre Uganda platform.',
   },
   {
     title: 'Confidential process',

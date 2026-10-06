@@ -23,7 +23,7 @@ import {
 
 export const metadata: Metadata = buildMetadata({
   title: 'User guide',
-  description: 'A step-by-step guide to using the OneStopCentre: services, investments, the AI assistant, inquiries, appointments and business tools.',
+  description: 'A step-by-step guide to using the OneStop Centre: services, investments, the AI assistant, inquiries, appointments and business tools.',
   path: '/guide/',
 });
 

@@ -366,7 +366,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             <div>
               <h2 className="text-2xl font-bold text-black">Share Your Feedback</h2>
               <p className="text-neutral-700 mt-1">
-                Help us improve OneStopCentre Uganda by sharing your thoughts and suggestions.
+                Help us improve OneStop Centre Uganda by sharing your thoughts and suggestions.
               </p>
             </div>
             {onClose && (

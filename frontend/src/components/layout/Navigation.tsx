@@ -10,23 +10,15 @@ import AuthModal from '@/components/auth/AuthModal';
 
 const MENUS = [
   {
-    title: 'Start a business',
-    intro: 'Get oriented and take your first steps in Uganda.',
+    title: 'Services',
+    intro: 'Find the services and first steps for doing business in Uganda.',
     groups: [
-      { label: 'First steps', links: [{ label: 'Investment onboarding', href: '/investments/onboarding' }, { label: 'Explore opportunities', href: '/investments' }, { label: 'Track an application', href: '/track' }, { label: 'Business guide', href: '/guide' }] },
-      { label: 'Registrations', links: [{ label: 'Register a business', href: '/business/registration' }, { label: 'Investment certificate', href: '/investments/onboarding' }, { label: 'Agency directory', href: '/agencies' }] },
+      { label: 'Get started', links: [{ label: 'Investment onboarding', href: '/investments/onboarding' }, { label: 'Business guide', href: '/guide' }, { label: 'Track an application', href: '/track' }] },
+      { label: 'Business services', links: [{ label: 'Registration & incorporation', href: '/business/registration' }, { label: 'Permits & licences', href: '/services' }, { label: 'Tax & compliance', href: '/services' }, { label: 'Agency directory', href: '/agencies' }, { label: 'Investor aftercare', href: '/support' }] },
     ],
   },
   {
-    title: 'Find a service',
-    intro: 'Find public services for setting up and running a business.',
-    groups: [
-      { label: 'Business services', links: [{ label: 'Registration & incorporation', href: '/business/registration' }, { label: 'Permits & licences', href: '/services' }, { label: 'Tax & compliance', href: '/services' }] },
-      { label: 'Support', links: [{ label: 'Investment facilitation', href: '/investments' }, { label: 'Investor aftercare', href: '/support' }, { label: 'Contact an agency', href: '/agencies' }] },
-    ],
-  },
-  {
-    title: 'Invest in Uganda',
+    title: 'Invest',
     intro: 'Research the market, sectors and licensed projects.',
     groups: [
       { label: 'Opportunities', links: [{ label: 'Priority sectors', href: '/investments' }, { label: 'Licensed projects map', href: '/projects' }, { label: 'Investor analytics', href: '/analytics' }, { label: 'Investment incentives', href: '/incentives' }, { label: 'Investment process', href: '/investments/process' }] },
@@ -44,9 +36,8 @@ const MENUS = [
 ];
 
 const MENU_PATHS: Record<string, string[]> = {
-  'Start a business': ['/business', '/track'],
-  'Find a service': ['/services'],
-  'Invest in Uganda': ['/investments', '/projects', '/incentives', '/analytics'],
+  Services: ['/business', '/track', '/services'],
+  Invest: ['/investments', '/projects', '/incentives', '/analytics'],
   Resources: ['/downloads', '/guide', '/events', '/tools', '/chatbot', '/support'],
 };
 
@@ -162,8 +153,8 @@ export default function Navigation() {
             ) : (
               <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
             )}
-            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md bg-black px-3 py-2.5 text-xs font-bold text-yellow-400 transition hover:bg-neutral-800">
-              Investor onboarding <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md bg-red-700 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-800">
+              Start here <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Link>
           </div>
 
@@ -206,7 +197,7 @@ export default function Navigation() {
               ))}
               <Link href="/agencies" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Agencies</Link>
               <Link href="/track" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Track an application</Link>
-              <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 rounded-md bg-black px-4 py-3 text-center text-sm font-bold text-yellow-400">Start your investment journey</Link>
+              <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 rounded-md bg-red-700 px-4 py-3 text-center text-sm font-bold text-white">Start here</Link>
               {isAuthenticated ? (
                 <Link href="/profile" onClick={closeMenus} className="py-3 text-sm font-semibold text-neutral-800">My account</Link>
               ) : (

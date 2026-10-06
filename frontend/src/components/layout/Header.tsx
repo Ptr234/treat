@@ -157,7 +157,7 @@ const Header: React.FC = () => {
                 <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden shadow-black transition-all duration-300">
                   <Image
                     src="/images/oneStopCenter-logo.jpeg"
-                    alt="OneStopCentre Uganda"
+                    alt="OneStop Centre Uganda"
                     width={48}
                     height={48}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
@@ -165,7 +165,7 @@ const Header: React.FC = () => {
                 </div>
                 <div className="ml-2 md:ml-4 flex flex-col justify-center">
                   <div className="font-bold text-base md:text-xl leading-tight text-white">
-                    <span className="hidden sm:inline">OneStopCentre</span>
+                    <span className="hidden sm:inline">OneStop Centre</span>
                     <span className="sm:hidden">OSC</span>
                   </div>
                   <div className="text-xs md:text-sm font-semibold leading-tight text-yellow-400 -mt-0.5">

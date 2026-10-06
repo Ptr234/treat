@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
   title: "About",
-  description: "About the OneStopCentre Uganda: our mission, the services we offer and the results we report for investment and business in Uganda.",
+  description: "About the OneStop Centre Uganda: our mission, the services we offer and the results we report for investment and business in Uganda.",
   path: "/about/",
 });
 

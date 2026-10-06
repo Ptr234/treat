@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 
 export const SITE_URL = 'https://oscdigitaltool.com';
-export const SITE_NAME = 'OneStopCentre Uganda';
-export const DEFAULT_TITLE = 'Invest in Uganda | OneStopCentre';
+export const SITE_NAME = 'OneStop Centre Uganda';
+export const DEFAULT_TITLE = 'Invest in Uganda | OneStop Centre';
 export const DEFAULT_DESCRIPTION =
-  'Find investment opportunities, government services and agency guidance for building a business in Uganda through the OneStopCentre, with 16+ agencies under one roof.';
+  'Find investment opportunities, government services and agency guidance for building a business in Uganda through the OneStop Centre, with 16+ agencies under one roof.';
 export const SOCIAL_IMAGE = { path: '/images/og-default.png', width: 1200, height: 630 };
 
 export const CONTACT = {
@@ -37,8 +37,8 @@ export function buildMetadata({
   noIndex = false,
 }: MetadataOptions): Metadata {
   const canonical = absoluteUrl(path);
-  const image = absoluteUrl(SOCIAL_IMAGE.path);
-  const fullTitle = title.includes('OneStopCentre') ? title : `${title} | ${SITE_NAME}`;
+  const image = new URL(SOCIAL_IMAGE.path, SITE_URL).toString();
+  const fullTitle = title.includes('OneStop Centre') ? title : `${title} | ${SITE_NAME}`;
 
   return {
     title: { absolute: fullTitle },

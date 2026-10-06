@@ -80,7 +80,7 @@ export default function NotificationSettings() {
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">Notification Settings</h2>
           <p className="text-gray-600 mt-1">
-            Manage how and when you receive notifications from OneStopCentre Uganda.
+            Manage how and when you receive notifications from OneStop Centre Uganda.
           </p>
         </div>
 

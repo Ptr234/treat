@@ -3,7 +3,7 @@ import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
   title: "My submissions",
-  description: "Track your submissions to the OneStopCentre.",
+  description: "Track your submissions to the OneStop Centre.",
   path: "/account/",
   noIndex: true,
 });

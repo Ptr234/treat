@@ -35,14 +35,14 @@ export default function LoginPage() {
         <Link href="/" className="flex items-center justify-center gap-3 mb-8 group">
           <Image
             src="/images/oneStopCenter-logo.jpeg"
-            alt="OneStopCentre Uganda logo"
+            alt="OneStop Centre Uganda logo"
             width={44}
             height={44}
             className="rounded-lg object-contain bg-white flex-shrink-0"
           />
           <span className="leading-tight">
             <span className="block text-lg font-black text-black group-hover:text-red-600 transition-colors">
-              OneStopCentre
+              OneStop Centre
             </span>
             <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-red-600">
               Uganda

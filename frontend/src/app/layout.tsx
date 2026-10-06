@@ -14,11 +14,11 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_UG',
     siteName: SITE_NAME,
-    images: [{ url: absoluteUrl(SOCIAL_IMAGE.path), width: SOCIAL_IMAGE.width, height: SOCIAL_IMAGE.height, alt: `${SITE_NAME} social preview` }],
+    images: [{ url: new URL(SOCIAL_IMAGE.path, SITE_URL).toString(), width: SOCIAL_IMAGE.width, height: SOCIAL_IMAGE.height, alt: `${SITE_NAME} social preview` }],
   },
   title: {
     default: DEFAULT_TITLE,
-    template: '%s | OneStopCentre Uganda',
+    template: '%s | OneStop Centre Uganda',
   },
   keywords: [
     'Uganda investment',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     'UIA',
     'government services Uganda',
     'tax calculator Uganda',
-    'OneStopCentre',
+    'OneStop Centre',
     'ROI calculator',
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
