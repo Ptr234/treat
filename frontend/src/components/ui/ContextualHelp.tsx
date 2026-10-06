@@ -194,9 +194,9 @@ export default function ContextualHelp() {
       case 'info': return <InformationCircleIcon {...iconProps} className="w-4 h-4 text-blue-500 mt-0.5" />;
       case 'action': return <ArrowRightIcon {...iconProps} className="w-4 h-4 text-yellow-500 mt-0.5" />;
       case 'suggestion': return <ChatBubbleLeftRightIcon {...iconProps} className="w-4 h-4 text-purple-500 mt-0.5" />;
-      case 'step': return <div className="w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0">✓</div>;
+      case 'step': return <div className="w-4 h-4 bg-blue-500 text-black rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0">✓</div>;
       case 'intro': return <InformationCircleIcon {...iconProps} className="w-4 h-4 text-yellow-500 mt-0.5" />;
-      default: return <QuestionMarkCircleIcon {...iconProps} className="w-4 h-4 text-gray-500 mt-0.5" />;
+      default: return <QuestionMarkCircleIcon {...iconProps} className="w-4 h-4 text-neutral-600 mt-0.5" />;
     }
   };
 
@@ -218,9 +218,9 @@ export default function ContextualHelp() {
         exit={{ opacity: 0, x: 100, scale: 0.9 }}
         className="fixed top-1/2 right-6 transform -translate-y-1/2 z-50 max-w-sm"
       >
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden">
+        <div className="backdrop- overflow-hidden border-t-2 border-black pt-5">
           {/* Header */}
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white p-4 relative">
+          <div className="bg-white text-black p-4 relative">
             <button
               onClick={handleDismiss}
               className="absolute top-3 right-3 p-1 hover:bg-white/20 rounded-full transition-colors"
@@ -243,10 +243,10 @@ export default function ContextualHelp() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg"
+                className="flex items-start space-x-3 p-3 bg-neutral-50 rounded-md"
               >
                 {getContentIcon(item.type)}
-                <p className="text-gray-800 text-sm leading-relaxed flex-1">
+                <p className="text-neutral-800 text-sm leading-relaxed flex-1">
                   {item.text}
                 </p>
               </motion.div>
@@ -254,15 +254,15 @@ export default function ContextualHelp() {
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 p-3 border-t border-gray-200 text-center">
-            <p className="text-xs text-gray-600 mb-2">Need more help?</p>
+          <div className="bg-neutral-50 p-3 border-t border-neutral-200 text-center">
+            <p className="text-xs text-neutral-700 mb-2">Need more help?</p>
             <button
               onClick={() => {
                 handleDismiss();
                 // Navigate to support or open chat
                 router.push('/support');
               }}
-              className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors"
+              className="text-xs bg-indigo-600 text-black px-3 py-1.5 rounded-md hover:bg-indigo-700 transition-colors"
             >
               Contact Support
             </button>

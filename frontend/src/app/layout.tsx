@@ -1,74 +1,48 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL, SOCIAL_IMAGE, absoluteUrl, organizationLd, websiteLd } from "@/lib/seo";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Providers } from "./providers";
 import LayoutShell from "@/components/layout/LayoutShell";
 
 export const metadata: Metadata = {
-  title: {
-    default: "Invest in Uganda | OneStop Centre",
-    template: "%s | OneStopCentre Uganda",
-  },
-  description: "Find investment opportunities, government services and agency guidance for building a business in Uganda through the OneStop Centre.",
-  keywords: [
-    "Uganda",
-    "Investment",
-    "Business Registration",
-    "Government Services",
-    "OneStopCentre",
-    "Tax Calculator",
-    "ROI Calculator",
-    "Business Support",
-  ],
-  authors: [
-    {
-      name: "Uganda Investment One Stop Center",
-      url: "https://oscdigitaltool.com",
-    },
-  ],
-  creator: "Uganda Investment One Stop Center",
-  publisher: "Uganda Investment One Stop Center",
-  metadataBase: new URL("https://oscdigitaltool.com"),
+  metadataBase: new URL(SITE_URL),
+  description: DEFAULT_DESCRIPTION,
+  robots: { index: true, follow: true },
   openGraph: {
-    type: "website",
-    locale: "en_UG",
-    url: "https://oscdigitaltool.com",
-    title: "OneStopCentre Uganda - InvestUganda Simplified",
-    description: "Streamlined access to government business services, investment opportunities, and professional support in Uganda.",
-    siteName: "OneStopCentre Uganda",
-    images: [
-      {
-        url: "/images/oneStopCenter-logo.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "OneStopCentre Uganda Logo",
-      },
-    ],
+    type: 'website',
+    locale: 'en_UG',
+    siteName: SITE_NAME,
+    images: [{ url: absoluteUrl(SOCIAL_IMAGE.path), width: SOCIAL_IMAGE.width, height: SOCIAL_IMAGE.height, alt: `${SITE_NAME} social preview` }],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "OneStopCentre Uganda",
-    description: "Streamlined access to government business services and investment opportunities in Uganda.",
-    images: ["/images/oneStopCenter-logo.jpeg"],
-    creator: "@UgandaInvest",
+  title: {
+    default: DEFAULT_TITLE,
+    template: '%s | OneStopCentre Uganda',
   },
+  keywords: [
+    'Uganda investment',
+    'invest in Uganda',
+    'business registration Uganda',
+    'URSB',
+    'Uganda Investment Authority',
+    'UIA',
+    'government services Uganda',
+    'tax calculator Uganda',
+    'OneStopCentre',
+    'ROI calculator',
+  ],
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: 'government',
+  manifest: '/manifest.json',
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-touch-icon.png",
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
-  manifest: "/manifest.json",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  // Add Google Search Console verification code when available:
-  // verification: { google: "your-real-code" },
+  // Add the Google Search Console token here once it is issued:
+  // verification: { google: 'token-from-search-console' },
 };
 
 export default function RootLayout({
@@ -81,7 +55,8 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#000000" />
+        <JsonLd data={[organizationLd, websiteLd]} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
@@ -94,6 +69,7 @@ export default function RootLayout({
         className="antialiased bg-white text-gray-900 selection:bg-primary-100"
         suppressHydrationWarning
       >
+        <GoogleAnalytics />
         <Providers>
           <LayoutShell>
             {children}

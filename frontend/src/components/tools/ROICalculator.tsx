@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 
 interface InvestmentData {
   initialInvestment: string;
@@ -201,69 +200,60 @@ export default function ROICalculator() {
     );
   };
 
+  const inputClass = (hasError?: boolean) =>
+    `w-full rounded-md border bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1 ${
+      hasError ? 'border-red-600' : 'border-neutral-400'
+    }`;
+  const labelClass = 'mb-2 block text-sm font-bold text-black';
+  const errorClass = 'mt-1 text-sm font-semibold text-red-600';
+
+  const SECTORS = [
+    { name: 'Agriculture', detail: '20% growth multiplier, 10% ATMS tax credit. Farming, livestock, agro-processing.' },
+    { name: 'Tourism', detail: '40% growth multiplier, 15% ATMS tax credit. Hotels, tours, recreation.' },
+    { name: 'Manufacturing', detail: '30% growth multiplier, 12% ATMS tax credit. Production, processing.' },
+    { name: 'ICT', detail: '60% growth multiplier, 20% ATMS tax credit. Software, telecommunications.' },
+    { name: 'Mining', detail: '10% growth multiplier, 8% ATMS tax credit. Mineral extraction.' },
+    { name: 'Energy', detail: '50% growth multiplier, 18% ATMS tax credit. Renewable energy.' },
+  ];
+
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-black min-h-screen">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-6 sm:mb-8 lg:mb-12"
-      >
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-yellow-400 mb-4">
-          Investment ROI Calculator
-        </h2>
-        <p className="text-xl text-neutral-400">
-          Calculate your return on investment for Uganda business opportunities with sector-specific incentives.
-        </p>
-      </motion.div>
+    <div className="mx-auto max-w-6xl text-black">
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+        {/* Input form */}
+        <section aria-labelledby="roi-inputs-heading">
+          <h2 id="roi-inputs-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">
+            Investment details
+          </h2>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Input Form */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
-        >
-          <h3 className="text-xl sm:text-2xl font-semibold text-yellow-300 mb-6">
-            Investment Details
-          </h3>
-
-          <div className="space-y-4">
+          <div className="mt-6 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                Initial Investment (UGX) <span className="text-red-400">*</span>
+              <label htmlFor="roi-initial" className={labelClass}>
+                Initial investment (UGX) <span className="text-red-600">*</span>
               </label>
               <input
+                id="roi-initial"
                 type="number"
                 name="initialInvestment"
                 value={investment.initialInvestment}
                 onChange={handleInputChange}
                 placeholder="Enter initial investment amount"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 placeholder:text-neutral-500 ${
-                  errors.initialInvestment
-                    ? 'border-red-500 focus:ring-red-500'
-                    : 'border-neutral-600 focus:ring-yellow-500'
-                }`}
+                aria-invalid={!!errors.initialInvestment}
+                className={inputClass(!!errors.initialInvestment)}
               />
-              {errors.initialInvestment && (
-                <p className="text-red-400 text-sm mt-1">{errors.initialInvestment}</p>
-              )}
+              {errors.initialInvestment && <p className={errorClass}>{errors.initialInvestment}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                Investment Sector <span className="text-red-400">*</span>
+              <label htmlFor="roi-sector" className={labelClass}>
+                Investment sector <span className="text-red-600">*</span>
               </label>
               <select
+                id="roi-sector"
                 name="sector"
                 value={investment.sector}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 ${
-                  errors.sector
-                    ? 'border-red-500 focus:ring-red-500'
-                    : 'border-neutral-600 focus:ring-yellow-500'
-                }`}
+                aria-invalid={!!errors.sector}
+                className={inputClass(!!errors.sector)}
               >
                 <option value="">Select a sector</option>
                 <option value="agriculture">Agriculture & Agribusiness</option>
@@ -276,99 +266,85 @@ export default function ROICalculator() {
                 <option value="education">Education & Training</option>
                 <option value="other">Other Sectors</option>
               </select>
-              {errors.sector && (
-                <p className="text-red-400 text-sm mt-1">{errors.sector}</p>
-              )}
+              {errors.sector && <p className={errorClass}>{errors.sector}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                Project Duration (Years)
-              </label>
+              <label htmlFor="roi-duration" className={labelClass}>Project duration (years)</label>
               <select
+                id="roi-duration"
                 name="projectDuration"
                 value={investment.projectDuration}
                 onChange={handleInputChange}
-                className="w-full px-4 py-2 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-neutral-800 text-yellow-100"
+                className={inputClass()}
               >
-                <option value="1">1 Year</option>
-                <option value="3">3 Years</option>
-                <option value="5">5 Years</option>
-                <option value="10">10 Years</option>
-                <option value="15">15 Years</option>
-                <option value="20">20 Years</option>
+                <option value="1">1 year</option>
+                <option value="3">3 years</option>
+                <option value="5">5 years</option>
+                <option value="10">10 years</option>
+                <option value="15">15 years</option>
+                <option value="20">20 years</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                Expected Annual Revenue (UGX) <span className="text-red-400">*</span>
+              <label htmlFor="roi-revenue" className={labelClass}>
+                Expected annual revenue (UGX) <span className="text-red-600">*</span>
               </label>
               <input
+                id="roi-revenue"
                 type="number"
                 name="annualRevenue"
                 value={investment.annualRevenue}
                 onChange={handleInputChange}
                 placeholder="Enter expected annual revenue"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 placeholder:text-neutral-500 ${
-                  errors.annualRevenue
-                    ? 'border-red-500 focus:ring-red-500'
-                    : 'border-neutral-600 focus:ring-yellow-500'
-                }`}
+                aria-invalid={!!errors.annualRevenue}
+                className={inputClass(!!errors.annualRevenue)}
               />
-              {errors.annualRevenue && (
-                <p className="text-red-400 text-sm mt-1">{errors.annualRevenue}</p>
-              )}
+              {errors.annualRevenue && <p className={errorClass}>{errors.annualRevenue}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                Annual Operating Costs (UGX) <span className="text-red-400">*</span>
+              <label htmlFor="roi-costs" className={labelClass}>
+                Annual operating costs (UGX) <span className="text-red-600">*</span>
               </label>
               <input
+                id="roi-costs"
                 type="number"
                 name="operatingCosts"
                 value={investment.operatingCosts}
                 onChange={handleInputChange}
                 placeholder="Enter annual operating costs"
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 placeholder:text-neutral-500 ${
-                  errors.operatingCosts
-                    ? 'border-red-500 focus:ring-red-500'
-                    : 'border-neutral-600 focus:ring-yellow-500'
-                }`}
+                aria-invalid={!!errors.operatingCosts}
+                className={inputClass(!!errors.operatingCosts)}
               />
-              {errors.operatingCosts && (
-                <p className="text-red-400 text-sm mt-1">{errors.operatingCosts}</p>
-              )}
+              {errors.operatingCosts && <p className={errorClass}>{errors.operatingCosts}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                Number of Employees
-              </label>
+              <label htmlFor="roi-employees" className={labelClass}>Number of employees</label>
               <input
+                id="roi-employees"
                 type="number"
                 name="employeeCount"
                 value={investment.employeeCount}
                 onChange={handleInputChange}
                 placeholder="Enter number of employees"
-                className="w-full px-4 py-2 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
+                className={inputClass()}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                Investment Location <span className="text-red-400">*</span>
+              <label htmlFor="roi-location" className={labelClass}>
+                Investment location <span className="text-red-600">*</span>
               </label>
               <select
+                id="roi-location"
                 name="location"
                 value={investment.location}
                 onChange={handleInputChange}
-                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-neutral-800 text-yellow-100 ${
-                  errors.location
-                    ? 'border-red-500 focus:ring-red-500'
-                    : 'border-neutral-600 focus:ring-yellow-500'
-                }`}
+                aria-invalid={!!errors.location}
+                className={inputClass(!!errors.location)}
               >
                 <option value="">Select location</option>
                 <option value="kampala">Kampala (Central)</option>
@@ -378,35 +354,32 @@ export default function ROICalculator() {
                 <option value="northern">Northern Region</option>
                 <option value="other">Other Location</option>
               </select>
-              {errors.location && (
-                <p className="text-red-400 text-sm mt-1">{errors.location}</p>
-              )}
+              {errors.location && <p className={errorClass}>{errors.location}</p>}
             </div>
 
-            <div className="flex items-center">
+            <label className="flex items-start gap-3 text-sm text-neutral-700">
               <input
                 type="checkbox"
                 name="isATMSQualified"
                 checked={investment.isATMSQualified}
                 onChange={handleInputChange}
-                className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-neutral-500 rounded"
+                className="mt-1 h-4 w-4 accent-black"
               />
-              <label className="ml-2 block text-sm text-neutral-300">
-                Qualifies for ATMS Investment Incentives
-              </label>
-            </div>
+              <span>Qualifies for ATMS investment incentives</span>
+            </label>
 
             <button
+              type="button"
               onClick={calculateROI}
-              className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-black py-3 px-6 rounded-lg font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+              className="w-full rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
             >
               Calculate ROI
             </button>
 
             {Object.keys(errors).length > 0 && (
-              <div className="bg-red-900/20 border border-red-700/30 rounded-lg p-3 mt-4">
-                <p className="text-red-400 text-sm font-medium">Please fix the following errors:</p>
-                <ul className="list-disc list-inside text-red-400 text-sm mt-1">
+              <div className="border-l-4 border-red-600 bg-neutral-50 p-4" role="alert">
+                <p className="text-sm font-bold text-red-700">Please fix the following errors:</p>
+                <ul className="mt-2 list-inside list-disc text-sm text-red-700">
                   {Object.values(errors).map((error, index) => (
                     <li key={index}>{error}</li>
                   ))}
@@ -414,164 +387,127 @@ export default function ROICalculator() {
               </div>
             )}
           </div>
-        </motion.div>
+        </section>
 
         {/* Results */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6"
-        >
-          <h3 className="text-xl sm:text-2xl font-semibold text-yellow-300 mb-6">
-            Investment Analysis
-          </h3>
+        <section aria-labelledby="roi-results-heading">
+          <h2 id="roi-results-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">
+            Investment analysis
+          </h2>
 
           {results ? (
-            <div className="space-y-6">
-              {/* Key Metrics */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-yellow-900/30 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-yellow-400">{results.roi.toFixed(1)}%</div>
-                  <div className="text-sm text-yellow-300">Total ROI</div>
+            <div className="mt-6 space-y-8">
+              {/* Key metrics */}
+              <dl className="grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-2">
+                <div className="border-l-4 border-yellow-400 pl-4">
+                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Total ROI</dt>
+                  <dd className="mt-1 text-3xl font-bold text-black">{results.roi.toFixed(1)}%</dd>
                 </div>
-                <div className="bg-red-900/30 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-red-400">{results.annualROI.toFixed(1)}%</div>
-                  <div className="text-sm text-red-300">Annual ROI</div>
+                <div className="border-l-4 border-red-600 pl-4">
+                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Annual ROI</dt>
+                  <dd className="mt-1 text-3xl font-bold text-red-600">{results.annualROI.toFixed(1)}%</dd>
                 </div>
-              </div>
+              </dl>
 
-              {/* Financial Breakdown */}
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-neutral-400">Initial Investment:</span>
-                  <span className="font-semibold text-yellow-300">UGX {results.initial.toLocaleString()}</span>
+              {/* Financial breakdown */}
+              <dl className="divide-y divide-neutral-200 text-sm">
+                <div className="flex justify-between gap-4 py-3">
+                  <dt className="text-neutral-700">Initial investment</dt>
+                  <dd className="font-semibold text-black">UGX {results.initial.toLocaleString()}</dd>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-400">Annual Revenue (Adjusted):</span>
-                  <span className="font-semibold text-yellow-300">UGX {results.annualRevenue.toLocaleString()}</span>
+                <div className="flex justify-between gap-4 py-3">
+                  <dt className="text-neutral-700">Annual revenue (adjusted)</dt>
+                  <dd className="font-semibold text-black">UGX {results.annualRevenue.toLocaleString()}</dd>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-400">Annual Profit:</span>
-                  <span className="font-semibold text-yellow-300">UGX {results.annualProfit.toLocaleString()}</span>
+                <div className="flex justify-between gap-4 py-3">
+                  <dt className="text-neutral-700">Annual profit</dt>
+                  <dd className="font-semibold text-black">UGX {results.annualProfit.toLocaleString()}</dd>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-400">Net Annual Cash Flow:</span>
-                  <span className="font-semibold text-yellow-300">UGX {results.netAnnualCashFlow.toLocaleString()}</span>
+                <div className="flex justify-between gap-4 py-3">
+                  <dt className="text-neutral-700">Net annual cash flow</dt>
+                  <dd className="font-semibold text-black">UGX {results.netAnnualCashFlow.toLocaleString()}</dd>
                 </div>
-                <div className="flex justify-between border-t border-neutral-700 pt-2">
-                  <span className="text-lg font-semibold text-neutral-300">Total Profit ({results.duration} years):</span>
-                  <span className="text-lg font-bold text-yellow-400">UGX {results.totalProfit.toLocaleString()}</span>
+                <div className="flex justify-between gap-4 border-t-2 border-black py-4">
+                  <dt className="font-bold text-black">Total profit ({results.duration} years)</dt>
+                  <dd className="font-bold text-black">UGX {results.totalProfit.toLocaleString()}</dd>
                 </div>
-              </div>
+              </dl>
 
-              {/* Investment Metrics */}
-              <div className="bg-neutral-800 rounded-lg p-4">
-                <h4 className="font-semibold text-yellow-300 mb-3">Investment Metrics</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-400">Payback Period:</span>
-                    <span className={`font-medium text-yellow-200 ${results.paybackPeriod === Infinity ? 'text-red-400' : ''}`}>
-                      {results.paybackPeriod === Infinity ? 'Never (Negative cashflow)' : `${results.paybackPeriod.toFixed(1)} years`}
-                    </span>
+              {/* Investment metrics */}
+              <section aria-labelledby="roi-metrics-heading">
+                <h3 id="roi-metrics-heading" className="mb-3 text-base font-bold text-black">Investment metrics</h3>
+                <dl className="divide-y divide-neutral-200 text-sm">
+                  <div className="flex justify-between gap-4 py-3">
+                    <dt className="text-neutral-700">Payback period</dt>
+                    <dd className={`font-semibold ${results.paybackPeriod === Infinity ? 'text-red-600' : 'text-black'}`}>
+                      {results.paybackPeriod === Infinity ? 'Never (negative cash flow)' : `${results.paybackPeriod.toFixed(1)} years`}
+                    </dd>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-400">Risk-Adjusted ROI:</span>
-                    <span className="font-medium text-yellow-200">{results.riskAdjustedROI.toFixed(1)}% annually</span>
+                  <div className="flex justify-between gap-4 py-3">
+                    <dt className="text-neutral-700">Risk-adjusted ROI</dt>
+                    <dd className="font-semibold text-black">{results.riskAdjustedROI.toFixed(1)}% annually</dd>
                   </div>
                   {results.taxBenefits > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-neutral-400">ATMS Tax Benefits:</span>
-                      <span className="font-medium text-yellow-400">UGX {results.taxBenefits.toLocaleString()}</span>
+                    <div className="flex justify-between gap-4 py-3">
+                      <dt className="text-neutral-700">ATMS tax benefits</dt>
+                      <dd className="font-semibold text-black">UGX {results.taxBenefits.toLocaleString()}</dd>
                     </div>
                   )}
-                </div>
-              </div>
+                </dl>
+              </section>
 
-              {/* Economic Impact */}
-              <div className="bg-red-900/20 rounded-lg p-4 border border-red-800/30">
-                <h4 className="font-semibold text-red-300 mb-3">Economic Impact</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-400">Jobs Created:</span>
-                    <span className="font-medium text-yellow-200">{results.jobsCreated} positions</span>
+              {/* Economic impact */}
+              <section aria-labelledby="roi-impact-heading" className="border-l-4 border-red-600 pl-4">
+                <h3 id="roi-impact-heading" className="mb-3 text-base font-bold text-black">Economic impact</h3>
+                <dl className="space-y-2 text-sm">
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-neutral-700">Jobs created</dt>
+                    <dd className="font-semibold text-black">{results.jobsCreated} positions</dd>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-neutral-400">Economic Impact:</span>
-                    <span className="font-medium text-yellow-200">UGX {results.economicImpact.toLocaleString()}</span>
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-neutral-700">Economic impact</dt>
+                    <dd className="font-semibold text-black">UGX {results.economicImpact.toLocaleString()}</dd>
                   </div>
-                </div>
-              </div>
+                </dl>
+              </section>
 
-              {/* Sector Benefits */}
+              {/* Sector benefits */}
               {investment.sector && (
-                <div className="bg-yellow-900/20 rounded-lg p-4 border border-yellow-800/30">
-                  <h4 className="font-semibold text-yellow-300 mb-2">Sector Benefits</h4>
-                  <p className="text-sm text-yellow-200/80">
-                    <strong>{results.sector.description}</strong> sector provides a {((results.sector.multiplier - 1) * 100).toFixed(0)}% revenue multiplier
-                    {investment.isATMSQualified && ` and ${(results.sector.taxCredit * 100).toFixed(0)}% tax credit under ATMS`}.
-                  </p>
-                </div>
+                <p className="border-t border-neutral-200 pt-6 text-sm leading-6 text-neutral-700">
+                  <strong className="text-black">{results.sector.description}</strong> sector provides a {((results.sector.multiplier - 1) * 100).toFixed(0)}% revenue multiplier
+                  {investment.isATMSQualified && ` and ${(results.sector.taxCredit * 100).toFixed(0)}% tax credit under ATMS`}.
+                </p>
               )}
             </div>
           ) : (
-            <div className="text-center py-12 text-neutral-400">
-              <div className="mb-6">
-                <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">📊</span>
-                </div>
-                <p className="text-lg">Enter your investment details to see comprehensive ROI analysis</p>
-              </div>
-
-              <div className="bg-yellow-900/20 rounded-lg p-4 border border-yellow-700/30 text-left">
-                <h4 className="font-semibold text-yellow-300 mb-2">💡 Pro Tips:</h4>
-                <ul className="text-sm text-yellow-200/80 space-y-1">
-                  <li>• Use realistic revenue and cost projections</li>
-                  <li>• Consider ATMS incentives for qualifying projects</li>
-                  <li>• Factor in local market conditions</li>
-                  <li>• Review sector-specific multipliers</li>
+            <div className="mt-6">
+              <p className="text-base text-neutral-700">Enter your investment details to see a comprehensive ROI analysis.</p>
+              <div className="mt-6 border-l-4 border-yellow-400 pl-4">
+                <h3 className="font-bold text-black">Pro tips</h3>
+                <ul className="mt-2 space-y-1.5 text-sm text-neutral-700">
+                  <li>Use realistic revenue and cost projections.</li>
+                  <li>Consider ATMS incentives for qualifying projects.</li>
+                  <li>Factor in local market conditions.</li>
+                  <li>Review sector-specific multipliers.</li>
                 </ul>
               </div>
             </div>
           )}
-        </motion.div>
+        </section>
       </div>
 
-      {/* Investment Sectors Info */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.6 }}
-        className="mt-6 sm:mt-8 lg:mt-12 bg-gradient-to-r from-yellow-700 via-red-800 to-neutral-900 rounded-2xl p-4 sm:p-6 lg:p-8"
-      >
-        <h3 className="text-xl sm:text-2xl font-bold text-yellow-300 mb-6 text-center">Uganda Investment Sectors</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-black/30 rounded-lg p-4 border border-yellow-800/20 hover:bg-black/50 hover:border-yellow-600/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-900/20 transition-all duration-300 cursor-default">
-            <h4 className="font-semibold text-yellow-300 mb-2">🌾 Agriculture</h4>
-            <p className="text-sm text-yellow-200/80">20% growth multiplier, 10% ATMS tax credit. Farming, livestock, agro-processing.</p>
-          </div>
-          <div className="bg-black/30 rounded-lg p-4 border border-yellow-800/20 hover:bg-black/50 hover:border-yellow-600/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-900/20 transition-all duration-300 cursor-default">
-            <h4 className="font-semibold text-yellow-300 mb-2">🏖️ Tourism</h4>
-            <p className="text-sm text-yellow-200/80">40% growth multiplier, 15% ATMS tax credit. Hotels, tours, recreation.</p>
-          </div>
-          <div className="bg-black/30 rounded-lg p-4 border border-yellow-800/20 hover:bg-black/50 hover:border-yellow-600/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-900/20 transition-all duration-300 cursor-default">
-            <h4 className="font-semibold text-yellow-300 mb-2">🏭 Manufacturing</h4>
-            <p className="text-sm text-yellow-200/80">30% growth multiplier, 12% ATMS tax credit. Production, processing.</p>
-          </div>
-          <div className="bg-black/30 rounded-lg p-4 border border-yellow-800/20 hover:bg-black/50 hover:border-yellow-600/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-900/20 transition-all duration-300 cursor-default">
-            <h4 className="font-semibold text-yellow-300 mb-2">💻 ICT</h4>
-            <p className="text-sm text-yellow-200/80">60% growth multiplier, 20% ATMS tax credit. Software, telecommunications.</p>
-          </div>
-          <div className="bg-black/30 rounded-lg p-4 border border-yellow-800/20 hover:bg-black/50 hover:border-yellow-600/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-900/20 transition-all duration-300 cursor-default">
-            <h4 className="font-semibold text-yellow-300 mb-2">⛏️ Mining</h4>
-            <p className="text-sm text-yellow-200/80">10% growth multiplier, 8% ATMS tax credit. Mineral extraction.</p>
-          </div>
-          <div className="bg-black/30 rounded-lg p-4 border border-yellow-800/20 hover:bg-black/50 hover:border-yellow-600/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-yellow-900/20 transition-all duration-300 cursor-default">
-            <h4 className="font-semibold text-yellow-300 mb-2">⚡ Energy</h4>
-            <p className="text-sm text-yellow-200/80">50% growth multiplier, 18% ATMS tax credit. Renewable energy.</p>
-          </div>
-        </div>
-      </motion.div>
+      {/* Investment sectors */}
+      <section className="mt-16 border-t border-neutral-200 pt-10" aria-labelledby="roi-sectors-heading">
+        <h2 id="roi-sectors-heading" className="text-xl font-bold sm:text-2xl">Uganda investment sectors</h2>
+        <ul className="mt-8 grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
+          {SECTORS.map((sector) => (
+            <li key={sector.name} className="border-t-2 border-yellow-400 pt-4">
+              <h3 className="font-bold">{sector.name}</h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-700">{sector.detail}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

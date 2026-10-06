@@ -82,7 +82,7 @@ export default function SettingsPage() {
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-neutral-400">Admin access required.</p>
+        <p className="text-neutral-700">Admin access required.</p>
       </div>
     );
   }
@@ -94,26 +94,26 @@ export default function SettingsPage() {
         <div className="flex items-center gap-4 mb-8">
           <Link
             href="/dashboard"
-            className="p-2 hover:bg-neutral-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-neutral-100 rounded-md transition-colors"
             aria-label="Back to dashboard"
           >
-            <ArrowLeftIcon className="w-5 h-5 text-neutral-400" />
+            <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
           </Link>
           <div className="flex items-center gap-3">
             <Cog6ToothIcon className="w-7 h-7 text-yellow-500" />
             <div>
               <h1 className="text-2xl font-bold">Escalation Settings</h1>
-              <p className="text-sm text-neutral-400">Configure who gets notified when tickets are escalated</p>
+              <p className="text-sm text-neutral-700">Configure who gets notified when tickets are escalated</p>
             </div>
           </div>
         </div>
 
         {/* Feedback */}
         {feedback && (
-          <div className={`mb-6 p-4 rounded-lg border flex items-start gap-3 ${
+          <div className={`mb-6 p-4 rounded-md border flex items-start gap-3 ${
             feedback.type === 'success'
               ? 'bg-green-900/30 border-green-700 text-green-300'
-              : 'bg-red-900/30 border-red-700 text-red-300'
+              : 'bg-red-50 border-red-700 text-red-300'
           }`}>
             {feedback.type === 'success'
               ? <CheckCircleIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
@@ -125,16 +125,16 @@ export default function SettingsPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="space-y-8">
             {/* Escalation Email Recipients */}
-            <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6">
-              <label className="block text-sm font-semibold text-white mb-2">
+            <div className="p-6 border-t-2 border-black pt-5">
+              <label className="block text-sm font-semibold text-black mb-2">
                 Escalation Email Recipients
               </label>
-              <p className="text-xs text-neutral-400 mb-3">
+              <p className="text-xs text-neutral-700 mb-3">
                 Comma-separated email addresses. These people will receive an email whenever a ticket is escalated.
                 The default admin email always receives escalations in addition to these.
               </p>
@@ -142,7 +142,7 @@ export default function SettingsPage() {
                 value={settings.escalationEmails}
                 onChange={(e) => setSettings(prev => ({ ...prev, escalationEmails: e.target.value }))}
                 rows={3}
-                className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-600 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
                 placeholder="officer1@uia.go.ug, officer2@uia.go.ug, dg@uia.go.ug"
               />
               {settings.escalationEmails && (
@@ -156,8 +156,8 @@ export default function SettingsPage() {
                         key={i}
                         className={`text-xs px-2 py-1 rounded-full ${
                           valid
-                            ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
-                            : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                            ? 'bg-yellow-50 text-red-600 border border-yellow-400'
+                            : 'bg-red-50 text-red-300 border border-red-500/30'
                         }`}
                       >
                         {trimmed}
@@ -169,35 +169,35 @@ export default function SettingsPage() {
             </div>
 
             {/* Default Assignee */}
-            <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6">
-              <label className="block text-sm font-semibold text-white mb-2">
+            <div className="p-6 border-t-2 border-black pt-5">
+              <label className="block text-sm font-semibold text-black mb-2">
                 Default Escalation Officer
               </label>
-              <p className="text-xs text-neutral-400 mb-3">
+              <p className="text-xs text-neutral-700 mb-3">
                 When a ticket is escalated and has no assignee, this person will be automatically assigned.
               </p>
               <input
                 type="text"
                 value={settings.defaultAssignee}
                 onChange={(e) => setSettings(prev => ({ ...prev, defaultAssignee: e.target.value }))}
-                className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-600 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
                 placeholder="e.g. Senior Investment Officer"
               />
             </div>
 
             {/* Custom Escalation Message */}
-            <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6">
-              <label className="block text-sm font-semibold text-white mb-2">
+            <div className="p-6 border-t-2 border-black pt-5">
+              <label className="block text-sm font-semibold text-black mb-2">
                 Escalation Notification Message
               </label>
-              <p className="text-xs text-neutral-400 mb-3">
+              <p className="text-xs text-neutral-700 mb-3">
                 Custom message included in escalation email notifications. This appears above the review button.
               </p>
               <textarea
                 value={settings.escalationMessage}
                 onChange={(e) => setSettings(prev => ({ ...prev, escalationMessage: e.target.value }))}
                 rows={3}
-                className="w-full px-4 py-3 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-600 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
                 placeholder="A ticket has been escalated and requires immediate attention."
               />
             </div>
@@ -207,7 +207,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {saving ? (
                   <>

@@ -60,10 +60,10 @@ function initialsOf(name: string | undefined): string {
 }
 
 const statusColors: Record<string, string> = {
-  new: 'bg-yellow-500/20 text-yellow-400',
+  new: 'bg-yellow-50 text-red-600',
   contacted: 'bg-blue-500/20 text-blue-400',
   active: 'bg-green-500/20 text-green-400',
-  inactive: 'bg-neutral-700 text-neutral-400',
+  inactive: 'bg-neutral-100 text-neutral-700',
 };
 
 export default function InvestorsPage() {
@@ -127,7 +127,7 @@ export default function InvestorsPage() {
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-neutral-400">Admin access required.</p>
+        <p className="text-neutral-700">Admin access required.</p>
       </div>
     );
   }
@@ -137,20 +137,20 @@ export default function InvestorsPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-800 rounded-lg" aria-label="Back">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-400" />
+            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md" aria-label="Back">
+              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold">Investor Pipeline</h1>
-              <p className="text-sm text-neutral-400">{total} registered investors</p>
+              <p className="text-sm text-neutral-700">{total} registered investors</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <FunnelIcon className="w-4 h-4 text-neutral-500" />
+            <FunnelIcon className="w-4 h-4 text-neutral-600" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-neutral-800 border border-neutral-700 text-white text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-500"
+              className="bg-neutral-100 border border-neutral-200 text-black text-sm rounded-md px-3 py-2 focus:ring-2 focus-visible:ring-red-600"
             >
               <option value="">All Statuses</option>
               <option value="new">New</option>
@@ -162,8 +162,8 @@ export default function InvestorsPage() {
         </div>
 
         {feedback && (
-          <div className={`mb-6 p-4 rounded-lg border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-900/30 border-red-700 text-red-300'
+          <div className={`mb-6 p-4 rounded-md border text-sm ${
+            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
           }`}>{feedback.message}</div>
         )}
 
@@ -172,19 +172,19 @@ export default function InvestorsPage() {
           <div className={selectedInvestor ? 'lg:col-span-2' : 'lg:col-span-3'}>
             {loading ? (
               <div className="flex justify-center py-20">
-                <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
               </div>
             ) : investors.length === 0 ? (
-              <div className="text-center py-20 text-neutral-500">No investors found.</div>
+              <div className="text-center py-20 text-neutral-600">No investors found.</div>
             ) : (
               <div className="space-y-3">
                 {investors.map((inv) => (
-                  <div key={inv.referenceNumber} className={`bg-neutral-900 rounded-xl border p-4 transition-colors ${
-                    selectedInvestor?.referenceNumber === inv.referenceNumber ? 'border-yellow-500' : 'border-neutral-800'
+                  <div key={inv.referenceNumber} className={`bg-white rounded-md border p-4 transition-colors ${
+                    selectedInvestor?.referenceNumber === inv.referenceNumber ? 'border-yellow-400' : 'border-neutral-200'
                   }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-yellow-50 text-red-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
                           {initialsOf(inv.name)}
                         </div>
                         <div className="min-w-0">
@@ -194,7 +194,7 @@ export default function InvestorsPage() {
                               {inv.status}
                             </span>
                           </div>
-                          <div className="text-xs text-neutral-500 truncate">
+                          <div className="text-xs text-neutral-600 truncate">
                             {inv.referenceNumber} &middot; {inv.email}
                             {inv.companyName && ` · ${inv.companyName}`}
                           </div>
@@ -213,7 +213,7 @@ export default function InvestorsPage() {
                         <select
                           value={statusKey(inv)}
                           onChange={(e) => handleStatusChange(inv, e.target.value)}
-                          className="bg-neutral-800 border border-neutral-700 text-xs text-white rounded px-2 py-1"
+                          className="text-xs text-black px-2 py-1 border-t-2 border-black pt-5"
                         >
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
@@ -221,11 +221,11 @@ export default function InvestorsPage() {
                           <option value="inactive">Inactive</option>
                         </select>
                         <button onClick={() => viewInvestor(inv)} title="View details"
-                          className="p-2 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-yellow-400">
+                          className="p-2 rounded-md hover:bg-neutral-100 text-neutral-600 hover:text-red-600">
                           <EyeIcon className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDelete(inv)} title="Delete"
-                          className="p-2 rounded-lg hover:bg-red-900/30 text-neutral-500 hover:text-red-400">
+                          className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-400">
                           <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
@@ -233,7 +233,7 @@ export default function InvestorsPage() {
                     {sectorsOf(inv).length > 0 && (
                       <div className="flex gap-1.5 mt-2 flex-wrap">
                         {sectorsOf(inv).slice(0, 4).map((s) => (
-                          <span key={s} className="text-xs px-2 py-0.5 bg-neutral-800 text-neutral-400 rounded">{s}</span>
+                          <span key={s} className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-700 rounded">{s}</span>
                         ))}
                         {sectorsOf(inv).length > 4 && (
                           <span className="text-xs text-neutral-600">+{sectorsOf(inv).length - 4} more</span>
@@ -248,19 +248,19 @@ export default function InvestorsPage() {
 
           {/* Detail Panel */}
           {selectedInvestor && (
-            <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 h-fit sticky top-8">
+            <div className="p-6 h-fit sticky top-8 border-t-2 border-black pt-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Investor Details</h2>
-                <button onClick={() => setSelectedInvestor(null)} className="text-neutral-500 hover:text-white text-sm">Close</button>
+                <button onClick={() => setSelectedInvestor(null)} className="text-neutral-600 hover:text-red-600 text-sm">Close</button>
               </div>
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center font-bold">
+                  <div className="w-12 h-12 rounded-full bg-yellow-50 text-red-600 flex items-center justify-center font-bold">
                     <UserIcon className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="font-semibold text-white">{selectedInvestor.name}</div>
-                    <div className="text-xs text-neutral-500">{selectedInvestor.referenceNumber}</div>
+                    <div className="font-semibold text-black">{selectedInvestor.name}</div>
+                    <div className="text-xs text-neutral-600">{selectedInvestor.referenceNumber}</div>
                   </div>
                 </div>
                 {[
@@ -274,22 +274,22 @@ export default function InvestorsPage() {
                   ['Registered', new Date(selectedInvestor.createdAt).toLocaleDateString('en-UG')],
                 ].filter(([, v]) => v).map(([label, value]) => (
                   <div key={label} className="flex justify-between">
-                    <span className="text-neutral-500">{label}</span>
-                    <span className="text-white text-right">{value}</span>
+                    <span className="text-neutral-600">{label}</span>
+                    <span className="text-black text-right">{value}</span>
                   </div>
                 ))}
                 {selectedInvestor.linkedBusinessRegistrationRef && (
-                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                  <div className="bg-green-500/10 p-3 border-t-2 border-black pt-5">
                     <span className="text-green-400 text-xs font-medium block mb-1">
                       Linked URSB Registration
                     </span>
-                    <p className="text-xs text-neutral-400 mb-2">
+                    <p className="text-xs text-neutral-700 mb-2">
                       Matched by email + company name — fundamentals below were
                       already collected and verified by URSB, not re-entered here.
                     </p>
                     <Link
                       href={`/business/registration/${selectedInvestor.linkedBusinessRegistrationRef}/`}
-                      className="text-xs text-yellow-500 hover:text-yellow-400 underline"
+                      className="text-xs text-yellow-500 hover:text-red-600 underline"
                     >
                       View {selectedInvestor.linkedBusinessRegistrationRef} &rarr;
                     </Link>
@@ -297,10 +297,10 @@ export default function InvestorsPage() {
                 )}
                 {sectorsOf(selectedInvestor).length > 0 && (
                   <div>
-                    <span className="text-neutral-500 block mb-1">Sectors</span>
+                    <span className="text-neutral-600 block mb-1">Sectors</span>
                     <div className="flex gap-1 flex-wrap">
                       {sectorsOf(selectedInvestor).map((s) => (
-                        <span key={s} className="text-xs px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded">{s}</span>
+                        <span key={s} className="text-xs px-2 py-0.5 bg-yellow-50 text-red-600 rounded">{s}</span>
                       ))}
                     </div>
                   </div>

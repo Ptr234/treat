@@ -99,20 +99,20 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
     .filter((group) => group.items.length > 0);
 
   return (
-    <div className="flex h-full flex-col bg-black text-neutral-300">
+    <div className="flex h-full flex-col bg-black text-neutral-700">
       {/* Brand */}
-      <div className="h-1 bg-gradient-to-r from-red-600 via-yellow-500 to-red-600" />
+      <div className="h-1 bg-white" />
       <Link
         href="/dashboard"
         onClick={onNavigate}
-        className="flex items-center gap-3 px-5 py-5 border-b border-neutral-800"
+        className="flex items-center gap-3 px-5 py-5 border-b border-neutral-200"
       >
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-yellow-400 to-red-600 flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 flex items-center justify-center flex-shrink-0 border-t-2 border-black pt-5">
           <Squares2X2Icon className="w-5 h-5 text-black" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-bold text-white leading-tight truncate">OneStopCentre</p>
-          <p className="text-[11px] text-neutral-500 leading-tight">Admin Console</p>
+          <p className="text-sm font-bold text-black leading-tight truncate">OneStopCentre</p>
+          <p className="text-[11px] text-neutral-600 leading-tight">Admin Console</p>
         </div>
       </Link>
 
@@ -132,10 +132,10 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
                       href={href}
                       onClick={onNavigate}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
                         active
                           ? 'bg-yellow-500 text-black'
-                          : 'text-neutral-400 hover:text-yellow-500 hover:bg-neutral-900'
+                          : 'text-neutral-700 hover:text-yellow-500 hover:bg-white'
                       }`}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
@@ -149,7 +149,7 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
         ))}
       </nav>
 
-      <div className="h-0.5 bg-gradient-to-r from-transparent via-red-600 to-transparent" />
+      <div className="h-0.5 bg-white" />
     </div>
   );
 }

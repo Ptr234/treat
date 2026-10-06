@@ -41,21 +41,21 @@ export default function LoginPage() {
             className="rounded-lg object-contain bg-white flex-shrink-0"
           />
           <span className="leading-tight">
-            <span className="block text-lg font-black text-gray-900 group-hover:text-yellow-700 transition-colors">
+            <span className="block text-lg font-black text-black group-hover:text-red-600 transition-colors">
               OneStopCentre
             </span>
-            <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-yellow-700">
+            <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-red-600">
               Uganda
             </span>
           </span>
         </Link>
 
-        <div className="bg-white rounded-lg shadow-xl border border-gray-100 p-6 sm:p-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Admin Sign In</h1>
+        <div className="border-t-4 border-yellow-400 pt-8">
+          <h1 className="text-2xl font-bold text-black mb-4">Admin sign in</h1>
 
-          <div className="flex items-center gap-2 mb-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <ShieldCheckIcon className="w-5 h-5 text-yellow-600 flex-shrink-0" />
-            <p className="text-sm text-yellow-800">
+          <div className="flex items-start gap-3 mb-6 border-l-4 border-red-600 pl-4">
+            <ShieldCheckIcon className="mt-0.5 w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-sm text-neutral-800">
               Authorized UIA administrators only.
             </p>
           </div>
@@ -76,16 +76,16 @@ export default function LoginPage() {
           )}
 
           <div className="flex items-center my-5">
-            <div className="flex-1 border-t border-gray-300" />
-            <span className="px-3 text-sm text-gray-500">or</span>
-            <div className="flex-1 border-t border-gray-300" />
+            <div className="flex-1 border-t border-neutral-300" />
+            <span className="px-3 text-sm text-neutral-600">or</span>
+            <div className="flex-1 border-t border-neutral-300" />
           </div>
 
           <LoginForm />
         </div>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
-          <Link href="/" className="hover:text-yellow-700 transition-colors">
+        <p className="mt-8 text-center text-sm text-neutral-700">
+          <Link href="/" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">
             &larr; Back to homepage
           </Link>
         </p>

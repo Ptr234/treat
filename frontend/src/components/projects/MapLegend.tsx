@@ -15,11 +15,11 @@ export default function MapLegend() {
   ];
 
   return (
-    <div className="bg-neutral-900 border border-neutral-700 rounded-lg shadow-2xl p-4 max-w-xs">
+    <div className="p-4 max-w-xs border-t-2 border-black pt-5">
       <h3 className="font-bold text-yellow-500 text-sm mb-3">Map Legend</h3>
 
       <div className="mb-4">
-        <p className="text-xs font-semibold text-neutral-400 mb-2 uppercase tracking-wider">Sector Colors</p>
+        <p className="text-xs font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Sector Colors</p>
         <div className="space-y-1.5">
           {sectors.map((sector) => (
             <div key={sector.name} className="flex items-center gap-2">
@@ -27,14 +27,14 @@ export default function MapLegend() {
                 className="w-4 h-4 rounded-full flex-shrink-0 ring-1 ring-black/30"
                 style={{ backgroundColor: sector.color }}
               />
-              <span className="text-xs text-neutral-300">{sector.name}</span>
+              <span className="text-xs text-neutral-700">{sector.name}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="pt-4 border-t border-neutral-700">
-        <p className="text-xs font-semibold text-neutral-400 mb-2 uppercase tracking-wider">Investment Size</p>
+      <div className="pt-4 border-t border-neutral-200">
+        <p className="text-xs font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Investment Size</p>
         <div className="space-y-2">
           {investmentSizes.map((size) => (
             <div key={size.label} className="flex items-center gap-2">
@@ -42,14 +42,14 @@ export default function MapLegend() {
                 className="rounded-full bg-yellow-500 flex-shrink-0"
                 style={{ width: size.size, height: size.size }}
               />
-              <span className="text-xs text-neutral-300">{size.label}</span>
+              <span className="text-xs text-neutral-700">{size.label}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-neutral-700">
-        <p className="text-xs text-neutral-500 italic">Click on any dot to view project details</p>
+      <div className="mt-4 pt-4 border-t border-neutral-200">
+        <p className="text-xs text-neutral-600 italic">Click on any dot to view project details</p>
       </div>
     </div>
   );

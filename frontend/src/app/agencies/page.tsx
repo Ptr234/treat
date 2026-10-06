@@ -89,7 +89,7 @@ function AgencyDetail({ agency }: { agency: AgencyContact }) {
   return (
     <article className="border-t border-neutral-200 pt-6">
       <div className="flex items-start gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white">
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden border border-neutral-200 bg-white p-2">
           {agency.logo ? (
             <Image src={agency.logo} alt={agency.acronym} width={36} height={36} className="object-contain" />
           ) : (

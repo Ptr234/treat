@@ -63,8 +63,8 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
     return (
  <div className="min-h-screen bg-white flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Link href={`/business/registration/${referenceNumber}/`} className="text-yellow-700 underline text-sm">
+          <p className="text-neutral-700 mb-4">{error}</p>
+          <Link href={`/business/registration/${referenceNumber}/`} className="text-red-600 underline text-sm">
             Back to registration status
           </Link>
         </div>
@@ -76,59 +76,59 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
  <div className="min-h-screen bg-white py-8 px-4 print:bg-white print:py-0">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6 print:hidden">
-          <Link href={`/business/registration/${referenceNumber}/${emailParam ? `?email=${encodeURIComponent(emailParam)}` : ''}`} className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900">
+          <Link href={`/business/registration/${referenceNumber}/${emailParam ? `?email=${encodeURIComponent(emailParam)}` : ''}`} className="inline-flex items-center gap-1 text-sm text-neutral-700 hover:text-black">
             <ArrowLeftIcon className="w-4 h-4" /> Back to registration status
           </Link>
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-800"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-black text-yellow-400 text-sm font-medium rounded-md hover:bg-neutral-800"
           >
             <PrinterIcon className="w-4 h-4" /> Print / Save as PDF
           </button>
         </div>
 
         {/* The certificate itself */}
-        <div className="bg-white border-8 border-double border-yellow-600 rounded-lg p-10 print:border-4 print:shadow-none shadow-lg">
+        <div className="bg-white border-8 border-double border-yellow-600 p-10 print:border-4">
           <div className="text-center border-b-2 border-black pb-6 mb-6">
             <p className="text-xs tracking-[0.3em] text-red-700 font-bold uppercase">Republic of Uganda</p>
-            <h1 className="text-2xl font-black text-gray-900 mt-2">Uganda Registration Services Bureau</h1>
-            <p className="text-sm text-gray-600 mt-1">Certificate of Business Registration</p>
+            <h1 className="text-2xl font-black text-black mt-2">Uganda Registration Services Bureau</h1>
+            <p className="text-sm text-neutral-700 mt-1">Certificate of Business Registration</p>
           </div>
 
-          <p className="text-center text-gray-700 mb-6">This is to certify that</p>
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-2">{cert.businessName}</h2>
-          <p className="text-center text-gray-600 mb-8">
+          <p className="text-center text-neutral-800 mb-6">This is to certify that</p>
+          <h2 className="text-3xl font-bold text-center text-black mb-2">{cert.businessName}</h2>
+          <p className="text-center text-neutral-700 mb-8">
             {cert.businessStructure} · {cert.businessType} · {cert.location}
           </p>
 
-          <p className="text-center text-gray-700 mb-8">
+          <p className="text-center text-neutral-800 mb-8">
             has been duly registered with the Uganda Registration Services Bureau
             in accordance with the laws of the Republic of Uganda.
           </p>
 
           <div className="grid grid-cols-2 gap-6 mb-8 text-sm">
             <div>
-              <p className="text-gray-500">Registration Reference</p>
-              <p className="font-bold text-gray-900">{cert.referenceNumber}</p>
+              <p className="text-neutral-600">Registration Reference</p>
+              <p className="font-bold text-black">{cert.referenceNumber}</p>
             </div>
             <div>
-              <p className="text-gray-500">Certificate Number</p>
-              <p className="font-bold text-gray-900">{cert.certificateNumber}</p>
+              <p className="text-neutral-600">Certificate Number</p>
+              <p className="font-bold text-black">{cert.certificateNumber}</p>
             </div>
             <div>
-              <p className="text-gray-500">Date Issued</p>
-              <p className="font-bold text-gray-900">{new Date(cert.issuedAt).toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p className="text-neutral-600">Date Issued</p>
+              <p className="font-bold text-black">{new Date(cert.issuedAt).toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
 
-          <div className="border-t border-gray-200 pt-4">
-            <p className="text-sm text-gray-500 mb-2">Registered Owners</p>
+          <div className="border-t border-neutral-200 pt-4">
+            <p className="text-sm text-neutral-600 mb-2">Registered Owners</p>
             {cert.owners.map((o, i) => (
-              <p key={i} className="text-sm text-gray-800">{o.name} — {o.nationality} ({o.percentage}%)</p>
+              <p key={i} className="text-sm text-neutral-800">{o.name} — {o.nationality} ({o.percentage}%)</p>
             ))}
           </div>
 
-          <div className="mt-10 pt-6 border-t border-gray-200 text-center text-xs text-gray-400">
+          <div className="mt-10 pt-6 border-t border-neutral-200 text-center text-xs text-neutral-500">
             Issued via the Uganda OneStop Centre Digital Tool. Verify at oscdigitaltool.com/business/registration/{cert.referenceNumber}
           </div>
         </div>

@@ -153,15 +153,15 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
     }
   };
 
-  const inputClass = "w-full px-3 py-2 min-h-[44px] bg-neutral-800 border border-neutral-600 text-white placeholder-neutral-500 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 [&>option]:bg-neutral-800 [&>option]:text-white";
-  const labelClass = "block text-sm font-medium text-neutral-300 mb-1";
+  const inputClass = "w-full px-3 py-2 min-h-[44px] bg-neutral-100 border border-neutral-200 text-white placeholder:text-neutral-500 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 [&>option]:bg-neutral-100 [&>option]:text-white";
+  const labelClass = "block text-sm font-medium text-neutral-700 mb-1";
 
   const renderStep = () => {
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Personal Information</h3>
+            <h3 className="text-lg font-semibold text-black">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>Full Name *</label>
@@ -219,7 +219,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
       case 2:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Service Details</h3>
+            <h3 className="text-lg font-semibold text-black">Service Details</h3>
             <div>
               <label className={labelClass}>Service Required *</label>
               <select
@@ -285,9 +285,9 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
       case 3:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Schedule Preferences</h3>
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-md p-3">
-              <p className="text-sm text-yellow-400">
+            <h3 className="text-lg font-semibold text-black">Schedule Preferences</h3>
+            <div className="bg-yellow-50 p-3 border-t-2 border-black pt-5">
+              <p className="text-sm text-red-600">
                 Please provide your preferred appointment time and an alternative option.
                 Operating hours: {agency.operatingHours}
               </p>
@@ -328,7 +328,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
                 </div>
               </div>
 
-              <h4 className="font-medium text-neutral-400">Alternative Option (Optional)</h4>
+              <h4 className="font-medium text-neutral-700">Alternative Option (Optional)</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Alternative Date</label>
@@ -366,28 +366,28 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
       case 4:
         return (
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-white">Review & Submit</h3>
+            <h3 className="text-lg font-semibold text-black">Review & Submit</h3>
 
-            <div className="bg-neutral-800 rounded-lg p-4 space-y-3 border border-neutral-700">
+            <div className="p-4 space-y-3 border-t-2 border-black pt-5">
               <div className="flex items-center space-x-2">
                 <UserIcon className="w-5 h-5 text-yellow-500" />
-                <span className="font-medium text-white">{appointmentData.name}</span>
-                <span className="text-neutral-400">({appointmentData.email})</span>
+                <span className="font-medium text-black">{appointmentData.name}</span>
+                <span className="text-neutral-700">({appointmentData.email})</span>
               </div>
 
               <div className="flex items-center space-x-2">
                 <BuildingOfficeIcon className="w-5 h-5 text-yellow-500" />
-                <span className="text-neutral-300">{appointmentData.serviceType}</span>
+                <span className="text-neutral-700">{appointmentData.serviceType}</span>
               </div>
 
               <div className="flex items-center space-x-2">
                 <CalendarIcon className="w-5 h-5 text-yellow-500" />
-                <span className="text-neutral-300">{appointmentData.preferredDate} at {appointmentData.preferredTime}</span>
+                <span className="text-neutral-700">{appointmentData.preferredDate} at {appointmentData.preferredTime}</span>
               </div>
 
               <div className="flex items-center space-x-2">
                 <ClockIcon className="w-5 h-5 text-yellow-500" />
-                <span className="text-neutral-300">{appointmentData.duration} minutes ({appointmentData.meetingType})</span>
+                <span className="text-neutral-700">{appointmentData.duration} minutes ({appointmentData.meetingType})</span>
               </div>
             </div>
 
@@ -403,7 +403,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
               />
             </div>
 
-            <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3">
+            <div className="bg-red-50 p-3 border-t-2 border-black pt-5">
               <p className="text-sm text-red-400">
                 By submitting this request, you agree that {agency.acronym} may contact you to confirm
                 appointment details. You will receive confirmation within 24 hours.
@@ -421,19 +421,19 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="fixed inset-0 bg-neutral-100 flex items-center justify-center z-50 p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="bg-neutral-900 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-neutral-700"
+          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-red-800 to-yellow-600 text-white p-4 sm:p-6 rounded-t-xl">
+          <div className="text-black p-4 sm:p-6 border-t-2 border-black pt-5">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold">Book Appointment</h2>
-                <p className="text-white/70">{agency.name}</p>
+                <p className="text-black/70">{agency.name}</p>
               </div>
               <button
                 onClick={onClose}
@@ -455,7 +455,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
                   />
                 ))}
               </div>
-              <p className="text-white/70 text-sm mt-2">
+              <p className="text-black/70 text-sm mt-2">
                 Step {currentStep} of 4
               </p>
             </div>
@@ -467,14 +467,14 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
           </div>
 
           {/* Navigation */}
-          <div className="p-4 sm:p-6 border-t border-neutral-700 flex justify-between">
+          <div className="p-4 sm:p-6 border-t border-neutral-200 flex justify-between">
             <button
               onClick={prevStep}
               disabled={currentStep === 1}
-              className={`min-h-[44px] px-6 py-2 border border-neutral-600 rounded-md transition-colors ${
+              className={`min-h-[44px] px-6 py-2 border border-neutral-200 rounded-md transition-colors ${
                 currentStep === 1
                   ? 'text-neutral-600 cursor-not-allowed'
-                  : 'text-neutral-300 hover:bg-neutral-800'
+                  : 'text-neutral-700 hover:bg-neutral-100'
               }`}
             >
               Previous
@@ -487,7 +487,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
                 className={`min-h-[44px] px-6 py-2 rounded-md transition-colors ${
                   validateStep(currentStep)
                     ? 'bg-red-600 text-white hover:bg-red-500'
-                    : 'bg-neutral-700 text-neutral-500 cursor-not-allowed'
+                    : 'bg-neutral-100 text-neutral-600 cursor-not-allowed'
                 }`}
               >
                 Next

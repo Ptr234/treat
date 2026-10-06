@@ -1,17 +1,10 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ugandaAgencies, getAgencyById } from '@/data/agencies';
 import ServiceRequestForm from './ServiceRequestForm';
-import {
-  EnvelopeIcon,
-  PhoneIcon,
-  GlobeAltIcon,
-  MapPinIcon,
-  ClockIcon,
-  ArrowLeftIcon,
-  UserGroupIcon,
-  CheckCircleIcon
-} from '@heroicons/react/24/outline';
+import { SITE_URL, absoluteUrl, breadcrumbLd, buildMetadata } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 
 interface AgencyPageProps {
   params: Promise<{ id: string }>;
@@ -23,6 +16,48 @@ export async function generateStaticParams() {
   }));
 }
 
+const SLA_BY_SERVICE: Record<string, string> = {
+  'default': '5-7 business days',
+  'license': '10-14 business days',
+  'permit': '7-10 business days',
+  'registration': '3-5 business days',
+  'application': '5-7 business days',
+  'certificate': '7-10 business days',
+  'approval': '10-15 business days'
+};
+
+const getSlaForService = (service: string): string => {
+  const lowerService = service.toLowerCase();
+  for (const [key, value] of Object.entries(SLA_BY_SERVICE)) {
+    if (lowerService.includes(key)) {
+      return value;
+    }
+  }
+  return SLA_BY_SERVICE.default ?? '5-7 business days';
+};
+
+const linkClass =
+  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+
+const SECTION_LINKS = [
+  { href: '#services', label: 'Services' },
+  { href: '#contact', label: 'Contact' },
+  { href: '#request', label: 'Request a service' },
+];
+
+export async function generateMetadata({ params }: AgencyPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const agency = getAgencyById(id);
+  if (!agency) {
+    return buildMetadata({ title: 'Agency not found', path: `/agencies/${id}/`, noIndex: true });
+  }
+  return buildMetadata({
+    title: `${agency.name} (${agency.acronym})`,
+    description: agency.description,
+    path: `/agencies/${agency.id}/`,
+  });
+}
+
 export default async function AgencyDetailPage({ params }: AgencyPageProps) {
   const { id } = await params;
   const agency = getAgencyById(id);
@@ -31,225 +66,185 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
     notFound();
   }
 
-  const mockOfficers = [
-    {
-      name: 'Sarah Nakato',
-      title: 'Investment Facilitation Officer',
-      email: `s.nakato@${id}.go.ug`,
-      phone: '+256 414 123 456'
-    },
-    {
-      name: 'David Okello',
-      title: 'Senior Licensing Officer',
-      email: `d.okello@${id}.go.ug`,
-      phone: '+256 414 123 457'
-    },
-    {
-      name: 'Grace Namukasa',
-      title: 'Client Services Manager',
-      email: `g.namukasa@${id}.go.ug`,
-      phone: '+256 414 123 458'
-    },
-    {
-      name: 'James Mugisha',
-      title: 'Technical Advisor',
-      email: `j.mugisha@${id}.go.ug`,
-      phone: '+256 414 123 459'
-    }
-  ];
-
-  const slaByService: Record<string, string> = {
-    'default': '5-7 business days',
-    'license': '10-14 business days',
-    'permit': '7-10 business days',
-    'registration': '3-5 business days',
-    'application': '5-7 business days',
-    'certificate': '7-10 business days',
-    'approval': '10-15 business days'
+  const agencyLd = {
+    '@context': 'https://schema.org',
+    '@type': 'GovernmentOrganization',
+    name: agency.name,
+    alternateName: agency.acronym,
+    description: agency.description,
+    url: agency.contact.website ?? absoluteUrl(`/agencies/${agency.id}/`),
+    email: agency.contact.email,
+    telephone: agency.contact.phone,
+    address: { '@type': 'PostalAddress', streetAddress: agency.contact.address, addressCountry: 'UG' },
+    parentOrganization: { '@id': `${SITE_URL}/#organization` },
   };
+  const agencyCrumbs = breadcrumbLd([
+    { name: 'Home', path: '/' },
+    { name: 'Agency hub', path: '/agencies/' },
+    { name: agency.acronym, path: `/agencies/${agency.id}/` },
+  ]);
 
-  const getSlaForService = (service: string): string => {
-    const lowerService = service.toLowerCase();
-    for (const [key, value] of Object.entries(slaByService)) {
-      if (lowerService.includes(key)) {
-        return value;
-      }
-    }
-    return slaByService.default ?? '5-7 business days';
-  };
+  const relatedAgencies = ugandaAgencies
+    .filter((other) => other.category === agency.category && other.id !== agency.id)
+    .slice(0, 3);
 
   return (
- <div className="min-h-screen bg-white py-6 sm:py-8 lg:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link
-          href="/agencies/"
-          className="inline-flex items-center text-yellow-500 hover:text-yellow-400 mb-6 transition-colors"
-        >
-          <ArrowLeftIcon className="w-5 h-5 mr-2" />
-          Back to Agencies
-        </Link>
+    <div className="min-h-screen bg-white text-black">
+      <JsonLd data={[agencyLd, agencyCrumbs]} />
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li>
+              <Link href="/agencies/" className="text-red-600 hover:underline underline-offset-4">Agency hub</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">{agency.acronym}</li>
+          </ol>
+        </nav>
+      </div>
 
-        <div className="bg-neutral-900 rounded-xl shadow-lg overflow-hidden border border-neutral-800">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-red-800 via-red-700 to-yellow-600 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
-            <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-              {agency.logo && (
-                <div className="bg-white rounded-lg p-4 shadow-lg">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={agency.logo}
-                    alt={`${agency.name} logo`}
-                    className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 object-contain"
-                  />
-                </div>
-              )}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">{agency.name}</h1>
-                  <span className="px-3 py-1 bg-yellow-500 text-black text-sm font-bold rounded-full">
-                    {agency.acronym}
-                  </span>
-                </div>
-                <p className="text-white/80 text-lg mb-3">{agency.description}</p>
-                <span className="inline-block px-3 py-1 bg-white/10 text-white text-sm rounded-md capitalize border border-white/20">
-                  {agency.category.replace('_', ' ')}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4 sm:p-6 lg:p-8">
-            {/* Services Offered */}
-            <section className="mb-6 sm:mb-8 lg:mb-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <CheckCircleIcon className="w-7 h-7 text-yellow-500" />
-                Services Offered
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                {agency.services.map((service, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 p-4 bg-neutral-800 border border-neutral-700 rounded-lg hover:border-yellow-600 hover:shadow-lg hover:shadow-yellow-500/5 transition-all"
-                  >
-                    <CheckCircleIcon className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-white font-medium">{service}</p>
-                      <p className="text-sm text-red-400 mt-1">
-                        SLA: {getSlaForService(service)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Contact Information */}
-            <section className="mb-6 sm:mb-8 lg:mb-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Contact Information</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-3">
-                  <EnvelopeIcon className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
-                  <div>
-                    <p className="text-sm text-neutral-500 mb-1">Email</p>
-                    <a
-                      href={`mailto:${agency.contact.email}`}
-                      className="text-yellow-400 hover:text-yellow-300 font-medium"
-                    >
-                      {agency.contact.email}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <PhoneIcon className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
-                  <div>
-                    <p className="text-sm text-neutral-500 mb-1">Phone</p>
-                    <a
-                      href={`tel:${agency.contact.phone}`}
-                      className="text-yellow-400 hover:text-yellow-300 font-medium"
-                    >
-                      {agency.contact.phone}
-                    </a>
-                  </div>
-                </div>
-
-                {agency.contact.website && (
-                  <div className="flex items-start gap-3">
-                    <GlobeAltIcon className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
-                    <div>
-                      <p className="text-sm text-neutral-500 mb-1">Website</p>
-                      <a
-                        href={agency.contact.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-yellow-400 hover:text-yellow-300 font-medium"
-                      >
-                        {agency.contact.website}
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-start gap-3">
-                  <MapPinIcon className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
-                  <div>
-                    <p className="text-sm text-neutral-500 mb-1">Address</p>
-                    <p className="text-neutral-300">{agency.contact.address}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <ClockIcon className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
-                  <div>
-                    <p className="text-sm text-neutral-500 mb-1">Operating Hours</p>
-                    <p className="text-neutral-300">{agency.operatingHours}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Officer Directory */}
-            <section className="mb-6 sm:mb-8 lg:mb-12">
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                <UserGroupIcon className="w-7 h-7 text-red-500" />
-                Officer Directory
-              </h2>
-              <div className="grid md:grid-cols-2 gap-4">
-                {mockOfficers.map((officer, index) => (
-                  <div
-                    key={index}
-                    className="p-5 bg-neutral-800 border border-neutral-700 rounded-lg hover:border-red-600 hover:shadow-lg hover:shadow-red-500/5 transition-all"
-                  >
-                    <h3 className="font-semibold text-white mb-1">{officer.name}</h3>
-                    <p className="text-sm text-yellow-500 mb-3">{officer.title}</p>
-                    <div className="space-y-1">
-                      <a
-                        href={`mailto:${officer.email}`}
-                        className="text-sm text-neutral-400 hover:text-yellow-400 flex items-center gap-2"
-                      >
-                        <EnvelopeIcon className="w-4 h-4" />
-                        {officer.email}
-                      </a>
-                      <a
-                        href={`tel:${officer.phone}`}
-                        className="text-sm text-neutral-400 hover:text-yellow-400 flex items-center gap-2"
-                      >
-                        <PhoneIcon className="w-4 h-4" />
-                        {officer.phone}
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Service Request Form */}
-            <section>
-              <h2 className="text-xl sm:text-2xl font-bold text-white mb-6">Request a Service</h2>
-              <ServiceRequestForm agencyName={agency.name} agencyCode={agency.acronym} agencyEmail={agency.contact.email} services={agency.services} />
-            </section>
+      {/* Header */}
+      <section className="mx-auto grid max-w-6xl gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_auto] lg:items-start lg:px-8">
+        <div>
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-wider">
+            <span className="text-red-600">{agency.acronym}</span>
+            <span className="capitalize text-neutral-600">{agency.category.replace(/_/g, ' ')}</span>
+            {agency.urgencyLevel === 'high' && <span className="text-neutral-600">· Priority agency</span>}
+          </p>
+          <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{agency.name}</h1>
+          <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">{agency.description}</p>
+          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm">
+            <a href="#request" className="inline-flex items-center justify-center rounded-md bg-black px-5 py-2.5 font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
+              Request a service
+            </a>
+            <a href={`mailto:${agency.contact.email}`} className={`${linkClass} self-center`}>Email the agency</a>
           </div>
         </div>
+        {agency.logo && (
+          <div className="flex h-36 w-36 items-center justify-center overflow-hidden border border-neutral-200 bg-white p-4 sm:h-48 sm:w-48 sm:p-6 lg:h-56 lg:w-56">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={agency.logo} alt={`${agency.name} logo`} className="max-h-full max-w-full object-contain" />
+          </div>
+        )}
+      </section>
+
+      {/* Quick facts */}
+      <section aria-label="Quick facts" className="mx-auto mt-12 max-w-6xl px-4 sm:px-6 lg:px-8">
+        <dl className="grid grid-cols-2 gap-6 border-y border-neutral-200 py-6 md:grid-cols-4">
+          <div className="border-l-4 border-yellow-400 pl-4">
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Services</dt>
+            <dd className="mt-1 text-2xl font-bold">{agency.services.length}</dd>
+          </div>
+          <div className="border-l-4 border-yellow-400 pl-4">
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Operating hours</dt>
+            <dd className="mt-1 text-sm font-bold leading-6">{agency.operatingHours}</dd>
+          </div>
+          <div className="border-l-4 border-yellow-400 pl-4">
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Appointments</dt>
+            <dd className="mt-1 text-sm font-bold leading-6">{agency.hasAppointmentBooking ? 'Bookable online' : 'Contact to arrange'}</dd>
+          </div>
+          <div className="border-l-4 border-red-600 pl-4">
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Priority</dt>
+            <dd className="mt-1 text-sm font-bold leading-6 capitalize">{agency.urgencyLevel}</dd>
+          </div>
+        </dl>
+        <nav aria-label="On this page" className="mt-4">
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            {SECTION_LINKS.map((item) => (
+              <li key={item.href}>
+                <a href={item.href} className="font-semibold text-neutral-700 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded-sm">
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </section>
+
+      <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
+        {/* Services */}
+        <section id="services" aria-labelledby="services-heading" className="scroll-mt-24">
+          <h2 id="services-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Services offered</h2>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-700">
+            Turnaround times are indicative estimates based on the type of service. Confirm current timelines with the agency.
+          </p>
+          <ol className="mt-4 divide-y divide-neutral-200">
+            {agency.services.map((service, index) => (
+              <li key={index} className="grid gap-2 py-5 sm:grid-cols-[3rem_1fr_auto] sm:items-baseline sm:gap-6">
+                <span className="text-sm font-bold text-red-600">{String(index + 1).padStart(2, '0')}</span>
+                <p className="font-bold leading-snug">{service}</p>
+                <p className="text-sm text-neutral-700 sm:text-right">
+                  <span className="font-semibold text-black">Indicative:</span> {getSlaForService(service)}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Contact */}
+        <section id="contact" aria-labelledby="contact-heading" className="mt-16 scroll-mt-24">
+          <h2 id="contact-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Contact information</h2>
+          <dl className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-2">
+            <div className="border-l-4 border-yellow-400 pl-4">
+              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Email</dt>
+              <dd className="mt-1"><a href={`mailto:${agency.contact.email}`} className={linkClass}>{agency.contact.email}</a></dd>
+            </div>
+            <div className="border-l-4 border-yellow-400 pl-4">
+              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Phone</dt>
+              <dd className="mt-1"><a href={`tel:${agency.contact.phone}`} className={linkClass}>{agency.contact.phone}</a></dd>
+            </div>
+            {agency.contact.website && (
+              <div className="border-l-4 border-yellow-400 pl-4">
+                <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Website</dt>
+                <dd className="mt-1">
+                  <a href={agency.contact.website} target="_blank" rel="noopener noreferrer" className={`${linkClass} break-all`}>{agency.contact.website}</a>
+                </dd>
+              </div>
+            )}
+            <div className="border-l-4 border-red-600 pl-4">
+              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Address</dt>
+              <dd className="mt-1 text-neutral-800">{agency.contact.address}</dd>
+            </div>
+            <div className="border-l-4 border-red-600 pl-4">
+              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Operating hours</dt>
+              <dd className="mt-1 text-neutral-800">{agency.operatingHours}</dd>
+            </div>
+          </dl>
+        </section>
+
+        {/* Related agencies */}
+        {relatedAgencies.length > 0 && (
+          <section aria-labelledby="related-heading" className="mt-16">
+            <h2 id="related-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Related agencies</h2>
+            <ul className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-3">
+              {relatedAgencies.map((related) => (
+                <li key={related.id} className="border-t-2 border-yellow-400 pt-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-red-600">{related.acronym}</p>
+                  <h3 className="mt-1 font-bold leading-snug">
+                    <Link href={`/agencies/${related.id}/`} className={linkClass}>{related.name}</Link>
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-700">{related.description}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* Request a service */}
+        <section id="request" aria-labelledby="request-heading" className="mt-16 scroll-mt-24 border-t-4 border-yellow-400 pt-10">
+          <h2 id="request-heading" className="text-xl font-bold sm:text-2xl">Request a service</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-700">
+            Send a request to {agency.name}. You will receive a reference number, and the agency will contact you within 24–48 hours.
+          </p>
+          <div className="mt-8">
+            <ServiceRequestForm agencyName={agency.name} agencyCode={agency.acronym} agencyEmail={agency.contact.email} services={agency.services} />
+          </div>
+        </section>
       </div>
     </div>
   );

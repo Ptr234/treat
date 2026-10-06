@@ -1,127 +1,106 @@
-import { Metadata } from 'next';
+import { buildMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
-export const metadata: Metadata = {
-  title: 'Investment Tools',
-  description: 'Comprehensive tools and calculators to support your business and investment decisions in Uganda.',
-};
+export const metadata = buildMetadata({
+  title: 'Business tools',
+  description: 'Calculators and tools for investors and businesses in Uganda: ROI calculator, tax calculator, invoice generator and document checklist.',
+  path: '/tools/',
+});
+
+const linkClass =
+  'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+
+const TOOLS = [
+  {
+    title: 'Tax Calculator',
+    description: 'Calculate your business tax obligations with our comprehensive tax calculator.',
+    href: '/tools/tax-calculator',
+  },
+  {
+    title: 'ROI Calculator',
+    description: 'Calculate return on investment for various business opportunities.',
+    href: '/tools/roi-calculator',
+  },
+  {
+    title: 'Invoice Generator',
+    description: 'Generate professional invoices for your business transactions.',
+    href: '/tools/invoice-generator',
+  },
+  {
+    title: 'Document Checklist',
+    description: 'Comprehensive checklist for business registration and licensing documents.',
+    href: '/tools/document-checklist',
+  },
+];
 
 export default function ToolsPage() {
-  const tools = [
-    {
-      title: 'Tax Calculator',
-      description: 'Calculate your business tax obligations with our comprehensive tax calculator.',
-      href: '/tools/tax-calculator',
-      icon: (
-        <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      ),
-      available: true
-    },
-    {
-      title: 'ROI Calculator',
-      description: 'Calculate return on investment for various business opportunities.',
-      href: '/tools/roi-calculator',
-      icon: (
-        <svg className="w-8 h-8 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 00-2 2h-2a2 2 0 00-2-2z" />
-        </svg>
-      ),
-      available: true
-    },
-    {
-      title: 'Invoice Generator',
-      description: 'Generate professional invoices for your business transactions.',
-      href: '/tools/invoice-generator',
-      icon: (
-        <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      ),
-      available: true
-    },
-    {
-      title: 'Document Checklist',
-      description: 'Comprehensive checklist for business registration and licensing documents.',
-      href: '/tools/document-checklist',
-      icon: (
-        <svg className="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-        </svg>
-      ),
-      available: true
-    }
-  ];
-
   return (
- <div className="bg-white min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-cover bg-center bg-no-repeat py-20" style={{ backgroundImage: 'url(/images/Pride.webp)' }}>
-        <div className="absolute inset-0 bg-black/65"></div>
-        <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-yellow-400 mb-6">
-            Investment Tools
-          </h1>
-          <p className="text-xl text-neutral-200 max-w-3xl mx-auto">
-            Comprehensive tools and calculators to support your business and investment decisions in Uganda.
-            Make informed choices with our professional-grade utilities.
-          </p>
-        </div>
+    <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">Business tools</li>
+          </ol>
+        </nav>
+      </div>
+
+      {/* Title */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Business tools</p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Investment tools</h1>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
+          Comprehensive tools and calculators to support your business and investment decisions in Uganda.
+          Make informed choices with our professional-grade utilities.
+        </p>
       </section>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+      {/* Tool list */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-label="Available tools">
+        <ul className="divide-y divide-neutral-200 border-y border-neutral-200">
+          {TOOLS.map((tool, index) => (
+            <li key={tool.title} className="grid gap-3 py-7 sm:grid-cols-[4rem_1fr_auto] sm:items-center sm:gap-8">
+              <span className="text-3xl font-bold text-yellow-500" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+              <div>
+                <h2 className="text-lg font-bold sm:text-xl">{tool.title}</h2>
+                <p className="mt-1 text-sm leading-6 text-neutral-700">{tool.description}</p>
+              </div>
+              <Link href={tool.href as never} className={`${linkClass} text-sm`}>
+                Use tool<span className="sr-only"> {tool.title}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {tools.map((tool) => (
-              <Link
-                key={tool.title}
-                href={tool.href as never}
-                className="group bg-neutral-900 rounded-xl shadow-lg shadow-black/50 p-6 border border-yellow-900/30 hover:border-yellow-500 hover:shadow-yellow-900/20 transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <div className="flex items-center justify-center w-16 h-16 bg-neutral-800 rounded-lg mb-4 group-hover:bg-yellow-900/30 group-hover:shadow-lg group-hover:shadow-yellow-500/10 transition-all duration-300">
-                  {tool.icon}
-                </div>
-                <h3 className="text-lg font-semibold text-yellow-400 mb-2 group-hover:text-yellow-300 transition-colors">
-                  {tool.title}
-                </h3>
-                <p className="text-neutral-400 text-sm mb-4">
-                  {tool.description}
-                </p>
-                <div className="flex items-center text-yellow-500 font-medium">
-                  <span>Use Tool</span>
-                  <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="bg-gradient-to-r from-red-950 via-red-900 to-neutral-900 rounded-xl p-8 border border-red-800/50 text-center">
-            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Need Help Choosing the Right Tool?</h2>
-            <p className="text-neutral-300 mb-6 max-w-2xl mx-auto">
-              Our investment advisors can help you select the best tools for your specific business needs
-              and guide you through the calculation process.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/support"
-                className="bg-yellow-600 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500 hover:shadow-lg hover:shadow-yellow-500/20 active:scale-95 transition-all duration-200"
-              >
-                Contact Support
-              </Link>
-              <Link
-                href="/business/registration"
-                className="bg-neutral-800 text-yellow-400 border border-yellow-700 px-6 py-3 rounded-lg font-semibold hover:bg-neutral-700 hover:border-yellow-500 active:scale-95 transition-all duration-200"
-              >
-                Start Registration
-              </Link>
-            </div>
+      {/* Help */}
+      <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8" aria-labelledby="tools-help-heading">
+        <div className="border-t-4 border-yellow-400 pt-8">
+          <h2 id="tools-help-heading" className="text-2xl font-bold">Need help choosing the right tool?</h2>
+          <p className="mt-3 max-w-2xl leading-7 text-neutral-700">
+            Our investment advisors can help you select the best tools for your specific business needs
+            and guide you through the calculation process.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/support"
+              className="inline-flex items-center justify-center rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+            >
+              Contact support
+            </Link>
+            <Link
+              href="/business/registration"
+              className="inline-flex items-center justify-center rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+            >
+              Start registration
+            </Link>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

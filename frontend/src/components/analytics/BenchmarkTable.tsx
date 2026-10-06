@@ -18,9 +18,9 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
   const StatusIcon = ({ status }: { status: 'success' | 'warning' | 'danger' }) => {
     switch (status) {
       case 'success':
-        return <CheckCircleIcon className="w-5 h-5 text-yellow-600" />;
+        return <CheckCircleIcon className="w-5 h-5 text-red-600" />;
       case 'warning':
-        return <ExclamationTriangleIcon className="w-5 h-5 text-yellow-600" />;
+        return <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />;
       case 'danger':
         return <XCircleIcon className="w-5 h-5 text-red-600" />;
     }
@@ -38,21 +38,21 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Performance Benchmarks</h3>
-        <p className="text-sm text-gray-600">Comparison against targets and regional averages</p>
+        <h3 className="text-lg font-semibold text-black mb-2">Performance Benchmarks</h3>
+        <p className="text-sm text-neutral-700">Comparison against targets and regional averages</p>
       </div>
 
       {/* Desktop Table */}
       <div className="hidden lg:block overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-yellow-50 border-b-2 border-yellow-200">
-              <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">Metric</th>
-              <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Current</th>
-              <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Target</th>
-              <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Regional Avg</th>
-              <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Progress</th>
-              <th className="text-center py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+            <tr className="bg-yellow-50 border-b-2 border-yellow-400">
+              <th className="text-left py-3 px-4 text-sm font-semibold text-neutral-800">Metric</th>
+              <th className="text-center py-3 px-4 text-sm font-semibold text-neutral-800">Current</th>
+              <th className="text-center py-3 px-4 text-sm font-semibold text-neutral-800">Target</th>
+              <th className="text-center py-3 px-4 text-sm font-semibold text-neutral-800">Regional Avg</th>
+              <th className="text-center py-3 px-4 text-sm font-semibold text-neutral-800">Progress</th>
+              <th className="text-center py-3 px-4 text-sm font-semibold text-neutral-800">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -64,22 +64,22 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
               return (
                 <tr
                   key={benchmark.metric}
-                  className={`border-b border-gray-200 ${
-                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                  className={`border-b border-neutral-200 ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-neutral-50'
                   } hover:bg-yellow-50 transition-colors`}
                 >
-                  <td className="py-4 px-4 text-sm font-medium text-gray-900">
+                  <td className="py-4 px-4 text-sm font-medium text-black">
                     {benchmark.metric}
                   </td>
                   <td className="py-4 px-4 text-center">
-                    <span className="text-sm font-semibold text-yellow-700">
+                    <span className="text-sm font-semibold text-red-600">
                       {formatValue(benchmark.current, benchmark.unit)}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-center text-sm text-gray-600">
+                  <td className="py-4 px-4 text-center text-sm text-neutral-700">
                     {formatValue(benchmark.target, benchmark.unit)}
                   </td>
-                  <td className="py-4 px-4 text-center text-sm text-gray-500">
+                  <td className="py-4 px-4 text-center text-sm text-neutral-600">
                     {formatValue(benchmark.regional, benchmark.unit)}
                   </td>
                   <td className="py-4 px-4">
@@ -87,13 +87,13 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
                       <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${
-                            status === 'success' ? 'bg-yellow-600' :
+                            status === 'success' ? 'bg-yellow-400' :
                             status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
                           }`}
                           style={{ width: `${isReversed ? 100 - progress : progress}%` }}
                         />
                       </div>
-                      <span className="text-xs font-medium text-gray-600 min-w-[40px]">
+                      <span className="text-xs font-medium text-neutral-700 min-w-[40px]">
                         {progress.toFixed(0)}%
                       </span>
                     </div>
@@ -119,29 +119,29 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
           return (
             <div
               key={benchmark.metric}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:border-yellow-300 transition-colors"
+              className="bg-white border border-neutral-200 rounded-md p-4 hover:border-black transition-colors"
             >
               <div className="flex items-start justify-between mb-3">
-                <h4 className="text-sm font-semibold text-gray-900">{benchmark.metric}</h4>
+                <h4 className="text-sm font-semibold text-black">{benchmark.metric}</h4>
                 <StatusIcon status={status} />
               </div>
 
               <div className="grid grid-cols-3 gap-3 mb-3">
                 <div>
-                  <p className="text-xs text-gray-600 mb-1">Current</p>
-                  <p className="text-sm font-semibold text-yellow-700">
+                  <p className="text-xs text-neutral-700 mb-1">Current</p>
+                  <p className="text-sm font-semibold text-red-600">
                     {formatValue(benchmark.current, benchmark.unit)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 mb-1">Target</p>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-xs text-neutral-700 mb-1">Target</p>
+                  <p className="text-sm font-medium text-black">
                     {formatValue(benchmark.target, benchmark.unit)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-600 mb-1">Regional</p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs text-neutral-700 mb-1">Regional</p>
+                  <p className="text-sm text-neutral-700">
                     {formatValue(benchmark.regional, benchmark.unit)}
                   </p>
                 </div>
@@ -151,13 +151,13 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
                 <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      status === 'success' ? 'bg-yellow-600' :
+                      status === 'success' ? 'bg-yellow-400' :
                       status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
                     }`}
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <span className="text-xs font-medium text-gray-600">
+                <span className="text-xs font-medium text-neutral-700">
                   {progress.toFixed(0)}%
                 </span>
               </div>
@@ -167,18 +167,18 @@ export default function BenchmarkTable({ data }: BenchmarkTableProps) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 pt-4 border-t border-gray-200">
+      <div className="flex items-center justify-center gap-6 pt-4 border-t border-neutral-200">
         <div className="flex items-center gap-2">
-          <CheckCircleIcon className="w-4 h-4 text-yellow-600" />
-          <span className="text-xs text-gray-600">On Target (≥100%)</span>
+          <CheckCircleIcon className="w-4 h-4 text-red-600" />
+          <span className="text-xs text-neutral-700">On Target (≥100%)</span>
         </div>
         <div className="flex items-center gap-2">
-          <ExclamationTriangleIcon className="w-4 h-4 text-yellow-600" />
-          <span className="text-xs text-gray-600">Near Target (90-99%)</span>
+          <ExclamationTriangleIcon className="w-4 h-4 text-red-600" />
+          <span className="text-xs text-neutral-700">Near Target (90-99%)</span>
         </div>
         <div className="flex items-center gap-2">
           <XCircleIcon className="w-4 h-4 text-red-600" />
-          <span className="text-xs text-gray-600">Below Target (&lt;90%)</span>
+          <span className="text-xs text-neutral-700">Below Target (&lt;90%)</span>
         </div>
       </div>
     </div>

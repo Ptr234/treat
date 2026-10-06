@@ -127,12 +127,12 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
   return (
     <>
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/50 z-50" onClick={skipTutorial} />
+      <div className="fixed inset-0 bg-neutral-100 z-50" onClick={skipTutorial} />
       
       {/* Highlight */}
       {highlightElement && (
         <div
-          className="fixed border-4 border-yellow-500 rounded-lg pointer-events-none z-[60] animate-pulse"
+          className="fixed -4 pointer-events-none z-[60] animate-pulse border-t-2 border-black pt-5"
           style={{
             top: highlightElement.offsetTop - 4,
             left: highlightElement.offsetLeft - 4,
@@ -149,26 +149,26 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`fixed z-[70] bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 ${
+            className={`fixed z-[70] bg-white rounded-md max-w-md w-full mx-4 ${
               currentStepData?.position === 'center' 
                 ? 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'
                 : 'top-20 right-4'
             }`}
           >
             {/* Header */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-neutral-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">
+                  <h3 className="text-xl font-bold text-black">
                     {currentStepData?.title}
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-neutral-600">
                     Step {currentStep + 1} of {tutorialSteps.length}
                   </p>
                 </div>
                 <button
                   onClick={closeTutorial}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="p-2 hover:bg-neutral-100 rounded-md"
                   aria-label="Close tutorial"
                 >
                   <XMarkIcon className="w-5 h-5" />
@@ -188,21 +188,21 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
 
             {/* Content */}
             <div className="p-6">
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-neutral-800 leading-relaxed">
                 {currentStepData?.content}
               </p>
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-gray-200 flex justify-between">
+            <div className="p-6 border-t border-neutral-200 flex justify-between">
               <div className="flex space-x-2">
                 <button
                   onClick={prevStep}
                   disabled={currentStep === 0}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all ${
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
                     currentStep === 0 
-                      ? 'text-gray-400 cursor-not-allowed' 
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'text-neutral-500 cursor-not-allowed' 
+                      : 'text-neutral-800 hover:bg-neutral-100'
                   }`}
                 >
                   <ChevronLeftIcon className="w-4 h-4" />
@@ -211,7 +211,7 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
                 
                 <button
                   onClick={skipTutorial}
-                  className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all"
+                  className="text-neutral-700 hover:text-neutral-800 px-4 py-2 rounded-md hover:bg-neutral-100 transition-all"
                 >
                   Skip
                 </button>
@@ -219,7 +219,7 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
               
               <button
                 onClick={nextStep}
-                className="flex items-center space-x-2 px-6 py-2 bg-yellow-600 text-black rounded-lg hover:bg-yellow-700 transition-all"
+                className="flex items-center space-x-2 px-6 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-all"
               >
                 <span>
                   {currentStep === tutorialSteps.length - 1 ? 'Finish' : 'Next'}

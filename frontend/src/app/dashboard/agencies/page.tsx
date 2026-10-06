@@ -111,82 +111,82 @@ export default function AgencyManagementPage() {
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-neutral-400">Admin access required.</p>
+        <p className="text-neutral-700">Admin access required.</p>
       </div>
     );
   }
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent";
+  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-white placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
 
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-800 rounded-lg transition-colors" aria-label="Back to dashboard">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-400" />
+            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md transition-colors" aria-label="Back to dashboard">
+              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold">Agency Management</h1>
-              <p className="text-sm text-neutral-400">Manage government agencies, contact details, and SLA hours</p>
+              <p className="text-sm text-neutral-700">Manage government agencies, contact details, and SLA hours</p>
             </div>
           </div>
           <button onClick={() => { resetForm(); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 transition-colors">
+            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors">
             <PlusIcon className="w-5 h-5" />
             Add Agency
           </button>
         </div>
 
         {feedback && (
-          <div className={`mb-6 p-4 rounded-lg border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-900/30 border-red-700 text-red-300'
+          <div className={`mb-6 p-4 rounded-md border text-sm ${
+            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
           }`}>{feedback.message}</div>
         )}
 
         {showForm && (
-          <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 mb-8">
+          <div className="p-6 mb-8 border-t-2 border-black pt-5">
             <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Agency' : 'Add New Agency'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Agency Name *</label>
+                <label className="block text-sm text-neutral-700 mb-1">Agency Name *</label>
                 <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="Uganda Revenue Authority" />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Code *</label>
+                <label className="block text-sm text-neutral-700 mb-1">Code *</label>
                 <select value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} className={inputClass}>
                   {AGENCY_CODES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Contact Email</label>
+                <label className="block text-sm text-neutral-700 mb-1">Contact Email</label>
                 <input type="email" value={form.contactEmail} onChange={e => setForm(p => ({ ...p, contactEmail: e.target.value }))} className={inputClass} placeholder="info@ura.go.ug" />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Contact Phone</label>
+                <label className="block text-sm text-neutral-700 mb-1">Contact Phone</label>
                 <input type="tel" value={form.contactPhone} onChange={e => setForm(p => ({ ...p, contactPhone: e.target.value }))} className={inputClass} placeholder="+256..." />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Website</label>
+                <label className="block text-sm text-neutral-700 mb-1">Website</label>
                 <input type="url" value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} className={inputClass} placeholder="https://ura.go.ug" />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">SLA Response Hours</label>
+                <label className="block text-sm text-neutral-700 mb-1">SLA Response Hours</label>
                 <input type="number" min={1} value={form.slaResponseHours} onChange={e => setForm(p => ({ ...p, slaResponseHours: parseInt(e.target.value) || 4 }))} className={inputClass} />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-400 mb-1">Description</label>
+                <label className="block text-sm text-neutral-700 mb-1">Description</label>
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className={inputClass} rows={2} placeholder="Agency description..." />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-400 mb-1">Services (comma-separated)</label>
+                <label className="block text-sm text-neutral-700 mb-1">Services (comma-separated)</label>
                 <input type="text" value={form.services} onChange={e => setForm(p => ({ ...p, services: e.target.value }))} className={inputClass} placeholder="Tax Registration, TIN Issuance, ..." />
               </div>
             </div>
             <div className="flex gap-3 justify-end">
-              <button onClick={resetForm} className="px-4 py-2 text-neutral-400 hover:text-white transition-colors">Cancel</button>
+              <button onClick={resetForm} className="px-4 py-2 text-neutral-700 hover:text-red-600 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.name || !form.code}
-                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 disabled:opacity-50 transition-colors">
+                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 disabled:opacity-50 transition-colors">
                 {saving ? 'Saving...' : editingId ? 'Update Agency' : 'Add Agency'}
               </button>
             </div>
@@ -195,23 +195,23 @@ export default function AgencyManagementPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : agencies.length === 0 ? (
-          <div className="text-center py-20 text-neutral-500">
+          <div className="text-center py-20 text-neutral-600">
             <p className="text-lg mb-2">No agencies configured</p>
             <p className="text-sm">Add your first agency to get started.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {agencies.map(a => (
-              <div key={a._id} className="bg-neutral-900 rounded-xl border border-neutral-800 p-4 flex items-center justify-between">
+              <div key={a._id} className="p-4 flex items-center justify-between border-t-2 border-black pt-5">
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold flex items-center gap-2 flex-wrap">
                     <span className="truncate">{a.name}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 shrink-0">{a.code}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-50 text-red-600 shrink-0">{a.code}</span>
                   </div>
-                  <div className="text-sm text-neutral-500 mt-1">
+                  <div className="text-sm text-neutral-600 mt-1">
                     {a.contactEmail || 'No email'}
                     {a.slaResponseHours && ` · SLA: ${a.slaResponseHours}h`}
                     {a.services && a.services.length > 0 && ` · ${a.services.length} services`}
@@ -219,11 +219,11 @@ export default function AgencyManagementPage() {
                 </div>
                 <div className="flex items-center gap-1 ml-4 shrink-0">
                   <button onClick={() => handleEdit(a)} title="Edit"
-                    className="p-2 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-white transition-colors">
+                    className="p-2 rounded-md hover:bg-neutral-100 text-neutral-600 hover:text-red-600 transition-colors">
                     <PencilIcon className="w-5 h-5" />
                   </button>
                   <button onClick={() => handleDelete(a)} title="Delete"
-                    className="p-2 rounded-lg hover:bg-red-900/30 text-neutral-500 hover:text-red-400 transition-colors">
+                    className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-400 transition-colors">
                     <TrashIcon className="w-5 h-5" />
                   </button>
                 </div>

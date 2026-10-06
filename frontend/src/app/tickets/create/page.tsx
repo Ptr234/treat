@@ -297,13 +297,13 @@ export default function CreateTicketPage() {
         <div className="mb-8">
           <button
             onClick={() => router.push('/tickets/')}
-            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+            className="flex items-center gap-2 text-neutral-700 hover:text-black mb-4"
           >
             <ArrowLeftIcon className="w-4 h-4" />
             Back to Tickets
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Ticket</h1>
-          <p className="text-gray-600 mt-2">Submit your inquiry or issue</p>
+          <h1 className="text-3xl font-bold text-black">Create New Ticket</h1>
+          <p className="text-neutral-700 mt-2">Submit your inquiry or issue</p>
         </div>
 
         {/* Progress Bar */}
@@ -315,15 +315,15 @@ export default function CreateTicketPage() {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
                       step < currentStep
-                        ? 'bg-yellow-600 text-black'
+                        ? 'bg-yellow-400 text-black'
                         : step === currentStep
-                        ? 'bg-yellow-600 text-black ring-4 ring-yellow-100'
-                        : 'bg-gray-200 text-gray-500'
+                        ? 'bg-yellow-400 text-black ring-4 ring-yellow-100'
+                        : 'bg-gray-200 text-neutral-600'
                     }`}
                   >
                     {step < currentStep ? <CheckCircleIcon className="w-6 h-6" /> : step}
                   </div>
-                  <p className="text-xs mt-2 text-gray-600 hidden sm:block">
+                  <p className="text-xs mt-2 text-neutral-700 hidden sm:block">
                     {step === 1 && 'Category'}
                     {step === 2 && 'Details'}
                     {step === 3 && 'Contact'}
@@ -334,7 +334,7 @@ export default function CreateTicketPage() {
                   <div className="flex-1 h-0.5 mx-2">
                     <div
                       className={`h-full ${
-                        step < currentStep ? 'bg-yellow-600' : 'bg-gray-200'
+                        step < currentStep ? 'bg-yellow-400' : 'bg-gray-200'
                       }`}
                     />
                   </div>
@@ -345,7 +345,7 @@ export default function CreateTicketPage() {
         </div>
 
         {/* Form Steps */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
+        <div className="border-t-2 border-black pt-6 md:pt-8">
           {/* initial={false}: step 1 is already visible in the server-rendered
               HTML, so it must not depend on the mount animation to reveal it —
               a hydration mismatch elsewhere on the page (e.g. browser-injected
@@ -360,8 +360,8 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Category</h2>
-                <p className="text-gray-600 mb-6">Choose the type of issue or inquiry</p>
+                <h2 className="text-2xl font-bold text-black mb-2">Select Category</h2>
+                <p className="text-neutral-700 mb-6">Choose the type of issue or inquiry</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {categories.map((category) => {
@@ -377,18 +377,18 @@ export default function CreateTicketPage() {
                           });
                           setErrors({});
                         }}
-                        className={`p-5 rounded-lg border-2 text-left transition-all hover:shadow-md ${
+                        className={`p-5 rounded-md border-2 text-left transition-all ${
                           formData.category === category.value
                             ? 'border-yellow-600 bg-yellow-50'
-                            : 'border-gray-200 hover:border-yellow-300'
+                            : 'border-neutral-200 hover:border-yellow-300'
                         }`}
                       >
                         <Icon className={`w-8 h-8 mb-3 ${
-                          formData.category === category.value ? 'text-yellow-600' : 'text-gray-600'
+                          formData.category === category.value ? 'text-red-600' : 'text-neutral-700'
                         }`} />
-                        <h3 className="font-semibold text-gray-900 mb-1">{category.label}</h3>
-                        <p className="text-sm text-gray-600 mb-2">{category.description}</p>
-                        <p className="text-xs text-gray-500 font-medium">{category.sla}</p>
+                        <h3 className="font-semibold text-black mb-1">{category.label}</h3>
+                        <p className="text-sm text-neutral-700 mb-2">{category.description}</p>
+                        <p className="text-xs text-neutral-600 font-medium">{category.sla}</p>
                       </button>
                     );
                   })}
@@ -408,12 +408,12 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Issue Details</h2>
-                <p className="text-gray-600 mb-6">Describe your inquiry or issue</p>
+                <h2 className="text-2xl font-bold text-black mb-2">Issue Details</h2>
+                <p className="text-neutral-700 mb-6">Describe your inquiry or issue</p>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Title <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -421,8 +421,8 @@ export default function CreateTicketPage() {
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Brief summary of your issue"
-                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                        errors.title ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
+                        errors.title ? 'border-red-500' : 'border-neutral-400'
                       }`}
                     />
                     {errors.title && (
@@ -431,7 +431,7 @@ export default function CreateTicketPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Description <span className="text-red-500">*</span>
                     </label>
                     <textarea
@@ -439,11 +439,11 @@ export default function CreateTicketPage() {
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Provide detailed information about your inquiry or issue..."
                       rows={6}
-                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                        errors.description ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
+                        errors.description ? 'border-red-500' : 'border-neutral-400'
                       }`}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-neutral-600 mt-1">
                       {formData.description.length} characters (minimum 20)
                     </p>
                     {errors.description && (
@@ -452,19 +452,19 @@ export default function CreateTicketPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Priority
                     </label>
-                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-2 py-2 border-b border-neutral-200">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                         formData.priority === 'critical' ? 'bg-red-100 text-red-700' :
                         formData.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                        formData.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-yellow-100 text-yellow-700'
+                        formData.priority === 'medium' ? 'bg-yellow-100 text-red-600' :
+                        'bg-yellow-100 text-red-600'
                       }`}>
                         {formData.priority.toUpperCase()}
                       </span>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-neutral-700">
                         (Auto-assigned based on category)
                       </span>
                     </div>
@@ -481,12 +481,12 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Contact Information</h2>
-                <p className="text-gray-600 mb-6">How can we reach you?</p>
+                <h2 className="text-2xl font-bold text-black mb-2">Contact Information</h2>
+                <p className="text-neutral-700 mb-6">How can we reach you?</p>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -494,8 +494,8 @@ export default function CreateTicketPage() {
                       value={formData.contactName}
                       onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                       placeholder="Your full name"
-                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                        errors.contactName ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
+                        errors.contactName ? 'border-red-500' : 'border-neutral-400'
                       }`}
                     />
                     {errors.contactName && (
@@ -504,7 +504,7 @@ export default function CreateTicketPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Email Address <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -512,8 +512,8 @@ export default function CreateTicketPage() {
                       value={formData.contactEmail}
                       onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                       placeholder="your.email@example.com"
-                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                        errors.contactEmail ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
+                        errors.contactEmail ? 'border-red-500' : 'border-neutral-400'
                       }`}
                     />
                     {errors.contactEmail && (
@@ -522,7 +522,7 @@ export default function CreateTicketPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Phone Number <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -530,8 +530,8 @@ export default function CreateTicketPage() {
                       value={formData.contactPhone}
                       onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
                       placeholder="+256 700 000 000"
-                      className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${
-                        errors.contactPhone ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
+                        errors.contactPhone ? 'border-red-500' : 'border-neutral-400'
                       }`}
                     />
                     {errors.contactPhone && (
@@ -540,7 +540,7 @@ export default function CreateTicketPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-800 mb-2">
                       Attachments (Optional)
                     </label>
                     <input
@@ -552,25 +552,25 @@ export default function CreateTicketPage() {
                       className="hidden"
                     />
                     <div
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-yellow-400 transition-colors"
+                      className="border-2 border-dashed border-neutral-400 p-6 text-center cursor-pointer hover:border-black transition-colors"
                       onClick={() => {
                         if (formData.attachments.length < MAX_FILES) {
                           fileInputRef.current?.click();
                         }
                       }}
                     >
-                      <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600 mb-1">
+                      <ArrowUpTrayIcon className="w-8 h-8 text-neutral-500 mx-auto mb-2" />
+                      <p className="text-sm text-neutral-700 mb-1">
                         Click to select files
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-neutral-600">
                         PDF, DOC, DOCX, PNG, JPG (max 10MB per file, up to {MAX_FILES} files)
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-neutral-600">
                         Files are uploaded when you submit the ticket.
                       </p>
                       {formData.attachments.length >= MAX_FILES && (
-                        <p className="text-xs text-yellow-600 mt-2 font-medium">
+                        <p className="text-xs text-red-600 mt-2 font-medium">
                           Maximum number of files reached
                         </p>
                       )}
@@ -587,11 +587,11 @@ export default function CreateTicketPage() {
                     {formData.attachments.length > 0 && (
                       <div className="mt-3 space-y-2">
                         {formData.attachments.map((att, index) => (
-                          <div key={att.id} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-lg">
+                          <div key={att.id} className="flex items-center justify-between py-2 border-b border-neutral-200">
                             <div className="flex items-center gap-2 min-w-0">
-                              <PaperClipIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                              <span className="text-sm text-gray-700 truncate">{att.file.name}</span>
-                              <span className="text-xs text-gray-500 flex-shrink-0">
+                              <PaperClipIcon className="w-4 h-4 text-neutral-600 flex-shrink-0" />
+                              <span className="text-sm text-neutral-800 truncate">{att.file.name}</span>
+                              <span className="text-xs text-neutral-600 flex-shrink-0">
                                 ({formatFileSize(att.file.size)})
                               </span>
                             </div>
@@ -619,19 +619,19 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Review & Submit</h2>
-                <p className="text-gray-600 mb-6">Please review your information before submitting</p>
+                <h2 className="text-2xl font-bold text-black mb-2">Review & Submit</h2>
+                <p className="text-neutral-700 mb-6">Please review your information before submitting</p>
 
                 <div className="space-y-6">
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Category</h3>
+                    <h3 className="font-semibold text-black mb-2">Category</h3>
                     <div className="flex items-center gap-3">
                       {selectedCategory && (
                         <>
-                          <selectedCategory.icon className="w-6 h-6 text-yellow-600" />
+                          <selectedCategory.icon className="w-6 h-6 text-red-600" />
                           <div>
-                            <p className="font-medium text-gray-900">{selectedCategory.label}</p>
-                            <p className="text-sm text-gray-600">{selectedCategory.sla}</p>
+                            <p className="font-medium text-black">{selectedCategory.label}</p>
+                            <p className="text-sm text-neutral-700">{selectedCategory.sla}</p>
                           </div>
                         </>
                       )}
@@ -639,16 +639,16 @@ export default function CreateTicketPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Issue Details</h3>
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="font-medium text-gray-900 mb-2">{formData.title}</p>
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{formData.description}</p>
+                    <h3 className="font-semibold text-black mb-2">Issue Details</h3>
+                    <div className="border-l-4 border-yellow-400 pl-4 py-2">
+                      <p className="font-medium text-black mb-2">{formData.title}</p>
+                      <p className="text-sm text-neutral-800 whitespace-pre-wrap">{formData.description}</p>
                       <div className="mt-3">
                         <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
                           formData.priority === 'critical' ? 'bg-red-100 text-red-700' :
                           formData.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                          formData.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-yellow-100 text-yellow-700'
+                          formData.priority === 'medium' ? 'bg-yellow-100 text-red-600' :
+                          'bg-yellow-100 text-red-600'
                         }`}>
                           {formData.priority.toUpperCase()} PRIORITY
                         </span>
@@ -657,8 +657,8 @@ export default function CreateTicketPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-2">Contact Information</h3>
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <h3 className="font-semibold text-black mb-2">Contact Information</h3>
+                    <div className="border-l-4 border-yellow-400 pl-4 py-2 space-y-2">
                       <p className="text-sm"><span className="font-medium">Name:</span> {formData.contactName}</p>
                       <p className="text-sm"><span className="font-medium">Email:</span> {formData.contactEmail}</p>
                       <p className="text-sm"><span className="font-medium">Phone:</span> {formData.contactPhone}</p>
@@ -667,14 +667,14 @@ export default function CreateTicketPage() {
 
                   {formData.attachments.length > 0 && (
                     <div>
-                      <h3 className="font-semibold text-gray-900 mb-2">Attachments</h3>
-                      <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="font-semibold text-black mb-2">Attachments</h3>
+                      <div className="border-l-4 border-yellow-400 pl-4 py-2">
                         <ul className="space-y-1">
                           {formData.attachments.map((att) => (
-                            <li key={att.id} className="flex items-center gap-2 text-sm text-gray-700">
-                              <PaperClipIcon className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                            <li key={att.id} className="flex items-center gap-2 text-sm text-neutral-800">
+                              <PaperClipIcon className="w-4 h-4 text-neutral-600 flex-shrink-0" />
                               <span className="truncate">{att.file.name}</span>
-                              <span className="text-xs text-gray-500 flex-shrink-0">
+                              <span className="text-xs text-neutral-600 flex-shrink-0">
                                 ({formatFileSize(att.file.size)})
                               </span>
                             </li>
@@ -689,11 +689,11 @@ export default function CreateTicketPage() {
           </AnimatePresence>
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-neutral-200">
             {currentStep > 1 ? (
               <button
                 onClick={handleBack}
-                className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                className="flex items-center gap-2 px-6 py-2.5 border border-neutral-400 text-neutral-800 rounded-md hover:bg-neutral-50 font-medium transition-colors"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
                 Back
@@ -705,7 +705,7 @@ export default function CreateTicketPage() {
             {currentStep < 4 ? (
               <button
                 onClick={handleNext}
-                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-black rounded-lg font-medium transition-colors"
+                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black rounded-md font-medium transition-colors"
               >
                 Next
                 <ArrowRightIcon className="w-4 h-4" />
@@ -714,7 +714,7 @@ export default function CreateTicketPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-black rounded-lg font-medium transition-colors"
+                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 disabled:bg-neutral-300 disabled:cursor-not-allowed text-black rounded-md font-medium transition-colors"
               >
                 <CheckCircleIcon className="w-5 h-5" />
                 {submitting ? 'Submitting…' : 'Submit Ticket'}

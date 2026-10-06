@@ -1,12 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface LineItem {
   description: string;
   quantity: number;
   rate: number;
 }
+
+const inputClass =
+  'w-full rounded-md border border-neutral-400 bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
+const labelClass = 'mb-2 block text-sm font-bold text-black';
+const smallLabelClass = 'mb-1 block text-xs font-bold text-black';
+const sectionHeadingClass = 'text-lg font-bold text-black';
 
 export default function InvoiceGeneratorPage() {
   // Form state
@@ -77,199 +84,125 @@ export default function InvoiceGeneratorPage() {
   };
 
   return (
- <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-brand-black to-brand-darkGreen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-yellow-400">
-              Professional Invoice Generator
-            </h1>
-            <p className="text-xl text-yellow-100 mb-8 max-w-3xl mx-auto">
-              Generate professional, tax-compliant invoices for your business transactions with our easy-to-use invoice generator.
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li>
+              <Link href="/tools" className="text-red-600 hover:underline underline-offset-4">Business tools</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">Invoice generator</li>
+          </ol>
+        </nav>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Title */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Professional invoice generator</h1>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
+          Generate professional, tax-compliant invoices for your business transactions with our easy-to-use invoice generator.
+        </p>
+      </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Invoice Form */}
-          <div className="bg-neutral-900 rounded-lg shadow-lg p-6 border border-yellow-900/30">
-            <h2 className="text-2xl font-semibold text-yellow-400 mb-6">Invoice Details</h2>
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
+          {/* Invoice form */}
+          <section aria-labelledby="invoice-form-heading">
+            <h2 id="invoice-form-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Invoice details</h2>
 
-            <div className="space-y-6">
-              {/* Business Information */}
+            <div className="mt-8 space-y-10">
+              {/* Business information */}
               <div>
-                <h3 className="text-lg font-medium text-yellow-300 mb-4">Your Business Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h3 className={`${sectionHeadingClass} mb-4`}>Your business information</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Business Name *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Your Company Ltd"
-                      value={businessName}
-                      onChange={(e) => setBusinessName(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                    />
+                    <label htmlFor="inv-business" className={labelClass}>Business name <span className="text-red-600">*</span></label>
+                    <input id="inv-business" type="text" placeholder="Your Company Ltd" value={businessName} onChange={(e) => setBusinessName(e.target.value)} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Tax ID / TIN
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="1234567890"
-                      value={taxId}
-                      onChange={(e) => setTaxId(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                    />
+                    <label htmlFor="inv-tin" className={labelClass}>Tax ID / TIN</label>
+                    <input id="inv-tin" type="text" placeholder="1234567890" value={taxId} onChange={(e) => setTaxId(e.target.value)} className={inputClass} />
                   </div>
                 </div>
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                    Business Address
-                  </label>
-                  <textarea
-                    placeholder="Plot 123, Street Name, City, Uganda"
-                    rows={3}
-                    value={businessAddress}
-                    onChange={(e) => setBusinessAddress(e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                  />
+                  <label htmlFor="inv-address" className={labelClass}>Business address</label>
+                  <textarea id="inv-address" placeholder="Plot 123, Street Name, City, Uganda" rows={3} value={businessAddress} onChange={(e) => setBusinessAddress(e.target.value)} className={inputClass} />
                 </div>
               </div>
 
-              {/* Client Information */}
+              {/* Client information */}
               <div>
-                <h3 className="text-lg font-medium text-yellow-300 mb-4">Client Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <h3 className={`${sectionHeadingClass} mb-4`}>Client information</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Client Name *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Client Company Ltd"
-                      value={clientName}
-                      onChange={(e) => setClientName(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                    />
+                    <label htmlFor="inv-client" className={labelClass}>Client name <span className="text-red-600">*</span></label>
+                    <input id="inv-client" type="text" placeholder="Client Company Ltd" value={clientName} onChange={(e) => setClientName(e.target.value)} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="client@email.com"
-                      value={clientEmail}
-                      onChange={(e) => setClientEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                    />
+                    <label htmlFor="inv-email" className={labelClass}>Email</label>
+                    <input id="inv-email" type="email" placeholder="client@email.com" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} className={inputClass} />
                   </div>
                 </div>
               </div>
 
-              {/* Invoice Details */}
+              {/* Invoice dates */}
               <div>
-                <h3 className="text-lg font-medium text-yellow-300 mb-4">Invoice Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <h3 className={`${sectionHeadingClass} mb-4`}>Invoice details</h3>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Invoice Number *
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="INV-001"
-                      value={invoiceNumber}
-                      onChange={(e) => setInvoiceNumber(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                    />
+                    <label htmlFor="inv-number" className={labelClass}>Invoice number <span className="text-red-600">*</span></label>
+                    <input id="inv-number" type="text" placeholder="INV-001" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Issue Date
-                    </label>
-                    <input
-                      type="date"
-                      value={issueDate}
-                      onChange={(e) => setIssueDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                    />
+                    <label htmlFor="inv-issue" className={labelClass}>Issue date</label>
+                    <input id="inv-issue" type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Due Date
-                    </label>
-                    <input
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                    />
+                    <label htmlFor="inv-due" className={labelClass}>Due date</label>
+                    <input id="inv-due" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={inputClass} />
                   </div>
                 </div>
               </div>
 
-              {/* Line Items */}
+              {/* Line items */}
               <div>
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-medium text-yellow-300">Line Items</h3>
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className={sectionHeadingClass}>Line items</h3>
                   <button
+                    type="button"
                     onClick={addLineItem}
-                    className="text-sm bg-yellow-600 text-black px-3 py-1 rounded-lg hover:bg-yellow-500 hover:shadow-md hover:shadow-yellow-500/20 active:scale-95 transition-all duration-200"
+                    className="border-b-2 border-yellow-400 px-1 text-sm font-bold text-black hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                   >
-                    + Add Item
+                    + Add item
                   </button>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {items.map((item, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-2 items-end">
-                      <div className="col-span-5">
-                        <label className="block text-xs font-medium text-yellow-200/80 mb-1">
-                          Description
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Item description"
-                          value={item.description}
-                          onChange={(e) => updateLineItem(index, 'description', e.target.value)}
-                          className="w-full px-2 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                        />
+                    <div key={index} className="grid grid-cols-12 items-end gap-2 border-t border-neutral-200 pt-4">
+                      <div className="col-span-12 sm:col-span-5">
+                        <label htmlFor={`inv-desc-${index}`} className={smallLabelClass}>Description</label>
+                        <input id={`inv-desc-${index}`} type="text" placeholder="Item description" value={item.description} onChange={(e) => updateLineItem(index, 'description', e.target.value)} className={`${inputClass} px-2 py-2`} />
                       </div>
-                      <div className="col-span-2">
-                        <label className="block text-xs font-medium text-yellow-200/80 mb-1">
-                          Qty
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={item.quantity}
-                          onChange={(e) => updateLineItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                          className="w-full px-2 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                        />
+                      <div className="col-span-4 sm:col-span-2">
+                        <label htmlFor={`inv-qty-${index}`} className={smallLabelClass}>Qty</label>
+                        <input id={`inv-qty-${index}`} type="number" min="1" value={item.quantity} onChange={(e) => updateLineItem(index, 'quantity', parseInt(e.target.value) || 1)} className={`${inputClass} px-2 py-2`} />
                       </div>
-                      <div className="col-span-3">
-                        <label className="block text-xs font-medium text-yellow-200/80 mb-1">
-                          Rate (UGX)
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          value={item.rate}
-                          onChange={(e) => updateLineItem(index, 'rate', parseFloat(e.target.value) || 0)}
-                          className="w-full px-2 py-2 text-sm border border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-neutral-800 text-yellow-100 placeholder:text-neutral-500"
-                        />
+                      <div className="col-span-5 sm:col-span-3">
+                        <label htmlFor={`inv-rate-${index}`} className={smallLabelClass}>Rate (UGX)</label>
+                        <input id={`inv-rate-${index}`} type="number" min="0" value={item.rate} onChange={(e) => updateLineItem(index, 'rate', parseFloat(e.target.value) || 0)} className={`${inputClass} px-2 py-2`} />
                       </div>
-                      <div className="col-span-2 flex items-center">
+                      <div className="col-span-3 flex items-center sm:col-span-2">
                         {items.length > 1 && (
                           <button
+                            type="button"
                             onClick={() => removeLineItem(index)}
-                            className="text-red-400 hover:text-red-300 text-sm p-2"
+                            className="p-2 text-sm font-semibold text-red-600 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                           >
                             Remove
                           </button>
@@ -280,98 +213,91 @@ export default function InvoiceGeneratorPage() {
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col gap-3 border-t border-neutral-200 pt-6 sm:flex-row">
                 <button
+                  type="button"
                   onClick={handleGenerateInvoice}
-                  className="flex-1 bg-yellow-600 text-black py-3 rounded-lg font-semibold hover:bg-yellow-500 hover:shadow-lg hover:shadow-yellow-500/20 active:scale-95 transition-all duration-200"
+                  className="flex-1 rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
                 >
-                  Generate Invoice
+                  Generate invoice
                 </button>
                 <button
+                  type="button"
                   onClick={handleSaveDraft}
-                  className="flex-1 bg-neutral-800 text-yellow-400 border border-yellow-700 py-3 rounded-lg font-semibold hover:bg-neutral-700 hover:border-yellow-500 active:scale-95 transition-all duration-200"
+                  className="flex-1 rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
                 >
-                  Save Draft
+                  Save draft
                 </button>
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Preview */}
-          <div className="bg-neutral-900 rounded-lg shadow-lg p-6 border border-yellow-900/30">
-            <h2 className="text-2xl font-semibold text-yellow-400 mb-6">Invoice Preview</h2>
+          <section aria-labelledby="invoice-preview-heading">
+            <h2 id="invoice-preview-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Invoice preview</h2>
 
             {!showPreview ? (
-              <div className="bg-neutral-800 rounded-lg p-6 min-h-96">
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-neutral-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <p className="text-lg font-medium text-neutral-400">Invoice Preview</p>
-                  <p className="text-sm mt-2 text-neutral-400">Fill out the form and click Generate Invoice</p>
-                </div>
+              <div className="mt-8 border-l-4 border-yellow-400 py-8 pl-6">
+                <p className="text-lg font-bold text-black">Invoice preview</p>
+                <p className="mt-2 text-sm text-neutral-700">Fill out the form and click Generate invoice.</p>
               </div>
             ) : (
-              <div className="border-2 border-yellow-900/50 rounded-lg p-6 bg-neutral-800 min-h-96">
-                {/* Invoice Header */}
-                <div className="border-b-2 border-neutral-600 pb-4 mb-4">
-                  <h3 className="text-3xl font-bold text-yellow-400">INVOICE</h3>
-                  <p className="text-sm text-neutral-400 mt-1">Invoice #{invoiceNumber}</p>
+              <div className="mt-8 min-h-96">
+                {/* Invoice header */}
+                <div className="border-b-2 border-black pb-4">
+                  <h3 className="text-3xl font-bold tracking-tight">INVOICE</h3>
+                  <p className="mt-1 text-sm text-neutral-700">Invoice #{invoiceNumber}</p>
                 </div>
 
-                {/* Business & Client Info */}
-                <div className="grid grid-cols-2 gap-6 mb-6">
+                {/* From and bill to */}
+                <div className="mt-6 grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-xs font-semibold text-yellow-500 uppercase mb-2">From</p>
-                    <p className="font-bold text-yellow-200">{businessName}</p>
-                    {taxId && <p className="text-sm text-neutral-400">TIN: {taxId}</p>}
-                    {businessAddress && <p className="text-sm text-neutral-400 whitespace-pre-line">{businessAddress}</p>}
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-red-600">From</p>
+                    <p className="font-bold">{businessName}</p>
+                    {taxId && <p className="text-sm text-neutral-700">TIN: {taxId}</p>}
+                    {businessAddress && <p className="whitespace-pre-line text-sm text-neutral-700">{businessAddress}</p>}
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-yellow-500 uppercase mb-2">Bill To</p>
-                    <p className="font-bold text-yellow-200">{clientName}</p>
-                    {clientEmail && <p className="text-sm text-neutral-400">{clientEmail}</p>}
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wider text-red-600">Bill to</p>
+                    <p className="font-bold">{clientName}</p>
+                    {clientEmail && <p className="text-sm text-neutral-700">{clientEmail}</p>}
                   </div>
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
+                <div className="mt-6 grid grid-cols-2 gap-6 text-sm">
                   {issueDate && (
                     <div>
-                      <p className="text-neutral-500">Issue Date:</p>
-                      <p className="font-medium text-yellow-200">{issueDate}</p>
+                      <p className="text-neutral-600">Issue date</p>
+                      <p className="font-semibold">{issueDate}</p>
                     </div>
                   )}
                   {dueDate && (
                     <div>
-                      <p className="text-neutral-500">Due Date:</p>
-                      <p className="font-medium text-yellow-200">{dueDate}</p>
+                      <p className="text-neutral-600">Due date</p>
+                      <p className="font-semibold">{dueDate}</p>
                     </div>
                   )}
                 </div>
 
-                {/* Line Items Table */}
-                <div className="mb-6">
+                {/* Line items */}
+                <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b-2 border-neutral-600">
-                        <th className="text-left py-2 text-yellow-300 font-semibold">Description</th>
-                        <th className="text-right py-2 text-yellow-300 font-semibold">Qty</th>
-                        <th className="text-right py-2 text-yellow-300 font-semibold">Rate</th>
-                        <th className="text-right py-2 text-yellow-300 font-semibold">Amount</th>
+                      <tr className="border-b-2 border-black">
+                        <th scope="col" className="py-2 text-left font-bold">Description</th>
+                        <th scope="col" className="py-2 text-right font-bold">Qty</th>
+                        <th scope="col" className="py-2 text-right font-bold">Rate</th>
+                        <th scope="col" className="py-2 text-right font-bold">Amount</th>
                       </tr>
                     </thead>
                     <tbody>
                       {items.filter(item => item.description).map((item, index) => (
-                        <tr key={index} className="border-b border-neutral-700">
-                          <td className="py-2 text-neutral-300">{item.description}</td>
-                          <td className="text-right py-2 text-neutral-300">{item.quantity}</td>
-                          <td className="text-right py-2 text-neutral-300">UGX {item.rate.toLocaleString()}</td>
-                          <td className="text-right py-2 text-yellow-200 font-medium">
-                            UGX {(item.quantity * item.rate).toLocaleString()}
-                          </td>
+                        <tr key={index} className="border-b border-neutral-200">
+                          <td className="py-2 text-neutral-800">{item.description}</td>
+                          <td className="py-2 text-right text-neutral-800">{item.quantity}</td>
+                          <td className="py-2 text-right text-neutral-800">UGX {item.rate.toLocaleString()}</td>
+                          <td className="py-2 text-right font-semibold">UGX {(item.quantity * item.rate).toLocaleString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -379,61 +305,45 @@ export default function InvoiceGeneratorPage() {
                 </div>
 
                 {/* Totals */}
-                <div className="border-t-2 border-neutral-600 pt-4">
-                  <div className="flex justify-end">
-                    <div className="w-64 space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-neutral-400">Subtotal:</span>
-                        <span className="font-medium text-yellow-200">UGX {calculateSubtotal().toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-neutral-400">VAT (18%):</span>
-                        <span className="font-medium text-yellow-200">UGX {calculateTax().toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between text-lg font-bold border-t-2 border-yellow-700 pt-2">
-                        <span className="text-yellow-400">Total:</span>
-                        <span className="text-yellow-400">UGX {calculateTotal().toLocaleString()}</span>
-                      </div>
+                <div className="mt-6 flex justify-end">
+                  <dl className="w-72 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <dt className="text-neutral-700">Subtotal</dt>
+                      <dd className="font-semibold">UGX {calculateSubtotal().toLocaleString()}</dd>
                     </div>
-                  </div>
+                    <div className="flex justify-between">
+                      <dt className="text-neutral-700">VAT (18%)</dt>
+                      <dd className="font-semibold">UGX {calculateTax().toLocaleString()}</dd>
+                    </div>
+                    <div className="flex justify-between border-t-2 border-black pt-3 text-lg">
+                      <dt className="font-bold">Total</dt>
+                      <dd className="font-bold text-red-600">UGX {calculateTotal().toLocaleString()}</dd>
+                    </div>
+                  </dl>
                 </div>
               </div>
             )}
-          </div>
+          </section>
         </div>
 
-        <div className="mt-12 bg-neutral-900 rounded-lg p-6 border border-yellow-900/30">
-          <h3 className="text-lg font-semibold text-yellow-400 mb-4">Invoice Features</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center group hover:-translate-y-1 transition-all duration-300">
-              <div className="w-12 h-12 bg-yellow-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-yellow-800/30 group-hover:shadow-md group-hover:shadow-yellow-500/15 transition-all duration-300">
-                <svg className="w-6 h-6 text-yellow-400 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-yellow-300 mb-2">Professional Design</h4>
-              <p className="text-sm text-neutral-400">Clean, professional invoice templates that look great</p>
-            </div>
-            <div className="text-center group hover:-translate-y-1 transition-all duration-300">
-              <div className="w-12 h-12 bg-red-900/20 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-red-800/30 group-hover:shadow-md group-hover:shadow-red-500/15 transition-all duration-300">
-                <svg className="w-6 h-6 text-yellow-400 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-yellow-300 mb-2">Multiple Formats</h4>
-              <p className="text-sm text-neutral-400">Download as PDF, send via email, or print directly</p>
-            </div>
-            <div className="text-center group hover:-translate-y-1 transition-all duration-300">
-              <div className="w-12 h-12 bg-neutral-800 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-neutral-700 group-hover:shadow-md group-hover:shadow-yellow-500/15 transition-all duration-300">
-                <svg className="w-6 h-6 text-yellow-400 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h4 className="font-semibold text-yellow-300 mb-2">Tax Compliance</h4>
-              <p className="text-sm text-neutral-400">Automatically calculates taxes according to Uganda regulations</p>
-            </div>
-          </div>
-        </div>
+        {/* Features */}
+        <section className="mt-16 border-t border-neutral-200 pt-10" aria-labelledby="invoice-features-heading">
+          <h2 id="invoice-features-heading" className="text-lg font-bold">Invoice features</h2>
+          <ul className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <li className="border-t-2 border-yellow-400 pt-4">
+              <h3 className="font-bold">Professional design</h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-700">Clean, professional invoice templates that look great.</p>
+            </li>
+            <li className="border-t-2 border-yellow-400 pt-4">
+              <h3 className="font-bold">Multiple formats</h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-700">Download as PDF, send via email, or print directly.</p>
+            </li>
+            <li className="border-t-2 border-yellow-400 pt-4">
+              <h3 className="font-bold">Tax compliance</h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-700">Automatically calculates taxes according to Uganda regulations.</p>
+            </li>
+          </ul>
+        </section>
       </div>
     </div>
   );

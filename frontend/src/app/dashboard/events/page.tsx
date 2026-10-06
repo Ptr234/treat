@@ -138,12 +138,12 @@ export default function EventManagementPage() {
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-neutral-400">Admin access required.</p>
+        <p className="text-neutral-700">Admin access required.</p>
       </div>
     );
   }
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent";
+  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-white placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
 
   return (
  <div className="min-h-screen bg-white text-black">
@@ -151,17 +151,17 @@ export default function EventManagementPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-800 rounded-lg transition-colors" aria-label="Back to dashboard">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-400" />
+            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md transition-colors" aria-label="Back to dashboard">
+              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold">Event Management</h1>
-              <p className="text-sm text-neutral-400">Create, edit, and publish events (stored in Sanity CMS)</p>
+              <p className="text-sm text-neutral-700">Create, edit, and publish events (stored in Sanity CMS)</p>
             </div>
           </div>
           <button
             onClick={() => { resetForm(); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
           >
             <PlusIcon className="w-5 h-5" />
             New Event
@@ -170,8 +170,8 @@ export default function EventManagementPage() {
 
         {/* Feedback */}
         {feedback && (
-          <div className={`mb-6 p-4 rounded-lg border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-900/30 border-red-700 text-red-300'
+          <div className={`mb-6 p-4 rounded-md border text-sm ${
+            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
           }`}>
             {feedback.message}
           </div>
@@ -179,49 +179,49 @@ export default function EventManagementPage() {
 
         {/* Form */}
         {showForm && (
-          <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 mb-8">
+          <div className="p-6 mb-8 border-t-2 border-black pt-5">
             <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Event' : 'Create New Event'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-400 mb-1">Title *</label>
+                <label className="block text-sm text-neutral-700 mb-1">Title *</label>
                 <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className={inputClass} placeholder="Event title" />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Start Date *</label>
+                <label className="block text-sm text-neutral-700 mb-1">Start Date *</label>
                 <input type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">End Date</label>
+                <label className="block text-sm text-neutral-700 mb-1">End Date</label>
                 <input type="datetime-local" value={form.endDate} onChange={e => setForm(p => ({ ...p, endDate: e.target.value }))} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Category *</label>
+                <label className="block text-sm text-neutral-700 mb-1">Category *</label>
                 <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className={inputClass}>
                   {EVENT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Location</label>
+                <label className="block text-sm text-neutral-700 mb-1">Location</label>
                 <input type="text" value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} className={inputClass} placeholder="Kampala, Uganda" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-400 mb-1">Description</label>
+                <label className="block text-sm text-neutral-700 mb-1">Description</label>
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className={inputClass} rows={3} placeholder="Event description..." />
               </div>
               <div>
-                <label className="block text-sm text-neutral-400 mb-1">Registration URL</label>
+                <label className="block text-sm text-neutral-700 mb-1">Registration URL</label>
                 <input type="url" value={form.registrationUrl} onChange={e => setForm(p => ({ ...p, registrationUrl: e.target.value }))} className={inputClass} placeholder="https://..." />
               </div>
               <div className="flex items-center gap-3 pt-6">
                 <input type="checkbox" id="isPublished" checked={form.isPublished} onChange={e => setForm(p => ({ ...p, isPublished: e.target.checked }))}
-                  className="w-5 h-5 rounded border-neutral-600 bg-neutral-800 text-yellow-500 focus:ring-yellow-500" />
+                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-yellow-500 focus-visible:ring-red-600" />
                 <label htmlFor="isPublished" className="text-sm">Publish immediately</label>
               </div>
             </div>
             <div className="flex gap-3 justify-end">
-              <button onClick={resetForm} className="px-4 py-2 text-neutral-400 hover:text-white transition-colors">Cancel</button>
+              <button onClick={resetForm} className="px-4 py-2 text-neutral-700 hover:text-red-600 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.title || !form.date || !form.category}
-                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 disabled:opacity-50 transition-colors">
+                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 disabled:opacity-50 transition-colors">
                 {saving ? 'Saving...' : editingId ? 'Update Event' : 'Create Event'}
               </button>
             </div>
@@ -231,41 +231,41 @@ export default function EventManagementPage() {
         {/* Events List */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : events.length === 0 ? (
-          <div className="text-center py-20 text-neutral-500">
+          <div className="text-center py-20 text-neutral-600">
             <p className="text-lg mb-2">No events yet</p>
             <p className="text-sm">Create your first event to get started.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {events.map(ev => (
-              <div key={ev._id} className={`bg-neutral-900 rounded-xl border p-4 flex items-center justify-between ${
-                ev.isPublished ? 'border-neutral-800' : 'border-neutral-800 opacity-60'
+              <div key={ev._id} className={`bg-white rounded-md border p-4 flex items-center justify-between ${
+                ev.isPublished ? 'border-neutral-200' : 'border-neutral-200 opacity-60'
               }`}>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold flex items-center gap-2 flex-wrap">
                     <span className="truncate">{ev.title}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 shrink-0">{ev.category}</span>
-                    {!ev.isPublished && <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-700 text-neutral-400 shrink-0">Draft</span>}
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-50 text-red-600 shrink-0">{ev.category}</span>
+                    {!ev.isPublished && <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 shrink-0">Draft</span>}
                   </div>
-                  <div className="text-sm text-neutral-500 mt-1">
+                  <div className="text-sm text-neutral-600 mt-1">
                     {new Date(ev.date).toLocaleDateString('en-UG', { dateStyle: 'medium' })}
                     {ev.location && ` · ${ev.location}`}
                   </div>
                 </div>
                 <div className="flex items-center gap-1 ml-4 shrink-0">
                   <button onClick={() => handleTogglePublish(ev)} title={ev.isPublished ? 'Unpublish' : 'Publish'}
-                    className="p-2 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-yellow-400 transition-colors">
+                    className="p-2 rounded-md hover:bg-neutral-100 text-neutral-600 hover:text-red-600 transition-colors">
                     {ev.isPublished ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                   </button>
                   <button onClick={() => handleEdit(ev)} title="Edit"
-                    className="p-2 rounded-lg hover:bg-neutral-800 text-neutral-500 hover:text-white transition-colors">
+                    className="p-2 rounded-md hover:bg-neutral-100 text-neutral-600 hover:text-red-600 transition-colors">
                     <PencilIcon className="w-5 h-5" />
                   </button>
                   <button onClick={() => handleDelete(ev)} title="Delete"
-                    className="p-2 rounded-lg hover:bg-red-900/30 text-neutral-500 hover:text-red-400 transition-colors">
+                    className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-400 transition-colors">
                     <TrashIcon className="w-5 h-5" />
                   </button>
                 </div>

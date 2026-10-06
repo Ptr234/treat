@@ -160,23 +160,23 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
   const currentStepData = investmentSteps[currentStep];
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-neutral-100 z-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+        className="max-w-4xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-yellow-700 to-yellow-600 text-white rounded-t-2xl">
+        <div className="p-6 -b text-black border-t-2 border-black pt-5">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">{currentStepData?.title}</h2>
-              <p className="text-yellow-100 mt-1">{currentStepData?.subtitle}</p>
+              <p className="text-black mt-1">{currentStepData?.subtitle}</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-lg"
+              className="p-2 hover:bg-white/10 rounded-md"
               aria-label="Close tour"
             >
               <XMarkIcon className="w-6 h-6" />
@@ -195,7 +195,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                 />
               ))}
             </div>
-            <p className="text-sm text-yellow-100 mt-2">
+            <p className="text-sm text-black mt-2">
               Step {currentStep + 1} of {investmentSteps.length}
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
             >
               <div className="text-center mb-8">
                 <div className="text-6xl mb-4">{currentStepData?.visual}</div>
-                <p className="text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto">
+                <p className="text-xl text-neutral-800 leading-relaxed max-w-3xl mx-auto">
                   {currentStepData?.description}
                 </p>
               </div>
@@ -228,13 +228,13 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                 <div className="mb-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {currentStepData?.keyPoints?.map((point, index) => (
-                      <div key={index} className="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+                      <div key={index} className="flex items-start space-x-3 p-4 bg-neutral-50 rounded-md">
                         <div className="w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <p className="text-gray-700 font-medium">{point}</p>
+                        <p className="text-neutral-800 font-medium">{point}</p>
                       </div>
                     ))}
                   </div>
@@ -251,7 +251,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => selectProfile(profile)}
-                        className={`cursor-pointer rounded-xl p-6 text-white bg-gradient-to-br ${profile.color} shadow-lg`}
+                        className={`cursor-pointer rounded-md p-6 text-white bg-gradient-to-br ${profile.color}`}
                       >
                         <div className="flex items-center justify-between mb-4">
                           <div>
@@ -268,7 +268,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                         <div className="space-y-2">
                           {profile.benefits.map((benefit, benefitIndex) => (
                             <div key={benefitIndex} className="flex items-center space-x-2">
-                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                              <div className="w-1.5 h-1.5 border-t-2 border-black pt-5"></div>
                               <span className="text-sm">{benefit}</span>
                             </div>
                           ))}
@@ -281,28 +281,28 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
 
               {/* Results/Summary */}
               {showResults && userProfile && (
-                <div className="mb-8 bg-yellow-50 rounded-xl p-6 border border-yellow-200">
+                <div className="mb-8 bg-yellow-50 p-6 border-t-2 border-black pt-5">
                   <h3 className="text-2xl font-bold text-neutral-900 mb-4">
                     🎉 Congratulations! You qualify for {userProfile.tier} status
                   </h3>
-                  <p className="text-yellow-700 mb-4">
+                  <p className="text-red-600 mb-4">
                     Based on your investment level, you have access to premium benefits and fast-track services.
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-900 mb-2">Your Benefits:</h4>
+                    <div className="p-4 border-t-2 border-black pt-5">
+                      <h4 className="font-semibold text-black mb-2">Your Benefits:</h4>
                       <ul className="space-y-1">
                         {userProfile.benefits.map((benefit, index) => (
-                          <li key={index} className="text-sm text-gray-700 flex items-center space-x-2">
+                          <li key={index} className="text-sm text-neutral-800 flex items-center space-x-2">
                             <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>
                             <span>{benefit}</span>
                           </li>
                         ))}
                       </ul>
                     </div>
-                    <div className="bg-white rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-900 mb-2">Next Steps:</h4>
-                      <ul className="space-y-1 text-sm text-gray-700">
+                    <div className="p-4 border-t-2 border-black pt-5">
+                      <h4 className="font-semibold text-black mb-2">Next Steps:</h4>
+                      <ul className="space-y-1 text-sm text-neutral-800">
                         <li className="flex items-center space-x-2">
                           <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
                           <span>Explore investment opportunities</span>
@@ -325,18 +325,18 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+        <div className="p-6 -t border-t-2 border-black pt-5">
           {showResults ? (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={startInvestment}
-                className="px-8 py-3 bg-yellow-600 text-black rounded-lg font-semibold hover:bg-yellow-700 transition-colors"
+                className="px-8 py-3 bg-yellow-400 text-black rounded-md font-semibold hover:bg-yellow-300 transition-colors"
               >
                 Start Investing Now
               </button>
               <button
                 onClick={scheduleConsultation}
-                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                className="px-8 py-3 bg-blue-600 text-black rounded-md font-semibold hover:bg-blue-700 transition-colors"
               >
                 Schedule Consultation
               </button>
@@ -346,10 +346,10 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all ${
+                className={`flex items-center space-x-2 px-6 py-3 rounded-md transition-all ${
                   currentStep === 0 
-                    ? 'text-gray-400 cursor-not-allowed' 
-                    : 'text-gray-700 hover:bg-gray-200'
+                    ? 'text-neutral-500 cursor-not-allowed' 
+                    : 'text-neutral-800 hover:bg-gray-200'
                 }`}
               >
                 <ChevronLeftIcon className="w-4 h-4" />
@@ -359,19 +359,19 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
               <div className="flex space-x-4">
                 <button
                   onClick={onClose}
-                  className="text-gray-600 hover:text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-200 transition-all"
+                  className="text-neutral-700 hover:text-neutral-800 px-6 py-3 rounded-md hover:bg-gray-200 transition-all"
                 >
                   Skip Tour
                 </button>
                 
                 {currentStepData?.profiles ? (
-                  <p className="text-gray-600 px-6 py-3">
+                  <p className="text-neutral-700 px-6 py-3">
                     Select a tier to continue
                   </p>
                 ) : (
                   <button
                     onClick={nextStep}
-                    className="flex items-center space-x-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-neutral-800 transition-all"
+                    className="flex items-center space-x-2 px-6 py-3 bg-black text-yellow-400 rounded-md hover:bg-neutral-100 transition-all"
                   >
                     <span>
                       {currentStep === investmentSteps.length - 1 ? 'Complete Tour' : 'Continue'}

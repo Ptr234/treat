@@ -84,7 +84,7 @@ const AGENCY_COLORS: Record<string, { bg: string; text: string; ring: string }> 
   ERA:   { bg: 'bg-rose-500/20',   text: 'text-rose-400',   ring: 'ring-rose-500/40' },
 };
 
-const DEFAULT_COLOR = { bg: 'bg-neutral-700/40', text: 'text-neutral-300', ring: 'ring-neutral-600/40' };
+const DEFAULT_COLOR = { bg: 'bg-neutral-200', text: 'text-neutral-700', ring: 'ring-neutral-400' };
 
 const AGENCY_CODES = ['UIA', 'URSB', 'URA', 'DCIC', 'NEMA', 'KCCA', 'LANDS', 'UNBS', 'ERA'] as const;
 
@@ -523,7 +523,7 @@ export default function AgencyChatPage() {
   if (!canUseChat) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
+        <div className="max-w-md w-full text-center border-t-4 border-yellow-400 pt-8">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <LockClosedIcon className="w-8 h-8 text-yellow-700" />
           </div>
@@ -533,7 +533,7 @@ export default function AgencyChatPage() {
           </p>
           <Link
             href="/"
-            className="inline-block w-full px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors shadow-md hover:shadow-lg"
+            className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-100 transition-colors"
           >
             Return Home
           </Link>
@@ -545,15 +545,15 @@ export default function AgencyChatPage() {
   return (
  <div className="min-h-screen bg-white">
       {/* Page header */}
-      <div className="border-b border-neutral-800 bg-neutral-900/50">
+      <div className="border-b border-neutral-200 bg-white">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-600/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-md bg-red-50 flex items-center justify-center">
               <ChatBubbleLeftRightIcon className="w-5 h-5 text-red-500" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Inter-Agency Chat</h1>
-              <p className="text-sm text-neutral-400">
+              <h1 className="text-2xl font-bold text-black">Inter-Agency Chat</h1>
+              <p className="text-sm text-neutral-700">
                 Collaborate across agencies on investor cases
               </p>
             </div>
@@ -566,7 +566,7 @@ export default function AgencyChatPage() {
           {/* ── Mobile sidebar toggle ─────────────────────────────── */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-600/30 hover:bg-red-500 transition-colors"
+            className="lg:hidden fixed bottom-6 left-6 z-50 w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center shadow-none hover:bg-red-500 transition-colors"
             aria-label="Toggle channels"
           >
             <UserGroupIcon className="w-5 h-5" />
@@ -578,17 +578,17 @@ export default function AgencyChatPage() {
               ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
               lg:translate-x-0 lg:relative
               fixed inset-y-0 left-0 z-40 w-72 lg:w-72 flex-shrink-0
-              bg-neutral-900 border border-neutral-800 rounded-none lg:rounded-2xl
+              bg-white border border-neutral-200 rounded-none lg:rounded-md
               transition-transform duration-200 ease-out
               flex flex-col overflow-hidden
             `}
           >
             {/* Sidebar header */}
-            <div className="px-4 py-4 border-b border-neutral-800">
+            <div className="px-4 py-4 border-b border-neutral-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <UserGroupIcon className="w-5 h-5 text-yellow-500" />
-                  <h2 className="text-sm font-semibold text-white">Channels</h2>
+                  <h2 className="text-sm font-semibold text-black">Channels</h2>
                 </div>
                 <span className="text-xs text-neutral-500">
                   {uniqueChannelList.length}
@@ -617,7 +617,7 @@ export default function AgencyChatPage() {
                       w-full text-left px-3 py-2.5 rounded-xl transition-all duration-150
                       ${isActive
                         ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
-                        : 'text-neutral-300 hover:bg-neutral-800 hover:text-white border border-transparent'
+                        : 'text-neutral-700 hover:bg-neutral-100 hover:text-red-600 border border-transparent'
                       }
                     `}
                   >
@@ -627,7 +627,7 @@ export default function AgencyChatPage() {
                       ) : (
                         <HashtagIcon className="w-4 h-4 flex-shrink-0" />
                       )}
-                      <span className={`text-sm font-medium truncate flex-1 ${unread > 0 && !isActive ? 'text-white font-bold' : ''}`}>
+                      <span className={`text-sm font-medium truncate flex-1 ${unread > 0 && !isActive ? 'text-black font-bold' : ''}`}>
                         {isGeneral ? 'General' : ch}
                       </span>
                       {unread > 0 && !isActive && (
@@ -643,7 +643,7 @@ export default function AgencyChatPage() {
                     )}
                     {ticketInfo && (
                       <div className="mt-1 ml-6 flex items-center gap-1.5">
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700">
                           {ticketInfo.status}
                         </span>
                         {ticketInfo.agencyCode && (
@@ -676,27 +676,27 @@ export default function AgencyChatPage() {
           )}
 
           {/* ── Main chat area ────────────────────────────────────── */}
-          <div className="flex-1 flex flex-col bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden min-w-0">
+          <div className="flex-1 flex flex-col bg-white border border-neutral-200 rounded-md overflow-hidden min-w-0">
             {/* Channel header */}
-            <div className="px-4 sm:px-6 py-4 border-b border-neutral-800 flex items-center gap-3">
+            <div className="px-4 sm:px-6 py-4 border-b border-neutral-200 flex items-center gap-3">
               {activeChannel === 'general' ? (
                 <ChatBubbleLeftRightIcon className="w-5 h-5 text-yellow-500 flex-shrink-0" />
               ) : (
                 <HashtagIcon className="w-5 h-5 text-yellow-500 flex-shrink-0" />
               )}
               <div className="min-w-0 flex-1">
-                <h3 className="text-base font-semibold text-white truncate">
+                <h3 className="text-base font-semibold text-black truncate">
                   {activeChannel === 'general' ? 'General' : activeChannel}
                 </h3>
                 {activeChannel === 'general' ? (
-                  <p className="text-xs text-neutral-400">
+                  <p className="text-xs text-neutral-700">
                     Cross-agency coordination &amp; announcements
                   </p>
                 ) : (
                   (() => {
                     const ti = getTicketInfo(activeChannel);
                     return ti ? (
-                      <p className="text-xs text-neutral-400 truncate">
+                      <p className="text-xs text-neutral-700 truncate">
                         {ti.title}
                       </p>
                     ) : null;
@@ -714,7 +714,7 @@ export default function AgencyChatPage() {
                   className={`p-2 rounded-lg transition-colors ${
                     searchOpen
                       ? 'bg-yellow-500/20 text-yellow-400'
-                      : 'text-neutral-500 hover:text-white hover:bg-neutral-800'
+                      : 'text-neutral-600 hover:text-red-600 hover:bg-neutral-100'
                   }`}
                   aria-label="Search messages"
                 >
@@ -726,7 +726,7 @@ export default function AgencyChatPage() {
 
             {/* Search bar (collapsible) */}
             {searchOpen && (
-              <div className="px-4 sm:px-6 py-2 border-b border-neutral-800 bg-neutral-900/80">
+              <div className="px-4 sm:px-6 py-2 border-b border-neutral-200 bg-white">
                 <div className="relative">
                   <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
                   <input
@@ -735,12 +735,12 @@ export default function AgencyChatPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search messages, names, or agencies..."
                     autoFocus
-                    className="w-full pl-9 pr-8 py-2 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50"
+                    className="w-full pl-9 pr-8 py-2 text-sm bg-white border border-neutral-400 rounded-md text-black placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-red-600"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -800,11 +800,11 @@ export default function AgencyChatPage() {
                 <div key={group.date}>
                   {/* Date separator */}
                   <div className="flex items-center gap-3 my-4">
-                    <div className="flex-1 h-px bg-neutral-800" />
+                    <div className="flex-1 h-px bg-neutral-100" />
                     <span className="text-xs text-neutral-500 font-medium px-2">
                       {group.date}
                     </span>
-                    <div className="flex-1 h-px bg-neutral-800" />
+                    <div className="flex-1 h-px bg-neutral-100" />
                   </div>
 
                   {/* Messages in this group */}
@@ -814,7 +814,7 @@ export default function AgencyChatPage() {
                     return (
                       <div
                         key={msg._id}
-                        className={`group flex gap-3 py-2 hover:bg-neutral-800/30 rounded-xl px-2 -mx-2 transition-colors ${
+                        className={`group flex gap-3 py-2 hover:bg-neutral-50 rounded-xl px-2 -mx-2 transition-colors ${
                           isOptimistic ? 'opacity-60' : ''
                         }`}
                       >
@@ -828,7 +828,7 @@ export default function AgencyChatPage() {
                         {/* Content */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-baseline gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-white">
+                            <span className="text-sm font-semibold text-black">
                               {msg.senderName}
                             </span>
                             <span
@@ -836,14 +836,14 @@ export default function AgencyChatPage() {
                             >
                               {msg.senderAgencyCode}
                             </span>
-                            <span className="text-[11px] text-neutral-600 group-hover:text-neutral-500 transition-colors">
+                            <span className="text-[11px] text-neutral-500 group-hover:text-neutral-500 transition-colors">
                               {formatTime(msg.sentAt)}
                             </span>
                             {isOptimistic && (
-                              <span className="text-[10px] text-neutral-600 italic">Sending...</span>
+                              <span className="text-[10px] text-neutral-500 italic">Sending...</span>
                             )}
                           </div>
-                          <p className="text-sm text-neutral-300 mt-0.5 whitespace-pre-wrap break-words">
+                          <p className="text-sm text-neutral-700 mt-0.5 whitespace-pre-wrap break-words">
                             {msg.content}
                           </p>
                           {msg.attachments && msg.attachments.length > 0 && (
@@ -854,7 +854,7 @@ export default function AgencyChatPage() {
                                   href={att.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 hover:border-yellow-500/40 hover:bg-neutral-700 transition-colors text-xs text-neutral-300 hover:text-yellow-400"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-white border border-neutral-400 hover:border-black hover:bg-neutral-100 transition-colors text-xs text-neutral-700 hover:text-red-600"
                                 >
                                   <DocumentIcon className="w-3.5 h-3.5 flex-shrink-0" />
                                   <span className="truncate max-w-[160px]">
@@ -878,7 +878,7 @@ export default function AgencyChatPage() {
                               });
                               inputRef.current?.focus();
                             }}
-                            className="self-start mt-1 p-1.5 rounded-lg text-neutral-600 opacity-0 group-hover:opacity-100 hover:bg-neutral-800 hover:text-yellow-400 transition-all flex-shrink-0"
+                            className="self-start mt-1 p-1.5 rounded-md text-neutral-500 opacity-0 group-hover:opacity-100 hover:bg-neutral-100 hover:text-red-600 transition-all flex-shrink-0"
                             title="Reply to this message"
                           >
                             <ArrowUturnLeftIcon className="w-3.5 h-3.5" />
@@ -898,7 +898,7 @@ export default function AgencyChatPage() {
               <div className="absolute bottom-[200px] right-8 z-10">
                 <button
                   onClick={scrollToBottom}
-                  className="relative w-10 h-10 rounded-full bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 hover:border-yellow-500/40 text-neutral-400 hover:text-yellow-400 shadow-lg transition-all flex items-center justify-center"
+                  className="relative w-10 h-10 rounded-full bg-white border border-neutral-400 hover:bg-neutral-100 hover:border-black text-neutral-700 hover:text-red-600 transition-all flex items-center justify-center"
                   aria-label="Scroll to bottom"
                 >
                   <ChevronDownIcon className="w-5 h-5" />
@@ -912,25 +912,25 @@ export default function AgencyChatPage() {
             )}
 
             {/* ── Sender info bar ─────────────────────────────────── */}
-            <div className="px-4 sm:px-6 py-3 border-t border-neutral-800 bg-neutral-900/80">
+            <div className="px-4 sm:px-6 py-3 border-t border-neutral-200 bg-white">
               {/* Reply preview */}
               {replyTarget && (
-                <div className="mb-2 flex items-start gap-2 px-3 py-2 bg-neutral-800/60 border-l-2 border-yellow-500 rounded-r-lg">
+                <div className="mb-2 flex items-start gap-2 px-3 py-2 bg-neutral-100 border-l-2 border-yellow-400 rounded-r-lg">
                   <ArrowUturnLeftIcon className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <span className="text-xs font-semibold text-yellow-400">
+                    <span className="text-xs font-semibold text-red-600">
                       {replyTarget.senderName}
                     </span>
                     <span className="text-[10px] text-neutral-500 ml-1.5">
                       {replyTarget.senderAgencyCode}
                     </span>
-                    <p className="text-xs text-neutral-400 truncate mt-0.5">
+                    <p className="text-xs text-neutral-700 truncate mt-0.5">
                       {truncate(replyTarget.content, 120)}
                     </p>
                   </div>
                   <button
                     onClick={() => setReplyTarget(null)}
-                    className="p-0.5 rounded hover:bg-neutral-700 text-neutral-500 hover:text-white transition-colors flex-shrink-0"
+                    className="p-0.5 rounded hover:bg-neutral-100 text-neutral-500 hover:text-red-600 transition-colors flex-shrink-0"
                   >
                     <XMarkIcon className="w-3.5 h-3.5" />
                   </button>
@@ -939,7 +939,7 @@ export default function AgencyChatPage() {
 
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 {/* Logged-in user identity */}
-                <span className="px-3 py-1.5 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-neutral-300">
+                <span className="px-3 py-1.5 text-sm bg-white border border-neutral-400 rounded-md text-neutral-700">
                   {user?.name || 'Admin'}
                 </span>
 
@@ -947,7 +947,7 @@ export default function AgencyChatPage() {
                 <select
                   value={senderAgencyCode}
                   onChange={(e) => setSenderAgencyCode(e.target.value)}
-                  className="px-3 py-1.5 text-sm bg-neutral-800 border border-neutral-700 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 appearance-none cursor-pointer"
+                  className="px-3 py-1.5 text-sm bg-white border border-neutral-400 rounded-md text-black focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black appearance-none cursor-pointer"
                 >
                   {AGENCY_CODES.map((code) => (
                     <option key={code} value={code}>
@@ -957,14 +957,14 @@ export default function AgencyChatPage() {
                 </select>
 
                 {/* Keyboard hint */}
-                <span className="hidden sm:inline text-[10px] text-neutral-600 ml-auto">
+                <span className="hidden sm:inline text-[10px] text-neutral-500 ml-auto">
                   Enter to send &middot; Shift+Enter for new line
                 </span>
               </div>
 
               {/* Send error display */}
               {sendError && (
-                <div className="mb-2 px-3 py-1.5 text-xs text-red-400 bg-red-900/30 border border-red-800/50 rounded-lg flex items-center justify-between">
+                <div className="mb-2 px-3 py-1.5 text-xs text-red-400 bg-red-900/30 border border-red-800/50 rounded-md flex items-center justify-between">
                   <span>{sendError}</span>
                   <button
                     onClick={() => setSendError(null)}
@@ -981,14 +981,14 @@ export default function AgencyChatPage() {
                   {pendingAttachments.map((att) => (
                     <span
                       key={att.assetId}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-800 border border-neutral-700 text-xs text-neutral-300"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-neutral-400 text-xs text-neutral-700"
                     >
                       <DocumentIcon className="w-3.5 h-3.5 flex-shrink-0 text-yellow-500" />
                       <span className="truncate max-w-[140px]">{att.name}</span>
                       <button
                         type="button"
                         onClick={() => removeAttachment(att.assetId)}
-                        className="ml-0.5 p-0.5 rounded hover:bg-neutral-700 text-neutral-500 hover:text-white transition-colors"
+                        className="ml-0.5 p-0.5 rounded hover:bg-neutral-100 text-neutral-500 hover:text-red-600 transition-colors"
                       >
                         <XMarkIcon className="w-3 h-3" />
                       </button>
@@ -1032,14 +1032,14 @@ export default function AgencyChatPage() {
                   }}
                   placeholder={`Message #${activeChannel === 'general' ? 'general' : activeChannel}...`}
                   rows={1}
-                  className="flex-1 px-4 py-2.5 text-sm bg-neutral-800 border border-neutral-700 rounded-xl text-white placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-yellow-500/50 focus:border-yellow-500/50 resize-none overflow-hidden"
+                  className="flex-1 px-4 py-2.5 text-sm bg-white border border-neutral-400 rounded-md text-black placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black resize-none overflow-hidden"
                   style={{ maxHeight: '120px' }}
                 />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading || pendingAttachments.length >= 3}
-                  className="px-3 py-2.5 bg-neutral-800 border border-neutral-700 hover:bg-neutral-700 hover:border-yellow-500/40 disabled:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-400 hover:text-yellow-400 rounded-xl transition-colors flex items-center flex-shrink-0"
+                  className="px-3 py-2.5 bg-white border border-neutral-400 hover:bg-neutral-100 hover:border-black disabled:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-700 hover:text-red-600 rounded-md transition-colors flex items-center flex-shrink-0"
                   title="Attach files (max 3)"
                 >
                   <PaperClipIcon className="w-4 h-4" />
@@ -1047,7 +1047,7 @@ export default function AgencyChatPage() {
                 <button
                   type="submit"
                   disabled={sending || !newMessage.trim()}
-                  className="px-4 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-neutral-700 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex items-center gap-2 flex-shrink-0 font-medium text-sm"
+                  className="px-4 py-2.5 bg-red-600 hover:bg-red-500 disabled:bg-neutral-300 disabled:cursor-not-allowed text-white rounded-md transition-colors flex items-center gap-2 flex-shrink-0 font-medium text-sm"
                 >
                   <PaperAirplaneIcon className="w-4 h-4" />
                   <span className="hidden sm:inline">

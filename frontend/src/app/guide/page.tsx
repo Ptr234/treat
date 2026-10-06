@@ -1,3 +1,4 @@
+import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Reveal } from '@/components/ui/Reveal';
@@ -20,11 +21,11 @@ import {
   BookmarkSquareIcon,
 } from '@heroicons/react/24/outline';
 
-export const metadata: Metadata = {
-  title: 'How to Use the OneStop Centre — User Guide',
-  description:
-    'A step-by-step guide to using the Uganda Investment Authority OneStop Centre: services, investments, the AI assistant, inquiries, appointments and business tools.',
-};
+export const metadata: Metadata = buildMetadata({
+  title: 'User guide',
+  description: 'A step-by-step guide to using the OneStopCentre: services, investments, the AI assistant, inquiries, appointments and business tools.',
+  path: '/guide/',
+});
 
 const linkClass =
   'font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
   CalculatorIcon,
   DocumentTextIcon,
@@ -9,7 +10,7 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 
-// Uganda Tax Rates 2024 (Based on URA official rates)
+// Uganda Tax Rates 2026 (verify against current URA schedules)
 const TAX_RATES = {
   individual: [
     { min: 0, max: 3180000, rate: 0 }, // Tax-free threshold UGX 3.18M annually
@@ -149,287 +150,284 @@ export default function TaxCalculatorPage() {
     return `UGX ${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   };
 
+  const inputClass =
+    'w-full rounded-md border border-neutral-400 bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
+  const labelClass = 'mb-2 block text-sm font-bold text-black';
+
+  const CALCULATOR_OPTIONS = [
+    { type: 'individual', icon: UserIcon, label: 'Individual tax' },
+    { type: 'corporate', icon: BuildingOfficeIcon, label: 'Corporate tax' },
+    { type: 'vat', icon: DocumentTextIcon, label: 'VAT' },
+  ] as const;
+
+  const resultRow = 'flex items-baseline justify-between gap-4 py-3';
+
   return (
- <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-brand-black to-brand-darkGreen">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 text-yellow-400">
-              Uganda Tax Calculator 2024
-            </h1>
-            <p className="text-xl text-yellow-100 mb-8 max-w-3xl mx-auto">
-              Calculate your tax obligations using official URA rates. Individual income tax, corporate tax, and VAT calculations.
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 text-sm">
-              <div className="bg-yellow-900/20 border border-yellow-800/30 rounded-lg px-4 py-2 hover:bg-yellow-900/30 hover:border-yellow-600/40 transition-all duration-200">
-                <span className="font-semibold">Individual Tax: </span>0-40%
-              </div>
-              <div className="bg-yellow-900/20 border border-yellow-800/30 rounded-lg px-4 py-2 hover:bg-yellow-900/30 hover:border-yellow-600/40 transition-all duration-200">
-                <span className="font-semibold">Corporate Tax: </span>20-30%
-              </div>
-              <div className="bg-yellow-900/20 border border-yellow-800/30 rounded-lg px-4 py-2 hover:bg-yellow-900/30 hover:border-yellow-600/40 transition-all duration-200">
-                <span className="font-semibold">VAT Rate: </span>18%
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li>
+              <Link href="/tools" className="text-red-600 hover:underline underline-offset-4">Business tools</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">Tax calculator</li>
+          </ol>
+        </nav>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* Title and rates */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Uganda tax calculator 2026</h1>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
+          Calculate your tax obligations using official URA rates. Individual income tax, corporate tax, and VAT calculations.
+        </p>
+        <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
+          <div className="border-l-4 border-yellow-400 pl-4">
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Individual tax</dt>
+            <dd className="mt-1 text-xl font-bold">0–40%</dd>
+          </div>
+          <div className="border-l-4 border-yellow-400 pl-4">
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Corporate tax</dt>
+            <dd className="mt-1 text-xl font-bold">20–30%</dd>
+          </div>
+          <div className="border-l-4 border-red-600 pl-4">
+            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">VAT rate</dt>
+            <dd className="mt-1 text-xl font-bold">18%</dd>
+          </div>
+        </dl>
+      </section>
 
-          {/* Calculator Input Section */}
-          <div className="lg:col-span-2">
-            <div className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
+        {/* Inputs */}
+        <section className="lg:col-span-2" aria-labelledby="tax-inputs-heading">
+          <h2 id="tax-inputs-heading" className="border-b-2 border-black pb-3 text-xl font-bold sm:text-2xl">Tax calculator</h2>
 
-              {/* Calculator Type Selection */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-yellow-400 mb-4">Tax Calculator</h2>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { type: 'individual', icon: UserIcon, label: 'Individual Tax' },
-                    { type: 'corporate', icon: BuildingOfficeIcon, label: 'Corporate Tax' },
-                    { type: 'vat', icon: DocumentTextIcon, label: 'VAT Calculator' }
-                  ].map((option) => (
-                    <button
-                      key={option.type}
-                      onClick={() => setCalculatorType(option.type as 'individual' | 'corporate' | 'vat')}
-                      className={`p-4 rounded-lg border-2 transition-all duration-200 active:scale-95 hover:shadow-md hover:shadow-yellow-900/20 ${
-                        calculatorType === option.type
-                          ? 'border-yellow-500 bg-yellow-900/20 text-yellow-400 shadow-sm shadow-yellow-500/10'
-                          : 'border-neutral-700 hover:border-yellow-700 hover:-translate-y-0.5 text-neutral-400'
-                      }`}
-                    >
-                      <option.icon className="w-6 h-6 mx-auto mb-2" />
-                      <div className="text-sm font-medium">{option.label}</div>
-                    </button>
-                  ))}
+          {/* Calculator type */}
+          <div role="group" aria-label="Calculator type" className="mt-6 grid grid-cols-3 gap-2">
+            {CALCULATOR_OPTIONS.map((option) => {
+              const isActive = calculatorType === option.type;
+              return (
+                <button
+                  key={option.type}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => setCalculatorType(option.type)}
+                  className={`flex flex-col items-center gap-2 border-b-4 px-3 py-4 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
+                    isActive ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-700 hover:text-red-600'
+                  }`}
+                >
+                  <option.icon className="h-6 w-6" aria-hidden="true" />
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Currency */}
+          <div className="mt-8">
+            <p className={labelClass}>Currency</p>
+            <div role="group" aria-label="Currency" className="flex gap-2">
+              {(['UGX', 'USD'] as const).map((curr) => (
+                <button
+                  key={curr}
+                  type="button"
+                  aria-pressed={currency === curr}
+                  onClick={() => setCurrency(curr)}
+                  className={`min-w-[5rem] border-2 px-4 py-2 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
+                    currency === curr ? 'border-black bg-black text-yellow-400' : 'border-black bg-white text-black hover:bg-neutral-100'
+                  }`}
+                >
+                  {curr}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Fields by calculator type */}
+          {calculatorType === 'individual' && (
+            <div className="mt-8 space-y-6">
+              <div>
+                <label htmlFor="tax-income" className={labelClass}>Annual gross income ({currency})</label>
+                <input
+                  id="tax-income"
+                  type="number"
+                  value={grossIncome || ''}
+                  onChange={(e) => setGrossIncome(Number(e.target.value))}
+                  placeholder={currency === 'UGX' ? '50,000,000' : '13,500'}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="tax-deductions" className={labelClass}>Allowable deductions ({currency})</label>
+                <input
+                  id="tax-deductions"
+                  type="number"
+                  value={deductions || ''}
+                  onChange={(e) => setDeductions(Number(e.target.value))}
+                  placeholder={currency === 'UGX' ? '5,000,000' : '1,350'}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          )}
+
+          {calculatorType === 'corporate' && (
+            <div className="mt-8 space-y-6">
+              <div>
+                <label htmlFor="tax-revenue" className={labelClass}>Annual revenue ({currency})</label>
+                <input
+                  id="tax-revenue"
+                  type="number"
+                  value={grossIncome || ''}
+                  onChange={(e) => setGrossIncome(Number(e.target.value))}
+                  placeholder={currency === 'UGX' ? '100,000,000' : '27,000'}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label htmlFor="tax-business" className={labelClass}>Business type</label>
+                <select
+                  id="tax-business"
+                  value={businessType}
+                  onChange={(e) => setBusinessType(e.target.value as 'standard' | 'small' | 'mining' | 'telecom')}
+                  className={inputClass}
+                >
+                  <option value="standard">Standard business (30%)</option>
+                  <option value="small">Small business – turnover &lt; UGX 150M (20%)</option>
+                  <option value="mining">Mining company (30%)</option>
+                  <option value="telecom">Telecommunications (30%)</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="tax-expenses" className={labelClass}>Business expenses ({currency})</label>
+                <input
+                  id="tax-expenses"
+                  type="number"
+                  value={deductions || ''}
+                  onChange={(e) => setDeductions(Number(e.target.value))}
+                  placeholder={currency === 'UGX' ? '20,000,000' : '5,400'}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          )}
+
+          {calculatorType === 'vat' && (
+            <div className="mt-8 space-y-6">
+              <div>
+                <label htmlFor="tax-turnover" className={labelClass}>Annual turnover ({currency})</label>
+                <input
+                  id="tax-turnover"
+                  type="number"
+                  value={vatTurnover || ''}
+                  onChange={(e) => setVatTurnover(Number(e.target.value))}
+                  placeholder={currency === 'UGX' ? '200,000,000' : '54,000'}
+                  className={inputClass}
+                />
+              </div>
+              <div className="flex items-start gap-3 border-l-4 border-yellow-400 pl-4 text-sm">
+                <InformationCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" aria-hidden="true" />
+                <div>
+                  <p className="font-bold text-black">VAT registration threshold</p>
+                  <p className="mt-1 leading-6 text-neutral-700">
+                    Businesses with annual turnover of UGX 150M+ must register for VAT.
+                    Current VAT rate is 18% on taxable supplies.
+                  </p>
                 </div>
               </div>
+            </div>
+          )}
+        </section>
 
-              {/* Currency Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-yellow-200/80 mb-2">Currency</label>
-                <div className="flex space-x-4">
-                  {['UGX', 'USD'].map((curr) => (
-                    <button
-                      key={curr}
-                      onClick={() => setCurrency(curr as 'UGX' | 'USD')}
-                      className={`px-4 py-2 rounded-lg border transition-all duration-200 active:scale-95 ${
-                        currency === curr
-                          ? 'border-yellow-500 bg-yellow-600 text-black shadow-sm shadow-yellow-500/20'
-                          : 'border-neutral-600 text-neutral-400 hover:border-yellow-700 hover:bg-neutral-800'
-                      }`}
-                    >
-                      {curr}
-                    </button>
-                  ))}
+        {/* Results and information */}
+        <aside className="space-y-12" aria-label="Results and information">
+          {calculation && (
+            <section aria-labelledby="tax-results-heading">
+              <h2 id="tax-results-heading" className="flex items-center gap-2 border-b-2 border-black pb-3 text-lg font-bold">
+                <CalculatorIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+                Tax calculation results
+              </h2>
+              <dl className="mt-2 divide-y divide-neutral-200 text-sm">
+                <div className={resultRow}>
+                  <dt className="text-neutral-700">Gross income</dt>
+                  <dd className="font-semibold text-black">{formatCurrency(calculation.grossIncome)}</dd>
                 </div>
-              </div>
+                {calculatorType !== 'vat' && (
+                  <>
+                    <div className={resultRow}>
+                      <dt className="text-neutral-700">Taxable income</dt>
+                      <dd className="font-semibold text-black">{formatCurrency(calculation.taxableIncome)}</dd>
+                    </div>
+                    <div className={resultRow}>
+                      <dt className="text-neutral-700">Income tax</dt>
+                      <dd className="font-semibold text-black">{formatCurrency(calculation.incomeTax)}</dd>
+                    </div>
+                  </>
+                )}
+                {calculation.vatLiability !== undefined && (
+                  <div className={resultRow}>
+                    <dt className="text-neutral-700">VAT liability</dt>
+                    <dd className="font-semibold text-black">{formatCurrency(calculation.vatLiability)}</dd>
+                  </div>
+                )}
+                <div className={resultRow}>
+                  <dt className="text-neutral-700">Net income</dt>
+                  <dd className="font-bold text-black">{formatCurrency(calculation.netIncome)}</dd>
+                </div>
+                <div className={resultRow}>
+                  <dt className="text-neutral-700">Effective rate</dt>
+                  <dd className="font-semibold text-red-600">{calculation.effectiveRate.toFixed(2)}%</dd>
+                </div>
+              </dl>
+            </section>
+          )}
 
-              {/* Input Fields Based on Calculator Type */}
+          <section aria-labelledby="tax-info-heading">
+            <h2 id="tax-info-heading" className="flex items-center gap-2 border-b-2 border-black pb-3 text-lg font-bold">
+              <InformationCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
+              Tax information
+            </h2>
+            <ul className="mt-4 space-y-3 text-sm leading-6 text-neutral-700">
               {calculatorType === 'individual' && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Annual Gross Income ({currency})
-                    </label>
-                    <input
-                      type="number"
-                      value={grossIncome || ''}
-                      onChange={(e) => setGrossIncome(Number(e.target.value))}
-                      placeholder={currency === 'UGX' ? '50,000,000' : '13,500'}
-                      className="w-full px-4 py-3 bg-neutral-800 border border-neutral-600 text-yellow-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-neutral-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Allowable Deductions ({currency})
-                    </label>
-                    <input
-                      type="number"
-                      value={deductions || ''}
-                      onChange={(e) => setDeductions(Number(e.target.value))}
-                      placeholder={currency === 'UGX' ? '5,000,000' : '1,350'}
-                      className="w-full px-4 py-3 bg-neutral-800 border border-neutral-600 text-yellow-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-neutral-500"
-                    />
-                  </div>
-                </div>
+                <>
+                  <li><strong className="text-black">Tax-free threshold:</strong> UGX 3.18M annually</li>
+                  <li><strong className="text-black">Tax brackets:</strong> 0%, 10%, 20%, 30%, 40%</li>
+                  <li><strong className="text-black">Due date:</strong> 15th of following month</li>
+                </>
               )}
-
               {calculatorType === 'corporate' && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Annual Revenue ({currency})
-                    </label>
-                    <input
-                      type="number"
-                      value={grossIncome || ''}
-                      onChange={(e) => setGrossIncome(Number(e.target.value))}
-                      placeholder={currency === 'UGX' ? '100,000,000' : '27,000'}
-                      className="w-full px-4 py-3 bg-neutral-800 border border-neutral-600 text-yellow-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-neutral-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">Business Type</label>
-                    <select
-                      value={businessType}
-                      onChange={(e) => setBusinessType(e.target.value as 'standard' | 'small' | 'mining' | 'telecom')}
-                      className="w-full px-4 py-3 bg-neutral-800 border border-neutral-600 text-yellow-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    >
-                      <option value="standard">Standard Business (30%)</option>
-                      <option value="small">Small Business - Turnover &lt; UGX 150M (20%)</option>
-                      <option value="mining">Mining Company (30%)</option>
-                      <option value="telecom">Telecommunications (30%)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Business Expenses ({currency})
-                    </label>
-                    <input
-                      type="number"
-                      value={deductions || ''}
-                      onChange={(e) => setDeductions(Number(e.target.value))}
-                      placeholder={currency === 'UGX' ? '20,000,000' : '5,400'}
-                      className="w-full px-4 py-3 bg-neutral-800 border border-neutral-600 text-yellow-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-neutral-500"
-                    />
-                  </div>
-                </div>
+                <>
+                  <li><strong className="text-black">Standard rate:</strong> 30% on chargeable income</li>
+                  <li><strong className="text-black">Small business:</strong> 20% (turnover &lt; UGX 150M)</li>
+                  <li><strong className="text-black">Due date:</strong> 6 months after year-end</li>
+                </>
               )}
-
               {calculatorType === 'vat' && (
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-yellow-200/80 mb-2">
-                      Annual Turnover ({currency})
-                    </label>
-                    <input
-                      type="number"
-                      value={vatTurnover || ''}
-                      onChange={(e) => setVatTurnover(Number(e.target.value))}
-                      placeholder={currency === 'UGX' ? '200,000,000' : '54,000'}
-                      className="w-full px-4 py-3 bg-neutral-800 border border-neutral-600 text-yellow-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 placeholder:text-neutral-500"
-                    />
-                  </div>
-                  <div className="bg-yellow-900/20 border border-yellow-700/30 rounded-lg p-4">
-                    <div className="flex items-start space-x-3">
-                      <InformationCircleIcon className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="font-medium text-yellow-300">VAT Registration Threshold</p>
-                        <p className="text-neutral-400 mt-1">
-                          Businesses with annual turnover of UGX 150M+ must register for VAT.
-                          Current VAT rate is 18% on taxable supplies.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <>
+                  <li><strong className="text-black">Registration threshold:</strong> UGX 150M annually</li>
+                  <li><strong className="text-black">Standard rate:</strong> 18% on taxable supplies</li>
+                  <li><strong className="text-black">Return due:</strong> 15th of following month</li>
+                </>
               )}
+            </ul>
+          </section>
 
-            </div>
-          </div>
-
-          {/* Results Section */}
-          <div className="space-y-6">
-
-            {/* Tax Calculation Results */}
-            {calculation && (
-              <div className="bg-neutral-900 rounded-xl shadow-lg border border-yellow-900/30 p-6">
-                <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center">
-                  <CalculatorIcon className="w-5 h-5 mr-2 text-yellow-400" />
-                  Tax Calculation Results
-                </h3>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                    <span className="text-neutral-400">Gross Income:</span>
-                    <span className="font-semibold text-yellow-300">{formatCurrency(calculation.grossIncome)}</span>
-                  </div>
-
-                  {calculatorType !== 'vat' && (
-                    <>
-                      <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                        <span className="text-neutral-400">Taxable Income:</span>
-                        <span className="font-semibold text-yellow-300">{formatCurrency(calculation.taxableIncome)}</span>
-                      </div>
-
-                      <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                        <span className="text-neutral-400">Income Tax:</span>
-                        <span className="font-semibold text-yellow-300">{formatCurrency(calculation.incomeTax)}</span>
-                      </div>
-                    </>
-                  )}
-
-                  {calculation.vatLiability !== undefined && (
-                    <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                      <span className="text-neutral-400">VAT Liability:</span>
-                      <span className="font-semibold text-yellow-300">{formatCurrency(calculation.vatLiability)}</span>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center py-2 border-b border-neutral-700">
-                    <span className="text-neutral-400">Net Income:</span>
-                    <span className="font-semibold text-yellow-400">{formatCurrency(calculation.netIncome)}</span>
-                  </div>
-
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-neutral-400">Effective Rate:</span>
-                    <span className="font-semibold text-yellow-300">{calculation.effectiveRate.toFixed(2)}%</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Tax Information */}
-            <div className="bg-neutral-900 rounded-xl shadow-lg border border-neutral-800 p-6">
-              <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center">
-                <InformationCircleIcon className="w-5 h-5 mr-2 text-yellow-400" />
-                Tax Information
-              </h3>
-
-              <div className="space-y-3 text-sm">
-                {calculatorType === 'individual' && (
-                  <>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Tax-Free Threshold:</strong> UGX 3.18M annually</p>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Tax Brackets:</strong> 0%, 10%, 20%, 30%, 40%</p>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Due Date:</strong> 15th of following month</p>
-                  </>
-                )}
-
-                {calculatorType === 'corporate' && (
-                  <>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Standard Rate:</strong> 30% on chargeable income</p>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Small Business:</strong> 20% (turnover &lt; UGX 150M)</p>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Due Date:</strong> 6 months after year-end</p>
-                  </>
-                )}
-
-                {calculatorType === 'vat' && (
-                  <>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Registration Threshold:</strong> UGX 150M annually</p>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Standard Rate:</strong> 18% on taxable supplies</p>
-                    <p className="text-neutral-400"><strong className="text-yellow-300">Return Due:</strong> 15th of following month</p>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Contact URA */}
-            <div className="bg-red-950 text-yellow-50 rounded-xl p-6 border border-red-800/50 hover:border-red-700/60 hover:shadow-lg hover:shadow-red-900/20 transition-all duration-300">
-              <h3 className="text-lg font-bold mb-3 text-yellow-400">Need Tax Assistance?</h3>
-              <p className="text-sm mb-4 text-neutral-300">Contact Uganda Revenue Authority for official tax guidance.</p>
-              <div className="space-y-2 text-sm text-neutral-300">
-                <p><strong className="text-yellow-300">Phone:</strong> +256 417 444 602</p>
-                <p><strong className="text-yellow-300">Toll Free:</strong> 0800 117 000</p>
-                <p><strong className="text-yellow-300">Email:</strong> info@ura.go.ug</p>
-              </div>
-            </div>
-
-          </div>
-        </div>
+          <section aria-labelledby="ura-heading" className="border-t-4 border-yellow-400 pt-6">
+            <h2 id="ura-heading" className="text-lg font-bold">Need tax assistance?</h2>
+            <p className="mt-2 text-sm leading-6 text-neutral-700">Contact Uganda Revenue Authority for official tax guidance.</p>
+            <dl className="mt-4 space-y-2 text-sm">
+              <div className="flex gap-2"><dt className="font-bold text-black">Phone:</dt><dd className="text-neutral-700">+256 417 444 602</dd></div>
+              <div className="flex gap-2"><dt className="font-bold text-black">Toll free:</dt><dd className="text-neutral-700">0800 117 000</dd></div>
+              <div className="flex gap-2"><dt className="font-bold text-black">Email:</dt><dd><a href="mailto:info@ura.go.ug" className="font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">info@ura.go.ug</a></dd></div>
+            </dl>
+          </section>
+        </aside>
       </div>
     </div>
   );

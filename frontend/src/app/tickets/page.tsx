@@ -92,7 +92,7 @@ export default function TicketsPage() {
   if (authLoading) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="flex flex-col items-center gap-3 text-gray-500">
+        <div className="flex flex-col items-center gap-3 text-neutral-600">
           <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-sm">Loading Issue Tracking System…</p>
         </div>
@@ -104,22 +104,22 @@ export default function TicketsPage() {
   if (!isStaff) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full text-center">
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShieldCheckIcon className="w-8 h-8 text-yellow-700" />
+        <div className="max-w-lg w-full text-center border-t-4 border-yellow-400 pt-8">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+            <ShieldCheckIcon className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">Issue Tracking System</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="text-2xl font-bold text-black mb-3">Issue Tracking System</h1>
+          <p className="text-neutral-700 mb-6">
             The ticket management dashboard is restricted to authorized administrators and executive staff. If you need support, you can submit a new ticket below.
           </p>
           <Link href="/tickets/create/">
-            <button className="w-full px-6 py-3 bg-yellow-600 hover:bg-yellow-700 text-black font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors">
+            <button className="w-full px-6 py-3 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold rounded-md flex items-center justify-center gap-2 transition-colors">
               <PlusIcon className="w-5 h-5" />
               Submit a Support Ticket
             </button>
           </Link>
-          <p className="text-sm text-gray-500 mt-4">
-            Admin or CEO? <Link href="/dashboard" className="text-yellow-700 hover:text-yellow-800 font-medium">Sign in</Link> to access the full dashboard.
+          <p className="text-sm text-neutral-600 mt-4">
+            Admin or CEO? <Link href="/dashboard" className="text-red-600 hover:text-yellow-800 font-medium">Sign in</Link> to access the full dashboard.
           </p>
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function TicketsPage() {
   return (
  <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-yellow-700 via-yellow-600 to-yellow-500 text-white py-16">
+      <section className="border-b border-neutral-200 bg-white text-black py-16">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -147,24 +147,24 @@ export default function TicketsPage() {
       </section>
 
       {/* Stats Bar */}
-      <section className="bg-white border-b border-gray-200 py-6">
+      <section className="bg-white border-b border-neutral-200 py-6">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
-              <p className="text-sm text-gray-600 mt-1">Total Tickets</p>
+              <p className="text-3xl font-bold text-black">{stats.total}</p>
+              <p className="text-sm text-neutral-700 mt-1">Total Tickets</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-yellow-600">{stats.open}</p>
-              <p className="text-sm text-gray-600 mt-1">Open</p>
+              <p className="text-3xl font-bold text-red-600">{stats.open}</p>
+              <p className="text-sm text-neutral-700 mt-1">Open</p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-blue-600">{stats.resolved}</p>
-              <p className="text-sm text-gray-600 mt-1">Resolved</p>
+              <p className="text-sm text-neutral-700 mt-1">Resolved</p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-bold text-purple-600">{stats.avgResolutionTime}h</p>
-              <p className="text-sm text-gray-600 mt-1">Avg Resolution</p>
+              <p className="text-sm text-neutral-700 mt-1">Avg Resolution</p>
             </div>
           </div>
         </div>
@@ -175,17 +175,17 @@ export default function TicketsPage() {
         {/* Search and Create */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-500" />
             <input
               type="text"
               placeholder="Search by ticket ID or title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
             />
           </div>
           <Link href="/tickets/create/">
-            <button className="w-full md:w-auto px-6 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-black rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+            <button className="w-full md:w-auto px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black rounded-md font-medium flex items-center justify-center gap-2 transition-colors">
               <PlusIcon className="w-5 h-5" />
               Create New Ticket
             </button>
@@ -199,10 +199,10 @@ export default function TicketsPage() {
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
+                className={`px-4 py-2 rounded-md font-medium text-sm transition-colors whitespace-nowrap ${
                   statusFilter === status
-                    ? 'bg-yellow-600 text-black'
-                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
+                    ? 'bg-yellow-400 text-black'
+                    : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-200'
                 }`}
               >
                 {status.replace('_', ' ')}
@@ -214,11 +214,11 @@ export default function TicketsPage() {
         {/* Filters and Sort */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <FunnelIcon className="w-5 h-5 text-gray-500" />
+            <FunnelIcon className="w-5 h-5 text-neutral-600" />
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as TicketPriority | 'ALL')}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+              className="px-4 py-2 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
             >
               <option value="ALL">All Priorities</option>
               <option value="low">Low</option>
@@ -231,7 +231,7 @@ export default function TicketsPage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="px-4 py-2 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -249,15 +249,15 @@ export default function TicketsPage() {
           </div>
         ) : (
           <div className="text-center py-16">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+              <MagnifyingGlassIcon className="w-8 h-8 text-neutral-500" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No tickets found</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-lg font-semibold text-black mb-2">No tickets found</h3>
+            <p className="text-neutral-700 mb-6">
               Try adjusting your search or filters
             </p>
             <Link href="/tickets/create/">
-              <button className="px-6 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-black rounded-lg font-medium inline-flex items-center gap-2 transition-colors">
+              <button className="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black rounded-md font-medium inline-flex items-center gap-2 transition-colors">
                 <PlusIcon className="w-5 h-5" />
                 Create New Ticket
               </button>

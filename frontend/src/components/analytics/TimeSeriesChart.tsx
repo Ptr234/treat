@@ -32,22 +32,22 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as TimeSeriesPoint;
       return (
-        <div className="bg-white p-4 border border-yellow-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 mb-3">{formatMonth(label ?? '')}</p>
+        <div className="p-4 border-t-2 border-black pt-5">
+          <p className="font-semibold text-black mb-3">{formatMonth(label ?? '')}</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-yellow-200" />
-              <span className="text-sm text-gray-600">Inquiries:</span>
-              <span className="text-sm font-medium text-gray-900">{data.inquiries}</span>
+              <span className="text-sm text-neutral-700">Inquiries:</span>
+              <span className="text-sm font-medium text-black">{data.inquiries}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-neutral-800" />
-              <span className="text-sm text-gray-600">Conversions:</span>
-              <span className="text-sm font-medium text-gray-900">{data.conversions}</span>
+              <div className="w-3 h-3 rounded-full bg-neutral-100" />
+              <span className="text-sm text-neutral-700">Conversions:</span>
+              <span className="text-sm font-medium text-black">{data.conversions}</span>
             </div>
-            <div className="pt-2 border-t border-gray-200">
-              <span className="text-sm text-gray-600">Investment Value:</span>
-              <span className="text-sm font-medium text-yellow-700 ml-2">
+            <div className="pt-2 border-t border-neutral-200">
+              <span className="text-sm text-neutral-700">Investment Value:</span>
+              <span className="text-sm font-medium text-red-600 ml-2">
                 {formatCurrency(data.investmentValue)}
               </span>
             </div>
@@ -61,8 +61,8 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
   return (
     <div className="space-y-4">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Inquiry & Conversion Trends</h3>
-        <p className="text-sm text-gray-600">Monthly performance over the past year</p>
+        <h3 className="text-lg font-semibold text-black mb-2">Inquiry & Conversion Trends</h3>
+        <p className="text-sm text-neutral-700">Monthly performance over the past year</p>
       </div>
 
       <ResponsiveContainer width="100%" height={chartHeight}>
@@ -123,21 +123,21 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
 
           return (
             <>
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <p className="text-xs font-medium text-gray-600 uppercase">Total Inquiries</p>
-                <p className="text-2xl font-bold text-yellow-700 mt-1">{totalInquiries.toLocaleString()}</p>
+              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+                <p className="text-xs font-medium text-neutral-700 uppercase">Total Inquiries</p>
+                <p className="text-2xl font-bold text-red-600 mt-1">{totalInquiries.toLocaleString()}</p>
               </div>
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <p className="text-xs font-medium text-gray-600 uppercase">Total Conversions</p>
-                <p className="text-2xl font-bold text-yellow-700 mt-1">{totalConversions}</p>
+              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+                <p className="text-xs font-medium text-neutral-700 uppercase">Total Conversions</p>
+                <p className="text-2xl font-bold text-red-600 mt-1">{totalConversions}</p>
               </div>
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <p className="text-xs font-medium text-gray-600 uppercase">Avg Monthly Inquiries</p>
-                <p className="text-2xl font-bold text-yellow-700 mt-1">{avgInquiries}</p>
+              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+                <p className="text-xs font-medium text-neutral-700 uppercase">Avg Monthly Inquiries</p>
+                <p className="text-2xl font-bold text-red-600 mt-1">{avgInquiries}</p>
               </div>
-              <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <p className="text-xs font-medium text-gray-600 uppercase">Conversion Rate</p>
-                <p className="text-2xl font-bold text-yellow-700 mt-1">{conversionRate}%</p>
+              <div className="p-4 bg-yellow-50 border-t-2 border-black pt-5">
+                <p className="text-xs font-medium text-neutral-700 uppercase">Conversion Rate</p>
+                <p className="text-2xl font-bold text-red-600 mt-1">{conversionRate}%</p>
               </div>
             </>
           );

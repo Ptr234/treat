@@ -105,18 +105,18 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
-          className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+          className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
         >
           {/* Header */}
-          <div className="bg-black text-white p-4 sm:p-6 rounded-t-xl">
+          <div className="bg-black text-yellow-400 p-4 sm:p-6 rounded-t-xl">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold">Contact {agency.acronym}</h2>
-                <p className="text-yellow-100">{agency.name}</p>
+                <p className="text-black">{agency.name}</p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-neutral-800 rounded-full transition-colors"
+                className="p-2 hover:bg-neutral-100 rounded-full transition-colors"
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>
@@ -127,7 +127,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
           <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-800 mb-1">
                   Full Name *
                 </label>
                 <input
@@ -136,12 +136,12 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                   placeholder="Your full name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-800 mb-1">
                   Email Address *
                 </label>
                 <input
@@ -150,7 +150,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -158,7 +158,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-800 mb-1">
                   Phone Number *
                 </label>
                 <input
@@ -167,12 +167,12 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                   placeholder="+256 XXX XXX XXX"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-800 mb-1">
                   Company/Organization
                 </label>
                 <input
@@ -180,7 +180,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   name="company"
                   value={formData.company}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                   placeholder="Your company name (optional)"
                 />
               </div>
@@ -188,7 +188,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-800 mb-1">
                   Service Required *
                 </label>
                 <select
@@ -196,7 +196,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.serviceType}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                 >
                   <option value="">Select a service</option>
                   {agency.services.map((service, index) => (
@@ -208,14 +208,14 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-neutral-800 mb-1">
                   Priority Level
                 </label>
                 <select
                   name="urgency"
                   value={formData.urgency}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                 >
                   <option value="low">Low Priority</option>
                   <option value="normal">Normal Priority</option>
@@ -225,7 +225,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-neutral-800 mb-1">
                 Subject *
               </label>
               <input
@@ -234,13 +234,13 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                 value={formData.subject}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                 placeholder="Brief description of your inquiry"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-neutral-800 mb-1">
                 Detailed Message *
               </label>
               <textarea
@@ -249,17 +249,17 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                 placeholder="Please provide detailed information about your inquiry..."
               />
             </div>
 
             {/* File Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-neutral-800 mb-2">
                 Attachments (Optional)
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <div className="-2 -dashed p-4 border-t-2 border-black pt-5">
                 <input
                   type="file"
                   multiple
@@ -272,8 +272,8 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   htmlFor="file-upload"
                   className="cursor-pointer flex flex-col items-center space-y-2"
                 >
-                  <DocumentArrowUpIcon className="w-8 h-8 text-gray-400" />
-                  <span className="text-sm text-gray-600">
+                  <DocumentArrowUpIcon className="w-8 h-8 text-neutral-500" />
+                  <span className="text-sm text-neutral-700">
                     Click to upload documents (PDF, DOC, Images)
                   </span>
                 </label>
@@ -282,8 +282,8 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
               {attachments.length > 0 && (
                 <div className="mt-2 space-y-1">
                   {attachments.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded">
-                      <span className="text-sm text-gray-700">{file.name}</span>
+                    <div key={index} className="flex items-center justify-between bg-neutral-100 px-3 py-2 rounded">
+                      <span className="text-sm text-neutral-800">{file.name}</span>
                       <button
                         type="button"
                         onClick={() => removeAttachment(index)}
@@ -302,14 +302,14 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
               <button
                 type="button"
                 onClick={onClose}
-                className="min-h-[44px] px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                className="min-h-[44px] px-6 py-2 border border-neutral-400 text-neutral-800 rounded-md hover:bg-neutral-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="min-h-[44px] flex items-center space-x-2 px-6 py-2 bg-black text-white rounded-md hover:bg-neutral-800 transition-colors disabled:opacity-50"
+                className="min-h-[44px] flex items-center space-x-2 px-6 py-2 bg-black text-yellow-400 rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>

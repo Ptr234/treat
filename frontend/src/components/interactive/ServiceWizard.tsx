@@ -155,23 +155,23 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-neutral-100 z-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto border-t-2 border-black pt-5"
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Investment Pathway Finder</h2>
-              <p className="text-gray-600 mt-1">Let us guide you to the right investment opportunities and services</p>
+              <h2 className="text-2xl font-bold text-black">Investment Pathway Finder</h2>
+              <p className="text-neutral-700 mt-1">Let us guide you to the right investment opportunities and services</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg"
+              className="p-2 hover:bg-neutral-100 rounded-md"
               aria-label="Close wizard"
             >
               <XMarkIcon className="w-6 h-6" />
@@ -190,7 +190,7 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
                 />
               ))}
             </div>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-neutral-600 mt-2">
               Step {currentStep + 1} of {steps.length}
             </p>
           </div>
@@ -211,7 +211,7 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              <h3 className="text-xl font-semibold text-black mb-6">
                 {currentStepData?.title}
               </h3>
               
@@ -220,21 +220,21 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
                   <button
                     key={option.id}
                     onClick={() => handleAnswer(currentStepData?.id || '', option.id)}
-                    className="p-4 border-2 border-gray-200 rounded-xl hover:border-yellow-300 hover:bg-yellow-50 transition-all duration-200 text-left group focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                    className="p-4 border-2 border-neutral-200 rounded-md hover:border-black hover:bg-yellow-50 transition-all duration-200 text-left group focus:ring-2 focus-visible:ring-red-600 focus:outline-none"
                   >
                     <div className="flex items-start space-x-3">
                       <span className="text-2xl">{option.icon}</span>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 group-hover:text-yellow-700">
+                        <h4 className="font-semibold text-black group-hover:text-red-600">
                           {option.title}
                         </h4>
                         {option.description && (
-                          <p className="text-gray-600 text-sm mt-1">
+                          <p className="text-neutral-700 text-sm mt-1">
                             {option.description}
                           </p>
                         )}
                       </div>
-                      <ChevronRightIcon className="w-5 h-5 text-gray-400 group-hover:text-yellow-600" />
+                      <ChevronRightIcon className="w-5 h-5 text-neutral-500 group-hover:text-red-600" />
                     </div>
                   </button>
                 ))}
@@ -244,14 +244,14 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 flex justify-between">
+        <div className="p-6 border-t border-neutral-200 flex justify-between">
           <button
             onClick={goBack}
             disabled={currentStep === 0}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all duration-200 ${
               currentStep === 0 
-                ? 'text-gray-400 cursor-not-allowed' 
-                : 'text-gray-700 hover:bg-gray-100'
+                ? 'text-neutral-500 cursor-not-allowed' 
+                : 'text-neutral-800 hover:bg-neutral-100'
             }`}
           >
             <ArrowLeftIcon className="w-4 h-4" />
@@ -260,7 +260,7 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
           
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
+            className="text-neutral-700 hover:text-neutral-800 px-4 py-2 rounded-md hover:bg-neutral-100 transition-all duration-200"
           >
             Skip & Browse All Services
           </button>

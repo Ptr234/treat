@@ -301,10 +301,10 @@ export default function SearchPage() {
       <div className="max-w-4xl mx-auto">
         {/* Search Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-6">
+          <h1 className="text-4xl font-bold tracking-tight text-black mb-6">
             Search OneStopCentre
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-lg text-neutral-700 mb-8">
             Find services, agencies, documents, and information to help with your business needs.
           </p>
           
@@ -324,12 +324,12 @@ export default function SearchPage() {
               aria-controls="search-suggestions"
               role="combobox"
               autoComplete="off"
-              className="w-full px-6 py-4 pr-14 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent shadow-sm"
+              className="w-full border-2 border-black bg-white px-4 py-4 pr-16 text-lg text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
             />
             <button 
               onClick={handleSearch}
               aria-label="Search"
-              className="absolute right-2 top-2 bottom-2 px-6 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+              className="absolute right-2 top-2 bottom-2 px-5 bg-black text-yellow-400 hover:bg-neutral-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
             >
               <Search className="w-5 h-5" />
             </button>
@@ -341,7 +341,7 @@ export default function SearchPage() {
                 id="search-suggestions"
                 role="listbox"
                 aria-label="Search suggestions"
-                className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg mt-1 shadow-lg z-50 max-h-64 overflow-y-auto"
+                className="absolute top-full left-0 right-0 bg-white border-2 border-black mt-1 z-50 max-h-64 overflow-y-auto"
               >
                 {suggestions.map((suggestion, index) => (
                   <button
@@ -349,7 +349,7 @@ export default function SearchPage() {
                     onClick={() => handleSuggestionClick(suggestion)}
                     role="option"
                     aria-selected="false"
-                    className="w-full px-6 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 flex items-center gap-3"
+                    className="w-full px-4 py-3 text-left hover:bg-neutral-50 border-b border-neutral-200 last:border-b-0 flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600"
                   >
                     <Search className="w-4 h-4 text-gray-400" />
                     <span className="text-gray-700">{suggestion}</span>
@@ -360,7 +360,7 @@ export default function SearchPage() {
           </div>
 
           {/* Search Filters */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-8">
             {['All', 'Services', 'Agencies', 'Investments', 'Documents', 'Guides'].map((filter) => (
               <button 
                 key={filter}
@@ -368,10 +368,10 @@ export default function SearchPage() {
                   setSelectedFilter(filter);
                   if (searchQuery) performSearch(searchQuery);
                 }}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                className={`border-b-2 px-1 py-2 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
                   selectedFilter === filter
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'border-red-600 text-red-600'
+                    : 'border-transparent text-neutral-700 hover:text-red-600'
                 }`}
               >
                 {filter}
@@ -383,17 +383,17 @@ export default function SearchPage() {
         {/* Search Categories */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {searchCategories.map((category, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 text-center hover:shadow-xl transition-shadow cursor-pointer">
-              <div className="flex justify-center mb-4">
+            <div key={index} className="border-t-2 border-black pt-6 text-left transition-colors hover:border-red-600">
+              <div className="mb-4">
                 {category.icon}
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-bold text-black mb-2">
                 {category.title}
               </h3>
-              <p className="text-gray-600 text-sm mb-3">
+              <p className="text-neutral-700 text-sm leading-6 mb-3">
                 {category.description}
               </p>
-              <p className="text-primary-600 font-medium text-sm">
+              <p className="text-red-600 font-bold text-sm">
                 {category.count}
               </p>
             </div>
@@ -402,36 +402,29 @@ export default function SearchPage() {
 
         {/* Search Results */}
         {searchResults.length > 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden mb-8">
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Search Results</h2>
-              <p className="text-gray-600 text-sm">
+          <div className="mb-12">
+            <div className="border-b-2 border-black pb-3 mb-6">
+              <h2 className="text-xl font-bold text-black">Search results</h2>
+              <p className="text-neutral-700 text-sm mt-1">
                 Showing {searchResults.length} results for &quot;{searchQuery}&quot;
                 {selectedFilter !== 'All' && ` in ${selectedFilter}`}
               </p>
             </div>
-            <div className="p-6">
-              <div className="space-y-6">
+            <div>
+              <div className="divide-y divide-neutral-200">
                 {searchResults.map((result) => (
-                  <div key={result.id} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
+                  <div key={result.id} className="py-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center mb-2">
-                          <Link href={result.url} className="text-xl font-semibold text-primary-600 hover:text-primary-700">
+                          <Link href={result.url} className="text-xl font-bold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600">
                             {result.title}
                           </Link>
-                          <span className={`ml-3 px-2 py-1 text-xs font-medium rounded-full ${
-                            result.type === 'Agency' ? 'bg-blue-100 text-blue-700' :
-                            result.type === 'Investment' ? 'bg-yellow-100 text-yellow-700' :
-                            result.type === 'Service' ? 'bg-purple-100 text-purple-700' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
+                          <span className="ml-3 text-xs font-bold uppercase tracking-wider text-red-600">
                             {result.type}
                           </span>
                           {result.metadata?.priority && (
-                            <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${
-                              result.metadata.priority === 'High' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
-                            }`}>
+                            <span className="ml-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-neutral-700">
                               <Star className="w-3 h-3" />
                               {result.metadata.priority}
                             </span>
@@ -439,27 +432,27 @@ export default function SearchPage() {
                         </div>
                         
                         {result.category && (
-                          <p className="text-sm text-gray-500 mb-1 capitalize">{result.category}</p>
+                          <p className="text-sm text-neutral-600 mb-1 capitalize">{result.category}</p>
                         )}
                         
-                        <p className="text-gray-600 mb-3">{result.description}</p>
+                        <p className="text-neutral-700 leading-7 mb-3">{result.description}</p>
                         
                         {/* Investment metadata */}
                         {result.metadata && (
                           <div className="flex flex-wrap gap-4 mb-3">
                             {result.metadata.roi && (
-                              <div className="flex items-center gap-1 text-sm text-yellow-600">
+                              <div className="flex items-center gap-1 text-sm text-black">
                                 <Zap className="w-4 h-4" />
                                 <span>ROI: {result.metadata.roi}</span>
                               </div>
                             )}
                             {result.metadata.investmentRange && (
-                              <div className="flex items-center gap-1 text-sm text-blue-600">
+                              <div className="flex items-center gap-1 text-sm text-neutral-800">
                                 <span>Investment: {result.metadata.investmentRange}</span>
                               </div>
                             )}
                             {result.metadata.timeline && (
-                              <div className="flex items-center gap-1 text-sm text-purple-600">
+                              <div className="flex items-center gap-1 text-sm text-neutral-800">
                                 <Clock className="w-4 h-4" />
                                 <span>{result.metadata.timeline}</span>
                               </div>
@@ -471,13 +464,13 @@ export default function SearchPage() {
                         {result.contact && (
                           <div className="flex flex-wrap gap-4 mb-3">
                             {result.contact.phone && (
-                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <div className="flex items-center gap-1 text-sm text-neutral-700">
                                 <Phone className="w-4 h-4" />
                                 <span>{result.contact.phone}</span>
                               </div>
                             )}
                             {result.contact.email && (
-                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <div className="flex items-center gap-1 text-sm text-neutral-700">
                                 <Mail className="w-4 h-4" />
                                 <span>{result.contact.email}</span>
                               </div>
@@ -487,7 +480,7 @@ export default function SearchPage() {
                                 href={result.contact.website} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
+                                className="flex items-center gap-1 text-sm font-semibold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600"
                               >
                                 <ExternalLink className="w-4 h-4" />
                                 <span>Website</span>
@@ -496,8 +489,8 @@ export default function SearchPage() {
                           </div>
                         )}
                         
-                        <div className="flex items-center text-sm text-gray-500">
-                          <span className="text-primary-600">{result.url}</span>
+                        <div className="flex items-center text-sm text-neutral-600">
+                          <span className="font-semibold text-black">{result.url}</span>
                           <span className="mx-2">•</span>
                           <span>{result.relevance}% relevant</span>
                         </div>
@@ -512,14 +505,14 @@ export default function SearchPage() {
         
         {/* No results message */}
         {searchQuery && searchResults.length === 0 && (
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center mb-8">
-            <div className="text-gray-400 mb-4">
+          <div className="border-l-4 border-red-600 bg-neutral-50 p-6 mb-8">
+            <div className="text-neutral-500 mb-4">
               <Search className="w-16 h-16 mx-auto" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-bold text-black mb-2">
               No results found for &quot;{searchQuery}&quot;
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-neutral-700 mb-4">
               Try adjusting your search terms or browse the categories below.
             </p>
             <button 
@@ -527,20 +520,20 @@ export default function SearchPage() {
                 setSearchQuery('');
                 setSearchResults([]);
               }}
-              className="text-primary-600 hover:text-primary-700 font-medium"
+              className="font-bold text-black underline decoration-yellow-400 decoration-2 underline-offset-4 hover:text-red-600"
             >
               Clear search
             </button>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Recent Searches */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">Recent Searches</h3>
+          <div>
+            <div className="border-b-2 border-black pb-3">
+              <h3 className="text-lg font-bold text-black">Recent searches</h3>
             </div>
-            <div className="p-6">
+            <div className="pt-4">
               <div className="space-y-3">
                 {recentSearches.map((search, index) => (
                   <button
@@ -549,9 +542,9 @@ export default function SearchPage() {
                       setSearchQuery(search);
                       performSearch(search);
                     }}
-                    className="flex items-center w-full p-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center w-full border-b border-neutral-200 py-3 text-left text-neutral-800 hover:text-red-600 transition-colors"
                   >
-                    <Clock className="w-4 h-4 text-gray-400 mr-3" />
+                    <Clock className="w-4 h-4 text-neutral-500 mr-3" />
                     {search}
                   </button>
                 ))}
@@ -560,11 +553,11 @@ export default function SearchPage() {
           </div>
 
           {/* Popular Searches */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-bold text-gray-900">Popular Searches</h3>
+          <div>
+            <div className="border-b-2 border-black pb-3">
+              <h3 className="text-lg font-bold text-black">Popular searches</h3>
             </div>
-            <div className="p-6">
+            <div className="pt-4">
               <div className="space-y-3">
                 {popularSearches.map((search, index) => (
                   <button
@@ -573,9 +566,9 @@ export default function SearchPage() {
                       setSearchQuery(search);
                       performSearch(search);
                     }}
-                    className="flex items-center w-full p-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="flex items-center w-full border-b border-neutral-200 py-3 text-left text-neutral-800 hover:text-red-600 transition-colors"
                   >
-                    <Star className="w-4 h-4 text-gray-400 mr-3" />
+                    <Star className="w-4 h-4 text-neutral-500 mr-3" />
                     {search}
                   </button>
                 ))}
@@ -585,24 +578,24 @@ export default function SearchPage() {
         </div>
 
         {/* Search Tips */}
-        <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Search Tips</h3>
+        <div className="mt-16 border-t-4 border-yellow-400 pt-8">
+          <h3 className="text-lg font-bold text-black mb-6">Search tips</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Use specific keywords</h4>
-              <p className="text-gray-600">Try &quot;business registration&quot; instead of &quot;register business&quot;</p>
+              <h4 className="font-bold text-black mb-2">Use specific keywords</h4>
+              <p className="text-neutral-700">Try &quot;business registration&quot; instead of &quot;register business&quot;</p>
             </div>
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Include location</h4>
-              <p className="text-gray-600">Add &quot;Uganda&quot; or city names for location-specific results</p>
+              <h4 className="font-bold text-black mb-2">Include location</h4>
+              <p className="text-neutral-700">Add &quot;Uganda&quot; or city names for location-specific results</p>
             </div>
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Use quotation marks</h4>
-              <p className="text-gray-600">Search for exact phrases using &quot;quotation marks&quot;</p>
+              <h4 className="font-bold text-black mb-2">Use quotation marks</h4>
+              <p className="text-neutral-700">Search for exact phrases using &quot;quotation marks&quot;</p>
             </div>
             <div>
-              <h4 className="font-medium text-gray-900 mb-2">Filter by category</h4>
-              <p className="text-gray-600">Use the filter buttons to narrow your search</p>
+              <h4 className="font-bold text-black mb-2">Filter by category</h4>
+              <p className="text-neutral-700">Use the filter buttons to narrow your search</p>
             </div>
           </div>
         </div>

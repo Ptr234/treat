@@ -56,72 +56,40 @@ export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail
     }
   };
 
+  const inputClass =
+    'w-full rounded-md border border-neutral-400 bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
+  const labelClass = 'mb-2 block text-sm font-bold text-black';
+
   return (
-    <form onSubmit={handleFormSubmit} className="bg-neutral-800 p-4 sm:p-6 rounded-lg border border-neutral-700">
+    <form onSubmit={handleFormSubmit} className="space-y-6">
       {result && (
-        <div className={`mb-6 p-4 rounded-lg border ${
-          result.success
-            ? 'bg-green-900/30 border-green-700 text-green-300'
-            : 'bg-red-900/30 border-red-700 text-red-300'
-        }`}>
-          <p className="text-sm">{result.message}</p>
+        <div
+          role={result.success ? 'status' : 'alert'}
+          className={`border-l-4 bg-neutral-50 p-4 text-sm ${result.success ? 'border-black text-black' : 'border-red-600 text-red-700'}`}
+        >
+          {result.message}
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-neutral-300 mb-2">
-            Full Name <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            required
-            className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            placeholder="Enter your full name"
-          />
+          <label htmlFor="name" className={labelClass}>Full name <span className="text-red-600">*</span></label>
+          <input type="text" id="name" name="name" required className={inputClass} placeholder="Enter your full name" />
         </div>
-
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-neutral-300 mb-2">
-            Email Address <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            placeholder="your.email@example.com"
-          />
+          <label htmlFor="email" className={labelClass}>Email address <span className="text-red-600">*</span></label>
+          <input type="email" id="email" name="email" required className={inputClass} placeholder="your.email@example.com" />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-neutral-300 mb-2">
-            Phone Number
-          </label>
-          <input
-            type="tel"
-            id="phone"
-            name="phone"
-            className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-            placeholder="+256 XXX XXX XXX"
-          />
+          <label htmlFor="phone" className={labelClass}>Phone number</label>
+          <input type="tel" id="phone" name="phone" className={inputClass} placeholder="+256 XXX XXX XXX" />
         </div>
-
         <div>
-          <label htmlFor="service" className="block text-sm font-medium text-neutral-300 mb-2">
-            Service Required <span className="text-red-500">*</span>
-          </label>
-          <select
-            id="service"
-            name="service"
-            required
-            className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-          >
+          <label htmlFor="service" className={labelClass}>Service required <span className="text-red-600">*</span></label>
+          <select id="service" name="service" required className={inputClass}>
             <option value="">Select a service</option>
             {services.map((service, index) => (
               <option key={index} value={service}>
@@ -132,16 +100,14 @@ export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail
         </div>
       </div>
 
-      <div className="mb-6">
-        <label htmlFor="message" className="block text-sm font-medium text-neutral-300 mb-2">
-          Message / Additional Details <span className="text-red-500">*</span>
-        </label>
+      <div>
+        <label htmlFor="message" className={labelClass}>Message / additional details <span className="text-red-600">*</span></label>
         <textarea
           id="message"
           name="message"
           required
           rows={5}
-          className="w-full px-4 py-3 sm:py-2 bg-neutral-900 border border-neutral-600 text-white placeholder-neutral-500 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+          className={inputClass}
           placeholder="Please provide details about your service request..."
         />
       </div>
@@ -149,9 +115,9 @@ export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full md:w-auto px-8 py-3 bg-yellow-500 text-black font-bold rounded-lg hover:bg-yellow-400 hover:shadow-lg hover:shadow-yellow-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="rounded-md bg-black px-8 py-3 text-sm font-bold text-yellow-400 transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isSubmitting ? 'Submitting...' : 'Submit Service Request'}
+        {isSubmitting ? 'Submitting…' : 'Submit service request'}
       </button>
     </form>
   );

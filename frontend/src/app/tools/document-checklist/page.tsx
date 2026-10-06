@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Building, FileText, LandPlot, CheckCircle } from 'lucide-react';
+import { CheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 interface Document {
@@ -156,184 +156,166 @@ export default function DocumentChecklistPage() {
     URL.revokeObjectURL(url);
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'registration': return 'bg-neutral-900 border-yellow-800/40';
-      case 'tax': return 'bg-neutral-900 border-red-800/40';
-      case 'investment': return 'bg-neutral-900 border-yellow-600/40';
-      default: return 'bg-neutral-900 border-neutral-700';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'registration':
-        return <Building className="w-6 h-6 text-yellow-400" />;
-      case 'tax':
-        return <FileText className="w-6 h-6 text-red-400" />;
-      case 'investment':
-        return <LandPlot className="w-6 h-6 text-yellow-500" />;
-      default:
-        return null;
-    }
-  };
-
   const totalProgress = getTotalProgress();
   const progressPercentage = totalProgress.total > 0
     ? Math.round((totalProgress.checked / totalProgress.total) * 100)
     : 0;
 
   return (
- <div className="bg-white min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-yellow-400 mb-6">
-              Document Checklist
-            </h1>
-            <p className="text-xl text-neutral-400 max-w-3xl mx-auto">
-              Comprehensive checklist for business registration and licensing documents required in Uganda.
-              Make sure you have all necessary documents before starting your application.
+    <div className="min-h-screen bg-white text-black">
+      {/* Breadcrumb band */}
+      <div className="border-b border-neutral-200 bg-white">
+        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm">
+            <li>
+              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li>
+              <Link href="/tools" className="text-red-600 hover:underline underline-offset-4">Business tools</Link>
+            </li>
+            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
+            <li className="font-semibold text-black" aria-current="page">Document checklist</li>
+          </ol>
+        </nav>
+      </div>
+
+      {/* Title */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Document checklist</h1>
+        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
+          Comprehensive checklist for business registration and licensing documents required in Uganda.
+          Make sure you have all necessary documents before starting your application.
+        </p>
+      </section>
+
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        {/* Overall progress */}
+        <section aria-labelledby="overall-progress-heading" className="border-y border-neutral-200 py-6">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
+            <h2 id="overall-progress-heading" className="text-lg font-bold">Overall progress</h2>
+            <p className="text-sm text-neutral-700" aria-live="polite">
+              {totalProgress.checked} of {totalProgress.total} documents checked ({progressPercentage}%)
             </p>
           </div>
-
-          {/* Overall Progress Bar */}
-          <div className="bg-neutral-900 rounded-lg shadow-md border border-yellow-900/30 p-6 mb-8">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-semibold text-yellow-400">Overall Progress</h3>
-              <span className="text-sm font-medium text-neutral-400">
-                {totalProgress.checked} of {totalProgress.total} documents checked ({progressPercentage}%)
-              </span>
-            </div>
-            <div className="w-full bg-neutral-700 rounded-full h-4 overflow-hidden">
-              <div
-                className="bg-yellow-500 h-4 transition-all duration-300 ease-in-out"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-            <div className="mt-4 flex gap-3">
-              <button
-                onClick={resetAll}
-                className="px-4 py-2 bg-red-700 text-neutral-100 text-sm font-medium rounded-lg hover:bg-red-600 hover:shadow-lg hover:shadow-red-900/30 active:scale-95 transition-all duration-200"
-              >
-                Reset All
-              </button>
-            </div>
+          <div
+            className="mt-4 h-2 w-full bg-neutral-200"
+            role="progressbar"
+            aria-valuenow={progressPercentage}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Overall checklist progress"
+          >
+            <div className="h-2 bg-yellow-400 transition-all duration-300 ease-in-out" style={{ width: `${progressPercentage}%` }} />
           </div>
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={resetAll}
+              className="text-sm font-bold text-red-600 underline decoration-red-600 underline-offset-4 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+            >
+              Reset all
+            </button>
+          </div>
+        </section>
 
-          <div className="space-y-8">
-            {checklists.map((checklist) => {
-              const progress = getProgress(checklist.category, checklist.documents.length);
-              const categoryPercentage = checklist.documents.length > 0
-                ? Math.round((progress.checked / progress.total) * 100)
-                : 0;
+        {/* Checklists */}
+        <div className="mt-12 space-y-16">
+          {checklists.map((checklist) => {
+            const progress = getProgress(checklist.category, checklist.documents.length);
+            const categoryPercentage = checklist.documents.length > 0
+              ? Math.round((progress.checked / progress.total) * 100)
+              : 0;
 
-              return (
-                <div key={checklist.category} className={`rounded-xl p-6 border-2 ${getCategoryColor(checklist.category)}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      {getCategoryIcon(checklist.category)}
-                      <h2 className="text-2xl font-bold text-yellow-400 ml-3">{checklist.title}</h2>
-                    </div>
-                    <span className="text-sm font-medium text-neutral-400">
-                      {progress.checked}/{progress.total} ({categoryPercentage}%)
-                    </span>
-                  </div>
-
-                  {/* Category Progress Bar */}
-                  <div className="mb-6">
-                    <div className="w-full bg-neutral-700 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-yellow-500 h-2 transition-all duration-300 ease-in-out"
-                        style={{ width: `${categoryPercentage}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    {checklist.documents.map((document, index) => {
-                      const isChecked = checkedItems[checklist.category]?.[index] || false;
-
-                      return (
-                        <div key={document.id} className="flex items-start space-x-4 bg-neutral-800 rounded-lg p-4 border border-neutral-700 hover:border-yellow-700/50 hover:bg-neutral-800/80 hover:shadow-md hover:shadow-black/30 transition-all duration-200 cursor-pointer">
-                          <div className="flex-shrink-0 mt-1">
-                            <button
-                              onClick={() => toggleCheckbox(checklist.category, index)}
-                              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-150 active:scale-90 ${
-                                isChecked
-                                  ? 'border-yellow-500 bg-yellow-500 shadow-sm shadow-yellow-500/30'
-                                  : 'border-neutral-500 hover:border-yellow-400 hover:shadow-sm hover:shadow-yellow-500/20'
-                              }`}
-                            >
-                              {isChecked && (
-                                <CheckCircle className="w-3 h-3 text-black" />
-                              )}
-                            </button>
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h3 className={`text-lg font-semibold ${isChecked ? 'text-neutral-400 line-through' : 'text-yellow-200'}`}>
-                                {document.name}
-                              </h3>
-                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                document.required
-                                  ? 'bg-red-900/40 text-red-300'
-                                  : 'bg-neutral-700 text-neutral-400'
-                              }`}>
-                                {document.required ? 'Required' : 'Optional'}
-                              </span>
-                            </div>
-                            <p className={`mt-1 ${isChecked ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                              {document.description}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+            return (
+              <section key={checklist.category} aria-labelledby={`checklist-${checklist.category}`}>
+                <div className="flex flex-col gap-2 border-b-2 border-black pb-3 sm:flex-row sm:items-baseline sm:justify-between">
+                  <h2 id={`checklist-${checklist.category}`} className="text-xl font-bold sm:text-2xl">{checklist.title}</h2>
+                  <p className="text-sm text-neutral-700">
+                    {progress.checked}/{progress.total} ({categoryPercentage}%)
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+                <div className="mt-4 h-1.5 w-full bg-neutral-200" aria-hidden="true">
+                  <div className="h-1.5 bg-yellow-400 transition-all duration-300 ease-in-out" style={{ width: `${categoryPercentage}%` }} />
+                </div>
 
-          <div className="mt-12 bg-gradient-to-r from-red-950 via-red-900 to-neutral-900 rounded-xl p-8 border border-red-800/50 text-center">
-            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Ready to Start Your Application?</h2>
-            <p className="text-neutral-300 mb-6 max-w-2xl mx-auto">
-              Once you have gathered all the required documents, you can begin your business registration
-              process through our streamlined online platform.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/business/registration"
-                className="bg-yellow-600 text-black px-8 py-3 rounded-lg font-semibold hover:bg-yellow-500 hover:shadow-lg hover:shadow-yellow-500/20 active:scale-95 transition-all duration-200"
-              >
-                Start Registration
-              </Link>
-              <button
-                onClick={downloadChecklist}
-                className="bg-neutral-800 text-yellow-400 border border-yellow-700 px-8 py-3 rounded-lg font-semibold hover:bg-neutral-700 hover:border-yellow-500 active:scale-95 transition-all duration-200"
-              >
-                Download Checklist
-              </button>
-            </div>
-          </div>
+                <ul className="mt-6 divide-y divide-neutral-200">
+                  {checklist.documents.map((document, index) => {
+                    const isChecked = checkedItems[checklist.category]?.[index] || false;
+                    const inputId = `${checklist.category}-${index}`;
 
-          <div className="mt-8 bg-yellow-900/20 rounded-lg p-6 border border-yellow-700/30">
-            <div className="flex items-start">
-              <svg className="w-6 h-6 text-yellow-400 mt-1 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <div>
-                <h3 className="text-lg font-semibold text-yellow-200 mb-2">Important Notice</h3>
-                <p className="text-yellow-200">
-                  Document requirements may vary depending on your specific business type and circumstances.
-                  It&apos;s recommended to consult with our support team or visit the relevant government agency
-                  for the most up-to-date requirements.
-                </p>
-              </div>
-            </div>
-          </div>
+                    return (
+                      <li key={document.id} className="flex items-start gap-4 py-5">
+                        <input
+                          id={inputId}
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleCheckbox(checklist.category, index)}
+                          className="peer sr-only"
+                        />
+                        <label
+                          htmlFor={inputId}
+                          className={`mt-0.5 flex h-5 w-5 flex-shrink-0 cursor-pointer items-center justify-center border-2 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-red-600 peer-focus-visible:ring-offset-2 ${
+                            isChecked ? 'border-black bg-black' : 'border-black bg-white hover:bg-neutral-100'
+                          }`}
+                        >
+                          {isChecked && <CheckIcon className="h-3.5 w-3.5 text-yellow-400" aria-hidden="true" />}
+                          <span className="sr-only">Mark {document.name} as {isChecked ? 'not done' : 'done'}</span>
+                        </label>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                            <h3 className={`text-base font-bold ${isChecked ? 'text-neutral-500 line-through' : 'text-black'}`}>
+                              {document.name}
+                            </h3>
+                            <span className={`text-xs font-bold uppercase tracking-wider ${document.required ? 'text-red-600' : 'text-neutral-600'}`}>
+                              {document.required ? 'Required' : 'Optional'}
+                            </span>
+                          </div>
+                          <p className={`mt-1 text-sm leading-6 ${isChecked ? 'text-neutral-500' : 'text-neutral-700'}`}>
+                            {document.description}
+                          </p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })}
         </div>
+
+        {/* Next steps */}
+        <section className="mt-16 border-t-4 border-yellow-400 pt-8" aria-labelledby="checklist-next-heading">
+          <h2 id="checklist-next-heading" className="text-2xl font-bold">Ready to start your application?</h2>
+          <p className="mt-3 max-w-2xl leading-7 text-neutral-700">
+            Once you have gathered all the required documents, you can begin your business registration
+            process through our streamlined online platform.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/business/registration"
+              className="inline-flex items-center justify-center rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+            >
+              Start registration
+            </Link>
+            <button
+              type="button"
+              onClick={downloadChecklist}
+              className="inline-flex items-center justify-center rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+            >
+              Download checklist
+            </button>
+          </div>
+        </section>
+
+        <section className="mt-12 border-l-4 border-red-600 pl-6" aria-labelledby="checklist-notice-heading">
+          <h2 id="checklist-notice-heading" className="text-lg font-bold">Important notice</h2>
+          <p className="mt-2 max-w-3xl text-sm leading-7 text-neutral-700">
+            Document requirements may vary depending on your specific business type and circumstances.
+            It&apos;s recommended to consult with our support team or visit the relevant government agency
+            for the most up-to-date requirements.
+          </p>
+        </section>
       </div>
     </div>
   );

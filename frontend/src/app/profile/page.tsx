@@ -156,7 +156,7 @@ export default function ProfilePage() {
  <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Loading your profile…</p>
+          <p className="text-neutral-700 font-medium">Loading your profile…</p>
         </div>
       </div>
     );
@@ -166,15 +166,15 @@ export default function ProfilePage() {
   if (!isAuthenticated) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <LockClosedIcon className="w-8 h-8 text-yellow-700" />
+        <div className="max-w-md w-full text-center border-t-4 border-yellow-400 pt-8">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+            <LockClosedIcon className="w-8 h-8 text-red-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">Profile</h1>
-          <p className="text-gray-600 mb-6">Sign in to view your profile.</p>
+          <h1 className="text-2xl font-bold text-black mb-3">Profile</h1>
+          <p className="text-neutral-700 mb-6">Sign in to view your profile.</p>
           <Link
             href="/"
-            className="inline-block w-full px-6 py-3 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 transition-colors"
+            className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-800 transition-colors"
           >
             Return Home
           </Link>
@@ -276,8 +276,8 @@ export default function ProfilePage() {
  <div className="min-h-screen bg-white py-8">
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
         {mfaSetupRequired && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-300 rounded-lg p-4 flex items-start gap-3">
-            <DevicePhoneMobileIcon className="w-6 h-6 text-yellow-700 flex-shrink-0 mt-0.5" />
+          <div className="mb-6 border-l-4 border-yellow-400 pl-4 py-2 flex items-start gap-3">
+            <DevicePhoneMobileIcon className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-yellow-900">Set up two-factor authentication to continue</p>
               <p className="text-sm text-yellow-800 mt-1">
@@ -289,14 +289,14 @@ export default function ProfilePage() {
         )}
 
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-soft p-6 mb-6">
+        <div className="border-t-2 border-black pt-6 mb-6">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl font-bold text-yellow-700">{initials}</span>
+            <div className="flex h-16 w-16 items-center justify-center flex-shrink-0">
+              <span className="text-2xl font-bold text-red-600">{initials}</span>
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900 truncate">{user?.name}</h1>
-              <p className="text-gray-500">{user?.email}</p>
+              <h1 className="text-2xl font-bold text-black truncate">{user?.name}</h1>
+              <p className="text-neutral-600">{user?.email}</p>
               <div className="flex items-center gap-2 mt-2">
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                   <ShieldCheckIcon className="w-3.5 h-3.5" />
@@ -308,16 +308,16 @@ export default function ProfilePage() {
         </div>
 
         {/* Personal Information */}
-        <div className="bg-white rounded-xl shadow-soft overflow-hidden mb-6">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <UserCircleIcon className="w-5 h-5 text-gray-500" />
+        <div className="border-t-2 border-black pt-6 mb-6">
+          <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+              <UserCircleIcon className="w-5 h-5 text-neutral-600" />
               Personal Information
             </h2>
             {!isEditing && (
               <button
                 onClick={handleStartEdit}
-                className="text-sm font-medium text-yellow-700 hover:text-yellow-800"
+                className="text-sm font-medium text-red-600 hover:text-yellow-800"
               >
                 Edit
               </button>
@@ -325,42 +325,42 @@ export default function ProfilePage() {
           </div>
           <div className="p-6 space-y-4">
             {profileSuccess && (
-              <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+              <div className="flex items-center gap-2 py-2 border-l-4 border-black pl-4 text-sm">
                 <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {profileSuccess}
               </div>
             )}
             {profileError && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+              <div className="flex items-center gap-2 py-2 border-l-4 border-red-600 pl-4 text-sm text-red-700">
                 <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {profileError}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Full Name</label>
+              <label className="block text-sm font-medium text-neutral-600 mb-1">Full Name</label>
               {isEditing ? (
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
                   autoFocus
                 />
               ) : (
-                <p className="text-gray-900 font-medium">{user?.name}</p>
+                <p className="text-black font-medium">{user?.name}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Email</label>
-              <p className="text-gray-900">{user?.email}</p>
-              <p className="text-xs text-gray-400 mt-0.5">Email cannot be changed</p>
+              <label className="block text-sm font-medium text-neutral-600 mb-1">Email</label>
+              <p className="text-black">{user?.email}</p>
+              <p className="text-xs text-neutral-500 mt-0.5">Email cannot be changed</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-500 mb-1">Role</label>
-              <p className="text-gray-900 capitalize">{user?.role}</p>
+              <label className="block text-sm font-medium text-neutral-600 mb-1">Role</label>
+              <p className="text-black capitalize">{user?.role}</p>
             </div>
 
             {isEditing && (
@@ -368,14 +368,14 @@ export default function ProfilePage() {
                 <button
                   onClick={handleSaveName}
                   disabled={saving}
-                  className="px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                  className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
                 >
                   {saving ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   onClick={handleCancelEdit}
                   disabled={saving}
-                  className="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-5 py-2 bg-neutral-100 text-neutral-800 text-sm font-semibold rounded-md hover:bg-gray-200 transition-colors"
                 >
                   Cancel
                 </button>
@@ -385,10 +385,10 @@ export default function ProfilePage() {
         </div>
 
         {/* Security */}
-        <div className="bg-white rounded-xl shadow-soft overflow-hidden mb-6">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <LockClosedIcon className="w-5 h-5 text-gray-500" />
+        <div className="border-t-2 border-black pt-6 mb-6">
+          <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
+            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+              <LockClosedIcon className="w-5 h-5 text-neutral-600" />
               Security
             </h2>
             {!showPasswordForm && (
@@ -398,7 +398,7 @@ export default function ProfilePage() {
                   setPasswordError('');
                   setPasswordSuccess('');
                 }}
-                className="text-sm font-medium text-yellow-700 hover:text-yellow-800"
+                className="text-sm font-medium text-red-600 hover:text-yellow-800"
               >
                 Change Password
               </button>
@@ -406,7 +406,7 @@ export default function ProfilePage() {
           </div>
           <div className="p-6">
             {passwordSuccess && (
-              <div className="flex items-center gap-2 p-3 mb-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+              <div className="flex items-center gap-2 py-2 mb-4 border-l-4 border-black pl-4 text-sm">
                 <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {passwordSuccess}
               </div>
@@ -415,13 +415,13 @@ export default function ProfilePage() {
             {showPasswordForm ? (
               <form onSubmit={handleChangePassword} className="space-y-4">
                 {passwordError && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                  <div className="flex items-center gap-2 py-2 border-l-4 border-red-600 pl-4 text-sm text-red-700">
                     <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
                     {passwordError}
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-800 mb-1">
                     Current Password
                   </label>
                   <input
@@ -429,11 +429,11 @@ export default function ProfilePage() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-800 mb-1">
                     New Password
                   </label>
                   <input
@@ -442,12 +442,12 @@ export default function ProfilePage() {
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Minimum 8 characters</p>
+                  <p className="text-xs text-neutral-500 mt-1">Minimum 8 characters</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-800 mb-1">
                     Confirm New Password
                   </label>
                   <input
@@ -456,14 +456,14 @@ export default function ProfilePage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     type="submit"
                     disabled={passwordSaving}
-                    className="px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                    className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
                   >
                     {passwordSaving ? 'Updating...' : 'Update Password'}
                   </button>
@@ -477,7 +477,7 @@ export default function ProfilePage() {
                       setPasswordError('');
                     }}
                     disabled={passwordSaving}
-                    className="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-5 py-2 bg-neutral-100 text-neutral-800 text-sm font-semibold rounded-md hover:bg-gray-200 transition-colors"
                   >
                     Cancel
                   </button>
@@ -486,11 +486,11 @@ export default function ProfilePage() {
             ) : (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 text-sm">Password</span>
-                  <span className="text-gray-400 text-sm">Last set at account creation</span>
+                  <span className="text-neutral-800 text-sm">Password</span>
+                  <span className="text-neutral-500 text-sm">Last set at account creation</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 text-sm">Session</span>
+                  <span className="text-neutral-800 text-sm">Session</span>
                   <span className="text-green-600 text-sm font-medium">Active (24h token)</span>
                 </div>
               </div>
@@ -500,16 +500,16 @@ export default function ProfilePage() {
 
         {/* Two-factor authentication (back-office roles only) */}
         {canUseMfa && (
-          <div className="bg-white rounded-xl shadow-soft overflow-hidden mb-6">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <DevicePhoneMobileIcon className="w-5 h-5 text-gray-500" />
+          <div className="border-t-2 border-black pt-6 mb-6">
+            <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
+              <h2 className="text-lg font-bold text-black flex items-center gap-2">
+                <DevicePhoneMobileIcon className="w-5 h-5 text-neutral-600" />
                 Two-Factor Authentication
               </h2>
               {mfaStatusLoaded && (
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                    mfaEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                    mfaEnabled ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-700'
                   }`}
                 >
                   {mfaEnabled ? 'Enabled' : 'Disabled'}
@@ -518,38 +518,38 @@ export default function ProfilePage() {
             </div>
             <div className="p-6">
               {mfaSuccess && (
-                <div className="flex items-center gap-2 p-3 mb-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800">
+                <div className="flex items-center gap-2 py-2 mb-4 border-l-4 border-black pl-4 text-sm">
                   <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                   {mfaSuccess}
                 </div>
               )}
               {mfaError && (
-                <div className="flex items-center gap-2 p-3 mb-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                <div className="flex items-center gap-2 py-2 mb-4 border-l-4 border-red-600 pl-4 text-sm text-red-700">
                   <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
                   {mfaError}
                 </div>
               )}
 
               {!mfaStatusLoaded ? (
-                <p className="text-sm text-gray-500">Loading…</p>
+                <p className="text-sm text-neutral-600">Loading…</p>
               ) : mfaEnabled ? (
                 showDisable ? (
                   <form onSubmit={handleDisableMfa} className="space-y-4">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-neutral-700">
                       Confirm your password and a current authentication code to turn off two-factor authentication.
                     </p>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                      <label className="block text-sm font-medium text-neutral-800 mb-1">Current Password</label>
                       <input
                         type="password"
                         value={disablePassword}
                         onChange={(e) => setDisablePassword(e.target.value)}
                         required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Authentication Code</label>
+                      <label className="block text-sm font-medium text-neutral-800 mb-1">Authentication Code</label>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -557,7 +557,7 @@ export default function ProfilePage() {
                         value={disableCode}
                         onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, ''))}
                         required
-                        className="w-40 px-3 py-2 border border-gray-300 rounded-lg tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        className="w-40 px-3 py-2 border border-neutral-400 rounded-md tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
                         placeholder="000000"
                       />
                     </div>
@@ -565,7 +565,7 @@ export default function ProfilePage() {
                       <button
                         type="submit"
                         disabled={mfaBusy || disableCode.length !== 6}
-                        className="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
+                        className="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-700 disabled:opacity-50 transition-colors"
                       >
                         {mfaBusy ? 'Disabling…' : 'Disable 2FA'}
                       </button>
@@ -573,7 +573,7 @@ export default function ProfilePage() {
                         type="button"
                         onClick={() => { setShowDisable(false); setDisablePassword(''); setDisableCode(''); setMfaError(''); }}
                         disabled={mfaBusy}
-                        className="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                        className="px-5 py-2 bg-neutral-100 text-neutral-800 text-sm font-semibold rounded-md hover:bg-gray-200 transition-colors"
                       >
                         Cancel
                       </button>
@@ -581,7 +581,7 @@ export default function ProfilePage() {
                   </form>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-neutral-700">
                       Your account is protected with an authenticator app. A code is required each time you sign in.
                     </p>
                     <button
@@ -594,24 +594,24 @@ export default function ProfilePage() {
                 )
               ) : enroll ? (
                 <form onSubmit={handleVerifyEnroll} className="space-y-4">
-                  <ol className="text-sm text-gray-600 list-decimal list-inside space-y-1">
+                  <ol className="text-sm text-neutral-700 list-decimal list-inside space-y-1">
                     <li>Open your authenticator app (Google Authenticator, Authy, Microsoft Authenticator…).</li>
                     <li>Add an account and enter this setup key manually:</li>
                   </ol>
                   <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg font-mono text-sm text-gray-900 break-all tracking-wider">
+                    <code className="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md font-mono text-sm text-black break-all tracking-wider">
                       {enroll.secret.replace(/(.{4})/g, '$1 ').trim()}
                     </code>
                     <button
                       type="button"
                       onClick={copySecret}
-                      className="px-3 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors whitespace-nowrap"
+                      className="px-3 py-2 bg-neutral-100 text-neutral-800 text-sm font-semibold rounded-md hover:bg-gray-200 transition-colors whitespace-nowrap"
                     >
                       {secretCopied ? 'Copied!' : 'Copy'}
                     </button>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-neutral-800 mb-1">
                       Enter the 6-digit code to confirm
                     </label>
                     <input
@@ -621,7 +621,7 @@ export default function ProfilePage() {
                       autoFocus
                       value={mfaCode}
                       onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                      className="w-40 px-3 py-2 border border-gray-300 rounded-lg tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      className="w-40 px-3 py-2 border border-neutral-400 rounded-md tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
                       placeholder="000000"
                     />
                   </div>
@@ -629,7 +629,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={mfaBusy || mfaCode.length !== 6}
-                      className="px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                      className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
                     >
                       {mfaBusy ? 'Verifying…' : 'Verify & Enable'}
                     </button>
@@ -637,7 +637,7 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => { setEnroll(null); setMfaCode(''); setMfaError(''); }}
                       disabled={mfaBusy}
-                      className="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                      className="px-5 py-2 bg-neutral-100 text-neutral-800 text-sm font-semibold rounded-md hover:bg-gray-200 transition-colors"
                     >
                       Cancel
                     </button>
@@ -645,13 +645,13 @@ export default function ProfilePage() {
                 </form>
               ) : (
                 <div className="space-y-3">
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-neutral-700">
                     Add an extra layer of security by requiring a time-based code from an authenticator app at sign-in.
                   </p>
                   <button
                     onClick={handleStartEnroll}
                     disabled={mfaBusy}
-                    className="px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                    className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
                   >
                     {mfaBusy ? 'Starting…' : 'Enable two-factor authentication'}
                   </button>
@@ -662,30 +662,30 @@ export default function ProfilePage() {
         )}
 
         {/* Quick links */}
-        <div className="bg-white rounded-xl shadow-soft p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Links</h2>
+        <div className="border-t-2 border-black pt-6">
+          <h2 className="text-lg font-bold text-black mb-4">Quick Links</h2>
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/dashboard"
-              className="px-4 py-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors text-center"
+              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
             >
               Dashboard
             </Link>
             <Link
               href="/agency-chat"
-              className="px-4 py-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors text-center"
+              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
             >
               Agency Chat
             </Link>
             <Link
               href="/tickets"
-              className="px-4 py-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors text-center"
+              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
             >
               Tickets
             </Link>
             <Link
               href="/projects"
-              className="px-4 py-3 bg-gray-50 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors text-center"
+              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
             >
               Projects
             </Link>

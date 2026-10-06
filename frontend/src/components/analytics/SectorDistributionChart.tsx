@@ -30,11 +30,11 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as SectorAnalyticsData;
       return (
-        <div className="bg-white p-4 border border-yellow-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 mb-2">{data.sector}</p>
-          <p className="text-sm text-gray-600">Count: <span className="font-medium">{data.count}</span></p>
-          <p className="text-sm text-gray-600">Percentage: <span className="font-medium">{data.percentage.toFixed(1)}%</span></p>
-          <p className="text-sm text-gray-600">Investment: <span className="font-medium">{formatCurrency(data.investmentValue)}</span></p>
+        <div className="p-4 border-t-2 border-black pt-5">
+          <p className="font-semibold text-black mb-2">{data.sector}</p>
+          <p className="text-sm text-neutral-700">Count: <span className="font-medium">{data.count}</span></p>
+          <p className="text-sm text-neutral-700">Percentage: <span className="font-medium">{data.percentage.toFixed(1)}%</span></p>
+          <p className="text-sm text-neutral-700">Investment: <span className="font-medium">{formatCurrency(data.investmentValue)}</span></p>
         </div>
       );
     }
@@ -44,7 +44,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
   const TrendIcon = ({ trend, percentage }: { trend: 'up' | 'down' | 'stable'; percentage: number }) => {
     if (trend === 'up') {
       return (
-        <span className="inline-flex items-center text-yellow-600 text-xs font-medium">
+        <span className="inline-flex items-center text-red-600 text-xs font-medium">
           <ArrowTrendingUpIcon className="w-3 h-3 mr-0.5" />
           {percentage.toFixed(1)}%
         </span>
@@ -59,7 +59,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
       );
     }
     return (
-      <span className="inline-flex items-center text-gray-500 text-xs font-medium">
+      <span className="inline-flex items-center text-neutral-600 text-xs font-medium">
         <MinusIcon className="w-3 h-3 mr-0.5" />
         {percentage.toFixed(1)}%
       </span>
@@ -70,7 +70,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
     <div className="space-y-8">
       {/* Pie Chart (Donut) */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Sector Distribution</h3>
+        <h3 className="text-lg font-semibold text-black mb-4">Sector Distribution</h3>
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
@@ -101,19 +101,19 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
 
       {/* Sector Trend List */}
       <div>
-        <h4 className="text-md font-semibold text-gray-900 mb-3">Sector Trends</h4>
+        <h4 className="text-md font-semibold text-black mb-3">Sector Trends</h4>
         <div className="space-y-2">
           {data.map((sector, index) => (
-            <div key={sector.sector} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+            <div key={sector.sector} className="flex items-center justify-between p-3 bg-neutral-50 rounded-md hover:bg-neutral-100 transition-colors">
               <div className="flex items-center gap-3">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: GREEN_SHADES[index % GREEN_SHADES.length] }}
                 />
-                <span className="text-sm font-medium text-gray-700">{sector.sector}</span>
+                <span className="text-sm font-medium text-neutral-800">{sector.sector}</span>
               </div>
               <div className="flex items-center gap-4">
-                <span className="text-sm text-gray-600">{sector.count} inquiries</span>
+                <span className="text-sm text-neutral-700">{sector.count} inquiries</span>
                 <TrendIcon trend={sector.trend} percentage={sector.trendPercentage} />
               </div>
             </div>
@@ -123,7 +123,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
 
       {/* Bar Chart Comparison */}
       <div>
-        <h4 className="text-md font-semibold text-gray-900 mb-3">Investment Value by Sector</h4>
+        <h4 className="text-md font-semibold text-black mb-3">Investment Value by Sector</h4>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} layout="vertical">
             <XAxis type="number" tickFormatter={formatCurrency} />

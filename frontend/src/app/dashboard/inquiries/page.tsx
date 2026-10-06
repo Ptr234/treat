@@ -22,17 +22,17 @@ interface ContactInquiry {
 }
 
 const urgencyColors: Record<string, string> = {
-  low: 'bg-neutral-700 text-neutral-300',
-  normal: 'bg-yellow-500/20 text-yellow-400',
-  high: 'bg-red-500/20 text-red-400',
+  low: 'bg-neutral-100 text-neutral-700',
+  normal: 'bg-yellow-50 text-red-600',
+  high: 'bg-red-50 text-red-400',
   urgent: 'bg-red-600/30 text-red-300',
 };
 
 const statusColors: Record<string, string> = {
-  new: 'bg-yellow-500/20 text-yellow-400',
+  new: 'bg-yellow-50 text-red-600',
   'in-progress': 'bg-blue-500/20 text-blue-400',
   resolved: 'bg-green-500/20 text-green-400',
-  closed: 'bg-neutral-700 text-neutral-400',
+  closed: 'bg-neutral-100 text-neutral-700',
 };
 
 export default function InquiriesPage() {
@@ -60,7 +60,7 @@ export default function InquiriesPage() {
   if (!isAuthenticated || !isAdminLevel(user?.role)) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-neutral-400">Admin access required.</p>
+        <p className="text-neutral-700">Admin access required.</p>
       </div>
     );
   }
@@ -72,20 +72,20 @@ export default function InquiriesPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-800 rounded-lg" aria-label="Back">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-400" />
+            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md" aria-label="Back">
+              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
             </Link>
             <div>
               <h1 className="text-2xl font-bold">Contact Inquiries</h1>
-              <p className="text-sm text-neutral-400">{total} total inquiries</p>
+              <p className="text-sm text-neutral-700">{total} total inquiries</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <FunnelIcon className="w-4 h-4 text-neutral-500" />
+            <FunnelIcon className="w-4 h-4 text-neutral-600" />
             <select
               value={agencyFilter}
               onChange={(e) => setAgencyFilter(e.target.value)}
-              className="bg-neutral-800 border border-neutral-700 text-white text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-500"
+              className="bg-neutral-100 border border-neutral-200 text-black text-sm rounded-md px-3 py-2 focus:ring-2 focus-visible:ring-red-600"
             >
               <option value="">All Agencies</option>
               {agencies.map(a => <option key={a} value={a}>{a}</option>)}
@@ -95,18 +95,18 @@ export default function InquiriesPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : inquiries.length === 0 ? (
-          <div className="text-center py-20 text-neutral-500">No inquiries found.</div>
+          <div className="text-center py-20 text-neutral-600">No inquiries found.</div>
         ) : (
           <div className="space-y-3">
             {inquiries.map((inq) => (
-              <div key={inq.id} className="bg-neutral-900 rounded-xl border border-neutral-800 p-5">
+              <div key={inq.id} className="p-5 border-t-2 border-black pt-5">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-mono text-neutral-500">{inq.referenceNumber}</span>
+                      <span className="text-xs font-mono text-neutral-600">{inq.referenceNumber}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${urgencyColors[inq.urgency] || urgencyColors.normal}`}>
                         {inq.urgency}
                       </span>
@@ -114,14 +114,14 @@ export default function InquiriesPage() {
                         {inq.status}
                       </span>
                     </div>
-                    <h3 className="font-semibold text-white">{inq.subject}</h3>
+                    <h3 className="font-semibold text-black">{inq.subject}</h3>
                   </div>
-                  <span className="text-xs text-neutral-500 whitespace-nowrap ml-4">
+                  <span className="text-xs text-neutral-600 whitespace-nowrap ml-4">
                     {inq.agency}
                   </span>
                 </div>
-                <p className="text-sm text-neutral-400 mb-3 line-clamp-2">{inq.message}</p>
-                <div className="flex items-center gap-4 text-xs text-neutral-500">
+                <p className="text-sm text-neutral-700 mb-3 line-clamp-2">{inq.message}</p>
+                <div className="flex items-center gap-4 text-xs text-neutral-600">
                   <span className="flex items-center gap-1">
                     <EnvelopeIcon className="w-3.5 h-3.5" />
                     {inq.fullName} ({inq.email})

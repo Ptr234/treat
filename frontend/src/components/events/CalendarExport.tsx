@@ -87,10 +87,10 @@ export function CalendarExport({ event }: CalendarExportProps) {
   };
 
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-col items-start gap-3">
       <button
         onClick={handleGoogleCalendar}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 text-neutral-700 text-sm font-medium rounded-lg hover:bg-neutral-50 hover:border-neutral-400 transition-colors duration-200"
+        className="inline-flex items-center gap-2 border-b-2 border-yellow-400 pb-0.5 text-sm font-bold text-black transition-colors hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
       >
         <CalendarIcon className="w-4 h-4" />
         Add to Google Calendar
@@ -98,7 +98,7 @@ export function CalendarExport({ event }: CalendarExportProps) {
 
       <button
         onClick={handleICalDownload}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 text-neutral-700 text-sm font-medium rounded-lg hover:bg-neutral-50 hover:border-neutral-400 transition-colors duration-200"
+        className="inline-flex items-center gap-2 border-b-2 border-yellow-400 pb-0.5 text-sm font-bold text-black transition-colors hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
       >
         <ArrowDownTrayIcon className="w-4 h-4" />
         Download .ics
@@ -106,7 +106,7 @@ export function CalendarExport({ event }: CalendarExportProps) {
 
       <button
         onClick={handleOutlookCalendar}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 text-neutral-700 text-sm font-medium rounded-lg hover:bg-neutral-50 hover:border-neutral-400 transition-colors duration-200"
+        className="inline-flex items-center gap-2 border-b-2 border-yellow-400 pb-0.5 text-sm font-bold text-black transition-colors hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
       >
         <CalendarIcon className="w-4 h-4" />
         Add to Outlook

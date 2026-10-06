@@ -162,7 +162,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             className="space-y-6"
           >
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">How was your experience?</h3>
+              <h3 className="text-lg font-semibold text-black mb-4">How was your experience?</h3>
               <div className="flex justify-center space-x-2 mb-6">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -171,9 +171,9 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                     className="p-1 hover:scale-110 transition-transform"
                   >
                     {star <= feedbackData.rating ? (
-                      <StarIconSolid className="w-8 h-8 text-yellow-400" />
+                      <StarIconSolid className="w-8 h-8 text-red-600" />
                     ) : (
-                      <StarIcon className="w-8 h-8 text-gray-300 hover:text-yellow-400" />
+                      <StarIcon className="w-8 h-8 text-gray-300 hover:text-red-600" />
                     )}
                   </button>
                 ))}
@@ -187,7 +187,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                     ) : (
                       <FaceFrownIcon className="w-8 h-8 text-orange-500" />
                     )}
-                    <span className="text-lg font-medium text-gray-900">
+                    <span className="text-lg font-medium text-black">
                       {feedbackData.rating >= 4 ? 'Great!' : 'We can do better!'}
                     </span>
                   </div>
@@ -196,25 +196,25 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="block text-sm font-medium text-neutral-800 mb-3">
                 What type of feedback is this?
               </label>
               <div className="grid grid-cols-1 gap-3">
                 {feedbackCategories.map((category) => (
                   <div
                     key={category.value}
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    className={`border rounded-md p-4 cursor-pointer transition-colors ${
                       feedbackData.category === category.value
-                        ? 'border-yellow-600 bg-yellow-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-yellow-400 bg-yellow-50'
+                        : 'border-neutral-400 hover:border-gray-400'
                     }`}
                     onClick={() => updateFeedbackData('category', category.value)}
                   >
                     <div className="flex items-start space-x-3">
                       <span className="text-2xl">{category.icon}</span>
                       <div>
-                        <div className="font-medium text-gray-900">{category.label}</div>
-                        <div className="text-sm text-gray-500">{category.description}</div>
+                        <div className="font-medium text-black">{category.label}</div>
+                        <div className="text-sm text-neutral-600">{category.description}</div>
                       </div>
                     </div>
                   </div>
@@ -232,37 +232,37 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             className="space-y-6"
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-neutral-800 mb-2">
                 Subject
               </label>
               <input
                 type="text"
                 value={feedbackData.subject}
                 onChange={(e) => updateFeedbackData('subject', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                 placeholder="Brief summary of your feedback"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-neutral-800 mb-2">
                 Tell us more
               </label>
               <textarea
                 value={feedbackData.message}
                 onChange={(e) => updateFeedbackData('message', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                 rows={6}
                 placeholder="Please provide detailed feedback to help us improve..."
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-neutral-600 mt-1">
                 {feedbackData.message.length}/500 characters
               </p>
             </div>
 
             {context && (
-              <div className="bg-gray-50 rounded-lg p-4">
-                <p className="text-sm text-gray-600">
+              <div className="bg-neutral-50 rounded-md p-4">
+                <p className="text-sm text-neutral-700">
                   <strong>Context:</strong> Feedback about {context}
                 </p>
               </div>
@@ -279,13 +279,13 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
           >
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-medium text-gray-900">Submit anonymously</h4>
-                <p className="text-sm text-gray-500">We won&apos;t be able to follow up with you</p>
+                <h4 className="text-sm font-medium text-black">Submit anonymously</h4>
+                <p className="text-sm text-neutral-600">We won&apos;t be able to follow up with you</p>
               </div>
               <button
                 onClick={() => updateFeedbackData('anonymous', !feedbackData.anonymous)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
-                  feedbackData.anonymous ? 'bg-yellow-600' : 'bg-gray-200'
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:ring-offset-2 ${
+                  feedbackData.anonymous ? 'bg-yellow-400' : 'bg-gray-200'
                 }`}
               >
                 <span
@@ -299,40 +299,40 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             {!feedbackData.anonymous && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-800 mb-2">
                     Name *
                   </label>
                   <input
                     type="text"
                     value={feedbackData.contactInfo.name}
                     onChange={(e) => updateContactInfo('name', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                     placeholder="Your full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-800 mb-2">
                     Email *
                   </label>
                   <input
                     type="email"
                     value={feedbackData.contactInfo.email}
                     onChange={(e) => updateContactInfo('email', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                     placeholder="your.email@example.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-800 mb-2">
                     Phone (Optional)
                   </label>
                   <input
                     type="tel"
                     value={feedbackData.contactInfo.phone}
                     onChange={(e) => updateContactInfo('phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black"
+                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
                     placeholder="+256 XXX XXX XXX"
                   />
                 </div>
@@ -342,9 +342,9 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                     type="checkbox"
                     checked={feedbackData.allowContact}
                     onChange={(e) => updateFeedbackData('allowContact', e.target.checked)}
-                    className="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-red-600 focus-visible:ring-red-600 border-neutral-400 rounded"
                   />
-                  <label className="ml-2 block text-sm text-gray-700">
+                  <label className="ml-2 block text-sm text-neutral-800">
                     Allow us to contact you for follow-up questions
                   </label>
                 </div>
@@ -360,19 +360,19 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-      <div className="bg-white rounded-xl shadow-lg">
-        <div className="p-6 border-b border-gray-200">
+      <div className="border-t-2 border-black pt-5">
+        <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Share Your Feedback</h2>
-              <p className="text-gray-600 mt-1">
+              <h2 className="text-2xl font-bold text-black">Share Your Feedback</h2>
+              <p className="text-neutral-700 mt-1">
                 Help us improve OneStopCentre Uganda by sharing your thoughts and suggestions.
               </p>
             </div>
             {onClose && (
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-neutral-100 rounded-md"
               >
                 ✕
               </button>
@@ -386,12 +386,12 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                 <div
                   key={step}
                   className={`h-2 flex-1 rounded-full ${
-                    step <= currentStep ? 'bg-yellow-600' : 'bg-gray-200'
+                    step <= currentStep ? 'bg-yellow-400' : 'bg-gray-200'
                   }`}
                 />
               ))}
             </div>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-neutral-600 mt-2">
               Step {currentStep} of 3
             </p>
           </div>
@@ -402,14 +402,14 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
         </div>
 
         {/* Navigation */}
-        <div className="p-6 border-t border-gray-200 flex justify-between">
+        <div className="p-6 border-t border-neutral-200 flex justify-between">
           <button
             onClick={prevStep}
             disabled={currentStep === 1}
-            className={`px-6 py-2 border border-gray-300 rounded-md transition-colors ${
+            className={`px-6 py-2 border border-neutral-400 rounded-md transition-colors ${
               currentStep === 1 
-                ? 'text-gray-400 cursor-not-allowed' 
-                : 'text-gray-700 hover:bg-gray-50'
+                ? 'text-neutral-500 cursor-not-allowed' 
+                : 'text-neutral-800 hover:bg-neutral-50'
             }`}
           >
             Previous
@@ -421,8 +421,8 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
               disabled={!validateCurrentStep()}
               className={`px-6 py-2 rounded-md transition-colors ${
                 validateCurrentStep()
-                  ? 'bg-yellow-600 text-black hover:bg-yellow-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-yellow-400 text-black hover:bg-yellow-300'
+                  : 'bg-gray-300 text-neutral-600 cursor-not-allowed'
               }`}
             >
               Next
@@ -433,8 +433,8 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
               disabled={!validateCurrentStep() || isSubmitting}
               className={`flex items-center space-x-2 px-6 py-2 rounded-md transition-colors ${
                 validateCurrentStep() && !isSubmitting
-                  ? 'bg-yellow-600 text-black hover:bg-yellow-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  ? 'bg-yellow-400 text-black hover:bg-yellow-300'
+                  : 'bg-gray-300 text-neutral-600 cursor-not-allowed'
               }`}
             >
               {isSubmitting ? (

@@ -165,10 +165,10 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   if (needsVerification) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <EnvelopeIcon className="w-10 h-10 text-yellow-600 mb-3" />
-          <h1 className="text-lg font-bold text-gray-900 mb-2">Verify your email to track this registration</h1>
-          <p className="text-sm text-gray-600 mb-4">
+        <div className="max-w-md w-full border-t-4 border-yellow-400 pt-6">
+          <EnvelopeIcon className="w-10 h-10 text-red-600 mb-3" />
+          <h1 className="text-lg font-bold text-black mb-2">Verify your email to track this registration</h1>
+          <p className="text-sm text-neutral-700 mb-4">
             Enter the email address you used when filing {referenceNumber}.
           </p>
           <form
@@ -184,9 +184,9 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
               value={verifyEmail}
               onChange={(e) => setVerifyEmail(e.target.value)}
               placeholder="your.email@example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="w-full px-3 py-2 border border-neutral-400 rounded-md text-black focus:outline-none focus:ring-2 focus-visible:ring-red-600"
             />
-            <button type="submit" className="w-full py-2 bg-yellow-600 text-black font-semibold rounded-md hover:bg-yellow-500">
+            <button type="submit" className="w-full py-2 bg-yellow-400 text-black font-semibold rounded-md hover:bg-yellow-500">
               Track Registration
             </button>
           </form>
@@ -199,7 +199,7 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   if (error || !registration) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-600">{error ?? 'Registration not found'}</p>
+        <p className="text-neutral-700">{error ?? 'Registration not found'}</p>
       </div>
     );
   }
@@ -211,21 +211,21 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   return (
  <div className="min-h-screen bg-white py-8 px-4">
       <div className="max-w-3xl mx-auto">
-        <Link href="/business/registration/" className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 mb-4">
+        <Link href="/business/registration/" className="inline-flex items-center gap-1 text-sm text-neutral-700 hover:text-black mb-4">
           <ArrowLeftIcon className="w-4 h-4" /> Back to Registration
         </Link>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="border-t-2 border-black pt-6 mb-6">
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
-              <p className="text-sm text-gray-500">{r.referenceNumber}</p>
-              <h1 className="text-2xl font-bold text-gray-900">{r.businessName}</h1>
-              <p className="text-sm text-gray-600 mt-1">{r.businessType} · {r.businessStructure} · {r.sector}</p>
+              <p className="text-sm text-neutral-600">{r.referenceNumber}</p>
+              <h1 className="text-2xl font-bold text-black">{r.businessName}</h1>
+              <p className="text-sm text-neutral-700 mt-1">{r.businessType} · {r.businessStructure} · {r.sector}</p>
             </div>
             <span className={`px-3 py-1 rounded-full text-sm font-medium border ${
               isRejectedTrack ? 'bg-red-50 text-red-700 border-red-200' :
               r.status === 'CertificateIssued' ? 'bg-green-50 text-green-700 border-green-200' :
-              'bg-yellow-50 text-yellow-700 border-yellow-200'
+              'bg-yellow-50 text-red-600 border-yellow-200'
             }`}>
               {STAGE_LABELS[r.status] ?? r.status}
             </span>
@@ -239,14 +239,14 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
                   <React.Fragment key={stage}>
                     <div className="flex flex-col items-center">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                        i <= currentStageIndex ? 'bg-yellow-600 text-black' : 'bg-gray-200 text-gray-500'
+                        i <= currentStageIndex ? 'bg-yellow-400 text-black' : 'bg-gray-200 text-neutral-600'
                       }`}>
                         {i + 1}
                       </div>
-                      <p className="text-xs text-gray-600 mt-1 text-center w-20">{STAGE_LABELS[stage]}</p>
+                      <p className="text-xs text-neutral-700 mt-1 text-center w-20">{STAGE_LABELS[stage]}</p>
                     </div>
                     {i < STAGES.length - 1 && (
-                      <div className={`flex-1 h-0.5 ${i < currentStageIndex ? 'bg-yellow-600' : 'bg-gray-200'}`} />
+                      <div className={`flex-1 h-0.5 ${i < currentStageIndex ? 'bg-yellow-400' : 'bg-gray-200'}`} />
                     )}
                   </React.Fragment>
                 ))}
@@ -255,13 +255,13 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           )}
 
           {isRejectedTrack && r.rejectionReason && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="mt-4 border-l-4 border-red-600 pl-4 py-2 text-red-700">
               <p className="text-sm text-red-800"><strong>Reason:</strong> {r.rejectionReason}</p>
             </div>
           )}
 
           {r.status === 'CertificateIssued' && r.certificateNumber && (
-            <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-4 flex items-center justify-between flex-wrap gap-3">
+            <div className="mt-4 border-l-4 border-black pl-4 py-2 flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-2">
                 <DocumentCheckIcon className="w-6 h-6 text-green-700" />
                 <div>
@@ -280,9 +280,9 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
         </div>
 
         {!isRejectedTrack && payment && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <CreditCardIcon className="w-5 h-5 text-gray-500" /> Registration Fee
+          <div className="border-t-2 border-black pt-6 mb-6">
+            <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
+              <CreditCardIcon className="w-5 h-5 text-neutral-600" /> Registration Fee
             </h2>
             {payment.status === 'successful' ? (
               <div className="flex items-center gap-2 text-green-700">
@@ -295,19 +295,19 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
             ) : (
               <div>
                 {returningFromCheckout && payment.status === 'pending' && (
-                  <p className="text-sm text-gray-500 mb-3">Confirming your payment with the provider — this can take a moment…</p>
+                  <p className="text-sm text-neutral-600 mb-3">Confirming your payment with the provider — this can take a moment…</p>
                 )}
                 {payment.status === 'failed' && (
                   <p className="text-sm text-red-600 mb-3">Your last payment attempt didn&apos;t go through. Please try again.</p>
                 )}
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-neutral-700 mb-3">
                   UGX {payment.amount.toLocaleString()} is due before a certificate can be issued.
                 </p>
                 {payError && <p className="text-sm text-red-600 mb-3">{payError}</p>}
                 <button
                   onClick={payNow}
                   disabled={payBusy}
-                  className="px-4 py-2 bg-black text-white text-sm font-medium rounded-md hover:bg-neutral-800 disabled:opacity-50"
+                  className="px-4 py-2 bg-black text-yellow-400 text-sm font-medium rounded-md hover:bg-neutral-800 disabled:opacity-50"
                 >
                   {payBusy ? 'Redirecting to payment…' : `Pay Registration Fee (UGX ${payment.amount.toLocaleString()})`}
                 </button>
@@ -316,41 +316,41 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           </div>
         )}
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <BuildingOfficeIcon className="w-5 h-5 text-gray-500" /> Business Details
+        <div className="border-t-2 border-black pt-6 mb-6">
+          <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
+            <BuildingOfficeIcon className="w-5 h-5 text-neutral-600" /> Business Details
           </h2>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div><dt className="text-gray-500">Location</dt><dd className="text-gray-900 font-medium">{r.location}</dd></div>
-            <div><dt className="text-gray-500">Sector</dt><dd className="text-gray-900 font-medium">{r.sector}</dd></div>
-            {r.initialCapital && <div><dt className="text-gray-500">Initial Capital</dt><dd className="text-gray-900 font-medium">{r.initialCapital}</dd></div>}
-            {r.projectedTurnover && <div><dt className="text-gray-500">Projected Turnover</dt><dd className="text-gray-900 font-medium">{r.projectedTurnover}</dd></div>}
+            <div><dt className="text-neutral-600">Location</dt><dd className="text-black font-medium">{r.location}</dd></div>
+            <div><dt className="text-neutral-600">Sector</dt><dd className="text-black font-medium">{r.sector}</dd></div>
+            {r.initialCapital && <div><dt className="text-neutral-600">Initial Capital</dt><dd className="text-black font-medium">{r.initialCapital}</dd></div>}
+            {r.projectedTurnover && <div><dt className="text-neutral-600">Projected Turnover</dt><dd className="text-black font-medium">{r.projectedTurnover}</dd></div>}
           </dl>
           {r.businessDescription && (
-            <p className="text-sm text-gray-600 mt-4 border-t border-gray-100 pt-4">{r.businessDescription}</p>
+            <p className="text-sm text-neutral-700 mt-4 border-t border-neutral-200 pt-4">{r.businessDescription}</p>
           )}
 
-          <h3 className="text-sm font-bold text-gray-900 mt-6 mb-2">Owners</h3>
+          <h3 className="text-sm font-bold text-black mt-6 mb-2">Owners</h3>
           <div className="space-y-2">
             {r.owners.map((o, i) => (
-              <div key={i} className="flex justify-between text-sm bg-gray-50 rounded-md px-3 py-2">
-                <span className="text-gray-900">{o.name} ({o.nationality})</span>
-                <span className="text-gray-600">{o.percentage}%</span>
+              <div key={i} className="flex justify-between text-sm py-2 border-b border-neutral-200">
+                <span className="text-black">{o.name} ({o.nationality})</span>
+                <span className="text-neutral-700">{o.percentage}%</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5 text-gray-500" /> Timeline
+        <div className="border-t-2 border-black pt-6">
+          <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
+            <CalendarIcon className="w-5 h-5 text-neutral-600" /> Timeline
           </h2>
           <dl className="text-sm space-y-2">
-            <div className="flex justify-between"><dt className="text-gray-500">Submitted</dt><dd className="text-gray-900">{new Date(r.createdAt).toLocaleString()}</dd></div>
+            <div className="flex justify-between"><dt className="text-neutral-600">Submitted</dt><dd className="text-black">{new Date(r.createdAt).toLocaleString()}</dd></div>
             {r.nameDecisionAt && (
-              <div className="flex justify-between"><dt className="text-gray-500">Name Decision</dt><dd className="text-gray-900">{new Date(r.nameDecisionAt).toLocaleString()}</dd></div>
+              <div className="flex justify-between"><dt className="text-neutral-600">Name Decision</dt><dd className="text-black">{new Date(r.nameDecisionAt).toLocaleString()}</dd></div>
             )}
-            <div className="flex justify-between"><dt className="text-gray-500">Processing Time</dt><dd className="text-gray-900">{r.processingHours < 24 ? `${r.processingHours}h` : `${(r.processingHours / 24).toFixed(1)}d`}</dd></div>
+            <div className="flex justify-between"><dt className="text-neutral-600">Processing Time</dt><dd className="text-black">{r.processingHours < 24 ? `${r.processingHours}h` : `${(r.processingHours / 24).toFixed(1)}d`}</dd></div>
           </dl>
         </div>
       </div>

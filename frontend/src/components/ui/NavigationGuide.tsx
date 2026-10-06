@@ -200,7 +200,7 @@ export default function NavigationGuide() {
       case 'agencies': return <InformationCircleIcon {...iconProps} className="w-5 h-5 text-purple-500" />;
       case 'filter': return <LightBulbIcon {...iconProps} className="w-5 h-5 text-yellow-500" />;
       case 'calculator': return <ArrowRightIcon {...iconProps} className="w-5 h-5 text-orange-500" />;
-      default: return <ChevronRightIcon {...iconProps} className="w-5 h-5 text-gray-400" />;
+      default: return <ChevronRightIcon {...iconProps} className="w-5 h-5 text-neutral-500" />;
     }
   };
 
@@ -214,9 +214,9 @@ export default function NavigationGuide() {
         exit={{ opacity: 0, y: 50, scale: 0.9 }}
         className="fixed bottom-6 right-6 z-50 max-w-sm"
       >
-        <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 overflow-hidden">
+        <div className="backdrop- overflow-hidden border-t-2 border-black pt-5">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 relative">
+          <div className="bg-white text-black p-4 relative">
             <button
               onClick={handleDismiss}
               className="absolute top-3 right-3 p-1 hover:bg-white/20 rounded-full transition-colors"
@@ -225,7 +225,7 @@ export default function NavigationGuide() {
             </button>
             
             <div className="flex items-center mb-2">
-              <LightBulbIcon className="w-5 h-5 mr-2 text-yellow-300" />
+              <LightBulbIcon className="w-5 h-5 mr-2 text-red-600" />
               <h3 className="font-bold text-lg">{currentGuide.title}</h3>
             </div>
             <p className="text-blue-100 text-sm">{currentGuide.description}</p>
@@ -239,17 +239,17 @@ export default function NavigationGuide() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex items-start space-x-3 p-3 bg-neutral-50 rounded-md hover:bg-neutral-100 transition-colors"
               >
                 <div className="flex-shrink-0 mt-0.5">
                   {getStepIcon(step.icon)}
                 </div>
                 <div className="flex-1">
-                  <p className="text-gray-800 text-sm font-medium">{step.text}</p>
+                  <p className="text-neutral-800 text-sm font-medium">{step.text}</p>
                   {step.action && (
                     <button
                       onClick={step.action}
-                      className="mt-2 text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                      className="mt-2 text-xs bg-blue-600 text-black px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
                     >
                       {step.actionText}
                     </button>
@@ -260,12 +260,12 @@ export default function NavigationGuide() {
           </div>
 
           {/* Footer with next action */}
-          <div className="bg-gray-50 p-4 border-t border-gray-200">
+          <div className="bg-neutral-50 p-4 border-t border-neutral-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-gray-600">Recommended next:</span>
+              <span className="text-xs text-neutral-700">Recommended next:</span>
               <button
                 onClick={handleNextAction}
-                className="flex items-center space-x-2 bg-gradient-to-r from-yellow-600 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all"
+                className="flex items-center space-x-2 bg-white text-black px-4 py-2 rounded-md text-sm font-medium transition-all"
               >
                 <span>{currentGuide.nextBestAction.text}</span>
                 <ArrowRightIcon className="w-4 h-4" />
@@ -274,7 +274,7 @@ export default function NavigationGuide() {
           </div>
 
           {/* Progress indicator */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 h-1">
+          <div className="bg-white h-1">
             <motion.div
               className="h-full bg-white/50"
               initial={{ width: '0%' }}

@@ -11,26 +11,27 @@ import BusinessRegistrationWizard from '@/components/forms/BusinessRegistrationW
 
 export default function BusinessRegistrationPage() {
   return (
- <div className="min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+ <div className="min-h-screen bg-white text-black">
+      <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+        <div>
+          <div className="mb-10 max-w-3xl">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-red-600">Business registration</p>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
               Business Registration Wizard
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="mt-5 text-base leading-7 text-neutral-700 sm:text-lg">
               Complete your business registration step by step with our comprehensive wizard. 
               Get accurate cost estimates, required documents, and timeframes for your business type.
             </p>
           </div>
           
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="border-t border-neutral-200 pt-10">
             <BusinessRegistrationWizard />
           </div>
-          
-          <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-yellow-800 mb-2">Important Note</h3>
-            <p className="text-yellow-700">
+
+          <div className="mt-12 border-l-4 border-red-600 pl-6">
+            <h3 className="mb-2 text-lg font-bold text-black">Important note</h3>
+            <p className="text-sm leading-7 text-neutral-700">
               This wizard provides estimates and guidance for business registration in Uganda. 
               Final costs and requirements may vary. Please verify with the relevant authorities 
               before proceeding with your registration.

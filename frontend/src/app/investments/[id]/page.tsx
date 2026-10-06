@@ -1,8 +1,11 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Phone, Mail, Globe, MapPin, Download } from 'lucide-react';
 import { getInvestmentById, getInvestmentIds } from '@/lib/investments';
+import { breadcrumbLd, buildMetadata } from '@/lib/seo';
+import { JsonLd } from '@/components/seo/JsonLd';
 import InvestmentDetailClient from './InvestmentDetailClient';
 
 const linkClass =
@@ -13,6 +16,19 @@ const sectionHeadingClass = 'text-lg font-bold text-black sm:text-xl';
 
 export async function generateStaticParams() {
   return getInvestmentIds();
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const opportunity = await getInvestmentById(id);
+  if (!opportunity) {
+    return buildMetadata({ title: 'Investment opportunity not found', path: `/investments/${id}/`, noIndex: true });
+  }
+  return buildMetadata({
+    title: opportunity.title,
+    description: opportunity.description,
+    path: `/investments/${id}/`,
+  });
 }
 
 export default async function InvestmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -35,6 +51,13 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
 
   return (
  <div className="min-h-screen bg-white text-black">
+      <JsonLd
+        data={breadcrumbLd([
+          { name: 'Home', path: '/' },
+          { name: 'Investments', path: '/investments/' },
+          { name: opportunity.title, path: `/investments/${id}/` },
+        ])}
+      />
       {/* Breadcrumb band */}
       <div className="border-b border-neutral-200 bg-white">
         <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">

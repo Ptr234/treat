@@ -166,10 +166,10 @@ export default function InvestmentOnboardingWizard() {
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.investorType === option.value
-                        ? 'border-yellow-600 bg-yellow-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-red-600 bg-neutral-50'
+                        : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('investorType', option.value)}
                   >
@@ -204,10 +204,10 @@ export default function InvestmentOnboardingWizard() {
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.experience === option.value
-                        ? 'border-yellow-600 bg-yellow-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-red-600 bg-neutral-50'
+                        : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('experience', option.value)}
                   >
@@ -243,10 +243,10 @@ export default function InvestmentOnboardingWizard() {
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.investmentGoal === option.value
-                        ? 'border-yellow-600 bg-yellow-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-red-600 bg-neutral-50'
+                        : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('investmentGoal', option.value)}
                   >
@@ -348,10 +348,10 @@ export default function InvestmentOnboardingWizard() {
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.primarySector === option.value
-                        ? 'border-yellow-600 bg-yellow-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-red-600 bg-neutral-50'
+                        : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('primarySector', option.value)}
                   >
@@ -520,10 +520,10 @@ export default function InvestmentOnboardingWizard() {
                 ].map((option) => (
                   <div
                     key={option.value}
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors ${
+                    className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.supportNeeded.includes(option.value)
-                        ? 'border-yellow-600 bg-yellow-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-red-600 bg-neutral-50'
+                        : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateArrayField('supportNeeded', option.value)}
                   >
@@ -559,8 +559,8 @@ export default function InvestmentOnboardingWizard() {
                 key={step}
                 className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 text-sm sm:text-base ${
                   currentStep >= step
-                    ? 'border-yellow-600 bg-yellow-600 text-black'
-                    : 'border-gray-300 bg-white text-gray-500'
+                    ? 'border-black bg-black text-yellow-400'
+                    : 'border-neutral-400 bg-white text-neutral-600'
                 }`}
               >
                 {step}
@@ -630,7 +630,7 @@ export default function InvestmentOnboardingWizard() {
 
       {/* Success result */}
       {submitResult && (
-        <div className="mt-6 p-6 bg-green-50 border border-green-200 rounded-lg text-center">
+        <div className="mt-6 border-t-4 border-black pt-6 text-center">
           <div className="text-green-800 font-bold text-lg mb-2">
             {submitResult.existing ? 'Profile Found' : 'Profile Created Successfully'}
           </div>

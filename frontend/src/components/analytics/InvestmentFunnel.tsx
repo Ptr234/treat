@@ -12,10 +12,10 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
     if (active && payload && payload.length) {
       const stage = payload[0]?.payload as FunnelStage;
       return (
-        <div className="bg-white p-4 border border-yellow-200 rounded-lg shadow-lg">
-          <p className="font-semibold text-gray-900 mb-2">{stage.stage}</p>
-          <p className="text-sm text-gray-600">Count: <span className="font-medium">{stage.count}</span></p>
-          <p className="text-sm text-gray-600">Conversion: <span className="font-medium">{stage.conversionRate.toFixed(1)}%</span></p>
+        <div className="p-4 border-t-2 border-black pt-5">
+          <p className="font-semibold text-black mb-2">{stage.stage}</p>
+          <p className="text-sm text-neutral-700">Count: <span className="font-medium">{stage.count}</span></p>
+          <p className="text-sm text-neutral-700">Conversion: <span className="font-medium">{stage.conversionRate.toFixed(1)}%</span></p>
         </div>
       );
     }
@@ -40,8 +40,8 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Investment Funnel</h3>
-        <p className="text-sm text-gray-600 mb-6">Track investor journey from initial inquiry to operation</p>
+        <h3 className="text-lg font-semibold text-black mb-2">Investment Funnel</h3>
+        <p className="text-sm text-neutral-700 mb-6">Track investor journey from initial inquiry to operation</p>
       </div>
 
       {/* Funnel Chart */}
@@ -74,7 +74,7 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
 
       {/* Conversion Rates Between Stages */}
       <div className="mt-8">
-        <h4 className="text-md font-semibold text-gray-900 mb-4">Stage-to-Stage Conversion</h4>
+        <h4 className="text-md font-semibold text-black mb-4">Stage-to-Stage Conversion</h4>
         <div className="space-y-3">
           {data.slice(0, -1).map((stage, index) => {
             const nextStage = data[index + 1];
@@ -87,14 +87,14 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
                     className="w-4 h-4 rounded"
                     style={{ backgroundColor: stage.color }}
                   />
-                  <span className="text-sm font-medium text-gray-700">{stage.stage}</span>
-                  <span className="text-xs text-gray-500">({stage.count})</span>
+                  <span className="text-sm font-medium text-neutral-800">{stage.stage}</span>
+                  <span className="text-xs text-neutral-600">({stage.count})</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                  <span className="text-sm font-semibold text-yellow-600 min-w-[50px]">
+                  <span className="text-sm font-semibold text-red-600 min-w-[50px]">
                     {conversionRate}%
                   </span>
                 </div>
@@ -103,8 +103,8 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
                     className="w-4 h-4 rounded"
                     style={{ backgroundColor: nextStage.color }}
                   />
-                  <span className="text-sm font-medium text-gray-700">{nextStage.stage}</span>
-                  <span className="text-xs text-gray-500">({nextStage.count})</span>
+                  <span className="text-sm font-medium text-neutral-800">{nextStage.stage}</span>
+                  <span className="text-xs text-neutral-600">({nextStage.count})</span>
                 </div>
               </div>
             );
@@ -113,17 +113,17 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
       </div>
 
       {/* Overall Conversion Summary */}
-      <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+      <div className="mt-6 p-4 bg-yellow-50 border-t-2 border-black pt-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700">Overall Conversion Rate</p>
-            <p className="text-xs text-gray-600 mt-1">From Inquiry to Operational</p>
+            <p className="text-sm font-medium text-neutral-800">Overall Conversion Rate</p>
+            <p className="text-xs text-neutral-700 mt-1">From Inquiry to Operational</p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-bold text-yellow-700">
+            <p className="text-3xl font-bold text-red-600">
               {data.length > 0 && data[data.length - 1] && data[0] ? ((data[data.length - 1]!.count / data[0]!.count) * 100).toFixed(1) : '0'}%
             </p>
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-neutral-700 mt-1">
               {data[data.length - 1]?.count ?? 0} / {data[0]?.count ?? 0}
             </p>
           </div>
