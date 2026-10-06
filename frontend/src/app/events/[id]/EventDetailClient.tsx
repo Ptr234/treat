@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
@@ -116,7 +117,8 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-wider">
           <span className="text-red-600">{event.category}</span>
           <span className="text-neutral-600">{event.status}</span>
@@ -128,6 +130,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
           Back to events
         </Link>
       </section>
+      </PageBand>
 
       <div className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-12 px-4 pb-20 sm:px-6 lg:grid-cols-3 lg:px-8">
         {/* Main content */}

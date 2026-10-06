@@ -1,3 +1,4 @@
+import PageBand from '@/components/ui/PageBand';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -89,7 +90,8 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
       </div>
 
       {/* Header */}
-      <section className="mx-auto grid max-w-6xl gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_auto] lg:items-start lg:px-8">
+      <PageBand>
+        <section className="mx-auto grid max-w-6xl gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_auto] lg:items-start lg:px-8">
         <div>
           <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-wider">
             <span className="text-red-600">{agency.acronym}</span>
@@ -98,7 +100,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
           <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{agency.name}</h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">{agency.description}</p>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-            <a href="#request" className="inline-flex items-center justify-center rounded-md bg-black px-5 py-2.5 font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
+            <a href="#request" className="inline-flex items-center justify-center rounded-md bg-yellow-400 px-5 py-2.5 font-bold text-black hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
               Request a service
             </a>
             <a href={`mailto:${agency.contact.email}`} className={`${linkClass} self-center`}>Email the agency</a>
@@ -111,6 +113,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
           </div>
         )}
       </section>
+      </PageBand>
 
       {/* Quick facts */}
       <section aria-label="Quick facts" className="mx-auto mt-12 max-w-6xl px-4 sm:px-6 lg:px-8">

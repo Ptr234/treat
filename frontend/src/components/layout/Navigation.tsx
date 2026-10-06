@@ -47,8 +47,8 @@ function Brand() {
       <Image src="/images/uganda-flag.png" alt="Flag of Uganda" width={36} height={24} className="h-6 w-9 flex-shrink-0 object-cover" priority />
       <Image src="/images/oneStopCenter-logo.jpeg" alt="" width={42} height={42} className="h-9 w-9 object-contain min-[390px]:h-10 min-[390px]:w-10" priority />
       <span className="leading-[1.05]">
-        <span className="block text-sm font-extrabold tracking-tight text-white">OneStop Centre</span>
-        <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.2em] text-yellow-400">Uganda Investment Authority</span>
+        <span className="block text-sm font-extrabold tracking-tight text-black">OneStop Centre</span>
+        <span className="mt-1 block text-[9px] font-bold uppercase tracking-[.2em] text-red-600">Uganda Investment Authority</span>
       </span>
     </Link>
   );
@@ -87,7 +87,7 @@ export default function Navigation() {
           <span className="flex-1 bg-yellow-400" />
           <span className="flex-1 bg-red-600" />
         </div>
-        <div className="mx-auto flex min-h-[68px] max-w-6xl items-stretch justify-between gap-2 bg-black px-3 sm:h-[76px] sm:gap-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[68px] max-w-6xl items-stretch justify-between gap-2 px-3 sm:h-[76px] sm:gap-4 sm:px-6 lg:px-8">
           <div className="flex min-w-0 shrink items-center pr-1 sm:shrink-0 sm:pr-2">
             <Brand />
           </div>
@@ -115,7 +115,7 @@ export default function Navigation() {
                     aria-expanded={expanded}
                     aria-controls={menuId}
                     onClick={() => setActiveMenu(menu.title)}
-                    className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-3.5 text-[15px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600 xl:px-4 ${expanded || isCurrent ? 'bg-white/10 text-yellow-400' : 'text-white hover:bg-white/10 hover:text-yellow-400'}`}
+                    className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-3.5 text-[15px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600 xl:px-4 ${expanded || isCurrent ? 'bg-neutral-100 text-red-600' : 'text-neutral-800 hover:bg-neutral-50 hover:text-red-600'}`}
                   >
                     {menu.title}
                     <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
@@ -146,25 +146,25 @@ export default function Navigation() {
                 </div>
               );
             })}
-            <Link href="/agencies" aria-current={pathname.startsWith('/agencies') ? 'page' : undefined} className={`inline-flex shrink-0 items-center whitespace-nowrap px-3 text-[15px] transition-colors hover:bg-white/10 hover:text-yellow-400 ${pathname.startsWith('/agencies') ? 'font-semibold text-yellow-400' : 'text-white'}`}>Agencies</Link>
+            <Link href="/agencies" aria-current={pathname.startsWith('/agencies') ? 'page' : undefined} className={`inline-flex shrink-0 items-center whitespace-nowrap px-3 text-[15px] transition-colors hover:bg-neutral-50 hover:text-red-600 ${pathname.startsWith('/agencies') ? 'font-semibold text-red-700' : 'text-neutral-800'}`}>Agencies</Link>
           </nav>
 
           <div className="hidden shrink-0 items-center gap-2 xl:flex xl:gap-3">
             {isAuthenticated ? (
-              <Link href="/profile" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-white hover:text-yellow-400">
+              <Link href="/profile" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-neutral-800 hover:text-red-600">
                 <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {user?.name ?? 'My account'}
               </Link>
             ) : (
-              <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-white hover:text-yellow-400">Log in</button>
+              <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
             )}
-            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap bg-yellow-400 px-4 py-2.5 text-sm font-bold text-black transition hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
+            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap bg-black px-4 py-2.5 text-sm font-bold text-yellow-400 transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
               Start here <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Link>
           </div>
 
           <div className="flex items-center xl:hidden">
-            <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} aria-controls="mobile-site-navigation" className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
+            <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} aria-controls="mobile-site-navigation" className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-black hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
               {mobileOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
             </button>
           </div>

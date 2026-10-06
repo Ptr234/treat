@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -201,7 +202,8 @@ export default function SupportPage() {
       </div>
 
       {/* Title and intro */}
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_.6fr] lg:px-8">
+      <PageBand>
+        <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_.6fr] lg:px-8">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Dedicated support centre</p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
@@ -215,6 +217,7 @@ export default function SupportPage() {
           <Image src="/images/uganda-kampala-city-view.webp" alt="Kampala city view" fill className="object-cover" sizes="(min-width: 1024px) 30vw, 0px" />
         </div>
       </section>
+      </PageBand>
 
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
         {/* Support channels */}

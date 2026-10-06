@@ -479,7 +479,7 @@ export default function InvoiceGenerator() {
   const totals = calculateInvoiceTotal();
 
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-black min-h-screen">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 bg-white min-h-screen">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

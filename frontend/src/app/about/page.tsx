@@ -1,3 +1,4 @@
+import PageBand from '@/components/ui/PageBand';
 import Link from 'next/link';
 import {
   BuildingOfficeIcon,
@@ -61,13 +62,15 @@ export default function AboutPage() {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">About</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">OneStop Centre Uganda</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
           Simplifying government services and investment processes for a prosperous Uganda.
         </p>
       </section>
+      </PageBand>
 
       {/* Mission and vision */}
       <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="mission-heading">

@@ -5,7 +5,6 @@ import Navigation from './Navigation';
 import Footer from './Footer';
 import NewsBar from './NewsBar';
 import ChatWidget from '@/components/chatbot/ChatWidget';
-import AccessTools from './AccessTools';
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -26,7 +25,6 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
         Skip to main content
       </a>
       <div className="flex-1 flex flex-col">
-        <AccessTools />
         <Navigation />
         <NewsBar />
         <main id="main-content" role="main" className="flex-1" tabIndex={-1}>

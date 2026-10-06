@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -103,12 +104,14 @@ export default function InvoiceGeneratorPage() {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Professional invoice generator</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
           Generate professional, tax-compliant invoices for your business transactions with our easy-to-use invoice generator.
         </p>
       </section>
+      </PageBand>
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">

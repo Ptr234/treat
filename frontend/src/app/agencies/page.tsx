@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -253,7 +254,8 @@ export default function GovernmentAgencies() {
       </div>
 
       {/* Hero: title, intro and overview */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Agency directory</p>
@@ -273,7 +275,7 @@ export default function GovernmentAgencies() {
             ].map((stat) => (
               <div key={stat.label} className="flex items-baseline justify-between gap-6 py-4">
                 <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">{stat.label}</dt>
-                <dd className="font-display text-3xl font-semibold leading-none text-black">{stat.value}</dd>
+                <dd className="font-display text-3xl font-semibold leading-none text-white">{stat.value}</dd>
               </div>
             ))}
           </dl>
@@ -334,6 +336,7 @@ export default function GovernmentAgencies() {
           </label>
         </div>
       </section>
+      </PageBand>
 
       <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
         {filteredAgencies !== null ? (

@@ -1,3 +1,4 @@
+import PageBand from '@/components/ui/PageBand';
 import Link from 'next/link';
 
 // Organized services by logical categories
@@ -122,7 +123,8 @@ export default function ServicesPage() {
       </div>
 
       {/* Title and intro */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight text-black sm:text-4xl">
           Government services for your business
         </h1>
@@ -134,6 +136,7 @@ export default function ServicesPage() {
           <Link href="/agencies" className={linkClass}>Contact agencies</Link>
         </div>
       </section>
+      </PageBand>
 
       {/* Service detail blocks */}
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8" aria-labelledby="services-heading">

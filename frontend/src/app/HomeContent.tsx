@@ -141,7 +141,7 @@ export default function HomePage() {
   return (
     <div className="bg-white text-black">
       {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-[#10283f] text-white">
+      <section className="relative isolate overflow-hidden bg-black text-white">
         <div className="absolute inset-0 -z-10" data-decorative="true">
           {!lowBandwidth && (
             <Image
@@ -153,7 +153,22 @@ export default function HomePage() {
               className="object-cover opacity-35"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#10283f] via-[#10283f]/95 to-[#10283f]/55" />
+          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/90 to-red-700/70" />
+          <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute -right-28 top-1/2 hidden h-[30rem] w-[30rem] -translate-y-1/2 lg:block">
+            <span className="absolute inset-0 border border-yellow-400/40" />
+            <span className="absolute inset-12 border border-white/20" />
+            <span className="absolute inset-24 border-2 border-red-600/70" />
+          </div>
+          <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute bottom-10 right-8 hidden items-end gap-2 lg:flex">
+            {[
+              { height: 48, color: 'bg-yellow-400/80' },
+              { height: 80, color: 'bg-yellow-400/80' },
+              { height: 64, color: 'bg-red-600' },
+              { height: 112, color: 'bg-yellow-400/80' },
+            ].map((bar, index) => (
+              <span key={index} className={`w-3 ${bar.color}`} style={{ height: `${bar.height}px` }} />
+            ))}
+          </div>
         </div>
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-[1.05fr_.75fr] lg:px-8 lg:py-24">
           <div className="max-w-3xl">
@@ -170,13 +185,13 @@ export default function HomePage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/investments"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-yellow-400 px-6 py-3 text-sm font-bold text-[#10283f] transition hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#10283f]"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-yellow-400 px-6 py-3 text-sm font-bold text-black transition hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 Explore investments <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
               </Link>
               <Link
                 href="/services"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/60 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-[#10283f] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#10283f]"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border border-white/60 px-6 py-3 text-sm font-bold text-white transition hover:bg-white hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 Find a service
               </Link>
@@ -218,8 +233,13 @@ export default function HomePage() {
       </section>
 
       {/* Events, answers and practical investor resources */}
-      <section className="border-y border-neutral-200 bg-[#10283f] py-12 text-white" aria-label="Investor updates and help">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
+      <section className="relative isolate overflow-hidden bg-gradient-to-br from-black via-black to-red-700/60 py-12 text-white" aria-label="Investor updates and help">
+          <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute -right-20 top-1/2 hidden h-72 w-72 -translate-y-1/2 lg:block">
+            <span className="absolute inset-0 border border-yellow-400/40" />
+            <span className="absolute inset-10 border border-white/20" />
+            <span className="absolute inset-20 border-2 border-red-600/70" />
+          </div>
+        <div className="relative mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-yellow-300">News &amp; events</p>
             <h2 className="mt-2 font-display text-xl font-bold uppercase">Meet Uganda’s investment community</h2>
@@ -289,7 +309,7 @@ export default function HomePage() {
           ].map((fact) => (
             <div key={fact.label} className=" pl-4 sm:ml-6 sm:first:ml-0 sm:pl-6">
               <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">{fact.label}</dt>
-              <dd className="font-data mt-1 text-4xl font-semibold leading-none text-[#10283f] sm:text-5xl">{fact.value}</dd>
+              <dd className="font-data mt-1 text-4xl font-semibold leading-none text-black sm:text-5xl">{fact.value}</dd>
               <p className="mt-1 text-xs leading-5 text-neutral-600">{fact.note}</p>
             </div>
           ))}
@@ -528,26 +548,31 @@ export default function HomePage() {
       </section>
 
       {/* Final call to action */}
-      <section className=" py-16">
-        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <section className="relative isolate overflow-hidden bg-gradient-to-br from-black via-black to-red-700/60 py-16 text-white">
+          <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute -right-20 top-1/2 hidden h-72 w-72 -translate-y-1/2 lg:block">
+            <span className="absolute inset-0 border border-yellow-400/40" />
+            <span className="absolute inset-10 border border-white/20" />
+            <span className="absolute inset-20 border-2 border-red-600/70" />
+          </div>
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="max-w-2xl">
-            <p className={sectionHeading}>Here to help</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">Here to help</p>
             <h2 className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Have a question about investing in Uganda?</h2>
-            <p className="mt-4 leading-7 text-neutral-700">
+            <p className="mt-4 leading-7 text-white/85">
               Speak with the OneStop Centre or get quick answers from our investment assistant.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
               href="/support"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-black px-5 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-yellow-400 px-5 py-3 text-sm font-bold text-black hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
             >
               Contact the centre <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
             </Link>
             <button
               type="button"
               onClick={openAssistant}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border-2 border-black px-5 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border-2 border-white/70 px-5 py-3 text-sm font-bold text-white hover:bg-white hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
             >
               <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
               Ask the assistant

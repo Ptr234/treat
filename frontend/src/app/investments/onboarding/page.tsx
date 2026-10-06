@@ -1,3 +1,4 @@
+import PageBand from '@/components/ui/PageBand';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -60,7 +61,8 @@ export default function InvestmentOnboardingPage() {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Investor onboarding</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Investment onboarding</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
@@ -68,6 +70,7 @@ export default function InvestmentOnboardingPage() {
           the right opportunities across Uganda&apos;s growing economy.
         </p>
       </section>
+      </PageBand>
 
       {/* Benefits */}
       <section className="mx-auto mt-12 max-w-6xl border-y border-neutral-200 px-4 py-10 sm:px-6 lg:px-8" aria-labelledby="benefits-heading">

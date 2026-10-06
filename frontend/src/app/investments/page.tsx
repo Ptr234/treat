@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -59,7 +60,8 @@ const InvestmentOpportunities = () => {
       </div>
 
       {/* Title and intro */}
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_.6fr] lg:px-8">
+      <PageBand>
+        <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_.6fr] lg:px-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Invest in Uganda</h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-600 sm:text-lg">
@@ -70,6 +72,7 @@ const InvestmentOpportunities = () => {
           <Image src="/images/lake-bunyonyi-uganda.jpg" alt="Lake Bunyonyi in Uganda" fill className="object-cover" priority />
         </div>
       </section>
+      </PageBand>
 
       {/* Search & filter */}
       <section className="mx-auto mt-10 max-w-6xl border-y border-neutral-200 px-4 py-4 sm:px-6 lg:px-8">

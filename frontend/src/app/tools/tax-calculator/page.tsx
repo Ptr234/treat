@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
@@ -182,7 +183,8 @@ export default function TaxCalculatorPage() {
       </div>
 
       {/* Title and rates */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Uganda tax calculator 2026</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
           Calculate your tax obligations using official URA rates. Individual income tax, corporate tax, and VAT calculations.
@@ -202,6 +204,7 @@ export default function TaxCalculatorPage() {
           </div>
         </dl>
       </section>
+      </PageBand>
 
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
         {/* Inputs */}

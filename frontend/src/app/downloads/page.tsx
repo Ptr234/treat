@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { client } from '@/lib/sanity-client';
@@ -112,12 +113,14 @@ export default function DownloadsPage() {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Downloads and resources</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
           Browse downloadable forms and guidance for business registration, investment and related public services. Each available resource includes its file type and any published description, so you can check that it is relevant before opening it. Documents may be revised by their issuing agencies; confirm that you have the current version before filing an application. If the resource you need is not listed, contact the responsible agency or the support team for direction.
         </p>
       </section>
+      </PageBand>
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Loading */}

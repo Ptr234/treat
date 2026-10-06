@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import React, { useState, useEffect } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -181,13 +182,15 @@ export default function DocumentChecklistPage() {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Document checklist</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
           Comprehensive checklist for business registration and licensing documents required in Uganda.
           Make sure you have all necessary documents before starting your application.
         </p>
       </section>
+      </PageBand>
 
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Overall progress */}

@@ -1,5 +1,6 @@
 'use client';
 
+import PageBand from '@/components/ui/PageBand';
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
@@ -99,7 +100,8 @@ export default function EventsPage() {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Events and investment activities</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
           Use the events calendar to find investment forums, missions, webinars and other activities involving Uganda’s business community. Search by title, location or organizer, then narrow the list by event category and status. Event listings include dates and participation details when those have been provided by the organizer. Check the event page for updates before making travel plans or sharing registration information.
@@ -119,6 +121,7 @@ export default function EventsPage() {
           </div>
         </dl>
       </section>
+      </PageBand>
 
       {/* Filters */}
       <section className="sticky top-0 z-40 mt-10 border-y border-neutral-200 bg-white" aria-label="Filter events">

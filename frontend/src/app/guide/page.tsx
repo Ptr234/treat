@@ -1,3 +1,4 @@
+import PageBand from '@/components/ui/PageBand';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -117,7 +118,8 @@ export default function GuidePage() {
       </div>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">User guide</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">How to use the OneStop Centre</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
@@ -128,6 +130,7 @@ export default function GuidePage() {
           <Link href="/chatbot" className={linkClass}>Ask the AI assistant</Link>
         </div>
       </section>
+      </PageBand>
 
       {/* Journey */}
       <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-16 sm:px-6 lg:px-8">

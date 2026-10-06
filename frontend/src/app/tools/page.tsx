@@ -1,3 +1,4 @@
+import PageBand from '@/components/ui/PageBand';
 import { buildMetadata } from '@/lib/seo';
 import Link from 'next/link';
 
@@ -50,13 +51,15 @@ export default function ToolsPage() {
       </div>
 
       {/* Title */}
-      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
+      <PageBand>
+        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Business tools</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Investment tools</h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
           Use these tools to organize early planning for an investment or business in Uganda. Estimate a possible return, prepare a document checklist, or create a working invoice with the available calculators and utilities. Each tool is designed to make common planning tasks easier to review and discuss. Results depend on the information you enter and are estimates, not official assessments or agency approvals. Contact the relevant institution when you need a confirmed requirement, fee or decision.
         </p>
       </section>
+      </PageBand>
 
       {/* Tool list */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-label="Available tools">
