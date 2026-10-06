@@ -2,6 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using OtpNet;
+using Microsoft.Extensions.DependencyInjection;
+using OscApi.Data;
+using OscApi.Models;
 using Xunit;
 
 namespace OscApi.Tests.Integration;
@@ -102,6 +105,35 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
             category = "general_inquiry",
         });
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task PaymentEndpoints_RejectRequestsWithoutMatchingApplicantEmail()
+    {
+        const string reference = "REG-2026-PAYSEC";
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<OscDbContext>();
+            db.BusinessRegistrations.Add(new BusinessRegistration
+            {
+                ReferenceNumber = reference,
+                BusinessName = "Payment Access Test",
+                BusinessType = "limited-company",
+                BusinessStructure = "private",
+                Sector = "ICT",
+                Location = "Kampala",
+                ContactName = "Test Applicant",
+                ContactEmail = "pay-owner@example.com",
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var client = _factory.CreateClient();
+        var status = await client.GetAsync($"/api/v1/business-registrations/{reference}/payment?email=wrong@example.com");
+        var initiate = await client.PostAsync($"/api/v1/business-registrations/{reference}/payment/initiate?email=wrong@example.com", null);
+
+        Assert.Equal(HttpStatusCode.NotFound, status.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, initiate.StatusCode);
     }
 
     [Fact]

@@ -25,7 +25,17 @@ public class PaymentsController : ControllerBase
     public async Task<IActionResult> FlutterwaveWebhook([FromBody] FlutterwaveWebhookIncoming payload)
     {
         var signature = Request.Headers["verif-hash"].FirstOrDefault();
-        var handled = await _payments.HandleWebhookAsync(signature, payload);
+        bool handled;
+        try
+        {
+            handled = await _payments.HandleWebhookAsync(signature, payload);
+        }
+        catch (InvalidOperationException)
+        {
+            // A provider verification outage is retryable; 503 asks Flutterwave
+            // to redeliver instead of acknowledging an unverified payment.
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
         // Flutterwave only cares about the status code, not the body: 200 = don't
         // retry. An invalid signature gets 401 so a forged call is rejected outright
         // rather than silently accepted.

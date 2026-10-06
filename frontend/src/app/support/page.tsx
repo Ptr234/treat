@@ -154,7 +154,7 @@ export default function SupportPage() {
       questions: [
         {
           q: 'What is the minimum investment amount required?',
-          a: 'The minimum investment varies by sector. For most sectors, the minimum is USD 100,000, but this can be lower for certain priority sectors.'
+          a: 'The minimum investment capital is set by the Minister through statutory instrument, separately for domestic and foreign investors. Confirm the current amounts with the Uganda Investment Authority before you commit capital. Incentives also depend on meeting the minimum for your category.'
         },
         {
           q: 'How do I apply for investment incentives?',

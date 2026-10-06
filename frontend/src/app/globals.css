@@ -120,6 +120,16 @@ html.low-bandwidth *, html.low-bandwidth *::before, html.low-bandwidth *::after 
   transition-duration: 0.01ms !important;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @media print {
   .access-tools, #site-header, #site-footer, [data-chat-widget], [data-print-hide], .no-print { display: none !important; }
   body { color: #000; background: #fff; font-size: 11pt; }

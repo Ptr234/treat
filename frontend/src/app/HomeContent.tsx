@@ -117,12 +117,6 @@ export default function HomePage() {
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    if (heroImages.length < 2) return;
-    const timer = window.setInterval(() => setHeroIndex((index) => (index + 1) % heroImages.length), 7000);
-    return () => window.clearInterval(timer);
-  }, [heroImages]);
-
   const openAssistant = () => document.dispatchEvent(new CustomEvent('openChatWidget'));
   const matchingActions = QUICK_ACTIONS.filter((action) =>
     `${action.title} ${action.detail} ${action.keywords}`.toLowerCase().includes(taskSearch.trim().toLowerCase()),
@@ -202,7 +196,7 @@ export default function HomePage() {
               ))}
             </ul>
             {heroImages.length > 1 && (
-              <div className="mt-6 flex gap-2" aria-label="Choose featured image">
+              <div className="mt-6 flex gap-2" role="group" aria-label="Choose featured image">
                 {heroImages.map((_, index) => (
                   <button
                     key={index}

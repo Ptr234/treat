@@ -53,10 +53,12 @@ public class PaymentService : IPaymentService
             return new InitiatePaymentResponse(alreadyPaid.TxRef, alreadyPaid.PaymentLink ?? "", alreadyPaid.Amount, alreadyPaid.Currency, "successful");
 
         var amount = FeeFor(registration.BusinessType);
+        var txRef = $"{refNumber}-{Guid.NewGuid():N}";
+        if (txRef.Length > 64) txRef = txRef[..64];
         var payment = new Payment
         {
             BusinessRegistrationRef = refNumber,
-            TxRef = $"{refNumber}-{Guid.NewGuid():N}"[..Math.Min(64, $"{refNumber}-{Guid.NewGuid():N}".Length)],
+            TxRef = txRef,
             Amount = amount,
             Currency = "UGX",
             Status = PaymentStatus.Pending,
@@ -111,9 +113,16 @@ public class PaymentService : IPaymentService
             && verified.TxRef == txRef
             && verified.Status.Equals("successful", StringComparison.OrdinalIgnoreCase)
             && verified.Currency.Equals(payment.Currency, StringComparison.OrdinalIgnoreCase)
-            && verified.Amount >= payment.Amount;
+            && verified.Amount == payment.Amount;
 
-        payment.ProviderTransactionId = verified?.Id.ToString();
+        // A null verification response means the provider could not confirm the
+        // transaction (for example, a transient outage). Leave it pending so a
+        // retried webhook can be verified later; never turn an outage into a
+        // permanent payment failure.
+        if (verified is null)
+            throw new InvalidOperationException("Flutterwave transaction verification is temporarily unavailable");
+
+        payment.ProviderTransactionId = verified.Id.ToString();
         if (isSuccessful)
         {
             payment.Status = PaymentStatus.Successful;
@@ -122,9 +131,7 @@ public class PaymentService : IPaymentService
         else
         {
             payment.Status = PaymentStatus.Failed;
-            payment.FailureReason = verified is null
-                ? "Server-to-server verification call failed"
-                : $"Verified status '{verified.Status}' / amount {verified.Amount} {verified.Currency} did not match expected {payment.Amount} {payment.Currency}";
+            payment.FailureReason = $"Verified status '{verified.Status}' / amount {verified.Amount} {verified.Currency} did not match expected {payment.Amount} {payment.Currency}";
         }
 
         await _db.SaveChangesAsync();

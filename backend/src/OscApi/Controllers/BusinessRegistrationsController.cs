@@ -106,8 +106,12 @@ public class BusinessRegistrationsController : ControllerBase
     /// of charging again.</summary>
     [HttpPost("{refNumber}/payment/initiate")]
     [EnableRateLimiting("public-form")]
-    public async Task<IActionResult> InitiatePayment(string refNumber)
+    public async Task<IActionResult> InitiatePayment(string refNumber, [FromQuery] string? email)
     {
+        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        if (await _registrations.GetByRefAsync(refNumber, email, isStaff) is null)
+            return Problem(detail: "Registration not found or email does not match", statusCode: StatusCodes.Status404NotFound);
+
         try
         {
             var result = await _payments.InitiatePaymentAsync(refNumber);
@@ -127,8 +131,12 @@ public class BusinessRegistrationsController : ControllerBase
     /// tracking page to poll after returning from checkout.</summary>
     [HttpGet("{refNumber}/payment")]
     [EnableRateLimiting("public-form")]
-    public async Task<IActionResult> PaymentStatus(string refNumber)
+    public async Task<IActionResult> PaymentStatus(string refNumber, [FromQuery] string? email)
     {
+        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        if (await _registrations.GetByRefAsync(refNumber, email, isStaff) is null)
+            return Problem(detail: "Registration not found or email does not match", statusCode: StatusCodes.Status404NotFound);
+
         var result = await _payments.GetStatusAsync(refNumber);
         if (result is null) return Problem(detail: "Registration not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<PaymentStatusResponse>(true, result));

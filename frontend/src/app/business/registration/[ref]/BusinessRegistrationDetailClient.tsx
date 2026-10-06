@@ -103,9 +103,12 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   );
 
   const fetchPayment = useCallback(async () => {
-    const res = await apiFetch<PaymentStatus>(`/api/business-registrations/${referenceNumber}/payment`);
+    if (!registration?.contactEmail) return;
+    const res = await apiFetch<PaymentStatus>(
+      `/api/business-registrations/${referenceNumber}/payment?email=${encodeURIComponent(registration.contactEmail)}`
+    );
     if (res.success && res.data) setPayment(res.data);
-  }, [referenceNumber]);
+  }, [referenceNumber, registration?.contactEmail]);
 
   useEffect(() => {
     if (registration) fetchPayment();
@@ -130,9 +133,10 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   const payNow = async () => {
     setPayBusy(true);
     setPayError(null);
-    const res = await apiFetch<{ paymentLink: string }>(`/api/business-registrations/${referenceNumber}/payment/initiate`, {
-      method: 'POST',
-    });
+    const res = await apiFetch<{ paymentLink: string }>(
+      `/api/business-registrations/${referenceNumber}/payment/initiate?email=${encodeURIComponent(registration?.contactEmail ?? '')}`,
+      { method: 'POST' }
+    );
     if (res.success && res.data?.paymentLink) {
       window.location.href = res.data.paymentLink;
     } else {

@@ -16,6 +16,8 @@ const FOOTER_SECTIONS = [
       { label: 'Home', href: '/' },
       { label: 'Investments', href: '/investments' },
       { label: 'Projects Map', href: '/projects' },
+      { label: 'Investment Incentives', href: '/incentives' },
+      { label: 'Investment Process', href: '/investments/process' },
       { label: 'Events Calendar', href: '/events' },
       { label: 'OSC Hub', href: '/agencies' },
     ],
@@ -25,6 +27,7 @@ const FOOTER_SECTIONS = [
     links: [
       { label: 'All Services', href: '/services' },
       { label: 'Business Registration', href: '/business/registration' },
+      { label: 'Track an Application', href: '/track' },
       { label: 'Investment Facilitation', href: '/investments/onboarding' },
       { label: 'Tools & Calculators', href: '/tools' },
       { label: 'Investor Aftercare', href: '/support' },

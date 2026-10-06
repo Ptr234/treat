@@ -43,6 +43,13 @@ const MENUS = [
   },
 ];
 
+const MENU_PATHS: Record<string, string[]> = {
+  'Start a business': ['/business', '/track'],
+  'Find a service': ['/services'],
+  'Invest in Uganda': ['/investments', '/projects', '/incentives', '/analytics'],
+  Resources: ['/downloads', '/guide', '/events', '/tools', '/chatbot', '/support'],
+};
+
 function Brand() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600" aria-label="OneStop Centre Uganda home">
@@ -89,9 +96,9 @@ export default function Navigation() {
             <Brand />
           </div>
 
-          <nav aria-label="Main navigation" className="hidden items-stretch gap-0.5 lg:flex xl:gap-1">
+          <nav aria-label="Main navigation" className="hidden items-stretch gap-0.5 xl:flex xl:gap-1">
             {MENUS.map((menu) => {
-              const isCurrent = pathname.startsWith(menu.title === 'Invest in Uganda' ? '/investments' : menu.title === 'Find a service' ? '/services' : menu.title === 'Resources' ? '/downloads' : '/business');
+              const isCurrent = MENU_PATHS[menu.title]?.some((path) => pathname.startsWith(path)) ?? false;
               const expanded = activeMenu === menu.title;
               const menuId = `menu-${menu.title.toLowerCase().replace(/[^a-z]+/g, '-')}`;
               return (
@@ -100,17 +107,22 @@ export default function Navigation() {
                   className="relative flex"
                   onMouseEnter={() => setActiveMenu(menu.title)}
                   onMouseLeave={() => setActiveMenu(null)}
-                  onKeyDown={(e) => { if (e.key === 'Escape') setActiveMenu(null); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setActiveMenu(null);
+                      e.currentTarget.querySelector('button')?.focus();
+                    }
+                  }}
                 >
                   <button
                     type="button"
                     aria-expanded={expanded}
                     aria-controls={menuId}
                     onClick={() => setActiveMenu(menu.title)}
-                    onFocus={() => setActiveMenu(menu.title)}
                     className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-3.5 text-[15px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600 xl:px-4 ${expanded || isCurrent ? 'bg-neutral-100 text-red-600' : 'text-neutral-800 hover:bg-neutral-50 hover:text-red-600'}`}
                   >
                     {menu.title}
+                    <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
 
                   {expanded && (
@@ -138,11 +150,10 @@ export default function Navigation() {
                 </div>
               );
             })}
-            <Link href="/agencies" className="inline-flex shrink-0 items-center whitespace-nowrap px-3 text-[15px] text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-red-600">Agencies</Link>
-            <Link href="/track" className="inline-flex shrink-0 items-center whitespace-nowrap px-3 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-50 hover:text-red-600">Track application</Link>
+            <Link href="/agencies" aria-current={pathname.startsWith('/agencies') ? 'page' : undefined} className={`inline-flex shrink-0 items-center whitespace-nowrap px-3 text-[15px] transition-colors hover:bg-neutral-50 hover:text-red-600 ${pathname.startsWith('/agencies') ? 'font-semibold text-red-700' : 'text-neutral-800'}`}>Agencies</Link>
           </nav>
 
-          <div className="hidden shrink-0 items-center gap-2 lg:flex xl:gap-3">
+          <div className="hidden shrink-0 items-center gap-2 xl:flex xl:gap-3">
             {isAuthenticated ? (
               <Link href="/profile" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-neutral-800 hover:text-red-600">
                 <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -151,12 +162,12 @@ export default function Navigation() {
             ) : (
               <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
             )}
-            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md bg-black px-4 py-2.5 text-xs font-bold text-yellow-400 transition hover:bg-neutral-800">
-              Start here <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-md bg-black px-3 py-2.5 text-xs font-bold text-yellow-400 transition hover:bg-neutral-800">
+              Investor onboarding <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="flex items-center lg:hidden">
+          <div className="flex items-center xl:hidden">
             <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} className="rounded p-2 text-black hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
               {mobileOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
             </button>
@@ -164,7 +175,7 @@ export default function Navigation() {
         </div>
 
         {mobileOpen && (
-          <nav aria-label="Mobile navigation" className="max-h-[calc(100vh-6rem)] overflow-y-auto border-t border-neutral-200 bg-white px-4 py-4 shadow-lg lg:hidden">
+          <nav aria-label="Mobile navigation" className="max-h-[calc(100vh-6rem)] overflow-y-auto border-t border-neutral-200 bg-white px-4 py-4 shadow-lg xl:hidden">
             <div className="flex flex-col gap-1">
               {MENUS.map((menu) => (
                 <div key={menu.title} className="border-b border-neutral-200">
@@ -183,7 +194,7 @@ export default function Navigation() {
                         <div key={group.label}>
                           <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-neutral-500">{group.label}</p>
                           {group.links.map((link) => (
-                            <Link key={link.href + link.label} href={link.href} onClick={closeMenus} className="block py-1.5 text-xs font-medium text-neutral-800 hover:text-red-600">
+                            <Link key={link.href + link.label} href={link.href} onClick={closeMenus} aria-current={pathname === link.href ? 'page' : undefined} className="block py-1.5 text-xs font-medium text-neutral-800 hover:text-red-600">
                               {link.label}
                             </Link>
                           ))}

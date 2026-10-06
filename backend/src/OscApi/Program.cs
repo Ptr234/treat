@@ -57,19 +57,22 @@ builder.Services.AddDbContext<OscDbContext>(options =>
         errorCodesToAdd: null))
     .LogTo(Console.WriteLine, LogLevel.Information));
 
-// Reverse proxy support (Render/nginx): trust X-Forwarded-For / X-Forwarded-Proto
-// so RemoteIpAddress is the real client IP. Without this, every request appears
-// to come from the proxy, which collapses all per-IP rate-limit buckets into one
-// and records the proxy's address in the audit log.
+// Reverse proxy support: accept forwarded headers only from explicitly trusted
+// proxy addresses. Trusting headers from every peer lets direct callers spoof
+// client IPs and scheme, bypassing IP-based limits and corrupting audit records.
 builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
         Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
         Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
-    // The platform proxy is not a fixed address; clear the defaults so the
-    // headers are honoured (the app is only reachable through the proxy).
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
+    foreach (var proxy in builder.Configuration["ForwardedHeaders:KnownProxies"]?
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [])
+    {
+        if (System.Net.IPAddress.TryParse(proxy, out var address))
+            options.KnownProxies.Add(address);
+        else
+            throw new InvalidOperationException($"Invalid ForwardedHeaders:KnownProxies IP address: {proxy}");
+    }
 });
 
 // CORS
@@ -345,7 +348,8 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("RunMigr
     }
     catch (Exception ex)
     {
-        Log.Warning(ex, "Database migration/seed skipped");
+        Log.Fatal(ex, "Database migration/seed failed; refusing to start without a verified schema");
+        throw;
     }
 }
 

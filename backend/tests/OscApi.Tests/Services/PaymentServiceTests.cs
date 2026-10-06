@@ -138,4 +138,21 @@ public class PaymentServiceTests
         var status = await svc.GetStatusAsync("REG-2026-0001");
         Assert.Equal("failed", status!.Status);
     }
+
+    [Fact]
+    public async Task HandleWebhookAsync_ProviderVerificationUnavailable_LeavesPaymentPendingForRetry()
+    {
+        var (svc, flutterwave, _) = CreateService();
+        var initiated = await svc.InitiatePaymentAsync("REG-2026-0001");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => svc.HandleWebhookAsync("valid-hash",
+            new FlutterwaveWebhookIncoming
+            {
+                Event = "charge.completed",
+                Data = new FlutterwaveWebhookData { Id = 999, TxRef = initiated.TxRef, Status = "successful" },
+            }));
+
+        var status = await svc.GetStatusAsync("REG-2026-0001");
+        Assert.Equal("pending", status!.Status);
+    }
 }
