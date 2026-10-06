@@ -150,10 +150,10 @@ export default function HomePage() {
               fill
               priority
               sizes="100vw"
-              className="object-cover opacity-35"
+              className="object-cover opacity-70"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-br from-black via-black/90 to-red-700/70" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-red-700/40" />
           <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute -right-28 top-1/2 hidden h-[30rem] w-[30rem] -translate-y-1/2 lg:block">
             <span className="absolute inset-0 border border-yellow-400/40" />
             <span className="absolute inset-12 border border-white/20" />

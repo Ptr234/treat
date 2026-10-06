@@ -35,12 +35,6 @@ const MENUS = [
   },
 ];
 
-const MENU_PATHS: Record<string, string[]> = {
-  Services: ['/business', '/track', '/services'],
-  Invest: ['/investments', '/projects', '/incentives', '/analytics'],
-  Resources: ['/downloads', '/guide', '/events', '/tools', '/chatbot', '/support'],
-};
-
 function Brand() {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600" aria-label="OneStop Centre Uganda home">
@@ -55,7 +49,6 @@ function Brand() {
 }
 
 export default function Navigation() {
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMobileMenu, setActiveMobileMenu] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -63,7 +56,6 @@ export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
 
   const closeMenus = () => {
-    setActiveMenu(null);
     setMobileOpen(false);
     setActiveMobileMenu(null);
   };
@@ -87,69 +79,13 @@ export default function Navigation() {
           <span className="flex-1 bg-yellow-400" />
           <span className="flex-1 bg-red-600" />
         </div>
-        <div className="mx-auto flex min-h-[68px] max-w-6xl items-stretch justify-between gap-2 px-3 sm:h-[76px] sm:gap-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-0 shrink items-center pr-1 sm:shrink-0 sm:pr-2">
+        <div className="mx-auto grid min-h-[68px] max-w-6xl grid-cols-[1fr_auto_1fr] items-stretch gap-2 px-3 sm:h-[76px] sm:gap-4 sm:px-6 lg:px-8">
+          <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-center">
             <Brand />
           </div>
 
-          <nav aria-label="Main navigation" className="hidden items-stretch gap-0.5 xl:flex xl:gap-1">
-            {MENUS.map((menu) => {
-              const isCurrent = MENU_PATHS[menu.title]?.some((path) => pathname.startsWith(path)) ?? false;
-              const expanded = activeMenu === menu.title;
-              const menuId = `menu-${menu.title.toLowerCase().replace(/[^a-z]+/g, '-')}`;
-              return (
-                <div
-                  key={menu.title}
-                  className="relative flex"
-                  onMouseEnter={() => setActiveMenu(menu.title)}
-                  onMouseLeave={() => setActiveMenu(null)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
-                      setActiveMenu(null);
-                      e.currentTarget.querySelector('button')?.focus();
-                    }
-                  }}
-                >
-                  <button
-                    type="button"
-                    aria-expanded={expanded}
-                    aria-controls={menuId}
-                    onClick={() => setActiveMenu(menu.title)}
-                    className={`inline-flex shrink-0 items-center gap-2 whitespace-nowrap px-3.5 text-[15px] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600 xl:px-4 ${expanded || isCurrent ? 'bg-neutral-100 text-red-600' : 'text-neutral-800 hover:bg-neutral-50 hover:text-red-600'}`}
-                  >
-                    {menu.title}
-                    <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} aria-hidden="true" />
-                  </button>
 
-                  {expanded && (
-                    <div id={menuId} className="absolute left-0 top-full z-50 w-72 border border-neutral-200 bg-white shadow-xl">
-                      {menu.groups.map((group) => (
-                        <div key={group.label}>
-                          <p className="bg-neutral-50 px-4 py-2 text-[11px] font-bold uppercase tracking-[.15em] text-neutral-500">{group.label}</p>
-                          <ul>
-                            {group.links.map((link) => (
-                              <li key={link.href + link.label} className="border-t border-neutral-200">
-                                <Link
-                                  href={link.href}
-                                  onClick={closeMenus}
-                                  className="block border-l-4 border-transparent px-4 py-3 text-sm text-neutral-900 transition-colors hover:border-yellow-400 hover:bg-neutral-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600"
-                                >
-                                  {link.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            <Link href="/agencies" aria-current={pathname.startsWith('/agencies') ? 'page' : undefined} className={`inline-flex shrink-0 items-center whitespace-nowrap px-3 text-[15px] transition-colors hover:bg-neutral-50 hover:text-red-600 ${pathname.startsWith('/agencies') ? 'font-semibold text-red-700' : 'text-neutral-800'}`}>Agencies</Link>
-          </nav>
-
-          <div className="hidden shrink-0 items-center gap-2 xl:flex xl:gap-3">
+          <div className="col-start-3 row-start-1 hidden shrink-0 items-center justify-self-end gap-2 xl:flex xl:gap-3">
             {isAuthenticated ? (
               <Link href="/profile" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-neutral-800 hover:text-red-600">
                 <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -163,7 +99,7 @@ export default function Navigation() {
             </Link>
           </div>
 
-          <div className="flex items-center xl:hidden">
+          <div className="col-start-1 row-start-1 flex items-center justify-self-start">
             <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} aria-controls="mobile-site-navigation" className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-black hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
               {mobileOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
             </button>
@@ -171,35 +107,54 @@ export default function Navigation() {
         </div>
 
         {mobileOpen && (
-          <nav id="mobile-site-navigation" aria-label="Mobile navigation" className="max-h-[calc(100dvh-6rem)] overscroll-contain overflow-y-auto border-t border-neutral-200 bg-white px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-lg xl:hidden">
+          <nav id="mobile-site-navigation" aria-label="Mobile navigation" className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-7rem)] overscroll-contain overflow-y-auto border-t border-neutral-200 bg-white px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl sm:inset-x-auto sm:left-0 sm:w-1/2 sm:px-6">
             <div className="flex flex-col gap-1">
-              {MENUS.map((menu) => (
-                <div key={menu.title} className="border-b border-neutral-200">
-                  <button
-                    type="button"
-                    onClick={() => setActiveMobileMenu(activeMobileMenu === menu.title ? null : menu.title)}
-                    aria-expanded={activeMobileMenu === menu.title}
-                    className="flex w-full items-center justify-between py-3 text-left text-sm font-bold text-black"
-                  >
-                    {menu.title}
-                    <ChevronDownIcon className={`h-4 w-4 transition-transform ${activeMobileMenu === menu.title ? 'rotate-180' : ''}`} aria-hidden="true" />
-                  </button>
-                  {activeMobileMenu === menu.title && (
-                    <div className="grid grid-cols-1 gap-y-4 pb-4 min-[420px]:grid-cols-2 min-[420px]:gap-x-4 min-[420px]:gap-y-5">
-                      {menu.groups.map((group) => (
-                        <div key={group.label}>
-                          <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-neutral-500">{group.label}</p>
-                          {group.links.map((link) => (
-                            <Link key={link.href + link.label} href={link.href} onClick={closeMenus} aria-current={pathname === link.href ? 'page' : undefined} className="block min-h-10 py-2 text-sm font-medium text-neutral-800 hover:text-red-600">
-                              {link.label}
-                            </Link>
-                          ))}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+              {MENUS.map((menu) => {
+                const open = activeMobileMenu === menu.title;
+                return (
+                  <div key={menu.title} className="border-b border-neutral-200">
+                    <button
+                      type="button"
+                      onClick={() => setActiveMobileMenu(open ? null : menu.title)}
+                      aria-expanded={open}
+                      aria-controls={`mobile-${menu.title.toLowerCase()}`}
+                      className="flex w-full items-center justify-between gap-4 py-4 text-left"
+                    >
+                      <span>
+                        <span className="block font-display text-lg font-semibold text-black">{menu.title}</span>
+                        <span className="mt-0.5 block text-xs text-neutral-600">{menu.intro}</span>
+                      </span>
+                      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors ${open ? 'bg-black text-yellow-400' : 'bg-neutral-100 text-black'}`} aria-hidden="true">
+                        <ChevronDownIcon className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
+                      </span>
+                    </button>
+                    {open && (
+                      <div id={`mobile-${menu.title.toLowerCase()}`} className="mb-4 space-y-5 bg-neutral-50 px-4 py-4">
+                        {menu.groups.map((group) => (
+                          <div key={group.label}>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-red-600">{group.label}</p>
+                            <ul className="mt-2 divide-y divide-neutral-200 bg-white">
+                              {group.links.map((link) => (
+                                <li key={link.href + link.label}>
+                                  <Link
+                                    href={link.href}
+                                    onClick={closeMenus}
+                                    aria-current={pathname === link.href ? 'page' : undefined}
+                                    className="group flex min-h-11 items-center justify-between gap-3 px-3 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-100 hover:text-red-600"
+                                  >
+                                    {link.label}
+                                    <ArrowRightIcon className="h-4 w-4 shrink-0 text-neutral-500 transition-transform group-hover:translate-x-0.5 group-hover:text-red-600" aria-hidden="true" />
+                                  </Link>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
               <Link href="/agencies" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Agencies</Link>
               <Link href="/track" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Track an application</Link>
               <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 bg-black px-4 py-3 text-center text-sm font-bold text-yellow-400">Start here</Link>
