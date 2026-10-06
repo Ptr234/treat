@@ -148,6 +148,14 @@ h1, h2, h3, h4, h5, h6 {
   text-wrap: pretty;
 }
 
+/* Title bands (PageBand): light text on the black-to-red gradient.
+   Plain rules, not utilities, so they hold regardless of page classes. */
+.page-band h1,
+.page-band h2 { color: #ffffff; }
+.page-band p,
+.page-band label { color: rgb(255 255 255 / 0.85); }
+.page-band .text-red-600 { color: #fde047; }
+
 /* Reserve the third face for figures, IDs and compact technical labels. */
 .font-data,
 [data-typography="data"] {
