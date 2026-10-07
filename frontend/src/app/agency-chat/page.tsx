@@ -175,6 +175,9 @@ export default function AgencyChatPage() {
   const [activeChannel, setActiveChannel] = useState('general');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  // Defaults to UIA (the coordinating OSC agency, for admin/dg) until the
+  // session resolves; the effect below switches it to the signed-in
+  // officer's own agency as soon as it's known.
   const [senderAgencyCode, setSenderAgencyCode] = useState<string>('UIA');
   const [sendError, setSendError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -204,6 +207,13 @@ export default function AgencyChatPage() {
   useEffect(() => {
     setReadStateLocal(getReadState());
   }, []);
+
+  // An agency officer's messages must be attributed to their own agency —
+  // the free-choice dropdown previously let any signed-in officer post as
+  // any agency, defaulting to UIA regardless of who they actually are.
+  useEffect(() => {
+    if (user?.agencyCode) setSenderAgencyCode(user.agencyCode);
+  }, [user?.agencyCode]);
 
   // ── Scroll tracking ──────────────────────────────────────────────
 
@@ -334,12 +344,19 @@ export default function AgencyChatPage() {
   }, [messages.length, isAtBottom]);
 
   // ── Auto-scroll only when at bottom ─────────────────────────────────
+  // Keyed on messages.length (a primitive), not the messages array itself —
+  // fetchMessages() builds a brand-new array on every 10s poll even when
+  // nothing changed, and keying on the array reference re-ran this smooth
+  // scroll every single poll. At the bottom, that's invisible most of the
+  // time, but any tiny reflow (e.g. an attachment link's width differing by
+  // a pixel) made the whole pane visibly snap up and down every 10 seconds.
+  // Matches the pattern already used correctly by the two effects below.
 
   useEffect(() => {
     if (isAtBottom) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isAtBottom]);
+  }, [messages.length, isAtBottom]);
 
   // ── Mark channel as read when switching ─────────────────────────────
 
@@ -943,18 +960,29 @@ export default function AgencyChatPage() {
                   {user?.name || 'Admin'}
                 </span>
 
-                {/* Agency selector */}
-                <select
-                  value={senderAgencyCode}
-                  onChange={(e) => setSenderAgencyCode(e.target.value)}
-                  className="px-3 py-1.5 text-sm bg-white border border-neutral-400 rounded-md text-black focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black appearance-none cursor-pointer"
-                >
-                  {AGENCY_CODES.map((code) => (
-                    <option key={code} value={code}>
-                      {code}
-                    </option>
-                  ))}
-                </select>
+                {/* Agency identity — fixed for officers (their messages must be
+                    attributed to their own agency), selectable only for
+                    admin/dg, who have no single agency of their own. */}
+                {user?.agencyCode ? (
+                  <span
+                    className="px-3 py-1.5 text-sm bg-neutral-100 border border-neutral-300 rounded-md text-neutral-700 font-medium"
+                    title="Messages are sent as your own agency"
+                  >
+                    {user.agencyCode}
+                  </span>
+                ) : (
+                  <select
+                    value={senderAgencyCode}
+                    onChange={(e) => setSenderAgencyCode(e.target.value)}
+                    className="px-3 py-1.5 text-sm bg-white border border-neutral-400 rounded-md text-black focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black appearance-none cursor-pointer"
+                  >
+                    {AGENCY_CODES.map((code) => (
+                      <option key={code} value={code}>
+                        {code}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 {/* Keyboard hint */}
                 <span className="hidden sm:inline text-[10px] text-neutral-500 ml-auto">

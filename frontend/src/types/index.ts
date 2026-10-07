@@ -11,6 +11,8 @@ export interface User {
   name: string;
   role: UserRole;
   picture?: string;
+  /** Set for agency_officer accounts (the agency_code JWT claim); absent for admin/dg/user. */
+  agencyCode?: string;
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;

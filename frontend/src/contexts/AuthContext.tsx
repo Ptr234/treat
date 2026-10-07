@@ -32,7 +32,7 @@ function extractUser(data: any): User | null {
   if (!u?.email) return null;
   return {
     id: u.id ?? u.sub, name: u.name, email: u.email, role: u.role,
-    picture: u.picture, isVerified: true,
+    picture: u.picture, agencyCode: u.agencyCode, isVerified: true,
     createdAt: u.createdAt ?? new Date().toISOString(),
     updatedAt: u.updatedAt ?? new Date().toISOString(),
   };
