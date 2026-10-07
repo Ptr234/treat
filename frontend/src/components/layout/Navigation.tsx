@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ArrowRightIcon, Bars3Icon, ChevronDownIcon, UserCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, Bars3Icon, ChevronDownIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthModal from '@/components/auth/AuthModal';
 
@@ -85,7 +85,7 @@ export default function Navigation() {
           </div>
 
 
-          <div className="col-start-3 row-start-1 hidden shrink-0 items-center justify-self-end gap-2 xl:flex xl:gap-3">
+          <div className="col-start-1 row-start-1 hidden shrink-0 items-center justify-self-start gap-2 xl:flex xl:gap-3">
             {isAuthenticated ? (
               <Link href="/profile" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-neutral-800 hover:text-red-600">
                 <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -99,15 +99,15 @@ export default function Navigation() {
             </Link>
           </div>
 
-          <div className="col-start-1 row-start-1 flex items-center justify-self-start">
-            <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} aria-controls="mobile-site-navigation" className="flex h-11 w-11 shrink-0 items-center justify-center rounded text-black hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
-              {mobileOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+          <div className="col-start-3 row-start-1 flex items-center justify-self-end">
+            <button type="button" onClick={() => setMobileOpen(!mobileOpen)} aria-label={mobileOpen ? 'Close menu' : 'Open menu'} aria-expanded={mobileOpen} aria-controls="mobile-site-navigation" className="flex h-11 shrink-0 items-center justify-center gap-2 rounded px-3 text-black hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600">
+              {mobileOpen ? <span className="text-sm font-bold">Close</span> : <Bars3Icon className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
         {mobileOpen && (
-          <nav id="mobile-site-navigation" aria-label="Mobile navigation" className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-7rem)] overscroll-contain overflow-y-auto border-t border-neutral-200 bg-white px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl sm:inset-x-auto sm:left-0 sm:w-1/2 sm:px-6">
+          <nav id="mobile-site-navigation" aria-label="Mobile navigation" className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-7rem)] overscroll-contain overflow-y-auto border-t border-neutral-200 bg-white px-4 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl sm:inset-x-auto sm:right-0 sm:w-96 sm:px-6">
             <div className="flex flex-col gap-1">
               {MENUS.map((menu) => {
                 const open = activeMobileMenu === menu.title;
