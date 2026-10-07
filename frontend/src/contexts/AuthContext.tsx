@@ -71,63 +71,78 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string, mfaCode?: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
 
-    const json = await apiFetch('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, mfaCode }),
-    });
+    // try/catch so a thrown error (a genuine network failure, not just
+    // `{ success: false }`) still resets isLoading — otherwise the form
+    // stays stuck on "Signing in..." until the page is reloaded.
+    try {
+      const json = await apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password, mfaCode }),
+      });
 
-    if (!json.success) {
+      if (!json.success) {
+        throw new Error(json.error || 'Login failed');
+      }
+
+      // The admin has MFA enabled: the password was accepted but a TOTP code
+      // is still required. Signal the caller to collect the code (no session yet).
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((json.data as any)?.mfaRequired) {
+        setState(s => ({ ...s, isLoading: false }));
+        return { mfaRequired: true };
+      }
+
+      const user = extractUser(json.data);
+      setState({ user, isAuthenticated: true, isLoading: false, error: null });
+      return {};
+    } catch (err) {
       setState(s => ({ ...s, isLoading: false }));
-      throw new Error(json.error || 'Login failed');
+      throw err;
     }
-
-    // The admin has MFA enabled: the password was accepted but a TOTP code is
-    // still required. Signal the caller to collect the code (no session yet).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((json.data as any)?.mfaRequired) {
-      setState(s => ({ ...s, isLoading: false }));
-      return { mfaRequired: true };
-    }
-
-    const user = extractUser(json.data);
-    setState({ user, isAuthenticated: true, isLoading: false, error: null });
-    return {};
   }, []);
 
   // ── Sign up (email + password) ─────────────────────────────────────
   const signup = useCallback(async (name: string, email: string, password: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
 
-    const json = await apiFetch('/api/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify({ name, email, password }),
-    });
+    try {
+      const json = await apiFetch('/api/auth/signup', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password }),
+      });
 
-    if (!json.success) {
+      if (!json.success) {
+        throw new Error(json.error || 'Sign up failed');
+      }
+
+      const user = extractUser(json.data);
+      setState({ user, isAuthenticated: true, isLoading: false, error: null });
+    } catch (err) {
       setState(s => ({ ...s, isLoading: false }));
-      throw new Error(json.error || 'Sign up failed');
+      throw err;
     }
-
-    const user = extractUser(json.data);
-    setState({ user, isAuthenticated: true, isLoading: false, error: null });
   }, []);
 
   // ── Login with Google credential ──────────────────────────────────
   const loginWithGoogle = useCallback(async (credential: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
 
-    const json = await apiFetch('/api/auth/google', {
-      method: 'POST',
-      body: JSON.stringify({ idToken: credential }),
-    });
+    try {
+      const json = await apiFetch('/api/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ idToken: credential }),
+      });
 
-    if (!json.success) {
+      if (!json.success) {
+        throw new Error(json.error || 'Google login failed');
+      }
+
+      const user = extractUser(json.data);
+      setState({ user, isAuthenticated: true, isLoading: false, error: null });
+    } catch (err) {
       setState(s => ({ ...s, isLoading: false }));
-      throw new Error(json.error || 'Google login failed');
+      throw err;
     }
-
-    const user = extractUser(json.data);
-    setState({ user, isAuthenticated: true, isLoading: false, error: null });
   }, []);
 
   // ── Logout via API ─────────────────────────────────────────────────

@@ -73,7 +73,9 @@ export default function GoogleSignInButton({
 
     const script = document.createElement('script');
     script.id = 'google-gsi-script';
-    script.src = 'https://accounts.google.com/gsi/client';
+    // hl=en pins the button text and the sign-in popup to English — without it,
+    // Google renders both in the visitor's browser/OS locale.
+    script.src = 'https://accounts.google.com/gsi/client?hl=en';
     script.async = true;
     script.defer = true;
     script.onload = () => setScriptLoaded(true);
