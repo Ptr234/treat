@@ -23,7 +23,7 @@ interface StatCardProps {
  */
 export default function StatCard({ label, value, helper, tone = 'black' }: StatCardProps) {
   return (
-    <div className="bg-white border border-neutral-200 p-5">
+    <div className="p-5 border-t border-neutral-200 pt-5">
       <p className="text-sm text-neutral-600 font-medium">{label}</p>
       <p className={`font-display text-3xl font-bold mt-1 ${TONE_CLASSES[tone]}`}>{value}</p>
       {helper && <p className="text-xs text-neutral-500 mt-1">{helper}</p>}

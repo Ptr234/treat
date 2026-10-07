@@ -25,6 +25,7 @@ import {
   PhoneIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
+import { PageHeader, StatCard } from '@/components/dashboard/ui';
 
 interface EnquiryStats {
   total: number;
@@ -206,54 +207,32 @@ export default function EnquiriesPage() {
   return (
  <div className="min-h-screen bg-white py-8">
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Link href="/dashboard" className="text-neutral-500 hover:text-neutral-700 transition-colors">
-                <ChevronLeftIcon className="w-5 h-5" />
-              </Link>
-              <h1 className="text-3xl font-bold text-black flex items-center gap-3">
-                <ChatBubbleLeftRightIcon className="w-8 h-8 text-red-600" />
-                Chat Enquiries
-              </h1>
-            </div>
-            <p className="text-neutral-700 ml-8">AI chatbot conversations and enquiry analytics</p>
-          </div>
-          <button
-            onClick={refresh}
-            className="p-2 rounded-md bg-white hover:bg-neutral-50 transition-colors border border-neutral-200"
-            title="Refresh"
-          >
-            <ArrowPathIcon className="w-5 h-5 text-neutral-700" />
-          </button>
-        </div>
+        <PageHeader
+          title="Chat Enquiries"
+          subtitle="AI chatbot conversations and enquiry analytics"
+          actions={
+            <button
+              onClick={refresh}
+              className="p-2 rounded-md bg-white hover:bg-neutral-50 transition-colors border border-neutral-200"
+              title="Refresh"
+            >
+              <ArrowPathIcon className="w-5 h-5 text-neutral-700" />
+            </button>
+          }
+        />
 
         {/* Stats Cards */}
         {stats && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="p-5 border-t border-neutral-200 pt-5">
-              <p className="text-sm text-neutral-600 font-medium">Total Enquiries</p>
-              <p className="text-3xl font-bold text-black mt-1">{stats.total}</p>
-              <p className="text-xs text-neutral-500 mt-1">{stats.uniqueSessions} conversations</p>
-            </div>
-            <div className="p-5 border-t border-neutral-200 pt-5">
-              <p className="text-sm text-neutral-600 font-medium">Today</p>
-              <p className="text-3xl font-bold text-red-600 mt-1">{stats.today}</p>
-              <p className="text-xs text-neutral-500 mt-1">messages today</p>
-            </div>
-            <div className="p-5 border-t border-neutral-200 pt-5">
-              <p className="text-sm text-neutral-600 font-medium">This Week</p>
-              <p className="text-3xl font-bold text-black mt-1">{stats.thisWeek}</p>
-              <p className="text-xs text-neutral-500 mt-1">last 7 days</p>
-            </div>
-            <div className="p-5 border-t border-neutral-200 pt-5">
-              <p className="text-sm text-neutral-600 font-medium">AI Success Rate</p>
-              <p className="text-3xl font-bold text-green-600 mt-1">
-                {stats.total > 0 ? Math.round(((stats.byTier.ai ?? 0) / stats.total) * 100) : 0}%
-              </p>
-              <p className="text-xs text-neutral-500 mt-1">handled by Groq AI</p>
-            </div>
+            <StatCard label="Total Enquiries" value={stats.total} helper={`${stats.uniqueSessions} conversations`} />
+            <StatCard label="Today" value={stats.today} helper="messages today" tone="red" />
+            <StatCard label="This Week" value={stats.thisWeek} helper="last 7 days" />
+            <StatCard
+              label="AI Success Rate"
+              value={`${stats.total > 0 ? Math.round(((stats.byTier.ai ?? 0) / stats.total) * 100) : 0}%`}
+              helper="handled by Groq AI"
+              tone="green"
+            />
           </div>
         )}
 
@@ -442,8 +421,8 @@ export default function EnquiriesPage() {
 
       {/* Conversation Viewer Modal */}
       {selectedSession && (
-        <div className="fixed inset-0 bg-neutral-100 z-50 flex items-center justify-center p-4">
-          <div className="max-w-2xl w-full max-h-[80vh] flex flex-col border-t border-neutral-200 pt-5">
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="max-w-2xl w-full max-h-[80vh] flex flex-col bg-white shadow-xl rounded-md overflow-hidden">
             <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold text-black">Conversation</h3>
@@ -509,7 +488,7 @@ export default function EnquiriesPage() {
                   <div key={msg._id} className="space-y-2">
                     {/* User message */}
                     <div className="flex justify-end">
-                      <div className="bg-yellow-50 px-4 py-2.5 max-w-[85%] border-t border-neutral-200 pt-5">
+                      <div className="bg-yellow-50 rounded-md px-4 py-2.5 max-w-[85%]">
                         <p className="text-sm text-neutral-800">{msg.userMessage}</p>
                         <p className="text-xs text-neutral-500 mt-1 text-right">
                           {new Date(msg.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
