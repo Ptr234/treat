@@ -558,31 +558,26 @@ export default function HomePage() {
       </section>
 
       {/* Final call to action */}
-      <section className="relative isolate overflow-hidden bg-gradient-to-br from-black via-black to-red-700/60 py-16 text-white">
-          <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute -right-20 top-1/2 hidden h-72 w-72 -translate-y-1/2 lg:block">
-            <span className="absolute inset-0 border border-yellow-400/40" />
-            <span className="absolute inset-10 border border-white/20" />
-            <span className="absolute inset-20 border-2 border-red-600/70" />
-          </div>
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <section className="py-16">
+        <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <div className="max-w-2xl">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-yellow-300">Here to help</p>
+            <p className={sectionHeading}>Here to help</p>
             <h2 className="font-display text-3xl font-bold uppercase tracking-tight sm:text-4xl">Have a question about investing in Uganda?</h2>
-            <p className="mt-4 leading-7 text-white/85">
+            <p className="mt-4 leading-7 text-neutral-700">
               Speak with the OneStop Centre or get quick answers from our investment assistant.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
               href="/support"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-yellow-400 px-5 py-3 text-sm font-bold text-black hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-black px-5 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
             >
               Contact the centre <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
             </Link>
             <button
               type="button"
               onClick={openAssistant}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border-2 border-white/70 px-5 py-3 text-sm font-bold text-white hover:bg-white hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md border-2 border-black px-5 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
             >
               <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
               Ask the assistant
