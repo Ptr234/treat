@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api-client';
 import { isStaff } from '@/lib/roles';
@@ -15,7 +16,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function ProfilePage() {
-  const { isAuthenticated, user, isLoading: authLoading, refreshUser } = useAuth();
+  const { isAuthenticated, user, isLoading: authLoading, refreshUser, logout } = useAuth();
+  const router = useRouter();
 
   // Set when middleware redirected here because a back-office session hasn't
   // completed MFA enrolment yet (?mfa=required) — read client-side to avoid
@@ -55,6 +57,11 @@ export default function ProfilePage() {
   const [mfaError, setMfaError] = useState('');
   const [mfaSuccess, setMfaSuccess] = useState('');
   const [secretCopied, setSecretCopied] = useState(false);
+  // The active session's token was issued before enrolment and still carries
+  // mfa_enabled=false — it only picks up the new claim on the next login, so
+  // enabling MFA here doesn't unlock the dashboard until the user re-signs in.
+  const [justEnrolledMfa, setJustEnrolledMfa] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   // Disable-MFA form
   const [showDisable, setShowDisable] = useState(false);
   const [disablePassword, setDisablePassword] = useState('');
@@ -106,11 +113,21 @@ export default function ProfilePage() {
       setEnroll(null);
       setMfaCode('');
       setMfaSuccess('Two-factor authentication is now enabled.');
-      setTimeout(() => setMfaSuccess(''), 4000);
+      setJustEnrolledMfa(true);
     } catch {
       setMfaError('Network error — please try again');
     } finally {
       setMfaBusy(false);
+    }
+  };
+
+  const handleSignOutToApply = async () => {
+    setSigningOut(true);
+    try {
+      await logout();
+      router.push('/login');
+    } catch {
+      setSigningOut(false);
     }
   };
 
@@ -131,6 +148,7 @@ export default function ProfilePage() {
       setShowDisable(false);
       setDisablePassword('');
       setDisableCode('');
+      setJustEnrolledMfa(false);
       setMfaSuccess('Two-factor authentication has been disabled.');
       setTimeout(() => setMfaSuccess(''), 4000);
     } catch {
@@ -581,6 +599,26 @@ export default function ProfilePage() {
                   </form>
                 ) : (
                   <div className="space-y-3">
+                    {justEnrolledMfa && (
+                      <div className="flex items-start gap-3 border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-50">
+                        <DevicePhoneMobileIcon className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-yellow-900">Sign out and sign back in to finish</p>
+                          <p className="text-sm text-yellow-800 mt-1">
+                            Your current session was issued before 2FA was enabled, so the dashboard and staff
+                            tools will keep asking for setup until you start a new session. Sign out now and log
+                            back in — you&apos;ll be prompted for your authenticator code.
+                          </p>
+                          <button
+                            onClick={handleSignOutToApply}
+                            disabled={signingOut}
+                            className="mt-3 px-4 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                          >
+                            {signingOut ? 'Signing out…' : 'Sign out now'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     <p className="text-sm text-neutral-700">
                       Your account is protected with an authenticator app. A code is required each time you sign in.
                     </p>
