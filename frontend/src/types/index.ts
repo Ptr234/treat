@@ -1,10 +1,15 @@
 // Core application types for OneStop Centre Uganda
 
+// Mirrors the back-office RBAC model in src/lib/roles.ts (and
+// backend/src/OscApi/Common/Roles.cs): 'admin' and 'dg' are admin-level,
+// 'agency_officer' is staff scoped to one agency, 'user' is a public account.
+export type UserRole = 'user' | 'admin' | 'dg' | 'agency_officer';
+
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'user' | 'admin';
+  role: UserRole;
   picture?: string;
   isVerified: boolean;
   createdAt: string;

@@ -34,24 +34,27 @@ interface NavGroup {
   items: NavItem[];
 }
 
-// Navigation model. `roles` mirrors the guard on each destination page today:
-// most dashboard pages are admin-only, User Management allows admin + dg, and
-// the Issue Tracking board is open to all back-office staff.
+// Navigation model. `roles` mirrors the guard each destination page actually
+// enforces (src/lib/roles.ts): every page below checks `isAdminLevel`
+// (admin + dg) except Business Registrations and Issue Tracking, which use
+// `isStaff` (+ agency_officer). dg is the Director General — a leadership
+// superuser per roles.ts — so it must appear everywhere admin does, or a DG
+// session ends up with no visible link to pages it's fully authorised to open.
 const NAV: NavGroup[] = [
   {
     heading: 'Overview',
     items: [
-      { label: 'Overview', href: '/dashboard', icon: Squares2X2Icon, roles: ['admin'] },
+      { label: 'Overview', href: '/dashboard', icon: Squares2X2Icon, roles: ['admin', 'dg'] },
       { label: 'Issue Tracking', href: '/tickets', icon: TicketIcon, roles: ['admin', 'dg', 'agency_officer'] },
     ],
   },
   {
     heading: 'Operations',
     items: [
-      { label: 'Contact Inquiries', href: '/dashboard/inquiries', icon: DocumentTextIcon, roles: ['admin'] },
-      { label: 'Chat Enquiries', href: '/dashboard/enquiries', icon: ChatBubbleLeftRightIcon, roles: ['admin'] },
-      { label: 'Investor Pipeline', href: '/dashboard/investors', icon: ArrowTrendingUpIcon, roles: ['admin'] },
-      { label: 'Appointments', href: '/dashboard/appointments', icon: CalendarIcon, roles: ['admin'] },
+      { label: 'Contact Inquiries', href: '/dashboard/inquiries', icon: DocumentTextIcon, roles: ['admin', 'dg'] },
+      { label: 'Chat Enquiries', href: '/dashboard/enquiries', icon: ChatBubbleLeftRightIcon, roles: ['admin', 'dg'] },
+      { label: 'Investor Pipeline', href: '/dashboard/investors', icon: ArrowTrendingUpIcon, roles: ['admin', 'dg'] },
+      { label: 'Appointments', href: '/dashboard/appointments', icon: CalendarIcon, roles: ['admin', 'dg'] },
       // Its own StaffPolicy + URSB-agency-scoped backend, so agency officers
       // (not just admin-level staff) belong here — see middleware.ts's
       // STAFF_ROUTES override for /dashboard/business-registrations.
@@ -61,17 +64,17 @@ const NAV: NavGroup[] = [
   {
     heading: 'Content',
     items: [
-      { label: 'Events', href: '/dashboard/events', icon: MegaphoneIcon, roles: ['admin'] },
-      { label: 'Agencies', href: '/dashboard/agencies', icon: BuildingOffice2Icon, roles: ['admin'] },
-      { label: 'Downloads', href: '/dashboard/downloads', icon: DocumentTextIcon, roles: ['admin'] },
+      { label: 'Events', href: '/dashboard/events', icon: MegaphoneIcon, roles: ['admin', 'dg'] },
+      { label: 'Agencies', href: '/dashboard/agencies', icon: BuildingOffice2Icon, roles: ['admin', 'dg'] },
+      { label: 'Downloads', href: '/dashboard/downloads', icon: DocumentTextIcon, roles: ['admin', 'dg'] },
     ],
   },
   {
     heading: 'Administration',
     items: [
       { label: 'User Management', href: '/dashboard/users', icon: UserGroupIcon, roles: ['admin', 'dg'] },
-      { label: 'Escalation Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, roles: ['admin'] },
-      { label: 'Audit Log', href: '/dashboard/audit', icon: ShieldCheckIcon, roles: ['admin'] },
+      { label: 'Escalation Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, roles: ['admin', 'dg'] },
+      { label: 'Audit Log', href: '/dashboard/audit', icon: ShieldCheckIcon, roles: ['admin', 'dg'] },
     ],
   },
 ];

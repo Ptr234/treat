@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeftIcon, UserPlusIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api-client';
+import { isAdminLevel } from '@/lib/roles';
 
 interface AdminUser {
   id: string;
@@ -27,7 +28,7 @@ const roleLabel = (role: string) => ROLE_LABELS[role] ?? role;
 
 export default function UserManagementPage() {
   const { isAuthenticated, user } = useAuth();
-  const isAdminLevel = ['admin', 'dg'].includes(user?.role ?? '');
+  const isAdmin = isAdminLevel(user?.role);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -88,7 +89,7 @@ export default function UserManagementPage() {
     }
   };
 
-  if (!isAuthenticated || !isAdminLevel) {
+  if (!isAuthenticated || !isAdmin) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
         <p className="text-neutral-700">Admin access required.</p>

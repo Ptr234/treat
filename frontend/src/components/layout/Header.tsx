@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { isAdminLevel, isStaff } from '@/lib/roles';
+import { isAdminLevel, isStaff, postLoginPath } from '@/lib/roles';
 import {
   UserIcon,
   ArrowRightOnRectangleIcon,
@@ -125,7 +125,7 @@ const Header: React.FC = () => {
                 Issue Tracking
               </Link>
             )}
-            {isAuthenticated && isAdminLevel(user?.role) && (
+            {isAuthenticated && isStaff(user?.role) && (
               <Link href="/agency-chat" className="text-xs font-medium text-gray-600 hover:text-black transition-colors">
                 Agency Chat
               </Link>
@@ -269,16 +269,20 @@ const Header: React.FC = () => {
                   <div className="absolute right-0 top-full mt-3 w-56 max-w-[90vw] bg-black/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-neutral-700 py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50" style={{
                     boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 215, 0, 0.1)'
                   }}>
-                    {/* Admins manage everything from the DG Dashboard; regular
-                        users get their personal submissions view. */}
+                    {/* Admin-level staff manage everything from the DG Dashboard,
+                        agency officers land in their agency workspace, and
+                        everyone else gets their personal submissions view —
+                        mirrors postLoginPath so sign-in and this menu agree. */}
                     <Link
-                      href={isAdminLevel(user.role) ? '/dashboard' : '/account'}
+                      href={postLoginPath(user.role)}
                       className="group flex items-center px-4 py-3 text-sm font-medium text-neutral-300 hover:text-yellow-400 hover:bg-yellow-400/5 transition-all duration-300"
                     >
                       <div className="w-8 h-8 rounded-xl bg-yellow-400/10 flex items-center justify-center">
                         <Squares2X2Icon className="w-4 h-4 text-yellow-400" />
                       </div>
-                      <span className="ml-3">{isAdminLevel(user.role) ? 'DG Dashboard' : 'My Submissions'}</span>
+                      <span className="ml-3">
+                        {isAdminLevel(user.role) ? 'DG Dashboard' : user.role === 'agency_officer' ? 'Agency Workspace' : 'My Submissions'}
+                      </span>
                     </Link>
                     <Link
                       href="/profile"
@@ -375,6 +379,31 @@ const Header: React.FC = () => {
                       </Link>
                     </motion.div>
                   ))}
+
+                  {/* Staff quick links — mirrors the desktop utility bar, which
+                      is hidden on mobile, so staff don't lose these on a phone. */}
+                  {isAuthenticated && isStaff(user?.role) && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: navigationItems.length * 0.05 }}
+                    >
+                      <Link
+                        href="/tickets"
+                        className="block px-4 py-4 text-base font-semibold rounded-2xl transition-all duration-300 text-white/90 hover:bg-yellow-400/5 hover:text-yellow-400"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Issue Tracking
+                      </Link>
+                      <Link
+                        href="/agency-chat"
+                        className="block px-4 py-4 text-base font-semibold rounded-2xl transition-all duration-300 text-white/90 hover:bg-yellow-400/5 hover:text-yellow-400"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Agency Chat
+                      </Link>
+                    </motion.div>
+                  )}
 
                   {/* DG Dashboard in mobile — admin-level (system admin + Director General) */}
                   {isAuthenticated && isAdminLevel(user?.role) && (
