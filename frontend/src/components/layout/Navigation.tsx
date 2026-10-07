@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { ArrowRightIcon, Bars3Icon, ChevronDownIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { usePathname, useRouter } from 'next/navigation';
+import { ArrowRightIcon, ArrowRightOnRectangleIcon, Bars3Icon, ChevronDownIcon, Squares2X2Icon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
+import { dashboardLabel, postLoginPath } from '@/lib/roles';
 import AuthModal from '@/components/auth/AuthModal';
 
 const MENUS = [
@@ -52,13 +53,37 @@ export default function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMobileMenu, setActiveMobileMenu] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuth();
 
   const closeMenus = () => {
     setMobileOpen(false);
     setActiveMobileMenu(null);
   };
+
+  const handleLogout = async () => {
+    setAccountMenuOpen(false);
+    try {
+      await logout();
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    const onClickOutside = (event: MouseEvent) => {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(event.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [accountMenuOpen]);
 
   return (
     <>
@@ -87,17 +112,57 @@ export default function Navigation() {
 
 
           <div className="col-start-1 row-start-1 hidden shrink-0 items-center justify-self-start gap-2 xl:flex xl:gap-3">
-            {isAuthenticated ? (
-              <Link href="/profile" className="inline-flex items-center gap-2 whitespace-nowrap text-sm font-semibold text-neutral-800 hover:text-red-600">
-                <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-                {user?.name ?? 'My account'}
-              </Link>
+            {isAuthenticated && user ? (
+              <div className="relative" ref={accountMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setAccountMenuOpen((v) => !v)}
+                  aria-expanded={accountMenuOpen}
+                  aria-controls="account-menu"
+                  className="inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-neutral-800 hover:text-red-600"
+                >
+                  <UserCircleIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+                  {user.name}
+                  <ChevronDownIcon className={`h-3.5 w-3.5 shrink-0 transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+                </button>
+                {accountMenuOpen && (
+                  <div id="account-menu" className="absolute left-0 top-full z-50 mt-2 w-56 border border-neutral-200 bg-white py-1.5 shadow-xl">
+                    <Link
+                      href={postLoginPath(user.role)}
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-neutral-900 hover:bg-neutral-100 hover:text-red-600"
+                    >
+                      <Squares2X2Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {dashboardLabel(user.role)}
+                    </Link>
+                    <Link
+                      href="/profile"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-neutral-900 hover:bg-neutral-100 hover:text-red-600"
+                    >
+                      <UserCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      Profile
+                    </Link>
+                    <div className="my-1 border-t border-neutral-200" />
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-medium text-neutral-900 hover:bg-neutral-100 hover:text-red-600"
+                    >
+                      <ArrowRightOnRectangleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
+              <>
+                <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
+                <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap bg-black px-4 py-2.5 text-sm font-bold text-yellow-400 transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
+                  Start here <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                </Link>
+              </>
             )}
-            <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap bg-black px-4 py-2.5 text-sm font-bold text-yellow-400 transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
-              Start here <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-            </Link>
           </div>
 
           <div className="col-start-3 row-start-1 flex items-center justify-self-end">
@@ -158,11 +223,34 @@ export default function Navigation() {
               })}
               <Link href="/agencies" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Agencies</Link>
               <Link href="/track" onClick={closeMenus} className="py-3 text-sm font-bold text-black">Track an application</Link>
-              <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 bg-black px-4 py-3 text-center text-sm font-bold text-yellow-400">Start here</Link>
-              {isAuthenticated ? (
-                <Link href="/profile" onClick={closeMenus} className="py-3 text-sm font-semibold text-neutral-800">My account</Link>
+              {isAuthenticated && user ? (
+                <div className="mt-2 border-t border-neutral-200 pt-2">
+                  <Link
+                    href={postLoginPath(user.role)}
+                    onClick={closeMenus}
+                    className="flex items-center gap-2.5 py-3 text-sm font-bold text-black"
+                  >
+                    <Squares2X2Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    {dashboardLabel(user.role)}
+                  </Link>
+                  <Link href="/profile" onClick={closeMenus} className="flex items-center gap-2.5 py-3 text-sm font-semibold text-neutral-800">
+                    <UserCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => { closeMenus(); handleLogout(); }}
+                    className="flex w-full items-center gap-2.5 py-3 text-left text-sm font-semibold text-neutral-800"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    Sign out
+                  </button>
+                </div>
               ) : (
-                <button onClick={() => { closeMenus(); setShowAuthModal(true); }} className="py-3 text-left text-sm font-semibold text-neutral-800">Log in</button>
+                <>
+                  <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 bg-black px-4 py-3 text-center text-sm font-bold text-yellow-400">Start here</Link>
+                  <button onClick={() => { closeMenus(); setShowAuthModal(true); }} className="py-3 text-left text-sm font-semibold text-neutral-800">Log in</button>
+                </>
               )}
             </div>
           </nav>

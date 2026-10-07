@@ -34,3 +34,10 @@ export function postLoginPath(role: string | null | undefined): string {
   if (role === 'agency_officer') return '/agency-chat';
   return '/account';
 }
+
+/** Label for the nav's quick link to `postLoginPath` — keep in sync with it. */
+export function dashboardLabel(role: string | null | undefined): string {
+  if (isAdminLevel(role)) return 'DG Dashboard';
+  if (role === 'agency_officer') return 'Agency Workspace';
+  return 'My Submissions';
+}
