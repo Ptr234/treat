@@ -68,6 +68,7 @@ export default function Navigation() {
           <span className="font-semibold text-neutral-800">Republic of Uganda <span className="mx-2 text-neutral-400">|</span> Uganda Investment Authority</span>
           <div className="flex items-center gap-5">
             <Link href="/events" className="hover:text-red-600 transition-colors">News &amp; events</Link>
+            <Link href="/search" className="hover:text-red-600 transition-colors">Search</Link>
             <Link href="/support" className="hover:text-red-600 transition-colors">Contact</Link>
           </div>
         </div>

@@ -78,15 +78,25 @@ const sectionHeading = 'mb-3 text-xs font-bold uppercase tracking-[0.18em] text-
 
 // Which investment-data categories feed each homepage sector.
 // Every published project is mapped once; empty categories are left out of the homepage list.
-const SECTOR_CATEGORIES: Record<string, string[]> = {
-  'Agriculture & agro-processing': ['Agriculture & Agribusiness'],
-  'Tourism & hospitality': ['Tourism & Hospitality'],
-  'Infrastructure & real estate': ['Infrastructure Development'],
-  'ICT & innovation': ['ICT & Technology'],
-  'Manufacturing': [],
-  'Energy & minerals': ['Energy & Utilities', 'Mining & Minerals'],
-  Healthcare: ['Healthcare'],
+// Keyed by the sector's first word, lowercased — not its full display title.
+// The CMS (Sanity) and the static fallback list word the same sectors
+// differently ("Agriculture & agro-processing" vs "Agriculture & Agro-
+// Processing" vs potentially something else entirely from an editor), so an
+// exact-string lookup silently went empty the moment Sanity's titles replaced
+// the fallback's on load — the projects were still there, the lookup just
+// stopped matching anything.
+const SECTOR_PROJECT_CATEGORIES: Record<string, string[]> = {
+  agriculture: ['Agriculture & Agribusiness'],
+  tourism: ['Tourism & Hospitality'],
+  infrastructure: ['Infrastructure Development'],
+  ict: ['ICT & Technology'],
+  manufacturing: [],
+  energy: ['Energy & Utilities', 'Mining & Minerals'],
+  mining: ['Energy & Utilities', 'Mining & Minerals'],
+  healthcare: ['Healthcare'],
 };
+
+const sectorKey = (title: string) => title.toLowerCase().match(/[a-z]+/)?.[0] ?? '';
 
 export default function HomePage() {
   const [heroImages, setHeroImages] = useState(HERO_IMAGES);
@@ -128,7 +138,7 @@ export default function HomePage() {
   const featured = highPriority.slice(0, 3);
 
   const projectsFor = (title: string) => {
-    const categories = SECTOR_CATEGORIES[title] ?? [];
+    const categories = SECTOR_PROJECT_CATEGORIES[sectorKey(title)] ?? [];
     return OPPORTUNITIES.filter((o) => categories.includes(o.category));
   };
   // Keep the CMS sector directory visible even when its titles do not match

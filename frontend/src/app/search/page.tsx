@@ -380,26 +380,6 @@ export default function SearchPage() {
           </div>
         </div>
 
-        {/* Search Categories */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {searchCategories.map((category, index) => (
-            <div key={index} className="border-t border-neutral-200 pt-6 text-left transition-colors hover:border-red-600">
-              <div className="mb-4">
-                {category.icon}
-              </div>
-              <h3 className="text-lg font-bold text-black mb-2">
-                {category.title}
-              </h3>
-              <p className="text-neutral-700 text-sm leading-6 mb-3">
-                {category.description}
-              </p>
-              <p className="text-red-600 font-bold text-sm">
-                {category.count}
-              </p>
-            </div>
-          ))}
-        </div>
-
         {/* Search Results */}
         {searchResults.length > 0 && (
           <div className="mb-12">
@@ -575,6 +555,26 @@ export default function SearchPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Search Categories */}
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {searchCategories.map((category, index) => (
+            <div key={index} className="border-t border-neutral-200 pt-6 text-left transition-colors hover:border-red-600">
+              <div className="mb-4">
+                {category.icon}
+              </div>
+              <h3 className="text-lg font-bold text-black mb-2">
+                {category.title}
+              </h3>
+              <p className="text-neutral-700 text-sm leading-6 mb-3">
+                {category.description}
+              </p>
+              <p className="text-red-600 font-bold text-sm">
+                {category.count}
+              </p>
+            </div>
+          ))}
         </div>
 
         {/* Search Tips */}
