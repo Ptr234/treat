@@ -15,7 +15,6 @@ import {
   UserGroupIcon,
   Cog6ToothIcon,
   ShieldCheckIcon,
-  MapIcon,
 } from '@heroicons/react/24/outline';
 import type { ComponentType, SVGProps } from 'react';
 
@@ -49,10 +48,6 @@ const NAV: NavGroup[] = [
       { label: 'Issue Tracking', href: '/tickets', icon: TicketIcon, roles: ['admin', 'dg', 'agency_officer'] },
       // Staff-only per middleware.ts's STAFF_ROUTES — same role set as Issue Tracking.
       { label: 'Agency Chat', href: '/agency-chat', icon: ChatBubbleLeftRightIcon, roles: ['admin', 'dg', 'agency_officer'] },
-      // Licensed-projects map/list is public content (no route guard), but it's
-      // one of the dashboard home's own Quick Links — without an entry here,
-      // staff who navigate to any other sub-page lose access to it entirely.
-      { label: 'Projects', href: '/projects', icon: MapIcon, roles: ['admin', 'dg', 'agency_officer'] },
     ],
   },
   {

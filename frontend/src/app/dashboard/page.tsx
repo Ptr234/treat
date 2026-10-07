@@ -27,7 +27,6 @@ import {
   SignalIcon,
   Squares2X2Icon,
   TicketIcon,
-  MapIcon,
   ShieldCheckIcon,
   BuildingLibraryIcon,
   BuildingOffice2Icon,
@@ -557,7 +556,6 @@ export default function DashboardPage() {
               { label: 'Dashboard', href: '/dashboard', icon: Squares2X2Icon },
               { label: 'Agency Chat', href: '/agency-chat', icon: ChatBubbleLeftRightIcon },
               { label: 'Tickets', href: '/tickets', icon: TicketIcon },
-              { label: 'Projects', href: '/projects', icon: MapIcon },
               { label: 'Audit Trail', href: '/dashboard/audit', icon: ShieldCheckIcon },
             ].map((l) => (
               <Link

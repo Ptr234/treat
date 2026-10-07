@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { ArrowRightIcon, ArrowRightOnRectangleIcon, Bars3Icon, ChevronDownIcon, Squares2X2Icon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, ArrowRightOnRectangleIcon, Bars3Icon, ChevronDownIcon, MapIcon, Squares2X2Icon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { dashboardLabel, postLoginPath } from '@/lib/roles';
 import AuthModal from '@/components/auth/AuthModal';
@@ -136,6 +136,14 @@ export default function Navigation() {
                       {dashboardLabel(user.role)}
                     </Link>
                     <Link
+                      href="/projects"
+                      onClick={() => setAccountMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-neutral-900 hover:bg-neutral-100 hover:text-red-600"
+                    >
+                      <MapIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      Project Maps
+                    </Link>
+                    <Link
                       href="/profile"
                       onClick={() => setAccountMenuOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium text-neutral-900 hover:bg-neutral-100 hover:text-red-600"
@@ -232,6 +240,10 @@ export default function Navigation() {
                   >
                     <Squares2X2Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {dashboardLabel(user.role)}
+                  </Link>
+                  <Link href="/projects" onClick={closeMenus} className="flex items-center gap-2.5 py-3 text-sm font-semibold text-neutral-800">
+                    <MapIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                    Project Maps
                   </Link>
                   <Link href="/profile" onClick={closeMenus} className="flex items-center gap-2.5 py-3 text-sm font-semibold text-neutral-800">
                     <UserCircleIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
