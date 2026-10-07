@@ -225,7 +225,7 @@ export default function InvestorsPage() {
                           <EyeIcon className="w-4 h-4" />
                         </button>
                         <button onClick={() => handleDelete(inv)} title="Delete"
-                          className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-400">
+                          className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-700">
                           <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>

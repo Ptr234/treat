@@ -49,12 +49,12 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  Received: 'bg-blue-500/20 text-blue-400',
+  Received: 'bg-blue-100 text-blue-800',
   UnderReview: 'bg-yellow-50 text-red-600',
-  NameApproved: 'bg-purple-500/20 text-purple-400',
-  CertificateIssued: 'bg-green-500/20 text-green-400',
-  NameRejected: 'bg-red-50 text-red-400',
-  Rejected: 'bg-red-50 text-red-400',
+  NameApproved: 'bg-purple-100 text-purple-800',
+  CertificateIssued: 'bg-green-100 text-green-800',
+  NameRejected: 'bg-red-50 text-red-700',
+  Rejected: 'bg-red-50 text-red-700',
 };
 
 export default function BusinessRegistrationsPage() {
@@ -138,7 +138,7 @@ export default function BusinessRegistrationsPage() {
 
         {feedback && (
           <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
+            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
           }`}>{feedback.message}</div>
         )}
 
@@ -174,7 +174,7 @@ export default function BusinessRegistrationsPage() {
                           <button
                             disabled={busy}
                             onClick={() => updateStatus(r.referenceNumber, 'name_approved')}
-                            className="px-3 py-1.5 text-xs font-medium rounded-md bg-purple-600/80 hover:bg-purple-600 text-black disabled:opacity-50"
+                            className="px-3 py-1.5 text-xs font-medium rounded-md bg-purple-600/80 hover:bg-purple-600 text-white disabled:opacity-50"
                           >
                             Approve Name
                           </button>
@@ -183,7 +183,7 @@ export default function BusinessRegistrationsPage() {
                           <button
                             disabled={busy}
                             onClick={() => updateStatus(r.referenceNumber, 'certificate_issued')}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-green-600/80 hover:bg-green-600 text-black disabled:opacity-50"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-green-600/80 hover:bg-green-600 text-white disabled:opacity-50"
                           >
                             <DocumentCheckIcon className="w-3.5 h-3.5" /> Issue Certificate
                           </button>

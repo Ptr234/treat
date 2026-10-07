@@ -134,7 +134,7 @@ export default function DownloadsManagementPage() {
     );
   }
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-white placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
+  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
   const getCategoryLabel = (val: string) => CATEGORIES.find(c => c.value === val)?.label || val;
 
   return (
@@ -159,7 +159,7 @@ export default function DownloadsManagementPage() {
 
         {feedback && (
           <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
+            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
           }`}>{feedback.message}</div>
         )}
 
@@ -226,7 +226,7 @@ export default function DownloadsManagementPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold flex items-center gap-2 flex-wrap">
                     <span className="truncate">{r.title}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 shrink-0">{r.fileType}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 shrink-0">{r.fileType}</span>
                     <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 shrink-0">{getCategoryLabel(r.category)}</span>
                     {!r.isPublished && <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 shrink-0">Draft</span>}
                   </div>
@@ -242,7 +242,7 @@ export default function DownloadsManagementPage() {
                     <PencilIcon className="w-5 h-5" />
                   </button>
                   <button onClick={() => handleDelete(r)} title="Delete"
-                    className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-400 transition-colors">
+                    className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-700 transition-colors">
                     <TrashIcon className="w-5 h-5" />
                   </button>
                 </div>

@@ -73,15 +73,15 @@ interface ReplyTarget {
 // ── Agency colour map ────────────────────────────────────────────────
 
 const AGENCY_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
-  UIA:   { bg: 'bg-yellow-500/20', text: 'text-yellow-400', ring: 'ring-yellow-500/40' },
-  URSB:  { bg: 'bg-blue-500/20',   text: 'text-blue-400',   ring: 'ring-blue-500/40' },
-  URA:   { bg: 'bg-green-500/20',  text: 'text-green-400',  ring: 'ring-green-500/40' },
-  DCIC:  { bg: 'bg-purple-500/20', text: 'text-purple-400', ring: 'ring-purple-500/40' },
-  NEMA:  { bg: 'bg-emerald-500/20',text: 'text-emerald-400',ring: 'ring-emerald-500/40' },
-  KCCA:  { bg: 'bg-orange-500/20', text: 'text-orange-400', ring: 'ring-orange-500/40' },
-  LANDS: { bg: 'bg-amber-500/20',  text: 'text-amber-400',  ring: 'ring-amber-500/40' },
-  UNBS:  { bg: 'bg-cyan-500/20',   text: 'text-cyan-400',   ring: 'ring-cyan-500/40' },
-  ERA:   { bg: 'bg-rose-500/20',   text: 'text-rose-400',   ring: 'ring-rose-500/40' },
+  UIA:   { bg: 'bg-yellow-100', text: 'text-yellow-800', ring: 'ring-yellow-300' },
+  URSB:  { bg: 'bg-blue-100',   text: 'text-blue-800',   ring: 'ring-blue-300' },
+  URA:   { bg: 'bg-green-100',  text: 'text-green-800',  ring: 'ring-green-300' },
+  DCIC:  { bg: 'bg-purple-100', text: 'text-purple-800', ring: 'ring-purple-300' },
+  NEMA:  { bg: 'bg-emerald-100',text: 'text-emerald-800',ring: 'ring-emerald-300' },
+  KCCA:  { bg: 'bg-orange-100', text: 'text-orange-800', ring: 'ring-orange-300' },
+  LANDS: { bg: 'bg-amber-100',  text: 'text-amber-800',  ring: 'ring-amber-300' },
+  UNBS:  { bg: 'bg-cyan-100',   text: 'text-cyan-800',   ring: 'ring-cyan-300' },
+  ERA:   { bg: 'bg-rose-100',   text: 'text-rose-800',   ring: 'ring-rose-300' },
 };
 
 const DEFAULT_COLOR = { bg: 'bg-neutral-200', text: 'text-neutral-700', ring: 'ring-neutral-400' };
@@ -616,7 +616,7 @@ export default function AgencyChatPage() {
                     className={`
                       w-full text-left px-3 py-2.5 rounded-xl transition-all duration-150
                       ${isActive
-                        ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                        ? 'bg-yellow-50 text-red-700 border border-yellow-300'
                         : 'text-neutral-700 hover:bg-neutral-100 hover:text-red-600 border border-transparent'
                       }
                     `}
@@ -713,7 +713,7 @@ export default function AgencyChatPage() {
                   }}
                   className={`p-2 rounded-lg transition-colors ${
                     searchOpen
-                      ? 'bg-yellow-500/20 text-yellow-400'
+                      ? 'bg-yellow-50 text-red-700'
                       : 'text-neutral-600 hover:text-red-600 hover:bg-neutral-100'
                   }`}
                   aria-label="Search messages"
@@ -964,11 +964,11 @@ export default function AgencyChatPage() {
 
               {/* Send error display */}
               {sendError && (
-                <div className="mb-2 px-3 py-1.5 text-xs text-red-400 bg-red-900/30 border border-red-800/50 rounded-md flex items-center justify-between">
+                <div className="mb-2 px-3 py-1.5 text-xs text-red-800 bg-red-50 border border-red-300 rounded-md flex items-center justify-between">
                   <span>{sendError}</span>
                   <button
                     onClick={() => setSendError(null)}
-                    className="ml-2 p-0.5 rounded hover:bg-red-800/50 text-red-400 hover:text-red-300 transition-colors"
+                    className="ml-2 p-0.5 rounded hover:bg-red-100 text-red-700 hover:text-red-900 transition-colors"
                   >
                     <XMarkIcon className="w-3.5 h-3.5" />
                   </button>

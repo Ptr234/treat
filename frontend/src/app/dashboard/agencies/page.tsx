@@ -116,7 +116,7 @@ export default function AgencyManagementPage() {
     );
   }
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-white placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
+  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
 
   return (
  <div className="min-h-screen bg-white text-black">
@@ -140,7 +140,7 @@ export default function AgencyManagementPage() {
 
         {feedback && (
           <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
+            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
           }`}>{feedback.message}</div>
         )}
 
@@ -223,7 +223,7 @@ export default function AgencyManagementPage() {
                     <PencilIcon className="w-5 h-5" />
                   </button>
                   <button onClick={() => handleDelete(a)} title="Delete"
-                    className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-400 transition-colors">
+                    className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-700 transition-colors">
                     <TrashIcon className="w-5 h-5" />
                   </button>
                 </div>

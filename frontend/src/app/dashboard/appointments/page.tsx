@@ -26,8 +26,8 @@ interface Appointment {
 
 const statusColors: Record<string, string> = {
   pending: 'bg-yellow-50 text-red-600',
-  confirmed: 'bg-green-500/20 text-green-400',
-  cancelled: 'bg-red-50 text-red-400',
+  confirmed: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-50 text-red-700',
   completed: 'bg-neutral-100 text-neutral-700',
 };
 

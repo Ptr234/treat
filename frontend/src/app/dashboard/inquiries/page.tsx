@@ -24,14 +24,14 @@ interface ContactInquiry {
 const urgencyColors: Record<string, string> = {
   low: 'bg-neutral-100 text-neutral-700',
   normal: 'bg-yellow-50 text-red-600',
-  high: 'bg-red-50 text-red-400',
-  urgent: 'bg-red-600/30 text-red-300',
+  high: 'bg-red-50 text-red-700',
+  urgent: 'bg-red-600 text-white',
 };
 
 const statusColors: Record<string, string> = {
   new: 'bg-yellow-50 text-red-600',
-  'in-progress': 'bg-blue-500/20 text-blue-400',
-  resolved: 'bg-green-500/20 text-green-400',
+  'in-progress': 'bg-blue-100 text-blue-800',
+  resolved: 'bg-green-100 text-green-800',
   closed: 'bg-neutral-100 text-neutral-700',
 };
 

@@ -112,8 +112,8 @@ export default function SettingsPage() {
         {feedback && (
           <div className={`mb-6 p-4 rounded-md border flex items-start gap-3 ${
             feedback.type === 'success'
-              ? 'bg-green-900/30 border-green-700 text-green-300'
-              : 'bg-red-50 border-red-700 text-red-300'
+              ? 'bg-green-50 border-green-600 text-green-800'
+              : 'bg-red-50 border-red-600 text-red-800'
           }`}>
             {feedback.type === 'success'
               ? <CheckCircleIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
@@ -157,7 +157,7 @@ export default function SettingsPage() {
                         className={`text-xs px-2 py-1 rounded-full ${
                           valid
                             ? 'bg-yellow-50 text-red-600 border border-yellow-400'
-                            : 'bg-red-50 text-red-300 border border-red-500/30'
+                            : 'bg-red-50 text-red-700 border border-red-300'
                         }`}
                       >
                         {trimmed}

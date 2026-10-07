@@ -99,7 +99,7 @@ export default function UserManagementPage() {
 
   const needsAgencyCode = createForm.role === 'agency_officer';
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-white placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
+  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
 
   return (
  <div className="min-h-screen bg-white text-black">
@@ -127,7 +127,7 @@ export default function UserManagementPage() {
         {/* Feedback */}
         {feedback && (
           <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
+            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
           }`}>
             {feedback.message}
           </div>
@@ -201,11 +201,11 @@ export default function UserManagementPage() {
                     <div className="font-semibold flex items-center gap-2">
                       {u.name}
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        u.role === 'admin' || u.role === 'dg' ? 'bg-yellow-50 text-red-600' : 'bg-blue-500/20 text-blue-400'
+                        u.role === 'admin' || u.role === 'dg' ? 'bg-yellow-50 text-red-600' : 'bg-blue-100 text-blue-800'
                       }`}>
                         {roleLabel(u.role)}{u.agencyCode ? ` · ${u.agencyCode}` : ''}
                       </span>
-                      {!u.isActive && <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-400">Inactive</span>}
+                      {!u.isActive && <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700">Inactive</span>}
                     </div>
                     <div className="text-sm text-neutral-600">{u.email}</div>
                   </div>
@@ -214,11 +214,11 @@ export default function UserManagementPage() {
                   {u.id !== user?.id && (
                     <>
                       <button onClick={() => handleToggleActive(u)} title={u.isActive ? 'Deactivate' : 'Activate'}
-                        className={`p-2 rounded-md transition-colors ${u.isActive ? 'hover:bg-red-50 text-neutral-600 hover:text-red-400' : 'hover:bg-green-900/30 text-neutral-600 hover:text-green-400'}`}>
+                        className={`p-2 rounded-md transition-colors ${u.isActive ? 'hover:bg-red-50 text-neutral-600 hover:text-red-700' : 'hover:bg-green-50 text-neutral-600 hover:text-green-700'}`}>
                         {u.isActive ? <XCircleIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
                       </button>
                       <button onClick={() => handleDelete(u)} title="Delete"
-                        className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-400 transition-colors">
+                        className="p-2 rounded-md hover:bg-red-50 text-neutral-600 hover:text-red-700 transition-colors">
                         <TrashIcon className="w-5 h-5" />
                       </button>
                     </>
