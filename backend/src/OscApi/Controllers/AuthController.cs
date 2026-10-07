@@ -22,8 +22,9 @@ public class AuthController : ControllerBase
     private readonly ITotpService _totp;
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _config;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(OscDbContext db, IJwtService jwt, IPasswordService password, IEmailService email, ITotpService totp, IWebHostEnvironment env, IConfiguration config)
+    public AuthController(OscDbContext db, IJwtService jwt, IPasswordService password, IEmailService email, ITotpService totp, IWebHostEnvironment env, IConfiguration config, ILogger<AuthController> logger)
     {
         _db = db;
         _jwt = jwt;
@@ -32,6 +33,7 @@ public class AuthController : ControllerBase
         _totp = totp;
         _env = env;
         _config = config;
+        _logger = logger;
     }
 
     /// <summary>Append a best-effort audit entry (never throws into the request).</summary>
@@ -176,8 +178,14 @@ public class AuthController : ControllerBase
             payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(request.IdToken,
                 new Google.Apis.Auth.GoogleJsonWebSignature.ValidationSettings { Audience = [clientId] });
         }
-        catch
+        catch (Exception ex)
         {
+            // Swallowing this without logging previously meant a genuine failure on our
+            // side (e.g. a transient failure fetching Google's signing keys) was
+            // indistinguishable from a visitor presenting a bad/expired token — both
+            // just returned "Invalid Google token" with nothing in the logs to tell
+            // them apart.
+            _logger.LogWarning(ex, "Google ID token validation failed");
             return Problem(detail: "Invalid Google token", statusCode: StatusCodes.Status401Unauthorized);
         }
 

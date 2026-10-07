@@ -18,6 +18,20 @@ declare global {
             client_id: string;
             callback: (response: { credential: string }) => void;
             auto_select?: boolean;
+            // FedCM: Google's current, officially recommended path for browsers
+            // that restrict third-party cookies/storage (Brave by default,
+            // Chrome and Safari increasingly). Without it, this library can
+            // fall back to a legacy cookie/iframe handshake that those
+            // browsers silently block — the failure never reaches our own
+            // code as a readable error, it just never completes.
+            use_fedcm_for_prompt?: boolean;
+            // Safari's Intelligent Tracking Prevention support — same class
+            // of fix as FedCM, for a different set of browsers.
+            itp_support?: boolean;
+            // Without this, a failure inside Google's own library (script
+            // init, popup, credential exchange) has no way to reach our UI —
+            // it fails silently and the button just never calls `callback`.
+            error_callback?: (error: { type: string; message?: string }) => void;
           }) => void;
           renderButton: (
             element: HTMLElement,
@@ -37,6 +51,24 @@ declare global {
   }
 }
 
+/** True once the GIS script has finished loading, however this component got there. */
+function isGoogleReady(): boolean {
+  return typeof window !== 'undefined' && !!window.google?.accounts?.id;
+}
+
+/**
+ * A network-level fetch failure (not an HTTP error status — the request never
+ * completed at all) surfaces as a bare `TypeError: Failed to fetch`. That's
+ * meaningless to someone signing in, so translate it into something they can
+ * actually act on.
+ */
+function describeError(err: unknown): string {
+  if (err instanceof TypeError && /fetch/i.test(err.message)) {
+    return "Couldn't reach the sign-in server. Check your connection — or an ad blocker or privacy extension — and try again.";
+  }
+  return err instanceof Error ? err.message : 'Google sign-in failed';
+}
+
 export default function GoogleSignInButton({
   onSuccess,
   onError,
@@ -45,7 +77,7 @@ export default function GoogleSignInButton({
   const { loginWithGoogle } = useAuth();
   const buttonRef = useRef<HTMLDivElement>(null);
   const initializedRef = useRef(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(isGoogleReady);
   const [loading, setLoading] = useState(false);
 
   // Stable refs for callbacks — prevents re-render loops
@@ -56,18 +88,26 @@ export default function GoogleSignInButton({
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
-  // Load the Google Identity Services script (runs once)
+  // Load the Google Identity Services script (runs once, shared across every
+  // instance of this component — e.g. the login page and the chat widget
+  // both render one).
   useEffect(() => {
-    if (!clientId) return;
-
-    if (window.google?.accounts?.id) {
-      setScriptLoaded(true);
-      return;
-    }
+    if (!clientId || scriptLoaded) return;
 
     const existing = document.getElementById('google-gsi-script');
     if (existing) {
-      existing.addEventListener('load', () => setScriptLoaded(true));
+      // The other instance's script may have already finished loading before
+      // this one mounted and attached a listener — in which case the 'load'
+      // event already fired and will never fire again, and this instance
+      // would wait forever. Check the actual state directly first.
+      if (isGoogleReady()) {
+        setScriptLoaded(true);
+      } else {
+        existing.addEventListener('load', () => setScriptLoaded(true));
+        existing.addEventListener('error', () =>
+          onErrorRef.current?.('Failed to load Google Sign-In')
+        );
+      }
       return;
     }
 
@@ -81,7 +121,7 @@ export default function GoogleSignInButton({
     script.onload = () => setScriptLoaded(true);
     script.onerror = () => onErrorRef.current?.('Failed to load Google Sign-In');
     document.head.appendChild(script);
-  }, [clientId]);
+  }, [clientId, scriptLoaded]);
 
   // Initialize Google Sign-In when script is loaded (runs once)
   useEffect(() => {
@@ -90,16 +130,23 @@ export default function GoogleSignInButton({
 
     window.google.accounts.id.initialize({
       client_id: clientId,
+      use_fedcm_for_prompt: true,
+      itp_support: true,
       callback: async (response) => {
         setLoading(true);
         try {
           await loginWithGoogle(response.credential);
           onSuccessRef.current?.();
         } catch (err) {
-          onErrorRef.current?.(err instanceof Error ? err.message : 'Google sign-in failed');
+          onErrorRef.current?.(describeError(err));
         } finally {
           setLoading(false);
         }
+      },
+      error_callback: (error) => {
+        onErrorRef.current?.(
+          error.message || 'Google could not complete sign-in. Please try again.'
+        );
       },
     });
 
