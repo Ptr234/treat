@@ -29,13 +29,54 @@ import {
   TicketIcon,
   MapIcon,
   ShieldCheckIcon,
+  BuildingLibraryIcon,
+  BuildingOffice2Icon,
+  MegaphoneIcon,
 } from '@heroicons/react/24/outline';
+import type { ComponentType, SVGProps } from 'react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
 
 type AlertFilter = 'all' | 'critical' | 'high' | 'medium';
 type ScorecardSortKey = 'score' | 'activeCases' | 'resolvedToday' | 'slaCompliance' | 'acronym';
 type SortDir = 'asc' | 'desc';
+
+interface ManageItem {
+  label: string;
+  href: string;
+  description: string;
+  icon: ComponentType<SVGProps<SVGSVGElement>>;
+}
+
+// Mirrors DashboardSidebar's groupings, so the home page and the nav agree.
+const MANAGE_SECTIONS: { heading: string; items: ManageItem[] }[] = [
+  {
+    heading: 'Operations',
+    items: [
+      { label: 'Contact Inquiries', href: '/dashboard/inquiries', icon: DocumentTextIcon, description: 'Contact form submissions and support requests, by agency' },
+      { label: 'Chat Enquiries', href: '/dashboard/enquiries', icon: ChatBubbleLeftRightIcon, description: 'AI chatbot conversations, user details, and sentiment' },
+      { label: 'Investor Pipeline', href: '/dashboard/investors', icon: ArrowTrendingUpIcon, description: 'Registered investor profiles, status, and pipeline value' },
+      { label: 'Appointments', href: '/dashboard/appointments', icon: CalendarIcon, description: 'Scheduled meetings, event registrations, and requests' },
+      { label: 'Business Registrations', href: '/dashboard/business-registrations', icon: BuildingLibraryIcon, description: 'URSB registration reviews and filings' },
+    ],
+  },
+  {
+    heading: 'Content',
+    items: [
+      { label: 'Events', href: '/dashboard/events', icon: MegaphoneIcon, description: 'Forums, summits, and webinars on the public calendar' },
+      { label: 'Agencies', href: '/dashboard/agencies', icon: BuildingOffice2Icon, description: 'Agency details, contacts, and service-level targets' },
+      { label: 'Downloads', href: '/dashboard/downloads', icon: DocumentTextIcon, description: 'Forms, guides, and resources in the downloads library' },
+    ],
+  },
+  {
+    heading: 'Administration',
+    items: [
+      { label: 'User Management', href: '/dashboard/users', icon: UserGroupIcon, description: 'Create, manage, and deactivate officers and team members' },
+      { label: 'Escalation Settings', href: '/dashboard/settings', icon: Cog6ToothIcon, description: 'Escalation recipients, default assignee, and messages' },
+      { label: 'Audit Log', href: '/dashboard/audit', icon: ShieldCheckIcon, description: 'Full activity trail across the back office' },
+    ],
+  },
+];
 
 // ── Persistent alert acknowledgment ─────────────────────────────────
 
@@ -303,17 +344,17 @@ export default function DashboardPage() {
   if (!isAdmin) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="p-8 max-w-md w-full text-center border-t border-neutral-200 pt-5">
-          <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <LockClosedIcon className="w-8 h-8 text-red-600" />
+        <div className="max-w-md w-full text-center bg-white border border-neutral-200 shadow-sm rounded-sm p-8">
+          <div className="w-16 h-16 bg-black flex items-center justify-center mx-auto mb-5">
+            <LockClosedIcon className="w-8 h-8 text-yellow-400" />
           </div>
-          <h1 className="text-2xl font-bold text-black mb-3">Director General Dashboard</h1>
+          <h1 className="font-display text-2xl font-bold text-black mb-3">Director General Dashboard</h1>
           <p className="text-neutral-700 mb-6">
             This dashboard requires Director General authorization to access live operational data and executive controls.
           </p>
           <Link
             href="/"
-            className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-100 transition-colors"
+            className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-sm hover:bg-neutral-800 transition-colors"
           >
             Return Home
           </Link>
@@ -338,7 +379,7 @@ export default function DashboardPage() {
  <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-neutral-700 font-medium">No dashboard data available yet.</p>
-          <button onClick={refresh} className="mt-4 px-4 py-2 bg-black text-yellow-400 rounded-md hover:bg-neutral-100">Refresh</button>
+          <button onClick={refresh} className="mt-4 px-4 py-2 bg-black text-yellow-400 hover:bg-neutral-800 transition-colors">Refresh</button>
         </div>
       </div>
     );
@@ -358,50 +399,55 @@ export default function DashboardPage() {
 
   // ── Sub-components & helpers ────────────────────────────────────────
 
+  // Severity/activity/score colors keep to the brand palette: red reads as
+  // the one alarming color, gold as "needs attention", black/neutral as
+  // routine — the classic ledger convention (black = in good standing, red
+  // = in the red) stands in for the generic green/blue/orange/purple set
+  // a default component library would reach for.
   const getSeverityIcon = (severity: AlertSeverity) => {
     switch (severity) {
-      case 'critical': return <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />;
-      case 'high': return <BellAlertIcon className="w-5 h-5 text-orange-600" />;
-      case 'medium': return <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />;
-      case 'low': return <CheckCircleIcon className="w-5 h-5 text-red-600" />;
+      case 'critical': return <ExclamationTriangleIcon className="w-5 h-5 text-red-700" />;
+      case 'high': return <BellAlertIcon className="w-5 h-5 text-red-600" />;
+      case 'medium': return <ExclamationTriangleIcon className="w-5 h-5 text-yellow-700" />;
+      case 'low': return <CheckCircleIcon className="w-5 h-5 text-neutral-500" />;
     }
   };
 
   const getSeverityColor = (severity: AlertSeverity) => {
     switch (severity) {
-      case 'critical': return 'border-l-4 border-red-600 bg-red-50';
-      case 'high': return 'border-l-4 border-orange-600 bg-orange-50';
-      case 'medium': return ' bg-yellow-50';
-      case 'low': return ' bg-yellow-50';
+      case 'critical': return 'border-l-4 border-red-700 bg-red-50';
+      case 'high': return 'border-l-4 border-red-300 bg-red-50/50';
+      case 'medium': return 'border-l-4 border-yellow-400 bg-yellow-50';
+      case 'low': return 'border-l-4 border-neutral-300 bg-neutral-50';
     }
   };
 
   const getActivityColor = (type: DGActivity['type']) => {
     switch (type) {
-      case 'inquiry': return 'bg-blue-500';
+      case 'inquiry': return 'bg-black';
       case 'approval': return 'bg-yellow-500';
-      case 'escalation': return 'bg-orange-500';
-      case 'resolution': return 'bg-purple-500';
+      case 'escalation': return 'bg-red-600';
+      case 'resolution': return 'bg-neutral-400';
     }
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-700 bg-green-100';
-    if (score >= 70) return 'text-red-600 bg-yellow-100';
-    return 'text-red-700 bg-red-100';
+    if (score >= 90) return 'text-black bg-neutral-100 ring-1 ring-inset ring-neutral-300';
+    if (score >= 70) return 'text-black bg-yellow-100';
+    return 'text-white bg-red-700';
   };
 
   const getScoreBarColor = (score: number) => {
-    if (score >= 90) return 'bg-green-500';
+    if (score >= 90) return 'bg-black';
     if (score >= 70) return 'bg-yellow-500';
-    return 'bg-red-500';
+    return 'bg-red-600';
   };
 
   const TrendBadge = ({ value, suffix = '' }: { value: number | undefined; suffix?: string }) => {
     if (value === undefined || value === 0) return null;
     const isUp = value > 0;
     return (
-      <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isUp ? 'text-green-600' : 'text-red-600'}`}>
+      <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isUp ? 'text-black' : 'text-red-700'}`}>
         {isUp ? <ArrowTrendingUpIcon className="w-3.5 h-3.5" /> : <ArrowTrendingDownIcon className="w-3.5 h-3.5" />}
         {isUp ? '+' : ''}{value}{suffix}
       </span>
@@ -418,7 +464,7 @@ export default function DashboardPage() {
   const CircularProgress = ({ value, label, progressDelta }: { value: number; label: string; progressDelta?: number }) => {
     const circumference = 2 * Math.PI * 40;
     const offset = circumference - (value / 100) * circumference;
-    const strokeColor = value >= 90 ? '#22c55e' : value >= 70 ? '#eab308' : '#ef4444';
+    const strokeColor = value >= 90 ? '#000000' : value >= 70 ? '#FFD700' : '#CE1126';
 
     return (
       <div className="flex flex-col items-center">
@@ -438,7 +484,7 @@ export default function DashboardPage() {
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-lg sm:text-2xl font-bold text-black">{value}%</span>
             {progressDelta !== undefined && progressDelta !== 0 && (
-              <span className={`text-[10px] font-semibold ${progressDelta > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <span className={`text-[10px] font-semibold ${progressDelta > 0 ? 'text-black' : 'text-red-700'}`}>
                 {progressDelta > 0 ? '+' : ''}{progressDelta}%
               </span>
             )}
@@ -459,45 +505,43 @@ export default function DashboardPage() {
  <div className="min-h-screen bg-white py-8">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* ── Page Header ────────────────────────────────────────── */}
-        <div className="mb-8">
+        <div className="mb-8 border-b border-neutral-200 pb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black">Director General Dashboard</h1>
-                <span className="animate-ping-slow w-3 h-3 bg-yellow-500 rounded-full" />
-              </div>
-              <p className="text-base sm:text-lg text-neutral-700">Real-time operational overview and executive controls</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-700">Executive overview</p>
+              <h1 className="mt-1 font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-black">Director General Dashboard</h1>
+              <p className="mt-2 text-base sm:text-lg text-neutral-600">Real-time operational overview and executive controls</p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {error && (
-                <span className="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">API Error</span>
+                <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-700 border border-red-200">API Error</span>
               )}
 
               {unacknowledgedCount > 0 && (
-                <span className="px-3 py-1 text-xs font-bold rounded-full bg-red-600 text-white animate-pulse">
+                <span className="px-3 py-1 text-xs font-bold bg-red-700 text-white animate-pulse">
                   {unacknowledgedCount} alert{unacknowledgedCount > 1 ? 's' : ''}
                 </span>
               )}
 
-              <span className={`px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1.5 ${isLive ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-red-600'}`}>
+              <span className={`px-3 py-1 text-xs font-semibold flex items-center gap-1.5 border ${isLive ? 'bg-black text-yellow-400 border-black' : 'bg-yellow-50 text-black border-yellow-300'}`}>
                 <SignalIcon className="w-3.5 h-3.5" />
                 {isLive ? 'Live Data' : 'Sample Data'}
               </span>
 
               {/* Refresh interval selector */}
-              <div className="flex items-center overflow-hidden border-t border-neutral-200 pt-5">
+              <div className="inline-flex items-center border border-neutral-300 divide-x divide-neutral-300 overflow-hidden">
                 {INTERVAL_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setRefreshInterval(opt.value)}
-                    className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${refreshInterval === opt.value ? 'bg-yellow-500 text-black' : 'text-neutral-700 hover:bg-neutral-50'}`}
+                    className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${refreshInterval === opt.value ? 'bg-yellow-400 text-black' : 'bg-white text-neutral-700 hover:bg-neutral-50'}`}
                   >
                     {opt.label}
                   </button>
                 ))}
               </div>
 
-              <button onClick={refresh} className="p-2 rounded-md bg-white border border-neutral-200 hover:bg-neutral-50 transition-colors" title="Refresh dashboard">
+              <button onClick={refresh} className="p-2 bg-white border border-neutral-300 hover:bg-neutral-50 hover:border-black transition-colors" title="Refresh dashboard">
                 <ArrowPathIcon className="w-5 h-5 text-neutral-700" />
               </button>
 
@@ -519,7 +563,7 @@ export default function DashboardPage() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-md border border-neutral-200 text-sm font-semibold text-neutral-800 hover:border-black hover:text-red-600 transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-neutral-200 text-sm font-semibold text-neutral-800 hover:border-black hover:text-red-700 transition-all"
               >
                 <l.icon className="w-4 h-4" />
                 {l.label}
@@ -529,32 +573,29 @@ export default function DashboardPage() {
         </div>
 
         {/* ── KPI Cards ──────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-          <div className="bg-white rounded-md border border-neutral-200 p-6 transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-neutral-600 font-medium">Live Inquiries</p>
-              <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+          <div className="bg-white border border-neutral-200 border-t-4 border-t-yellow-400 shadow-sm hover:shadow-md p-6 transition-shadow">
+            <p className="text-sm text-neutral-600 font-medium mb-2">Live Inquiries</p>
             <div className="flex items-end gap-2">
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black">{metrics.liveInquiries}</p>
+              <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-black">{metrics.liveInquiries}</p>
               <TrendBadge value={delta?.liveInquiries} />
             </div>
             <p className="text-xs text-neutral-500 mt-1">New + Assigned tickets</p>
           </div>
 
-          <div className="bg-white rounded-md border border-neutral-200 p-6 transition-shadow">
+          <div className="bg-white border border-neutral-200 border-t-4 border-t-yellow-400 shadow-sm hover:shadow-md p-6 transition-shadow">
             <p className="text-sm text-neutral-600 font-medium mb-2">Active Cases</p>
             <div className="flex items-end gap-2">
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black">{metrics.activeCases}</p>
+              <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-black">{metrics.activeCases}</p>
               <TrendBadge value={delta?.activeCases} />
             </div>
             <p className="text-xs text-neutral-500 mt-1">In Progress + Pending + Assigned</p>
           </div>
 
-          <div className="bg-white rounded-md border border-neutral-200 p-6 transition-shadow">
+          <div className={`bg-white border border-neutral-200 border-t-4 shadow-sm hover:shadow-md p-6 transition-shadow ${metrics.pendingApprovals > 20 ? 'border-t-red-600' : 'border-t-yellow-400'}`}>
             <p className="text-sm text-neutral-600 font-medium mb-2">Pending Approvals</p>
             <div className="flex items-end gap-2">
-              <p className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${metrics.pendingApprovals > 20 ? 'text-orange-600' : 'text-black'}`}>
+              <p className={`font-display text-2xl sm:text-3xl lg:text-4xl font-bold ${metrics.pendingApprovals > 20 ? 'text-red-700' : 'text-black'}`}>
                 {metrics.pendingApprovals}
               </p>
               <TrendBadge value={delta?.pendingApprovals} />
@@ -562,13 +603,10 @@ export default function DashboardPage() {
             <p className="text-xs text-neutral-500 mt-1">Awaiting external response</p>
           </div>
 
-          <div className="bg-white rounded-md border border-neutral-200 p-6 transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-neutral-600 font-medium">Escalated</p>
-              {(metrics.escalatedCount ?? 0) > 0 && <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
-            </div>
+          <div className={`bg-white border border-neutral-200 border-t-4 shadow-sm hover:shadow-md p-6 transition-shadow ${(metrics.escalatedCount ?? 0) > 0 ? 'border-t-red-600' : 'border-t-yellow-400'}`}>
+            <p className="text-sm text-neutral-600 font-medium mb-2">Escalated</p>
             <div className="flex items-end gap-2">
-              <p className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${(metrics.escalatedCount ?? 0) > 0 ? 'text-red-600' : 'text-black'}`}>
+              <p className={`font-display text-2xl sm:text-3xl lg:text-4xl font-bold ${(metrics.escalatedCount ?? 0) > 0 ? 'text-red-700' : 'text-black'}`}>
                 {metrics.escalatedCount ?? 0}
               </p>
               <TrendBadge value={delta?.escalatedCount} />
@@ -576,10 +614,10 @@ export default function DashboardPage() {
             <p className="text-xs text-neutral-500 mt-1">Awaiting officer action</p>
           </div>
 
-          <div className="bg-white rounded-md border border-neutral-200 p-6 transition-shadow">
+          <div className="bg-white border border-neutral-200 border-t-4 border-t-black shadow-sm hover:shadow-md p-6 transition-shadow">
             <p className="text-sm text-neutral-600 font-medium mb-2">Pipeline Value</p>
             <div className="flex items-end gap-2">
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600">
+              <p className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-black">
                 {formatPipeline(metrics.pipelineValue ?? 0)}
               </p>
               {delta?.pipelineValue !== undefined && delta.pipelineValue !== 0 && (
@@ -592,28 +630,28 @@ export default function DashboardPage() {
 
         {/* ── Escalated Tickets ───────────────────────────────────── */}
         {(metrics.escalatedTickets?.length ?? 0) > 0 && (
-          <div className="bg-red-50 p-6 mb-8 border-t border-neutral-200 pt-5">
-            <h2 className="text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
-              <ExclamationTriangleIcon className="w-6 h-6 text-red-600" />
+          <div className="bg-red-50 border border-red-200 shadow-sm p-6 mb-8">
+            <h2 className="font-display text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
+              <ExclamationTriangleIcon className="w-6 h-6 text-red-700" />
               Escalated Tickets — Needs Assignment
             </h2>
             <div className="space-y-3">
               {metrics.escalatedTickets!.map((t) => (
-                <div key={t.referenceNumber} className="flex items-center justify-between p-4 border-t border-neutral-200 pt-5">
+                <div key={t.referenceNumber} className="flex items-center justify-between bg-white border border-red-100 p-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-mono font-bold text-sm text-red-700">{t.referenceNumber}</span>
-                      <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${
-                        t.priority === 'critical' ? 'bg-red-100 text-red-700' :
-                        t.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                        'bg-yellow-100 text-red-600'
+                      <span className={`px-2 py-0.5 text-xs font-bold uppercase ${
+                        t.priority === 'critical' ? 'bg-red-700 text-white' :
+                        t.priority === 'high' ? 'bg-red-100 text-red-700 ring-1 ring-inset ring-red-200' :
+                        'bg-yellow-100 text-black'
                       }`}>{t.priority}</span>
-                      <span className="px-2 py-0.5 rounded text-xs bg-neutral-100 text-neutral-700">{t.status}</span>
+                      <span className="px-2 py-0.5 text-xs bg-neutral-100 text-neutral-700">{t.status}</span>
                     </div>
                     <p className="text-sm text-black font-medium truncate">{t.title}</p>
                     <p className="text-xs text-neutral-600 mt-1">{t.contactName} &bull; Agency: {t.agency} &bull; Escalated {formatTimestamp(t.escalatedAt)}</p>
                   </div>
-                  <Link href={`/tickets/${t.referenceNumber}`} className="ml-4 px-3 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-700 transition-colors flex-shrink-0">
+                  <Link href={`/tickets/${t.referenceNumber}`} className="ml-4 px-3 py-2 bg-black text-yellow-400 text-sm font-semibold hover:bg-neutral-800 transition-colors flex-shrink-0">
                     Assign
                   </Link>
                 </div>
@@ -624,8 +662,8 @@ export default function DashboardPage() {
 
         {/* ── Performance Gauges + Agency Scorecard ───────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="p-6 border-t border-neutral-200 pt-5">
-            <h2 className="text-xl font-bold text-black mb-6">Performance Gauges</h2>
+          <div className="bg-white border border-neutral-200 shadow-sm p-6">
+            <h2 className="font-display text-xl font-bold text-black mb-6">Performance Gauges</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <CircularProgress value={metrics.responseRate} label="Response Rate" progressDelta={delta?.responseRate} />
               <CircularProgress value={metrics.conversionRate} label="Conversion Rate" />
@@ -635,16 +673,16 @@ export default function DashboardPage() {
           </div>
 
           {/* Agency Scorecard (sortable) */}
-          <div className="p-4 sm:p-6 border-t border-neutral-200 pt-5">
-            <h2 className="text-xl font-bold text-black mb-4">Agency Scorecard</h2>
+          <div className="bg-white border border-neutral-200 shadow-sm p-4 sm:p-6">
+            <h2 className="font-display text-xl font-bold text-black mb-4">Agency Scorecard</h2>
 
             {/* Mobile card view */}
             <div className="lg:hidden space-y-3 max-h-[400px] overflow-y-auto">
               {sortedScorecard.slice(0, 9).map((agency) => (
-                <div key={agency.acronym} className="border border-neutral-200 rounded-md p-3 hover:border-black transition-colors">
+                <div key={agency.acronym} className="border border-neutral-200 p-3 hover:border-black transition-colors">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-semibold text-black">{agency.acronym}</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${getScoreColor(agency.score)}`}>{agency.score}</span>
+                    <span className={`px-2 py-1 text-xs font-bold ${getScoreColor(agency.score)}`}>{agency.score}</span>
                   </div>
                   <div className="w-full h-1.5 bg-neutral-100 rounded-full mb-2">
                     <div className={`h-full rounded-full transition-all duration-700 ${getScoreBarColor(agency.score)}`} style={{ width: `${agency.score}%` }} />
@@ -656,7 +694,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-xs text-neutral-600">Resolved Today</p>
-                      <p className="font-semibold text-red-600">{agency.resolvedToday}</p>
+                      <p className="font-semibold text-black">{agency.resolvedToday}</p>
                     </div>
                     <div>
                       <p className="text-xs text-neutral-600">Avg Response</p>
@@ -710,14 +748,14 @@ export default function DashboardPage() {
                       <td className="py-2.5 font-medium text-black">{agency.acronym}</td>
                       <td className="py-2.5">
                         <div className="flex items-center gap-2 justify-center">
-                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${getScoreColor(agency.score)}`}>{agency.score}</span>
+                          <span className={`px-2 py-1 text-xs font-bold ${getScoreColor(agency.score)}`}>{agency.score}</span>
                           <div className="w-16 h-1.5 bg-neutral-100 rounded-full hidden xl:block">
                             <div className={`h-full rounded-full transition-all duration-700 ${getScoreBarColor(agency.score)}`} style={{ width: `${agency.score}%` }} />
                           </div>
                         </div>
                       </td>
                       <td className="py-2.5 text-center text-neutral-800">{agency.activeCases}</td>
-                      <td className="py-2.5 text-center text-red-600 font-semibold">{agency.resolvedToday}</td>
+                      <td className="py-2.5 text-center text-black font-semibold">{agency.resolvedToday}</td>
                       <td className="py-2.5 text-right text-neutral-800">{agency.avgResponseTime}</td>
                       <td className="py-2.5 text-right font-semibold text-black">{agency.slaCompliance}%</td>
                     </tr>
@@ -730,13 +768,13 @@ export default function DashboardPage() {
 
         {/* ── Alerts + Activity ───────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="p-6 border-t border-neutral-200 pt-5">
+          <div className="bg-white border border-neutral-200 shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-black flex items-center gap-2">
-                <BellAlertIcon className="w-6 h-6 text-red-600" />
+              <h2 className="font-display text-xl font-bold text-black flex items-center gap-2">
+                <BellAlertIcon className="w-6 h-6 text-red-700" />
                 Alerts Feed
                 {unacknowledgedCount > 0 && (
-                  <span className="min-w-[22px] h-[22px] px-1.5 rounded-full bg-red-600 text-white text-xs font-bold flex items-center justify-center">
+                  <span className="min-w-[22px] h-[22px] px-1.5 bg-red-700 text-white text-xs font-bold flex items-center justify-center">
                     {unacknowledgedCount}
                   </span>
                 )}
@@ -746,8 +784,8 @@ export default function DashboardPage() {
                   <button
                     key={filter}
                     onClick={() => setAlertFilter(filter)}
-                    className={`px-3 py-1.5 min-h-[36px] text-xs font-semibold rounded-md transition-colors ${
-                      alertFilter === filter ? 'bg-yellow-400 text-black' : 'bg-neutral-100 text-neutral-800 hover:bg-gray-200'
+                    className={`px-3 py-1.5 min-h-[36px] text-xs font-semibold transition-colors ${
+                      alertFilter === filter ? 'bg-yellow-400 text-black' : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200'
                     }`}
                   >
                     {filter.charAt(0).toUpperCase() + filter.slice(1)}
@@ -762,7 +800,7 @@ export default function DashboardPage() {
               {filteredAlerts.map((alert) => {
                 const isAcknowledged = alert.acknowledged || acknowledgedAlerts.has(alert.id);
                 return (
-                  <div key={alert.id} className={`p-4 rounded-md ${getSeverityColor(alert.severity)} ${isAcknowledged ? 'opacity-50' : ''} transition-opacity`}>
+                  <div key={alert.id} className={`p-4 ${getSeverityColor(alert.severity)} ${isAcknowledged ? 'opacity-50' : ''} transition-opacity`}>
                     <div className="flex items-start gap-3">
                       {getSeverityIcon(alert.severity)}
                       <div className="flex-1">
@@ -773,13 +811,13 @@ export default function DashboardPage() {
                         <p className="text-sm text-neutral-800 mb-2">{alert.message}</p>
                         <div className="flex items-center gap-3">
                           {!isAcknowledged && (
-                            <button onClick={() => acknowledgeAlert(alert.id)} className="text-xs font-semibold text-red-600 hover:text-neutral-800 flex items-center gap-1">
+                            <button onClick={() => acknowledgeAlert(alert.id)} className="text-xs font-semibold text-red-700 hover:text-black flex items-center gap-1">
                               <CheckCircleIcon className="w-4 h-4" />
                               Acknowledge
                             </button>
                           )}
                           {alert.relatedTicketId && (
-                            <Link href={`/tickets/${alert.relatedTicketId}`} className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                            <Link href={`/tickets/${alert.relatedTicketId}`} className="text-xs font-semibold text-black underline underline-offset-2 hover:text-red-700 flex items-center gap-1">
                               View Ticket
                             </Link>
                           )}
@@ -792,9 +830,9 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="p-6 border-t border-neutral-200 pt-5">
-            <h2 className="text-xl font-bold text-black mb-4 flex items-center gap-2">
-              <ClockIcon className="w-6 h-6 text-red-600" />
+          <div className="bg-white border border-neutral-200 shadow-sm p-6">
+            <h2 className="font-display text-xl font-bold text-black mb-4 flex items-center gap-2">
+              <ClockIcon className="w-6 h-6 text-red-700" />
               Recent Activity
             </h2>
             <div className="space-y-4 max-h-[500px] overflow-y-auto">
@@ -802,7 +840,7 @@ export default function DashboardPage() {
                 <div key={activity.id} className="flex gap-3">
                   <div className="flex flex-col items-center">
                     <div className={`w-3 h-3 rounded-full ${getActivityColor(activity.type)} flex-shrink-0`} />
-                    <div className="w-0.5 h-full bg-gray-200 mt-1" />
+                    <div className="w-0.5 h-full bg-neutral-200 mt-1" />
                   </div>
                   <div className="flex-1 pb-4">
                     <p className="text-sm font-semibold text-black mb-1">{activity.action}</p>
@@ -818,200 +856,77 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Content Management ─────────────────────────────────── */}
-        <div className="mb-8">
-          <h2 className="text-lg font-bold text-black mb-4">Content Management (Sanity CMS)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/dashboard/events" className="bg-white rounded-md p-5 transition-shadow border border-neutral-200 group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-100 rounded-md flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                  <CalendarIcon className="w-5 h-5 text-red-700" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-black">Events</h3>
-                  <p className="text-xs text-neutral-600">Forums, summits, webinars</p>
-                </div>
-              </div>
-            </Link>
-            <Link href="/dashboard/agencies" className="bg-white rounded-md p-5 transition-shadow border border-neutral-200 group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-md flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                  <UserGroupIcon className="w-5 h-5 text-green-700" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-black">Agencies</h3>
-                  <p className="text-xs text-neutral-600">Agency details, contacts, SLA</p>
-                </div>
-              </div>
-            </Link>
-            <Link href="/dashboard/downloads" className="bg-white rounded-md p-5 transition-shadow border border-neutral-200 group">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-md flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                  <DocumentTextIcon className="w-5 h-5 text-purple-700" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-black">Downloads</h3>
-                  <p className="text-xs text-neutral-600">Forms, guides, resources</p>
-                </div>
-              </div>
-            </Link>
-          </div>
-        </div>
-
         {/* ── Engagement Stats ──────────────────────────────────── */}
-        <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
-          <h2 className="text-lg font-bold text-black mb-4">Platform Engagement (Last 30 Days)</h2>
+        <div className="bg-white border border-neutral-200 shadow-sm p-6 mb-8">
+          <h2 className="font-display text-lg font-bold text-black mb-4">Platform Engagement (Last 30 Days)</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {[
-              { label: 'Inquiries', value: metrics.totalInquiries ?? 0, recent: metrics.recentInquiries, color: 'text-red-600' },
-              { label: 'Appointments', value: metrics.totalAppointments ?? 0, recent: metrics.recentAppointments, color: 'text-green-600' },
-              { label: 'Escalations', value: metrics.chatEscalations ?? 0, color: 'text-orange-600' },
-              { label: 'Messages', value: metrics.totalMessages ?? 0, recent: metrics.recentMessages, color: 'text-blue-600' },
-              { label: 'Tool Uses', value: metrics.toolUsageCount ?? 0, color: 'text-red-600' },
+              { label: 'Inquiries', value: metrics.totalInquiries ?? 0, recent: metrics.recentInquiries, color: 'text-black' },
+              { label: 'Appointments', value: metrics.totalAppointments ?? 0, recent: metrics.recentAppointments, color: 'text-black' },
+              { label: 'Escalations', value: metrics.chatEscalations ?? 0, color: 'text-red-700' },
+              { label: 'Messages', value: metrics.totalMessages ?? 0, recent: metrics.recentMessages, color: 'text-black' },
+              { label: 'Tool Uses', value: metrics.toolUsageCount ?? 0, color: 'text-black' },
               { label: 'Downloads', value: metrics.downloadCount ?? 0, color: 'text-neutral-700' },
             ].map((stat) => (
-              <div key={stat.label} className="text-center p-3 rounded-md bg-neutral-50">
-                <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
+              <div key={stat.label} className="text-center p-3 bg-neutral-50 border border-neutral-100">
+                <p className={`font-display text-2xl font-bold ${stat.color}`}>{stat.value}</p>
                 <p className="text-xs text-neutral-600 mt-1">{stat.label}</p>
                 {stat.recent !== undefined && stat.recent > 0 && (
-                  <p className="text-xs text-green-600 mt-0.5">+{stat.recent} this month</p>
+                  <p className="text-xs text-neutral-500 mt-0.5">+{stat.recent} this month</p>
                 )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── Contact Inquiries Link ────────────────────────────── */}
-        <Link
-          href="/dashboard/inquiries"
-          className="block bg-white rounded-md p-6 mb-8 transition-shadow border border-neutral-200 group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-red-100 rounded-md flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                <DocumentTextIcon className="w-6 h-6 text-red-700" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-black">Contact Inquiries</h3>
-                <p className="text-sm text-neutral-600">View all contact form submissions and support requests by agency</p>
-              </div>
+        {/* ── Manage ──────────────────────────────────────────────── */}
+        {MANAGE_SECTIONS.map((section) => (
+          <div key={section.heading} className="mb-8">
+            <h2 className="font-display text-lg font-bold text-black mb-4 flex items-center gap-2">
+              <span className="h-3.5 w-3.5 bg-yellow-400" aria-hidden="true" />
+              {section.heading}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="group flex items-start gap-4 bg-white border border-neutral-200 shadow-sm hover:shadow-md hover:border-black p-5 transition-all"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center bg-black text-yellow-400 group-hover:bg-red-700 group-hover:text-white transition-colors">
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-black">{item.label}</h3>
+                      <p className="mt-1 text-xs leading-5 text-neutral-600">{item.description}</p>
+                    </div>
+                    <ArrowUpIcon className="mt-1 h-4 w-4 shrink-0 rotate-90 text-neutral-400 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" aria-hidden="true" />
+                  </Link>
+                );
+              })}
             </div>
-            <ArrowUpIcon className="w-5 h-5 text-neutral-500 rotate-90 group-hover:translate-x-1 transition-transform" />
           </div>
-        </Link>
-
-        {/* ── Appointments Link ────────────────────────────────── */}
-        <Link
-          href="/dashboard/appointments"
-          className="block bg-white rounded-md p-6 mb-8 transition-shadow border border-neutral-200 group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 rounded-md flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                <CalendarIcon className="w-6 h-6 text-green-700" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-black">Appointments</h3>
-                <p className="text-sm text-neutral-600">View scheduled meetings, event registrations, and appointment requests</p>
-              </div>
-            </div>
-            <ArrowUpIcon className="w-5 h-5 text-neutral-500 rotate-90 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
-
-        {/* ── Investor Pipeline Link ───────────────────────────── */}
-        <Link
-          href="/dashboard/investors"
-          className="block bg-white rounded-md p-6 mb-8 transition-shadow border border-neutral-200 group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-md flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
-                <ArrowTrendingUpIcon className="w-6 h-6 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-black">Investor Pipeline</h3>
-                <p className="text-sm text-neutral-600">Manage registered investors — view profiles, update status, track pipeline</p>
-              </div>
-            </div>
-            <ArrowUpIcon className="w-5 h-5 text-neutral-500 rotate-90 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
-
-        {/* ── Chat Enquiries Link ─────────────────────────────────── */}
-        <Link
-          href="/dashboard/enquiries"
-          className="block bg-white rounded-md p-6 mb-8 transition-shadow border border-neutral-200 group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-yellow-100 rounded-md flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
-                <ChatBubbleLeftRightIcon className="w-6 h-6 text-red-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-black">Chat Enquiries</h3>
-                <p className="text-sm text-neutral-600">View AI chatbot conversations, user details, and sentiment analytics</p>
-              </div>
-            </div>
-            <ArrowUpIcon className="w-5 h-5 text-neutral-500 rotate-90 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
-
-        {/* ── Settings Link ──────────────────────────────────────── */}
-        <Link
-          href="/dashboard/settings"
-          className="block bg-white rounded-md p-6 mb-8 transition-shadow border border-neutral-200 group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-neutral-100 rounded-md flex items-center justify-center group-hover:bg-neutral-200 transition-colors">
-                <Cog6ToothIcon className="w-6 h-6 text-neutral-700" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-black">Escalation Settings</h3>
-                <p className="text-sm text-neutral-600">Configure escalation email recipients, default assignee, and notification messages</p>
-              </div>
-            </div>
-            <ArrowUpIcon className="w-5 h-5 text-neutral-500 rotate-90 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
-
-        {/* ── User Management Link ──────────────────────────────── */}
-        <Link
-          href="/dashboard/users"
-          className="block bg-white rounded-md p-6 mb-8 transition-shadow border border-neutral-200 group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-md flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <UserGroupIcon className="w-6 h-6 text-blue-700" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-black">User Management</h3>
-                <p className="text-sm text-neutral-600">Create, manage, and deactivate admin officers and team members</p>
-              </div>
-            </div>
-            <ArrowUpIcon className="w-5 h-5 text-neutral-500 rotate-90 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </Link>
+        ))}
 
         {/* ── Executive Actions ────────────────────────────────────── */}
-        <div className="p-6 border-t border-neutral-200 pt-5">
-          <h2 className="text-xl font-bold text-black mb-4">Executive Actions</h2>
+        <div className="bg-black p-6 mb-8">
+          <h2 className="font-display text-xl font-bold text-white mb-4">Executive Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button onClick={() => { setActionModal('flag'); setActionInput(''); }} className="bg-white/10 hover:bg-white/20 backdrop- text-black p-4 rounded-md transition-all flex items-center gap-3">
+            <button onClick={() => { setActionModal('flag'); setActionInput(''); }} className="bg-white/10 hover:bg-yellow-400 hover:text-black text-white p-4 transition-colors flex items-center gap-3">
               <FlagIcon className="w-6 h-6" />
               <span className="font-semibold">Flag Priority Case</span>
             </button>
-            <button onClick={() => { setActionModal('message'); setActionInput(''); }} className="bg-white/10 hover:bg-white/20 backdrop- text-black p-4 rounded-md transition-all flex items-center gap-3">
+            <button onClick={() => { setActionModal('message'); setActionInput(''); }} className="bg-white/10 hover:bg-yellow-400 hover:text-black text-white p-4 transition-colors flex items-center gap-3">
               <ChatBubbleLeftRightIcon className="w-6 h-6" />
               <span className="font-semibold">Send Team Message</span>
             </button>
-            <button onClick={handleGenerateReport} className="bg-white/10 hover:bg-white/20 backdrop- text-black p-4 rounded-md transition-all flex items-center gap-3">
+            <button onClick={handleGenerateReport} className="bg-white/10 hover:bg-yellow-400 hover:text-black text-white p-4 transition-colors flex items-center gap-3">
               <DocumentTextIcon className="w-6 h-6" />
               <span className="font-semibold">Generate Report</span>
             </button>
-            <button onClick={() => { setActionModal('review'); setActionInput(''); setReviewDate(''); setReviewTime(''); }} className="bg-white/10 hover:bg-white/20 backdrop- text-black p-4 rounded-md transition-all flex items-center gap-3">
+            <button onClick={() => { setActionModal('review'); setActionInput(''); setReviewDate(''); setReviewTime(''); }} className="bg-white/10 hover:bg-yellow-400 hover:text-black text-white p-4 transition-colors flex items-center gap-3">
               <CalendarIcon className="w-6 h-6" />
               <span className="font-semibold">Schedule Review</span>
             </button>
@@ -1020,9 +935,9 @@ export default function DashboardPage() {
 
         {/* ── Action Modal ──────────────────────────────────────── */}
         {actionModal && (
-          <div className="fixed inset-0 bg-neutral-100 flex items-center justify-center z-50 p-4">
-            <div className="max-w-md w-full p-4 sm:p-6 max-h-[85vh] overflow-y-auto border-t border-neutral-200 pt-5">
-              <h3 className="text-lg font-bold text-black mb-2">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in">
+            <div className="max-w-md w-full bg-white shadow-2xl border-t-4 border-t-yellow-400 p-4 sm:p-6 max-h-[85vh] overflow-y-auto animate-scale-in">
+              <h3 className="font-display text-lg font-bold text-black mb-2">
                 {actionModal === 'flag' ? 'Flag Priority Case' : actionModal === 'message' ? 'Send Team Message' : 'Schedule Review'}
               </h3>
               <p className="text-sm text-neutral-700 mb-4">
@@ -1041,7 +956,7 @@ export default function DashboardPage() {
                       value={reviewDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setReviewDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -1050,7 +965,7 @@ export default function DashboardPage() {
                       type="time"
                       value={reviewTime}
                       onChange={(e) => setReviewTime(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -1060,7 +975,7 @@ export default function DashboardPage() {
                   value={actionInput}
                   onChange={(e) => setActionInput(e.target.value)}
                   placeholder="UIA-2026-0001"
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
                 />
               ) : (
                 <textarea
@@ -1068,20 +983,20 @@ export default function DashboardPage() {
                   onChange={(e) => setActionInput(e.target.value)}
                   rows={4}
                   placeholder={actionModal === 'message' ? 'Type your message...' : 'Review topic and notes...'}
-                  className="w-full px-4 py-3 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
                 />
               )}
               <div className="flex flex-col-reverse sm:flex-row gap-3 mt-4">
                 <button
                   onClick={() => { setActionModal(null); setActionInput(''); setReviewDate(''); setReviewTime(''); }}
-                  className="flex-1 px-4 py-2.5 min-h-[44px] border border-neutral-400 text-neutral-800 rounded-md hover:bg-neutral-50 font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 min-h-[44px] border border-neutral-400 text-neutral-800 hover:bg-neutral-50 font-medium transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={actionModal === 'flag' ? handleFlagCase : actionModal === 'message' ? handleSendMessage : handleScheduleReview}
                   disabled={!actionInput.trim() || actionLoading || (actionModal === 'review' && !reviewDate)}
-                  className="flex-1 px-4 py-2.5 bg-black text-yellow-400 rounded-md hover:bg-neutral-100 disabled:bg-neutral-300 disabled:cursor-not-allowed font-medium transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-black text-yellow-400 hover:bg-neutral-800 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed font-medium transition-colors"
                 >
                   {actionLoading ? 'Processing...' : actionModal === 'flag' ? 'Flag Case' : actionModal === 'message' ? 'Send Message' : 'Schedule'}
                 </button>
@@ -1092,7 +1007,7 @@ export default function DashboardPage() {
 
         {/* ── Success Toast ─────────────────────────────────────── */}
         {actionSuccess && (
-          <div className="fixed bottom-6 right-6 bg-green-600 text-black px-6 py-3 rounded-md z-50 animate-pulse">
+          <div className="fixed bottom-6 right-6 bg-black text-yellow-400 border-l-4 border-l-yellow-400 px-6 py-3 shadow-2xl z-50 animate-slide-up">
             {actionSuccess}
           </div>
         )}
