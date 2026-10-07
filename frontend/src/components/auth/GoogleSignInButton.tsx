@@ -85,6 +85,15 @@ export default function GoogleSignInButton({
   const [scriptLoaded, setScriptLoaded] = useState(isGoogleReady);
   const [loading, setLoading] = useState(false);
 
+  // MFA (TOTP) step — shown after Google confirms identity when the admin
+  // also has MFA enabled. Mirrors LoginForm's password-login equivalent:
+  // the backend accepts the same Google credential again alongside the code
+  // instead of issuing a new one, so it's kept here rather than re-prompting
+  // the Google popup.
+  const [pendingCredential, setPendingCredential] = useState<string | null>(null);
+  const [mfaCode, setMfaCode] = useState('');
+  const [mfaSubmitting, setMfaSubmitting] = useState(false);
+
   // Stable refs for callbacks — prevents re-render loops
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
@@ -140,7 +149,11 @@ export default function GoogleSignInButton({
       callback: async (response) => {
         setLoading(true);
         try {
-          await loginWithGoogle(response.credential);
+          const result = await loginWithGoogle(response.credential);
+          if (result.mfaRequired) {
+            setPendingCredential(response.credential);
+            return;
+          }
           onSuccessRef.current?.();
         } catch (err) {
           onErrorRef.current?.(describeError(err));
@@ -168,6 +181,60 @@ export default function GoogleSignInButton({
       locale: 'en',
     });
   }, [scriptLoaded, clientId, loginWithGoogle]);
+
+  const handleMfaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingCredential) return;
+    setMfaSubmitting(true);
+    try {
+      await loginWithGoogle(pendingCredential, mfaCode.trim());
+      onSuccessRef.current?.();
+    } catch (err) {
+      onErrorRef.current?.(describeError(err));
+    } finally {
+      setMfaSubmitting(false);
+    }
+  };
+
+  if (pendingCredential) {
+    return (
+      <form onSubmit={handleMfaSubmit} className="space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-900">Two-factor authentication</h3>
+          <p className="text-sm text-gray-600 mt-1">
+            Enter the 6-digit code from your authenticator app to finish signing in.
+          </p>
+        </div>
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          pattern="[0-9]*"
+          maxLength={6}
+          required
+          autoFocus
+          value={mfaCode}
+          onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
+          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm tracking-[0.5em] text-center text-lg focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 text-black placeholder-gray-400"
+          placeholder="000000"
+        />
+        <button
+          type="submit"
+          disabled={mfaSubmitting || mfaCode.length !== 6}
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+        >
+          {mfaSubmitting ? 'Verifying...' : 'Verify & Sign In'}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setPendingCredential(null); setMfaCode(''); }}
+          className="text-sm text-red-700 hover:text-red-800"
+        >
+          &larr; Back to sign in
+        </button>
+      </form>
+    );
+  }
 
   if (!clientId) {
     return (

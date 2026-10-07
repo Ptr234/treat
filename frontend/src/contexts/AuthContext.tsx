@@ -14,7 +14,7 @@ interface AuthState {
 interface AuthContextType extends AuthState {
   login: (email: string, password: string, mfaCode?: string) => Promise<{ mfaRequired?: boolean }>;
   signup: (name: string, email: string, password: string) => Promise<void>;
-  loginWithGoogle: (credential: string) => Promise<void>;
+  loginWithGoogle: (credential: string, mfaCode?: string) => Promise<{ mfaRequired?: boolean }>;
   logout: () => Promise<void>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
@@ -124,21 +124,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ── Login with Google credential ──────────────────────────────────
-  const loginWithGoogle = useCallback(async (credential: string) => {
+  const loginWithGoogle = useCallback(async (credential: string, mfaCode?: string) => {
     setState(s => ({ ...s, isLoading: true, error: null }));
 
     try {
       const json = await apiFetch('/api/auth/google', {
         method: 'POST',
-        body: JSON.stringify({ idToken: credential }),
+        body: JSON.stringify({ idToken: credential, mfaCode }),
       });
 
       if (!json.success) {
         throw new Error(json.error || 'Google login failed');
       }
 
+      // Identity confirmed but the admin has MFA enabled: no session cookie
+      // was set yet, a TOTP code is still required (mirrors the password
+      // login flow below). Signal the caller to collect the code.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((json.data as any)?.mfaRequired) {
+        setState(s => ({ ...s, isLoading: false }));
+        return { mfaRequired: true };
+      }
+
       const user = extractUser(json.data);
       setState({ user, isAuthenticated: true, isLoading: false, error: null });
+      return {};
     } catch (err) {
       setState(s => ({ ...s, isLoading: false }));
       throw err;
