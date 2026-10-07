@@ -8,6 +8,7 @@ import { useTickets } from '@/hooks/useTickets';
 import TicketCard from '@/components/tickets/TicketCard';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import PageBand from '@/components/ui/PageBand';
 
 export default function TicketsPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -129,8 +130,8 @@ export default function TicketsPage() {
   return (
  <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="border-b border-neutral-200 bg-white text-black py-16">
-        <div className="container mx-auto px-4">
+      <PageBand>
+        <div className="container mx-auto px-4 pt-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -139,12 +140,12 @@ export default function TicketsPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Issue Tracking System
             </h1>
-            <p className="text-lg text-yellow-50">
+            <p className="text-lg">
               Full lifecycle tracking for investment queries, complaints, and support requests
             </p>
           </motion.div>
         </div>
-      </section>
+      </PageBand>
 
       {/* Stats Bar */}
       <section className="bg-white border-b border-neutral-200 py-6">
