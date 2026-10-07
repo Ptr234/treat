@@ -43,6 +43,11 @@ declare global {
               text?: string;
               shape?: string;
               logo_alignment?: string;
+              // Google docs: the `hl` query param on the script tag sets the
+              // default, but a signed-in Google session's own language
+              // preference can still override it — passing `locale` here too
+              // is the documented way to pin the rendered button itself.
+              locale?: string;
             }
           ) => void;
         };
@@ -160,6 +165,7 @@ export default function GoogleSignInButton({
       text: 'signin_with',
       shape: 'rectangular',
       logo_alignment: 'center',
+      locale: 'en',
     });
   }, [scriptLoaded, clientId, loginWithGoogle]);
 
