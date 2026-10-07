@@ -73,7 +73,7 @@ export default function Navigation() {
         </div>
       </div>
 
-      <header id="site-header" className="sticky z-50 border-b border-neutral-200 bg-white" style={{ top: 'var(--newsbar-h, 0px)' }}>
+      <header id="site-header" className="sticky top-0 z-50 border-b border-neutral-200 bg-white">
         <div aria-hidden="true" className="mx-auto flex h-1 max-w-6xl">
           <span className="flex-1 bg-black" />
           <span className="flex-1 bg-yellow-400" />

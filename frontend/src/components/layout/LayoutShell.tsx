@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import NewsBar from './NewsBar';
 import ChatWidget from '@/components/chatbot/ChatWidget';
 
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
@@ -26,7 +25,6 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
       </a>
       <div className="flex-1 flex flex-col">
         <Navigation />
-        <NewsBar />
         <main id="main-content" role="main" className="flex-1" tabIndex={-1}>
           {children}
         </main>
