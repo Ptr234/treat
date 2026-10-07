@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import DashboardShell from './DashboardShell';
+import DashboardShell from '@/components/dashboard/DashboardShell';
 
 // Staff-only area: never indexed.
 export const metadata: Metadata = {

@@ -15,6 +15,13 @@ const ROLE_LABELS: Record<string, string> = {
   agency_officer: 'Agency Officer',
 };
 
+/**
+ * Shared admin-console shell — sidebar + topbar — for every staff-only route
+ * (/dashboard/*, /agency-chat). Reused rather than duplicated so staff keep
+ * the same persistent navigation and sign-out wherever they are in the
+ * back office, instead of each route re-implementing (and drifting from)
+ * its own chrome.
+ */
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user, isLoading, logout } = useAuth();
   const router = useRouter();

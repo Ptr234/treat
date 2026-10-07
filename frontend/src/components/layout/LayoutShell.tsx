@@ -8,9 +8,16 @@ import ChatWidget from '@/components/chatbot/ChatWidget';
 export default function LayoutShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isChatbot = pathname.startsWith('/chatbot');
+  // /dashboard and /agency-chat are staff-only admin console routes with
+  // their own DashboardShell (sidebar + topbar + sign-out). Without this
+  // check they also rendered the full public site header, mega-menu,
+  // footer, and the investor-facing chat widget stacked around the admin
+  // chrome — two navigation systems on screen at once, and a floating
+  // "Ask Assistant" bubble on top of agency-chat's own staff chat tool.
+  const isStaffConsole = pathname.startsWith('/dashboard') || pathname.startsWith('/agency-chat');
 
-  // Chatbot page owns its entire viewport — no site chrome
-  if (isChatbot) {
+  // These pages own their entire viewport — no public site chrome.
+  if (isChatbot || isStaffConsole) {
     return <>{children}</>;
   }
 
