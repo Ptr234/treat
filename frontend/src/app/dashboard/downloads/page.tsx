@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { ArrowLeftIcon, PlusIcon, TrashIcon, PencilIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, PencilIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminLevel } from '@/lib/roles';
+import { PageHeader, FeedbackBanner, FormField, StatusBadge, inputClass } from '@/components/dashboard/ui';
 
 interface Download {
   _id: string;
@@ -134,63 +134,48 @@ export default function DownloadsManagementPage() {
     );
   }
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
   const getCategoryLabel = (val: string) => CATEGORIES.find(c => c.value === val)?.label || val;
 
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md transition-colors" aria-label="Back to dashboard">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold">Downloads Management</h1>
-              <p className="text-sm text-neutral-700">Manage downloadable forms, guides, and resources</p>
-            </div>
-          </div>
-          <button onClick={() => { resetForm(); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors">
-            <PlusIcon className="w-5 h-5" />
-            Add Resource
-          </button>
-        </div>
+        <PageHeader
+          title="Downloads Management"
+          subtitle="Manage downloadable forms, guides, and resources"
+          actions={
+            <button onClick={() => { resetForm(); setShowForm(true); }}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors">
+              <PlusIcon className="w-5 h-5" />
+              Add Resource
+            </button>
+          }
+        />
 
-        {feedback && (
-          <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
-          }`}>{feedback.message}</div>
-        )}
+        {feedback && <FeedbackBanner type={feedback.type} message={feedback.message} />}
 
         {showForm && (
           <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Resource' : 'Add New Resource'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-700 mb-1">Title *</label>
+              <FormField label="Title" required wide>
                 <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className={inputClass} placeholder="Business Registration Form" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Category *</label>
+              </FormField>
+              <FormField label="Category" required>
                 <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className={inputClass}>
                   {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">File Type *</label>
+              </FormField>
+              <FormField label="File Type" required>
                 <select value={form.fileType} onChange={e => setForm(p => ({ ...p, fileType: e.target.value }))} className={inputClass}>
                   {FILE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-700 mb-1">Description</label>
+              </FormField>
+              <FormField label="Description" wide>
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className={inputClass} rows={2} placeholder="Brief description of this resource..." />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Sort Order</label>
+              </FormField>
+              <FormField label="Sort Order">
                 <input type="number" min={0} value={form.sortOrder} onChange={e => setForm(p => ({ ...p, sortOrder: parseInt(e.target.value) || 0 }))} className={inputClass} />
-              </div>
+              </FormField>
               <div className="flex items-center gap-3 pt-6">
                 <input type="checkbox" id="publishDownload" checked={form.isPublished} onChange={e => setForm(p => ({ ...p, isPublished: e.target.checked }))}
                   className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-yellow-500 focus-visible:ring-red-600" />
@@ -226,9 +211,9 @@ export default function DownloadsManagementPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold flex items-center gap-2 flex-wrap">
                     <span className="truncate">{r.title}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 shrink-0">{r.fileType}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 shrink-0">{getCategoryLabel(r.category)}</span>
-                    {!r.isPublished && <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 shrink-0">Draft</span>}
+                    <StatusBadge tone="blue" className="shrink-0">{r.fileType}</StatusBadge>
+                    <StatusBadge tone="neutral" className="shrink-0">{getCategoryLabel(r.category)}</StatusBadge>
+                    {!r.isPublished && <StatusBadge tone="neutral" className="shrink-0">Draft</StatusBadge>}
                   </div>
                   {r.description && <div className="text-sm text-neutral-600 mt-1 truncate">{r.description}</div>}
                 </div>

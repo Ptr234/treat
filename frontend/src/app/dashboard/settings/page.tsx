@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { ArrowLeftIcon, Cog6ToothIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminLevel } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
+import { PageHeader, FeedbackBanner, StatusBadge, inputClass } from '@/components/dashboard/ui';
 
 interface EscalationSettings {
   escalationEmails: string;
@@ -90,38 +89,9 @@ export default function SettingsPage() {
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link
-            href="/dashboard"
-            className="p-2 hover:bg-neutral-100 rounded-md transition-colors"
-            aria-label="Back to dashboard"
-          >
-            <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Cog6ToothIcon className="w-7 h-7 text-yellow-500" />
-            <div>
-              <h1 className="text-2xl font-bold">Escalation Settings</h1>
-              <p className="text-sm text-neutral-700">Configure who gets notified when tickets are escalated</p>
-            </div>
-          </div>
-        </div>
+        <PageHeader title="Escalation Settings" subtitle="Configure who gets notified when tickets are escalated" />
 
-        {/* Feedback */}
-        {feedback && (
-          <div className={`mb-6 p-4 rounded-md border flex items-start gap-3 ${
-            feedback.type === 'success'
-              ? 'bg-green-50 border-green-600 text-green-800'
-              : 'bg-red-50 border-red-600 text-red-800'
-          }`}>
-            {feedback.type === 'success'
-              ? <CheckCircleIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
-              : <ExclamationTriangleIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
-            }
-            <p className="text-sm">{feedback.message}</p>
-          </div>
-        )}
+        {feedback && <FeedbackBanner type={feedback.type} message={feedback.message} />}
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -142,7 +112,7 @@ export default function SettingsPage() {
                 value={settings.escalationEmails}
                 onChange={(e) => setSettings(prev => ({ ...prev, escalationEmails: e.target.value }))}
                 rows={3}
-                className="w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-600 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+                className={inputClass}
                 placeholder="officer1@uia.go.ug, officer2@uia.go.ug, dg@uia.go.ug"
               />
               {settings.escalationEmails && (
@@ -152,16 +122,13 @@ export default function SettingsPage() {
                     if (!trimmed) return null;
                     const valid = trimmed.includes('@');
                     return (
-                      <span
+                      <StatusBadge
                         key={i}
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          valid
-                            ? 'bg-yellow-50 text-red-600 border border-yellow-400'
-                            : 'bg-red-50 text-red-700 border border-red-300'
-                        }`}
+                        tone={valid ? 'yellow' : 'red'}
+                        className={valid ? 'border border-yellow-400' : 'border border-red-300'}
                       >
                         {trimmed}
-                      </span>
+                      </StatusBadge>
                     );
                   })}
                 </div>
@@ -180,7 +147,7 @@ export default function SettingsPage() {
                 type="text"
                 value={settings.defaultAssignee}
                 onChange={(e) => setSettings(prev => ({ ...prev, defaultAssignee: e.target.value }))}
-                className="w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-600 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+                className={inputClass}
                 placeholder="e.g. Senior Investment Officer"
               />
             </div>
@@ -197,7 +164,7 @@ export default function SettingsPage() {
                 value={settings.escalationMessage}
                 onChange={(e) => setSettings(prev => ({ ...prev, escalationMessage: e.target.value }))}
                 rows={3}
-                className="w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-600 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+                className={inputClass}
                 placeholder="A ticket has been escalated and requires immediate attention."
               />
             </div>

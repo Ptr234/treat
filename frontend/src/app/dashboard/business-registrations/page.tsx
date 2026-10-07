@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeftIcon, DocumentCheckIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { DocumentCheckIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { isStaff } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
+import { PageHeader, FeedbackBanner, StatusBadge, type BadgeTone } from '@/components/dashboard/ui';
 
 interface OwnerInfo {
   name: string;
@@ -48,13 +49,13 @@ const STATUS_LABELS: Record<string, string> = {
   Rejected: 'Rejected',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  Received: 'bg-blue-100 text-blue-800',
-  UnderReview: 'bg-yellow-50 text-red-600',
-  NameApproved: 'bg-purple-100 text-purple-800',
-  CertificateIssued: 'bg-green-100 text-green-800',
-  NameRejected: 'bg-red-50 text-red-700',
-  Rejected: 'bg-red-50 text-red-700',
+const STATUS_TONES: Record<string, BadgeTone> = {
+  Received: 'blue',
+  UnderReview: 'yellow',
+  NameApproved: 'purple',
+  CertificateIssued: 'green',
+  NameRejected: 'red',
+  Rejected: 'red',
 };
 
 export default function BusinessRegistrationsPage() {
@@ -126,21 +127,9 @@ export default function BusinessRegistrationsPage() {
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md" aria-label="Back">
-            <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold">Business Registrations</h1>
-            <p className="text-sm text-neutral-700">{total} registrations · URSB registry</p>
-          </div>
-        </div>
+        <PageHeader title="Business Registrations" subtitle={`${total} registrations · URSB registry`} />
 
-        {feedback && (
-          <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
-          }`}>{feedback.message}</div>
-        )}
+        {feedback && <FeedbackBanner type={feedback.type} message={feedback.message} />}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className={selected ? 'lg:col-span-2' : 'lg:col-span-3'}>
@@ -160,9 +149,9 @@ export default function BusinessRegistrationsPage() {
                       <div className="min-w-0">
                         <div className="font-semibold flex items-center gap-2 flex-wrap">
                           <span className="truncate">{r.businessName}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_COLORS[r.status] || 'bg-neutral-100 text-neutral-700'}`}>
+                          <StatusBadge tone={STATUS_TONES[r.status] || 'neutral'}>
                             {STATUS_LABELS[r.status] ?? r.status}
-                          </span>
+                          </StatusBadge>
                         </div>
                         <div className="text-xs text-neutral-600 truncate">
                           {r.referenceNumber} &middot; {r.contactName} &middot; {r.contactEmail}

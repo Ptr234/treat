@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminLevel } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
-import { ArrowPathIcon, ArrowLeftIcon, LockClosedIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { PageHeader, StatusBadge, type BadgeTone } from '@/components/dashboard/ui';
 
 interface AuditEntry {
   timestamp: string;
@@ -17,11 +18,11 @@ interface AuditEntry {
   ipAddress?: string | null;
 }
 
-function statusClass(code: number) {
-  if (code >= 200 && code < 300) return 'bg-green-100 text-green-800';
-  if (code === 401 || code === 403) return 'bg-red-100 text-red-800';
-  if (code >= 400) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-neutral-100 text-neutral-700';
+function statusTone(code: number): BadgeTone {
+  if (code >= 200 && code < 300) return 'green';
+  if (code === 401 || code === 403) return 'red';
+  if (code >= 400) return 'amber';
+  return 'neutral';
 }
 
 export default function AuditPage() {
@@ -82,21 +83,15 @@ export default function AuditPage() {
   return (
  <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm text-neutral-600 hover:text-neutral-800 mb-4">
-          <ArrowLeftIcon className="w-4 h-4" /> Back to Dashboard
-        </Link>
-
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-black flex items-center gap-2">
-              <ShieldCheckIcon className="w-7 h-7 text-red-600" /> Audit Trail
-            </h1>
-            <p className="text-neutral-700 mt-1">Append-only record of privileged and state-changing actions ({total} entries).</p>
-          </div>
-          <button onClick={load} className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-50 self-start">
-            <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
-          </button>
-        </div>
+        <PageHeader
+          title="Audit Trail"
+          subtitle={`Append-only record of privileged and state-changing actions (${total} entries).`}
+          actions={
+            <button onClick={load} className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-300 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-50">
+              <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
+            </button>
+          }
+        />
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
@@ -143,7 +138,7 @@ export default function AuditPage() {
                   <td className="px-4 py-3 whitespace-nowrap text-neutral-600">{e.actorRole}</td>
                   <td className="px-4 py-3 whitespace-nowrap font-mono text-xs text-neutral-800">{e.action}</td>
                   <td className="px-4 py-3 text-neutral-600 max-w-xs truncate">{e.details}</td>
-                  <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${statusClass(e.statusCode)}`}>{e.statusCode}</span></td>
+                  <td className="px-4 py-3"><StatusBadge tone={statusTone(e.statusCode)}>{e.statusCode}</StatusBadge></td>
                   <td className="px-4 py-3 whitespace-nowrap text-neutral-700 text-xs">{e.ipAddress}</td>
                 </tr>
               ))}

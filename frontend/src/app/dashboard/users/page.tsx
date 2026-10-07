@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { ArrowLeftIcon, UserPlusIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { UserPlusIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api-client';
 import { isAdminLevel } from '@/lib/roles';
+import { PageHeader, FeedbackBanner, FormField, StatusBadge, inputClass } from '@/components/dashboard/ui';
 
 interface AdminUser {
   id: string;
@@ -99,68 +99,48 @@ export default function UserManagementPage() {
 
   const needsAgencyCode = createForm.role === 'agency_officer';
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
-
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md transition-colors" aria-label="Back to dashboard">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold">User Management</h1>
-              <p className="text-sm text-neutral-700">Create and manage admin officers</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowCreate(!showCreate)}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
-          >
-            <UserPlusIcon className="w-5 h-5" />
-            Add User
-          </button>
-        </div>
+        <PageHeader
+          title="User Management"
+          subtitle="Create and manage admin officers"
+          actions={
+            <button
+              onClick={() => setShowCreate(!showCreate)}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+            >
+              <UserPlusIcon className="w-5 h-5" />
+              Add User
+            </button>
+          }
+        />
 
-        {/* Feedback */}
-        {feedback && (
-          <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
-          }`}>
-            {feedback.message}
-          </div>
-        )}
+        {feedback && <FeedbackBanner type={feedback.type} message={feedback.message} />}
 
         {/* Create Form */}
         {showCreate && (
           <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-lg font-semibold mb-4">Create New User</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Full Name</label>
+              <FormField label="Full Name">
                 <input type="text" value={createForm.name} onChange={e => setCreateForm(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="Officer name" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Email</label>
+              </FormField>
+              <FormField label="Email">
                 <input type="email" value={createForm.email} onChange={e => setCreateForm(p => ({ ...p, email: e.target.value }))} className={inputClass} placeholder="officer@uia.go.ug" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Password (min 8 chars, 1 uppercase, 1 digit)</label>
+              </FormField>
+              <FormField label="Password (min 8 chars, 1 uppercase, 1 digit)">
                 <input type="password" value={createForm.password} onChange={e => setCreateForm(p => ({ ...p, password: e.target.value }))} className={inputClass} placeholder="Secure password" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Role</label>
+              </FormField>
+              <FormField label="Role">
                 <select value={createForm.role} onChange={e => setCreateForm(p => ({ ...p, role: e.target.value }))} className={inputClass}>
                   <option value="admin">Admin — full access</option>
                   <option value="dg">Director General — full access</option>
                   <option value="agency_officer">Agency Officer — scoped to one agency</option>
                 </select>
-              </div>
+              </FormField>
               {needsAgencyCode && (
-                <div>
-                  <label className="block text-sm text-neutral-700 mb-1">Agency Code (required)</label>
+                <FormField label="Agency Code (required)">
                   <input
                     type="text"
                     value={createForm.agencyCode}
@@ -169,7 +149,7 @@ export default function UserManagementPage() {
                     placeholder="e.g. UIA, URSB, URA"
                   />
                   <p className="text-xs text-neutral-600 mt-1">The officer will only see tickets assigned to this agency.</p>
-                </div>
+                </FormField>
               )}
             </div>
             <div className="flex gap-3 justify-end">
@@ -200,12 +180,10 @@ export default function UserManagementPage() {
                   <div>
                     <div className="font-semibold flex items-center gap-2">
                       {u.name}
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        u.role === 'admin' || u.role === 'dg' ? 'bg-yellow-50 text-red-600' : 'bg-blue-100 text-blue-800'
-                      }`}>
+                      <StatusBadge tone={u.role === 'admin' || u.role === 'dg' ? 'yellow' : 'blue'}>
                         {roleLabel(u.role)}{u.agencyCode ? ` · ${u.agencyCode}` : ''}
-                      </span>
-                      {!u.isActive && <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-700">Inactive</span>}
+                      </StatusBadge>
+                      {!u.isActive && <StatusBadge tone="red">Inactive</StatusBadge>}
                     </div>
                     <div className="text-sm text-neutral-600">{u.email}</div>
                   </div>

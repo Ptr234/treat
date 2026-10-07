@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { ArrowLeftIcon, PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminLevel } from '@/lib/roles';
+import { PageHeader, FeedbackBanner, FormField, StatusBadge, inputClass } from '@/components/dashboard/ui';
 
 interface Agency {
   _id: string;
@@ -116,72 +116,53 @@ export default function AgencyManagementPage() {
     );
   }
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
-
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md transition-colors" aria-label="Back to dashboard">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold">Agency Management</h1>
-              <p className="text-sm text-neutral-700">Manage government agencies, contact details, and SLA hours</p>
-            </div>
-          </div>
-          <button onClick={() => { resetForm(); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors">
-            <PlusIcon className="w-5 h-5" />
-            Add Agency
-          </button>
-        </div>
+        <PageHeader
+          title="Agency Management"
+          subtitle="Manage government agencies, contact details, and SLA hours"
+          actions={
+            <button onClick={() => { resetForm(); setShowForm(true); }}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors">
+              <PlusIcon className="w-5 h-5" />
+              Add Agency
+            </button>
+          }
+        />
 
-        {feedback && (
-          <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
-          }`}>{feedback.message}</div>
-        )}
+        {feedback && <FeedbackBanner type={feedback.type} message={feedback.message} />}
 
         {showForm && (
           <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Agency' : 'Add New Agency'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Agency Name *</label>
+              <FormField label="Agency Name" required>
                 <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className={inputClass} placeholder="Uganda Revenue Authority" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Code *</label>
+              </FormField>
+              <FormField label="Code" required>
                 <select value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))} className={inputClass}>
                   {AGENCY_CODES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Contact Email</label>
+              </FormField>
+              <FormField label="Contact Email">
                 <input type="email" value={form.contactEmail} onChange={e => setForm(p => ({ ...p, contactEmail: e.target.value }))} className={inputClass} placeholder="info@ura.go.ug" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Contact Phone</label>
+              </FormField>
+              <FormField label="Contact Phone">
                 <input type="tel" value={form.contactPhone} onChange={e => setForm(p => ({ ...p, contactPhone: e.target.value }))} className={inputClass} placeholder="+256..." />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Website</label>
+              </FormField>
+              <FormField label="Website">
                 <input type="url" value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))} className={inputClass} placeholder="https://ura.go.ug" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">SLA Response Hours</label>
+              </FormField>
+              <FormField label="SLA Response Hours">
                 <input type="number" min={1} value={form.slaResponseHours} onChange={e => setForm(p => ({ ...p, slaResponseHours: parseInt(e.target.value) || 4 }))} className={inputClass} />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-700 mb-1">Description</label>
+              </FormField>
+              <FormField label="Description" wide>
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className={inputClass} rows={2} placeholder="Agency description..." />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-700 mb-1">Services (comma-separated)</label>
+              </FormField>
+              <FormField label="Services (comma-separated)" wide>
                 <input type="text" value={form.services} onChange={e => setForm(p => ({ ...p, services: e.target.value }))} className={inputClass} placeholder="Tax Registration, TIN Issuance, ..." />
-              </div>
+              </FormField>
             </div>
             <div className="flex gap-3 justify-end">
               <button onClick={resetForm} className="px-4 py-2 text-neutral-700 hover:text-red-600 transition-colors">Cancel</button>
@@ -209,7 +190,7 @@ export default function AgencyManagementPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold flex items-center gap-2 flex-wrap">
                     <span className="truncate">{a.name}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-50 text-red-600 shrink-0">{a.code}</span>
+                    <StatusBadge tone="yellow" className="shrink-0">{a.code}</StatusBadge>
                   </div>
                   <div className="text-sm text-neutral-600 mt-1">
                     {a.contactEmail || 'No email'}

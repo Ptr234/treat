@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeftIcon, FunnelIcon, TrashIcon, EyeIcon, UserIcon } from '@heroicons/react/24/outline';
+import { FunnelIcon, TrashIcon, EyeIcon, UserIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminLevel } from '@/lib/roles';
 import { apiFetch } from '@/lib/api-client';
+import { PageHeader, FeedbackBanner } from '@/components/dashboard/ui';
 
 /**
  * Shape returned by the ASP.NET InvestorsController. The list projection is a
@@ -135,37 +136,28 @@ export default function InvestorsPage() {
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md" aria-label="Back">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold">Investor Pipeline</h1>
-              <p className="text-sm text-neutral-700">{total} registered investors</p>
+        <PageHeader
+          title="Investor Pipeline"
+          subtitle={`${total} registered investors`}
+          actions={
+            <div className="flex items-center gap-2">
+              <FunnelIcon className="w-4 h-4 text-neutral-600" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-neutral-100 border border-neutral-200 text-black text-sm rounded-md px-3 py-2 focus:ring-2 focus-visible:ring-red-600"
+              >
+                <option value="">All Statuses</option>
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <FunnelIcon className="w-4 h-4 text-neutral-600" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-neutral-100 border border-neutral-200 text-black text-sm rounded-md px-3 py-2 focus:ring-2 focus-visible:ring-red-600"
-            >
-              <option value="">All Statuses</option>
-              <option value="new">New</option>
-              <option value="contacted">Contacted</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-        </div>
+          }
+        />
 
-        {feedback && (
-          <div className={`mb-6 p-4 border-l-4 text-sm ${
-            feedback.type === 'success' ? 'bg-neutral-50 border-black text-black' : 'bg-red-50 border-red-700 text-red-800'
-          }`}>{feedback.message}</div>
-        )}
+        {feedback && <FeedbackBanner type={feedback.type} message={feedback.message} />}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Investor List */}

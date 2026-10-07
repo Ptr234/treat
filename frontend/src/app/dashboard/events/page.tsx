@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { ArrowLeftIcon, PlusIcon, TrashIcon, PencilIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon, PencilIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdminLevel } from '@/lib/roles';
+import { PageHeader, FeedbackBanner, FormField, StatusBadge, inputClass } from '@/components/dashboard/ui';
 
 interface SanityEvent {
   _id: string;
@@ -143,75 +143,53 @@ export default function EventManagementPage() {
     );
   }
 
-  const inputClass = "w-full px-4 py-3 bg-neutral-100 border border-neutral-200 text-black placeholder:text-neutral-500 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent";
-
   return (
  <div className="min-h-screen bg-white text-black">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-md transition-colors" aria-label="Back to dashboard">
-              <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />
-            </Link>
-            <div>
-              <h1 className="text-2xl font-bold">Event Management</h1>
-              <p className="text-sm text-neutral-700">Create, edit, and publish events (stored in Sanity CMS)</p>
-            </div>
-          </div>
-          <button
-            onClick={() => { resetForm(); setShowForm(true); }}
-            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
-          >
-            <PlusIcon className="w-5 h-5" />
-            New Event
-          </button>
-        </div>
+        <PageHeader
+          title="Event Management"
+          subtitle="Create, edit, and publish events (stored in Sanity CMS)"
+          actions={
+            <button
+              onClick={() => { resetForm(); setShowForm(true); }}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+            >
+              <PlusIcon className="w-5 h-5" />
+              New Event
+            </button>
+          }
+        />
 
-        {/* Feedback */}
-        {feedback && (
-          <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-50 border-green-600 text-green-800' : 'bg-red-50 border-red-600 text-red-800'
-          }`}>
-            {feedback.message}
-          </div>
-        )}
+        {feedback && <FeedbackBanner type={feedback.type} message={feedback.message} />}
 
         {/* Form */}
         {showForm && (
           <div className="p-6 mb-8 border-t border-neutral-200 pt-5">
             <h2 className="text-lg font-semibold mb-4">{editingId ? 'Edit Event' : 'Create New Event'}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-700 mb-1">Title *</label>
+              <FormField label="Title" required wide>
                 <input type="text" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} className={inputClass} placeholder="Event title" />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Start Date *</label>
+              </FormField>
+              <FormField label="Start Date" required>
                 <input type="datetime-local" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} className={inputClass} />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">End Date</label>
+              </FormField>
+              <FormField label="End Date">
                 <input type="datetime-local" value={form.endDate} onChange={e => setForm(p => ({ ...p, endDate: e.target.value }))} className={inputClass} />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Category *</label>
+              </FormField>
+              <FormField label="Category" required>
                 <select value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value }))} className={inputClass}>
                   {EVENT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Location</label>
+              </FormField>
+              <FormField label="Location">
                 <input type="text" value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} className={inputClass} placeholder="Kampala, Uganda" />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm text-neutral-700 mb-1">Description</label>
+              </FormField>
+              <FormField label="Description" wide>
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} className={inputClass} rows={3} placeholder="Event description..." />
-              </div>
-              <div>
-                <label className="block text-sm text-neutral-700 mb-1">Registration URL</label>
+              </FormField>
+              <FormField label="Registration URL">
                 <input type="url" value={form.registrationUrl} onChange={e => setForm(p => ({ ...p, registrationUrl: e.target.value }))} className={inputClass} placeholder="https://..." />
-              </div>
+              </FormField>
               <div className="flex items-center gap-3 pt-6">
                 <input type="checkbox" id="isPublished" checked={form.isPublished} onChange={e => setForm(p => ({ ...p, isPublished: e.target.checked }))}
                   className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-yellow-500 focus-visible:ring-red-600" />
@@ -247,8 +225,8 @@ export default function EventManagementPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold flex items-center gap-2 flex-wrap">
                     <span className="truncate">{ev.title}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-50 text-red-600 shrink-0">{ev.category}</span>
-                    {!ev.isPublished && <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 shrink-0">Draft</span>}
+                    <StatusBadge tone="yellow" className="shrink-0">{ev.category}</StatusBadge>
+                    {!ev.isPublished && <StatusBadge tone="neutral" className="shrink-0">Draft</StatusBadge>}
                   </div>
                   <div className="text-sm text-neutral-600 mt-1">
                     {new Date(ev.date).toLocaleDateString('en-UG', { dateStyle: 'medium' })}
