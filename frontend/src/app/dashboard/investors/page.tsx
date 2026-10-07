@@ -60,10 +60,10 @@ function initialsOf(name: string | undefined): string {
 }
 
 const statusColors: Record<string, string> = {
-  new: 'bg-yellow-50 text-red-600',
-  contacted: 'bg-blue-500/20 text-blue-400',
-  active: 'bg-green-500/20 text-green-400',
-  inactive: 'bg-neutral-100 text-neutral-700',
+  new: 'bg-yellow-50 text-black ring-1 ring-inset ring-yellow-300',
+  contacted: 'bg-neutral-100 text-neutral-700 ring-1 ring-inset ring-neutral-300',
+  active: 'bg-black text-yellow-400',
+  inactive: 'bg-neutral-50 text-neutral-500 ring-1 ring-inset ring-neutral-200',
 };
 
 export default function InvestorsPage() {
@@ -162,8 +162,8 @@ export default function InvestorsPage() {
         </div>
 
         {feedback && (
-          <div className={`mb-6 p-4 rounded-md border text-sm ${
-            feedback.type === 'success' ? 'bg-green-900/30 border-green-700 text-green-300' : 'bg-red-50 border-red-700 text-red-300'
+          <div className={`mb-6 p-4 border-l-4 text-sm ${
+            feedback.type === 'success' ? 'bg-neutral-50 border-black text-black' : 'bg-red-50 border-red-700 text-red-800'
           }`}>{feedback.message}</div>
         )}
 
@@ -179,8 +179,8 @@ export default function InvestorsPage() {
             ) : (
               <div className="space-y-3">
                 {investors.map((inv) => (
-                  <div key={inv.referenceNumber} className={`bg-white rounded-md border p-4 transition-colors ${
-                    selectedInvestor?.referenceNumber === inv.referenceNumber ? 'border-yellow-400' : 'border-neutral-200'
+                  <div key={inv.referenceNumber} className={`bg-white shadow-sm p-4 transition-colors ${
+                    selectedInvestor?.referenceNumber === inv.referenceNumber ? 'border border-yellow-400' : 'border border-neutral-200'
                   }`}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -190,7 +190,7 @@ export default function InvestorsPage() {
                         <div className="min-w-0">
                           <div className="font-semibold flex items-center gap-2 flex-wrap">
                             <span className="truncate">{inv.name}</span>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[statusKey(inv)] || statusColors.new}`}>
+                            <span className={`text-xs px-2 py-0.5 font-semibold ${statusColors[statusKey(inv)] || statusColors.new}`}>
                               {inv.status}
                             </span>
                           </div>
@@ -201,10 +201,10 @@ export default function InvestorsPage() {
                           {inv.linkedBusinessRegistrationRef && (
                             <Link
                               href={`/business/registration/${inv.linkedBusinessRegistrationRef}/`}
-                              className="inline-flex items-center gap-1 mt-1 text-xs px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 hover:bg-green-500/30 w-fit"
+                              className="inline-flex items-center gap-1 mt-1 text-xs px-2 py-0.5 bg-black text-yellow-400 hover:bg-neutral-800 w-fit transition-colors"
                               title="This investor's company has a completed URSB registration — click to view it"
                             >
-                              🔗 URSB: {inv.linkedBusinessRegistrationRef}
+                              URSB: {inv.linkedBusinessRegistrationRef}
                             </Link>
                           )}
                         </div>
@@ -213,7 +213,7 @@ export default function InvestorsPage() {
                         <select
                           value={statusKey(inv)}
                           onChange={(e) => handleStatusChange(inv, e.target.value)}
-                          className="text-xs text-black px-2 py-1 border-t border-neutral-200 pt-5"
+                          className="text-xs text-black px-2 py-1.5 border border-neutral-300 focus:border-black focus:outline-none"
                         >
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>
@@ -248,7 +248,7 @@ export default function InvestorsPage() {
 
           {/* Detail Panel */}
           {selectedInvestor && (
-            <div className="p-6 h-fit sticky top-8 border-t border-neutral-200 pt-5">
+            <div className="bg-white border border-neutral-200 shadow-sm p-6 h-fit sticky top-8">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold">Investor Details</h2>
                 <button onClick={() => setSelectedInvestor(null)} className="text-neutral-600 hover:text-red-600 text-sm">Close</button>
@@ -279,8 +279,8 @@ export default function InvestorsPage() {
                   </div>
                 ))}
                 {selectedInvestor.linkedBusinessRegistrationRef && (
-                  <div className="bg-green-500/10 p-3 border-t border-neutral-200 pt-5">
-                    <span className="text-green-400 text-xs font-medium block mb-1">
+                  <div className="bg-neutral-50 border-l-4 border-black p-3">
+                    <span className="text-black text-xs font-bold uppercase tracking-wide block mb-1">
                       Linked URSB Registration
                     </span>
                     <p className="text-xs text-neutral-700 mb-2">
@@ -289,7 +289,7 @@ export default function InvestorsPage() {
                     </p>
                     <Link
                       href={`/business/registration/${selectedInvestor.linkedBusinessRegistrationRef}/`}
-                      className="text-xs text-yellow-500 hover:text-red-600 underline"
+                      className="text-xs font-semibold text-red-700 hover:text-black underline"
                     >
                       View {selectedInvestor.linkedBusinessRegistrationRef} &rarr;
                     </Link>
@@ -300,7 +300,7 @@ export default function InvestorsPage() {
                     <span className="text-neutral-600 block mb-1">Sectors</span>
                     <div className="flex gap-1 flex-wrap">
                       {sectorsOf(selectedInvestor).map((s) => (
-                        <span key={s} className="text-xs px-2 py-0.5 bg-yellow-50 text-red-600 rounded">{s}</span>
+                        <span key={s} className="text-xs px-2 py-0.5 bg-yellow-50 text-black">{s}</span>
                       ))}
                     </div>
                   </div>

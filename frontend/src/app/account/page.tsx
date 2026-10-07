@@ -61,19 +61,22 @@ interface Submissions {
 
 function StatusBadge({ status }: { status: string }) {
   const s = status.toLowerCase();
+  // Uganda flag palette only: black marks a finished/good outcome (the
+  // classic "in the black"), gold marks something actively in motion,
+  // neutral marks a wait, red marks a bad outcome.
   const cls =
     s.includes('resolved') || s.includes('closed') || s.includes('active') || s.includes('confirmed')
-      ? 'bg-green-100 text-green-800'
+      ? 'bg-black text-yellow-400'
       : s.includes('progress') || s.includes('assigned') || s.includes('contacted') || s.includes('scheduled')
-      ? 'bg-blue-100 text-blue-800'
+      ? 'bg-yellow-100 text-black ring-1 ring-inset ring-yellow-300'
       : s.includes('pending') || s.includes('new') || s.includes('requested')
-      ? 'bg-yellow-100 text-yellow-800'
+      ? 'bg-neutral-100 text-neutral-700 ring-1 ring-inset ring-neutral-300'
       : s.includes('inactive') || s.includes('cancelled') || s.includes('rejected')
-      ? 'bg-red-100 text-red-800'
-      : 'bg-neutral-100 text-neutral-700';
+      ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200'
+      : 'bg-neutral-50 text-neutral-500';
   // Humanize PascalCase / SNAKE_CASE
   const label = status.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
-  return <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${cls}`}>{label}</span>;
+  return <span className={`inline-block px-2.5 py-0.5 text-xs font-semibold ${cls}`}>{label}</span>;
 }
 
 function fmtDate(iso?: string) {
