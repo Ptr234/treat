@@ -49,16 +49,29 @@ function mapBackendMetrics(raw: BackendDashboard): DGDashboardMetrics {
   const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 100) : 0);
 
   return {
-    liveInquiries: k.recentInquiries ?? k.totalInquiries ?? 0,
+    // "Live Inquiries" is labelled "New + Assigned tickets" in the UI — it
+    // used to show ContactInquiries counts instead, an unrelated dataset.
+    // Falls back to the old (mislabelled) value only if an older backend
+    // hasn't been redeployed with the newOrAssignedTickets KPI yet.
+    liveInquiries: k.newOrAssignedTickets ?? k.recentInquiries ?? k.totalInquiries ?? 0,
     activeCases: openTickets,
-    pendingApprovals: k.totalAppointments ?? 0,
+    // "Pending Approvals" is labelled "Awaiting external response" — it used
+    // to show the all-time total of booked appointments, which has no
+    // relation to tickets awaiting a reply from an external party.
+    pendingApprovals: k.pendingExternalTickets ?? k.totalAppointments ?? 0,
     escalatedCount: k.escalatedTickets ?? 0,
     // Capital still in the investor funnel, reported by the API in USD and
     // displayed in billions.
     pipelineValue: (k.pipelineValueUsd ?? 0) / 1_000_000_000,
     responseRate: pct(resolvedTickets, totalTickets),
     conversionRate: k.conversionRate ?? 0,
-    slaCompliance: openTickets > 0 ? Math.round((1 - slaBreached / openTickets) * 100) : 100,
+    // slaComplianceOverall scores every ticket with a deadline (open or
+    // resolved) using the same breach definition as the agency scorecard;
+    // the old open-tickets-only formula couldn't see a ticket that breached
+    // its SLA before being resolved, so the headline number and the
+    // per-agency numbers it's meant to summarize disagreed.
+    slaCompliance: k.slaComplianceOverall ??
+      (openTickets > 0 ? Math.round((1 - slaBreached / openTickets) * 100) : 100),
     investorSatisfaction: pct(avgRating, 5),
     agencyScorecard: raw.agencyScorecard ?? [],
     alerts: raw.alerts ?? [],

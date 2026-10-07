@@ -53,14 +53,44 @@ public class DashboardService : IDashboardService
                 Total = g.Count(),
                 Open = g.Count(t => t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed),
                 Resolved = g.Count(t => t.Status == TicketStatus.Resolved || t.Status == TicketStatus.Closed),
-                Escalated = g.Count(t => t.IsEscalated),
+                // "Awaiting officer action" means still open — a ticket that was once
+                // escalated but has since been resolved isn't awaiting anything.
+                // IsEscalated is a one-way flag (never cleared on resolution, see
+                // TicketService.MarkEscalated), so without the status filter this
+                // counted every ticket ever escalated, including closed ones.
+                Escalated = g.Count(t => t.IsEscalated &&
+                    t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed),
+                // Matches the "New + Assigned tickets" label on the dashboard's Live
+                // Inquiries card — previously that card showed ContactInquiries counts
+                // instead, an unrelated dataset with no status filtering at all.
+                NewOrAssigned = g.Count(t => t.Status == TicketStatus.New || t.Status == TicketStatus.Assigned),
+                // Matches "Pending Approvals / Awaiting external response" — previously
+                // that card showed the all-time total of booked appointments, which
+                // has no conceptual connection to tickets awaiting an external reply.
+                PendingExternal = g.Count(t => t.Status == TicketStatus.PendingExternal),
                 SlaBreached = g.Count(t =>
                     t.SlaDeadlineAt != null && t.SlaDeadlineAt < now &&
                     t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed),
+                // Overall SLA compliance, scoped to tickets that actually carry a
+                // deadline and using the same breach definition as the agency
+                // scorecard below (overdue-and-open OR resolved-after-deadline).
+                // The top-level gauge previously used a different, narrower formula
+                // (breached-open / all-open) that silently excluded every ticket
+                // that breached its SLA before being resolved — so the headline
+                // number and the per-agency numbers it's meant to summarize weren't
+                // computed the same way.
+                SlaEligible = g.Count(t => t.SlaDeadlineAt != null),
+                SlaBreachedOverall = g.Count(t => t.SlaDeadlineAt != null &&
+                    ((t.ResolvedAt == null && t.SlaDeadlineAt < now) ||
+                     (t.ResolvedAt != null && t.ResolvedAt > t.SlaDeadlineAt))),
                 Recent = g.Count(t => t.CreatedAt >= thirtyDaysAgo),
                 AvgRating = g.Average(t => (double?)t.SatisfactionRating) ?? 0,
             })
             .FirstOrDefaultAsync();
+
+        var slaComplianceOverall = ticketStats is { SlaEligible: > 0 }
+            ? (int)Math.Round((ticketStats.SlaEligible - ticketStats.SlaBreachedOverall) * 100.0 / ticketStats.SlaEligible)
+            : 100;
 
         var ticketsByCategory = await _db.Tickets
             .GroupBy(t => t.Category)
@@ -222,7 +252,10 @@ public class DashboardService : IDashboardService
             OpenTickets = ticketStats?.Open ?? 0,
             ResolvedTickets = ticketStats?.Resolved ?? 0,
             EscalatedTickets = ticketStats?.Escalated ?? 0,
+            NewOrAssignedTickets = ticketStats?.NewOrAssigned ?? 0,
+            PendingExternalTickets = ticketStats?.PendingExternal ?? 0,
             SlaBreached = ticketStats?.SlaBreached ?? 0,
+            SlaComplianceOverall = slaComplianceOverall,
             AvgRating = ticketStats?.AvgRating ?? 0,
             RecentTickets = ticketStats?.Recent ?? 0,
             TotalInvestors = totalInvestors,
@@ -472,8 +505,13 @@ public class DashboardStats
     public int TotalTickets { get; set; }
     public int OpenTickets { get; set; }
     public int ResolvedTickets { get; set; }
+    /// <summary>Open tickets currently flagged escalated — resolved/closed ones don't count, see ComputeDashboardStatsAsync.</summary>
     public int EscalatedTickets { get; set; }
+    public int NewOrAssignedTickets { get; set; }
+    public int PendingExternalTickets { get; set; }
     public int SlaBreached { get; set; }
+    /// <summary>SLA compliance across every ticket with a deadline, open or resolved — see ComputeDashboardStatsAsync.</summary>
+    public int SlaComplianceOverall { get; set; }
     public double AvgRating { get; set; }
     public int RecentTickets { get; set; }
     public int TotalInvestors { get; set; }

@@ -52,11 +52,18 @@ interface MyInvestor {
   investorType: string;
   createdAt: string;
 }
+interface MyChatEnquiry {
+  sessionId: string;
+  lastMessage: string;
+  messageCount: number;
+  lastActivityAt: string;
+}
 interface Submissions {
   tickets: MyTicket[];
   inquiries: MyInquiry[];
   appointments: MyAppointment[];
   investor?: MyInvestor | null;
+  chatEnquiries?: MyChatEnquiry[];
 }
 
 function StatusBadge({ status }: { status: string }) {
@@ -137,7 +144,8 @@ export default function AccountPage() {
   const inquiries = data?.inquiries ?? [];
   const appointments = data?.appointments ?? [];
   const investor = data?.investor ?? null;
-  const totalCount = tickets.length + inquiries.length + appointments.length + (investor ? 1 : 0);
+  const chatEnquiries = data?.chatEnquiries ?? [];
+  const totalCount = tickets.length + inquiries.length + appointments.length + chatEnquiries.length + (investor ? 1 : 0);
 
   return (
  <div className="min-h-screen bg-white py-8">
@@ -280,6 +288,36 @@ export default function AccountPage() {
                         <p className="text-xs text-neutral-600">{a.referenceNumber} · {fmtDate(a.preferredDate)} at {a.preferredTime} · {a.meetingType}</p>
                       </div>
                       <StatusBadge status={a.status} />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* AI assistant conversations */}
+            {chatEnquiries.length > 0 && (
+              <section className="border-t border-neutral-200 pt-5">
+                <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
+                  <ChatBubbleLeftRightIcon className="w-5 h-5 text-red-600" />
+                  <h2 className="text-lg font-bold text-black">AI Assistant Conversations</h2>
+                  <span className="text-sm text-neutral-600">({chatEnquiries.length})</span>
+                </div>
+                <ul className="divide-y divide-neutral-200">
+                  {chatEnquiries.map((c) => (
+                    <li key={c.sessionId} className="py-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-black truncate">{c.lastMessage}</p>
+                        <p className="text-xs text-neutral-600">
+                          {c.messageCount} message{c.messageCount !== 1 ? 's' : ''} · {fmtDate(c.lastActivityAt)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => document.dispatchEvent(new CustomEvent('openChatWidget'))}
+                        className="inline-flex items-center gap-1 text-sm font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
+                      >
+                        Continue in chat <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                      </button>
                     </li>
                   ))}
                 </ul>

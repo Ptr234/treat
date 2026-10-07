@@ -303,4 +303,101 @@ public class DashboardServiceTests
         Assert.Equal("resolution", Read<string>(stats.RecentActivity[0], "type"));
         Assert.Equal("inquiry", Read<string>(stats.RecentActivity[1], "type"));
     }
+
+    [Fact]
+    public async Task EscalatedTickets_excludes_ones_that_have_since_been_resolved()
+    {
+        var db = TestDbFactory.Create();
+        var stillOpen = Ticket("T-OPEN", TicketStatus.InProgress, "UIA");
+        stillOpen.IsEscalated = true;
+        var nowClosed = Ticket("T-DONE", TicketStatus.Resolved, "UIA", resolvedAt: DateTimeOffset.UtcNow);
+        nowClosed.IsEscalated = true;
+        db.Tickets.AddRange(stillOpen, nowClosed);
+        await db.SaveChangesAsync();
+
+        var stats = await CreateService(db).GetDashboardStatsAsync();
+
+        // IsEscalated is never cleared on resolution (see TicketService.MarkEscalated),
+        // so counting it without a status filter would include T-DONE even though
+        // nothing is "awaiting officer action" on a resolved ticket.
+        Assert.Equal(1, stats.EscalatedTickets);
+    }
+
+    [Fact]
+    public async Task NewOrAssignedTickets_counts_only_those_two_statuses()
+    {
+        var db = TestDbFactory.Create();
+        db.Tickets.AddRange(
+            Ticket("T-1", TicketStatus.New, "UIA"),
+            Ticket("T-2", TicketStatus.Assigned, "UIA"),
+            Ticket("T-3", TicketStatus.InProgress, "UIA"),
+            Ticket("T-4", TicketStatus.PendingExternal, "UIA"));
+        await db.SaveChangesAsync();
+
+        var stats = await CreateService(db).GetDashboardStatsAsync();
+
+        Assert.Equal(2, stats.NewOrAssignedTickets);
+    }
+
+    [Fact]
+    public async Task PendingExternalTickets_counts_only_that_status()
+    {
+        var db = TestDbFactory.Create();
+        db.Tickets.AddRange(
+            Ticket("T-1", TicketStatus.PendingExternal, "UIA"),
+            Ticket("T-2", TicketStatus.InProgress, "UIA"),
+            Ticket("T-3", TicketStatus.Resolved, "UIA", resolvedAt: DateTimeOffset.UtcNow));
+        await db.SaveChangesAsync();
+
+        var stats = await CreateService(db).GetDashboardStatsAsync();
+
+        Assert.Equal(1, stats.PendingExternalTickets);
+    }
+
+    [Fact]
+    public async Task SlaComplianceOverall_counts_a_ticket_that_breached_before_it_was_resolved()
+    {
+        var db = TestDbFactory.Create();
+        var deadline = DateTimeOffset.UtcNow.AddHours(-2);
+        // Resolved, but after its own deadline — a real breach the old formula
+        // (breached-open / all-open) couldn't see at all once a ticket closes.
+        db.Tickets.Add(Ticket("T-LATE", TicketStatus.Resolved, "UIA",
+            slaDeadline: deadline, resolvedAt: deadline.AddHours(1)));
+        await db.SaveChangesAsync();
+
+        var stats = await CreateService(db).GetDashboardStatsAsync();
+
+        Assert.Equal(0, stats.SlaComplianceOverall);
+    }
+
+    [Fact]
+    public async Task SlaComplianceOverall_is_100_when_no_ticket_carries_a_deadline()
+    {
+        var db = TestDbFactory.Create();
+        db.Tickets.Add(Ticket("T-1", TicketStatus.New, "UIA"));
+        await db.SaveChangesAsync();
+
+        var stats = await CreateService(db).GetDashboardStatsAsync();
+
+        Assert.Equal(100, stats.SlaComplianceOverall);
+    }
+
+    [Fact]
+    public async Task SlaComplianceOverall_matches_the_agency_scorecards_definition()
+    {
+        // One UIA ticket resolved on time, one resolved late — the scorecard
+        // (which already handled resolved-late tickets correctly) and the
+        // headline gauge it summarizes should now agree: 50% either way.
+        var db = TestDbFactory.Create();
+        var deadline = DateTimeOffset.UtcNow.AddHours(-1);
+        db.Tickets.AddRange(
+            Ticket("T-ONTIME", TicketStatus.Resolved, "UIA", slaDeadline: deadline.AddHours(2), resolvedAt: deadline),
+            Ticket("T-LATE", TicketStatus.Resolved, "UIA", slaDeadline: deadline, resolvedAt: deadline.AddHours(2)));
+        await db.SaveChangesAsync();
+
+        var stats = await CreateService(db).GetDashboardStatsAsync();
+
+        var uia = Assert.Single(stats.AgencyScorecard);
+        Assert.Equal(Read<int>(uia, "slaCompliance"), stats.SlaComplianceOverall);
+    }
 }

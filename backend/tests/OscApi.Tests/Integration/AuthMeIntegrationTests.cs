@@ -150,4 +150,35 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, me.StatusCode);
         Assert.Contains("Integration ticket", await me.Content.ReadAsStringAsync());
     }
+
+    [Fact]
+    public async Task ChatbotConversation_AppearsIn_UsersSubmissions()
+    {
+        // Regression test: /api/v1/me/submissions previously never queried
+        // ChatEnquiries at all, so a signed-in investor's own AI-assistant
+        // conversations — correctly tagged with their email by the widget —
+        // were invisible on their own "My Submissions" page.
+        var client = _factory.CreateClient();
+        var email = NewEmail("chatuser");
+
+        await client.PostAsJsonAsync("/api/v1/auth/signup",
+            new { name = "Chat User", email, password = "Passw0rd1" });
+
+        var log = await client.PostAsJsonAsync("/api/v1/chatbot/log", new
+        {
+            sessionId = "sess-integration-1",
+            userEmail = email,
+            userMessage = "What permits do I need for a factory?",
+            botResponse = "Here is the permit checklist...",
+            language = "en",
+            tier = "ai",
+        });
+        Assert.Equal(HttpStatusCode.OK, log.StatusCode);
+
+        var me = await client.GetAsync("/api/v1/me/submissions");
+        Assert.Equal(HttpStatusCode.OK, me.StatusCode);
+        var body = await me.Content.ReadAsStringAsync();
+        Assert.Contains("chatEnquiries", body);
+        Assert.Contains("sess-integration-1", body);
+    }
 }

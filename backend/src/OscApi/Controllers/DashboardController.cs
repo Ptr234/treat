@@ -38,7 +38,9 @@ public class DashboardController : ControllerBase
             kpis = new
             {
                 stats.TotalTickets, stats.OpenTickets, stats.ResolvedTickets, stats.EscalatedTickets,
-                stats.SlaBreached, stats.AvgRating, stats.RecentTickets, stats.TotalInvestors, stats.TotalChatSessions,
+                stats.NewOrAssignedTickets, stats.PendingExternalTickets,
+                stats.SlaBreached, stats.SlaComplianceOverall,
+                stats.AvgRating, stats.RecentTickets, stats.TotalInvestors, stats.TotalChatSessions,
                 stats.TotalInquiries, stats.TotalAppointments, stats.RecentInquiries, stats.RecentAppointments,
                 stats.ChatEscalations, stats.TotalMessages, stats.RecentMessages,
                 stats.ToolUsageCount, stats.DownloadCount, stats.SearchCount,

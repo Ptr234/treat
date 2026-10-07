@@ -93,7 +93,35 @@ public class MeController : ControllerBase
             })
             .FirstOrDefaultAsync();
 
-        return Ok(new ApiResponse<object>(true, new { tickets, inquiries, appointments, investor }));
+        // AI chatbot conversations tied to this email — previously absent from
+        // this endpoint entirely, so a signed-in user's own chatbot enquiries
+        // never appeared on their "My Submissions" page even though the chat
+        // widget correctly tags them with the signed-in user's email (see
+        // ChatWidget.tsx's auto-fill from the auth session). Grouped by
+        // session rather than listed per message, since one conversation can
+        // be dozens of back-and-forth rows.
+        var chatEnquiryRows = await _db.ChatEnquiries.AsNoTracking()
+            .Where(c => c.UserEmail == email)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new { c.SessionId, c.UserMessage, c.CreatedAt })
+            .ToListAsync();
+
+        var chatEnquiries = chatEnquiryRows
+            .GroupBy(c => c.SessionId)
+            .Select(g => new
+            {
+                sessionId = g.Key,
+                // Rows are already ordered newest-first, so the group's first
+                // row is its most recent message.
+                lastMessage = g.First().UserMessage,
+                messageCount = g.Count(),
+                lastActivityAt = g.Max(c => c.CreatedAt),
+            })
+            .OrderByDescending(x => x.lastActivityAt)
+            .Take(20)
+            .ToList();
+
+        return Ok(new ApiResponse<object>(true, new { tickets, inquiries, appointments, investor, chatEnquiries }));
     }
 
     /// <summary>Get the signed-in user's saved draft for a form, if any.</summary>
