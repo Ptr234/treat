@@ -128,15 +128,17 @@ public class EmailService : IEmailService
         string contactName, string contactEmail, string subject, string message,
         string? agencyEmail = null)
     {
-        var body = $"New inquiry via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nFrom: {contactName} ({contactEmail})\nSubject: {subject}\n\nMessage:\n{message}\n\nReview: {_siteUrl}/dashboard";
+        var dashboardUrl = $"{_siteUrl}/dashboard";
         var subjectLine = $"New Inquiry {referenceNumber} for {agencyCode}";
+        var html = EmailTemplates.ContactNotificationToAgency(agencyName, agencyCode, referenceNumber, contactName, contactEmail, subject, message, dashboardUrl);
+        var text = $"New inquiry via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nFrom: {contactName} ({contactEmail})\nSubject: {subject}\n\nMessage:\n{message}\n\nReview: {dashboardUrl}";
 
         // Send to admin
-        await SendAsync(_adminEmail, subjectLine, textBody: body);
+        await SendAsync(_adminEmail, subjectLine, htmlBody: html, textBody: text);
 
         // Send to actual agency email if provided
         if (!string.IsNullOrEmpty(agencyEmail) && agencyEmail != _adminEmail)
-            await SendAsync(agencyEmail, subjectLine, textBody: body);
+            await SendAsync(agencyEmail, subjectLine, htmlBody: html, textBody: text);
     }
 
     public async Task SendAppointmentConfirmationAsync(
@@ -154,13 +156,15 @@ public class EmailService : IEmailService
         string serviceType, string purpose, string date, string time,
         int durationMinutes, string meetingType, string? agencyEmail = null)
     {
-        var body = $"Appointment request via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nContact: {contactName} ({contactEmail}, {contactPhone})\nService: {serviceType}\nPurpose: {purpose}\nDate: {date} at {time}\nDuration: {durationMinutes}min ({meetingType})\n\nReview: {_siteUrl}/dashboard";
+        var dashboardUrl = $"{_siteUrl}/dashboard";
         var subjectLine = $"Appointment Request {referenceNumber} for {agencyCode}";
+        var html = EmailTemplates.AppointmentNotificationToAgency(agencyName, agencyCode, referenceNumber, contactName, contactEmail, contactPhone, serviceType, purpose, date, time, durationMinutes, meetingType, dashboardUrl);
+        var text = $"Appointment request via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nContact: {contactName} ({contactEmail}, {contactPhone})\nService: {serviceType}\nPurpose: {purpose}\nDate: {date} at {time}\nDuration: {durationMinutes}min ({meetingType})\n\nReview: {dashboardUrl}";
 
-        await SendAsync(_adminEmail, subjectLine, textBody: body);
+        await SendAsync(_adminEmail, subjectLine, htmlBody: html, textBody: text);
 
         if (!string.IsNullOrEmpty(agencyEmail) && agencyEmail != _adminEmail)
-            await SendAsync(agencyEmail, subjectLine, textBody: body);
+            await SendAsync(agencyEmail, subjectLine, htmlBody: html, textBody: text);
     }
 
     private async Task SendAsync(string to, string subject, string? textBody = null, string? htmlBody = null)

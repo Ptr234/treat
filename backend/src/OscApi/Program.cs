@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection;
 using System.Threading.RateLimiting;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -117,6 +118,28 @@ else
     Log.Warning(
         "Redis is not configured: distributed cache and rate limiting are in-memory " +
         "and per-instance. Do NOT run more than one backend instance in this mode.");
+}
+
+// Data Protection key ring (optional — falls back to an in-memory, per-process
+// key if not configured). ASP.NET Core initializes this subsystem by default;
+// without a persisted key, it regenerates one on every restart and logs a
+// warning each time. Nothing in this app currently depends on it (auth uses a
+// custom JWT cookie handler, not the built-in Data-Protection-backed one), but
+// a self-hosted deployment restarts far more often than a managed platform's
+// would, so we persist it properly rather than carry the warning indefinitely.
+var keysDir = builder.Configuration["DataProtection:KeysDirectory"];
+if (!string.IsNullOrEmpty(keysDir))
+{
+    Directory.CreateDirectory(keysDir);
+    builder.Services.AddDataProtection()
+        .SetApplicationName("OscApi")
+        .PersistKeysToFileSystem(new DirectoryInfo(keysDir));
+}
+else
+{
+    Log.Warning(
+        "DataProtection:KeysDirectory is not configured: keys are in-memory and " +
+        "per-process, regenerated on every restart.");
 }
 
 // In-memory cache for application-level caching (settings, etc.)
