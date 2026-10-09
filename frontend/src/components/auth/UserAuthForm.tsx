@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface UserAuthFormProps {
@@ -18,15 +19,19 @@ export default function UserAuthForm({ onSuccess }: UserAuthFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setNotice('');
     setSubmitting(true);
     try {
       if (mode === 'signup') {
         await signup(name.trim(), email.trim(), password);
+        setNotice('Check your email for a verification link. You will choose your final password when you verify.');
+        return;
       } else {
         const result = await login(email.trim(), password);
         if (result?.mfaRequired) {
@@ -87,7 +92,8 @@ export default function UserAuthForm({ onSuccess }: UserAuthFormProps) {
         />
       </div>
 
-      {error && <p className="gov-inset gov-inset--red text-sm font-semibold">{error}</p>}
+      {error && <p className="gov-inset gov-inset--red text-sm font-semibold" role="alert">{error} <Link className="underline" href="/auth/verify-email">Resend verification link</Link></p>}
+      {notice && <p className="gov-inset text-sm font-semibold" role="status">{notice} <Link className="underline" href="/auth/verify-email">Verification help</Link></p>}
 
       <button
         type="submit"
@@ -104,6 +110,7 @@ export default function UserAuthForm({ onSuccess }: UserAuthFormProps) {
           onClick={() => {
             setMode(mode === 'signup' ? 'login' : 'signup');
             setError('');
+            setNotice('');
           }}
           className="gov-link"
         >

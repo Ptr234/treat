@@ -7,7 +7,7 @@ public interface IRecaptchaService
 {
     bool IsConfigured { get; }
 
-    /// <summary>Verify a reCAPTCHA v3 token. Returns true if valid or if reCAPTCHA is not configured.</summary>
+    /// <summary>Verify a reCAPTCHA v3 token. Missing configuration is allowed only in Development.</summary>
     Task<bool> VerifyAsync(string? token);
 }
 
@@ -17,11 +17,13 @@ public class RecaptchaService : IRecaptchaService
     private readonly string? _secretKey;
     private readonly double _minScore;
     private readonly ILogger<RecaptchaService> _logger;
+    private readonly IWebHostEnvironment _environment;
 
-    public RecaptchaService(HttpClient http, IConfiguration config, ILogger<RecaptchaService> logger)
+    public RecaptchaService(HttpClient http, IConfiguration config, ILogger<RecaptchaService> logger, IWebHostEnvironment environment)
     {
         _http = http;
         _logger = logger;
+        _environment = environment;
         _secretKey = config["Recaptcha:SecretKey"];
         _minScore = double.TryParse(config["Recaptcha:MinScore"], out var s) ? s : 0.5;
     }
@@ -29,14 +31,20 @@ public class RecaptchaService : IRecaptchaService
     public bool IsConfigured => !string.IsNullOrEmpty(_secretKey);
 
     /// <summary>
-    /// Verify a reCAPTCHA v3 token. Returns true if valid or if reCAPTCHA is not configured.
+    /// Verify a reCAPTCHA v3 token. Missing configuration is allowed only in Development.
     /// </summary>
     public async Task<bool> VerifyAsync(string? token)
     {
-        if (!IsConfigured)
+        if (!IsConfigured && (_environment.IsDevelopment() || _environment.IsEnvironment("Testing")))
         {
             _logger.LogDebug("reCAPTCHA not configured — skipping verification");
-            return true; // Allow through if not configured (dev mode)
+            return true;
+        }
+
+        if (!IsConfigured)
+        {
+            _logger.LogError("reCAPTCHA is not configured; rejecting public form submission");
+            return false;
         }
 
         if (string.IsNullOrEmpty(token))
@@ -71,7 +79,7 @@ public class RecaptchaService : IRecaptchaService
         catch (Exception ex)
         {
             _logger.LogError(ex, "reCAPTCHA verification error");
-            return true; // Fail open to not block users on reCAPTCHA outage
+            return false; // Fail closed: an outage must not disable the abuse control.
         }
     }
 }

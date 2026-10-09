@@ -30,6 +30,11 @@ public interface IAuditable
 /// </summary>
 public abstract class AuditableEntity : Entity, IAuditable
 {
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+    // PostgreSQL timestamptz stores microseconds. Millisecond precision keeps
+    // account-version claims identical before and after a database round-trip.
+    public static DateTimeOffset MillisecondUtcNow() =>
+        DateTimeOffset.FromUnixTimeMilliseconds(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+
+    public DateTimeOffset CreatedAt { get; set; } = MillisecondUtcNow();
+    public DateTimeOffset UpdatedAt { get; set; } = MillisecondUtcNow();
 }

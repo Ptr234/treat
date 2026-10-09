@@ -20,17 +20,28 @@ namespace OscApi.Controllers;
 public class MeController : ControllerBase
 {
     private readonly OscDbContext _db;
+    private readonly IJwtService _jwt;
+    private readonly IWebHostEnvironment _env;
 
-    public MeController(OscDbContext db) => _db = db;
+    public MeController(OscDbContext db, IJwtService jwt, IWebHostEnvironment env)
+    {
+        _db = db;
+        _jwt = jwt;
+        _env = env;
+    }
 
-    private string? Email => User.FindFirstValue(ClaimTypes.Email)?.ToLowerInvariant();
+    // All self-service records are keyed by email, so only expose them when the
+    // authenticated identity has proved control of that address.
+    private string? Email => (Roles.BackOfficeRoles.Contains(User.GetRole()) || User.FindFirst("email_verified")?.Value == "true")
+        ? User.FindFirstValue(ClaimTypes.Email)?.ToLowerInvariant()
+        : null;
 
     /// <summary>All submissions belonging to the signed-in user, matched by email.</summary>
     [HttpGet("submissions")]
     public async Task<IActionResult> GetSubmissions()
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "A verified email address is required", statusCode: StatusCodes.Status403Forbidden);
 
         var tickets = await _db.Tickets.AsNoTracking()
             .Where(t => t.ContactEmail == email)
@@ -129,7 +140,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> GetDraft(string formType)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "A verified email address is required", statusCode: StatusCodes.Status403Forbidden);
 
         var draft = await _db.FormDrafts.AsNoTracking()
             .FirstOrDefaultAsync(d => d.UserEmail == email && d.FormType == formType);
@@ -147,7 +158,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> SaveDraft(string formType, [FromBody] JsonElement data)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "A verified email address is required", statusCode: StatusCodes.Status403Forbidden);
 
         if (string.IsNullOrWhiteSpace(formType) || formType.Length > 50)
             return Problem(detail: "Invalid form type", statusCode: StatusCodes.Status400BadRequest);
@@ -177,7 +188,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> DeleteDraft(string formType)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "A verified email address is required", statusCode: StatusCodes.Status403Forbidden);
 
         var draft = await _db.FormDrafts.FirstOrDefaultAsync(d => d.UserEmail == email && d.FormType == formType);
         if (draft is not null)
@@ -194,7 +205,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> GetProfile()
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "A verified email address is required", statusCode: StatusCodes.Status403Forbidden);
 
         var isBackOffice = Roles.BackOfficeRoles.Contains(User.GetRole());
         var name = isBackOffice
@@ -213,7 +224,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> UpdateProfile([FromBody] JsonElement data)
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "A verified email address is required", statusCode: StatusCodes.Status403Forbidden);
 
         if (data.ValueKind != JsonValueKind.Object || !data.TryGetProperty("name", out var nameProp)
             || nameProp.ValueKind != JsonValueKind.String)
@@ -224,21 +235,30 @@ public class MeController : ControllerBase
             return Problem(detail: "Name must be 2-100 characters", statusCode: StatusCodes.Status400BadRequest);
 
         var isBackOffice = Roles.BackOfficeRoles.Contains(User.GetRole());
+        AdminUser? admin = null;
+        User? user = null;
         if (isBackOffice)
         {
-            var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email);
+            admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email);
             if (admin is null) return Problem(detail: "Account not found", statusCode: StatusCodes.Status404NotFound);
             admin.Name = name;
-            admin.UpdatedAt = DateTimeOffset.UtcNow;
         }
         else
         {
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+            user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (user is null) return Problem(detail: "Account not found", statusCode: StatusCodes.Status404NotFound);
             user.Name = name;
         }
 
         await _db.SaveChangesAsync();
+        var refreshed = _jwt.CreateToken(
+            (admin?.Id ?? user!.Id).ToString(), email, name, User.GetRole() ?? Roles.User,
+            picture: user?.Picture,
+            agencyCode: admin?.AgencyCode,
+            mfaEnabled: admin?.MfaEnabled ?? false,
+            emailVerified: User.FindFirst("email_verified")?.Value == "true",
+            accountUpdatedAt: admin?.UpdatedAt ?? user!.UpdatedAt);
+        Response.Cookies.Append("osc-session", refreshed, _jwt.GetCookieOptions(_env.IsProduction()));
         return Ok(new ApiResponse<object>(true, new { email, name }));
     }
 
@@ -247,7 +267,7 @@ public class MeController : ControllerBase
     public async Task<IActionResult> DeleteAccount()
     {
         var email = Email;
-        if (string.IsNullOrEmpty(email)) return Problem(detail: "Not authenticated", statusCode: StatusCodes.Status401Unauthorized);
+        if (string.IsNullOrEmpty(email)) return Problem(detail: "A verified email address is required", statusCode: StatusCodes.Status403Forbidden);
 
         // Delete investor profile
         var investor = await _db.InvestorProfiles.FirstOrDefaultAsync(p => p.Email == email);

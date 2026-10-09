@@ -47,7 +47,7 @@ public class OscDbContext : DbContext
         foreach (var entry in ChangeTracker.Entries<IAuditable>())
         {
             if (entry.State == EntityState.Modified)
-                entry.Entity.UpdatedAt = DateTimeOffset.UtcNow;
+                entry.Entity.UpdatedAt = AuditableEntity.MillisecondUtcNow();
         }
     }
 
@@ -67,6 +67,7 @@ public class OscDbContext : DbContext
         modelBuilder.Entity<User>(e =>
         {
             e.HasIndex(u => u.Email).IsUnique();
+            e.HasIndex(u => u.EmailVerificationToken);
         });
 
         // FormDraft — one draft per (user, form type)

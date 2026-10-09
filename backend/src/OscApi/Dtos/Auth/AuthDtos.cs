@@ -25,3 +25,5 @@ public record AuthResponse(string Id, string Email, string Name, string Role, st
 public record PasswordResetRequest(string Email);
 
 public record PasswordResetVerifyRequest(string Token, string NewPassword);
+public record EmailVerificationRequest(string Token, string NewPassword);
+public record EmailVerificationResendRequest(string Email);

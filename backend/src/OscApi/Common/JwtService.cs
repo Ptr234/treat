@@ -7,7 +7,7 @@ namespace OscApi.Common;
 
 public interface IJwtService
 {
-    string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null, bool mfaEnabled = false);
+    string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null, bool mfaEnabled = false, bool emailVerified = false, DateTimeOffset? accountUpdatedAt = null);
     ClaimsPrincipal? ValidateToken(string token);
     CookieOptions GetCookieOptions(bool isProduction = false);
 }
@@ -40,7 +40,7 @@ public class JwtService : IJwtService
         _cookieDomain = config["Cookie:Domain"];
     }
 
-    public string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null, bool mfaEnabled = false)
+    public string CreateToken(string userId, string email, string name, string role, string? picture = null, string? agencyCode = null, bool mfaEnabled = false, bool emailVerified = false, DateTimeOffset? accountUpdatedAt = null)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -62,6 +62,8 @@ public class JwtService : IJwtService
             // present (not just for back-office roles) so its absence is never
             // mistaken for "not required".
             new("mfa_enabled", mfaEnabled ? "true" : "false"),
+            new("email_verified", emailVerified ? "true" : "false"),
+            new("account_updated_at", (accountUpdatedAt ?? DateTimeOffset.MinValue).ToUnixTimeMilliseconds().ToString(System.Globalization.CultureInfo.InvariantCulture)),
         };
 
         if (picture is not null)

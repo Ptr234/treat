@@ -98,7 +98,7 @@ public class AuthController : ControllerBase
                 }
             }
 
-            var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role, picture: null, agencyCode: admin.AgencyCode, mfaEnabled: admin.MfaEnabled);
+            var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role, picture: null, agencyCode: admin.AgencyCode, mfaEnabled: admin.MfaEnabled, accountUpdatedAt: admin.UpdatedAt);
             Response.Cookies.Append("osc-session", adminToken, _jwt.GetCookieOptions(_env.IsProduction()));
             await AuditAsync(admin.Email, admin.Role, "auth.login", "Successful sign-in", 200);
             return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
@@ -113,7 +113,11 @@ public class AuthController : ControllerBase
             return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
         }
 
-        var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture);
+        if (!user.EmailVerified)
+            return Problem(detail: "Verify your email address before signing in", statusCode: StatusCodes.Status403Forbidden);
+
+        var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture,
+            emailVerified: user.EmailVerified, accountUpdatedAt: user.UpdatedAt);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
         await AuditAsync(user.Email, user.Role, "auth.login", "Successful sign-in", 200);
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
@@ -148,11 +152,13 @@ public class AuthController : ControllerBase
             PasswordHash = _password.HashPassword(request.Password),
             Role = "user",
         };
+        var verificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+        user.EmailVerificationToken = HashResetToken(verificationToken);
+        user.EmailVerificationExpiresAt = DateTimeOffset.UtcNow.AddHours(24);
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
-        var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role);
-        Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
+        await _email.SendEmailVerificationAsync(user.Email, user.Name, verificationToken);
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
             user.Id.ToString(), user.Email, user.Name, user.Role)));
     }
@@ -215,6 +221,7 @@ public class AuthController : ControllerBase
         }
 
         string role, name, id;
+        DateTimeOffset accountUpdatedAt;
         if (admin is not null)
         {
             // Google sign-in authenticates identity, not the second factor: an admin who
@@ -237,6 +244,7 @@ public class AuthController : ControllerBase
             role = admin.Role;
             name = admin.Name;
             id = admin.Id.ToString();
+            accountUpdatedAt = admin.UpdatedAt;
         }
         else
         {
@@ -252,6 +260,7 @@ public class AuthController : ControllerBase
                     Role = "user",
                     GoogleSubject = payload.Subject,
                     Picture = payload.Picture,
+                    EmailVerified = true,
                 };
                 _db.Users.Add(user);
             }
@@ -264,6 +273,9 @@ public class AuthController : ControllerBase
                     return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
                 }
                 user.GoogleSubject = payload.Subject;
+                user.EmailVerified = true;
+                user.EmailVerificationToken = null;
+                user.EmailVerificationExpiresAt = null;
                 if (!string.IsNullOrEmpty(payload.Picture)) user.Picture = payload.Picture;
                 if (string.IsNullOrWhiteSpace(user.Name) && payload.Name is not null) user.Name = payload.Name;
             }
@@ -272,13 +284,15 @@ public class AuthController : ControllerBase
             role = user.Role;
             name = user.Name;
             id = user.Id.ToString();
+            accountUpdatedAt = user.UpdatedAt;
         }
 
         // An agency officer's session must carry their agency, exactly as with
         // password sign-in — without it every staff endpoint treats the session
         // as a misconfigured officer and refuses it.
         var token = _jwt.CreateToken(id, email, name, role, payload.Picture,
-            agencyCode: admin?.AgencyCode, mfaEnabled: admin?.MfaEnabled ?? false);
+            agencyCode: admin?.AgencyCode, mfaEnabled: admin?.MfaEnabled ?? false,
+            emailVerified: true, accountUpdatedAt: accountUpdatedAt);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
         await AuditAsync(email, role, "auth.login", "Successful sign-in (Google)", 200);
 
@@ -295,8 +309,62 @@ public class AuthController : ControllerBase
         return Ok(new ApiResponse(true));
     }
 
+    /// <summary>Verify an email address using the single-use link sent at signup.</summary>
+    [HttpPost("verify-email")]
+    [EnableRateLimiting("password-reset")]
+    public async Task<IActionResult> VerifyEmail([FromBody] EmailVerificationRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Token))
+            return Problem(detail: "Invalid or expired verification link", statusCode: StatusCodes.Status400BadRequest);
+
+        if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8 ||
+            !request.NewPassword.Any(char.IsUpper) || !request.NewPassword.Any(char.IsDigit))
+            return Problem(detail: "Choose a password of at least 8 characters with an uppercase letter and a digit", statusCode: StatusCodes.Status400BadRequest);
+
+        var tokenHash = HashResetToken(request.Token);
+        var user = await _db.Users.FirstOrDefaultAsync(u =>
+            u.EmailVerificationToken == tokenHash && u.IsActive);
+        if (user is null || user.EmailVerificationExpiresAt is null ||
+            user.EmailVerificationExpiresAt < DateTimeOffset.UtcNow)
+            return Problem(detail: "Invalid or expired verification link", statusCode: StatusCodes.Status400BadRequest);
+
+        user.EmailVerified = true;
+        // The person controlling the mailbox chooses the final password. This
+        // prevents an attacker who registered someone else's address from
+        // learning the password that becomes active when the owner verifies it.
+        user.PasswordHash = _password.HashPassword(request.NewPassword);
+        user.EmailVerificationToken = null;
+        user.EmailVerificationExpiresAt = null;
+        await _db.SaveChangesAsync();
+
+        return Ok(new ApiResponse(true, "Email address verified. Sign in with your new password."));
+    }
+
+    /// <summary>Send a fresh verification link without revealing whether an address has an account.</summary>
+    [HttpPost("email-verification-request")]
+    [EnableRateLimiting("password-reset")]
+    public async Task<IActionResult> RequestEmailVerification([FromBody] EmailVerificationResendRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Email))
+        {
+            var email = request.Email.Trim().ToLowerInvariant();
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsActive && !u.EmailVerified);
+            if (user is not null)
+            {
+                var verificationToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+                user.EmailVerificationToken = HashResetToken(verificationToken);
+                user.EmailVerificationExpiresAt = DateTimeOffset.UtcNow.AddHours(24);
+                await _db.SaveChangesAsync();
+                await _email.SendEmailVerificationAsync(user.Email, user.Name, verificationToken);
+            }
+        }
+
+        return Accepted(new ApiResponse(true, "If the account needs verification, a link has been sent."));
+    }
+
     /// <summary>Get current authenticated user.</summary>
     [HttpGet("me")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public IActionResult Me()
     {
         var token = Request.Cookies["osc-session"];
@@ -320,6 +388,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Update the signed-in account's profile (admins and regular users).</summary>
     [HttpPatch("profile")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateRequest request)
     {
         var token = Request.Cookies["osc-session"];
@@ -389,7 +458,10 @@ public class AuthController : ControllerBase
 
         await _db.SaveChangesAsync();
 
-        var newToken = _jwt.CreateToken(id, email, name, finalRole, picture, agencyCode, mfaEnabled: admin?.MfaEnabled ?? false);
+        var newToken = _jwt.CreateToken(id, email, name, finalRole, picture, agencyCode,
+            mfaEnabled: admin?.MfaEnabled ?? false,
+            emailVerified: User.FindFirst("email_verified")?.Value == "true",
+            accountUpdatedAt: admin?.UpdatedAt ?? user!.UpdatedAt);
         Response.Cookies.Append("osc-session", newToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, finalRole, picture, agencyCode)));
@@ -415,6 +487,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Whether the signed-in admin currently has TOTP enabled.</summary>
     [HttpGet("mfa/status")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public async Task<IActionResult> MfaStatus()
     {
         var admin = await ResolveAdminAsync();
@@ -428,6 +501,7 @@ public class AuthController : ControllerBase
     /// admin to confirm with <c>mfa/verify</c> before MFA takes effect.
     /// </summary>
     [HttpPost("mfa/enroll")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     public async Task<IActionResult> MfaEnroll()
     {
         var admin = await ResolveAdminAsync();
@@ -440,12 +514,20 @@ public class AuthController : ControllerBase
         admin.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync();
 
+        // Enrolment changes account security state; refresh the cookie so the
+        // following verification request remains authenticated.
+        var refreshedToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role,
+            agencyCode: admin.AgencyCode, mfaEnabled: false,
+            accountUpdatedAt: admin.UpdatedAt);
+        Response.Cookies.Append("osc-session", refreshedToken, _jwt.GetCookieOptions(_env.IsProduction()));
+
         var uri = _totp.BuildOtpauthUri(admin.Email, secret);
         return Ok(new ApiResponse<MfaEnrollResponse>(true, new MfaEnrollResponse(secret, uri)));
     }
 
     /// <summary>Confirm enrolment by verifying a code against the pending secret, activating MFA.</summary>
     [HttpPost("mfa/verify")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [EnableRateLimiting("login")]
     public async Task<IActionResult> MfaVerify([FromBody] MfaVerifyRequest request)
     {
@@ -466,7 +548,8 @@ public class AuthController : ControllerBase
         // AdminOnly endpoints (see MfaCompleteHandler) — reissue now so this same
         // browser session is unblocked immediately, without a fresh login.
         var refreshedToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role,
-            picture: null, agencyCode: admin.AgencyCode, mfaEnabled: true);
+            picture: null, agencyCode: admin.AgencyCode, mfaEnabled: true,
+            accountUpdatedAt: admin.UpdatedAt);
         Response.Cookies.Append("osc-session", refreshedToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
         return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(true)));
@@ -474,6 +557,7 @@ public class AuthController : ControllerBase
 
     /// <summary>Disable MFA. Requires the current password and a valid TOTP code.</summary>
     [HttpPost("mfa/disable")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [EnableRateLimiting("login")]
     public async Task<IActionResult> MfaDisable([FromBody] MfaDisableRequest request)
     {
@@ -498,7 +582,8 @@ public class AuthController : ControllerBase
         // Staff/AdminOnly endpoints — you cannot turn off MFA and keep unrestricted
         // access on the same token.
         var refreshedToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role,
-            picture: null, agencyCode: admin.AgencyCode, mfaEnabled: false);
+            picture: null, agencyCode: admin.AgencyCode, mfaEnabled: false,
+            accountUpdatedAt: admin.UpdatedAt);
         Response.Cookies.Append("osc-session", refreshedToken, _jwt.GetCookieOptions(_env.IsProduction()));
 
         return Ok(new ApiResponse<MfaStatusResponse>(true, new MfaStatusResponse(false)));

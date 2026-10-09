@@ -18,7 +18,10 @@ public sealed record TicketRequester(bool IsStaff, string? AgencyScope, string? 
         // Same bar as the Staff policy (MfaCompleteRequirement): a back-office
         // session that hasn't finished MFA enrolment gets no staff access here.
         var isStaff = user.IsStaffSession();
-        var email = user.Identity?.IsAuthenticated == true
+        // Email ownership is only a proof when the identity provider verified it.
+        // Password signup does not verify addresses; those users must use the
+        // ticket's high-entropy access token until a verified identity is linked.
+        var email = user.Identity?.IsAuthenticated == true && user.FindFirst("email_verified")?.Value == "true"
             ? (user.FindFirst(ClaimTypes.Email)?.Value ?? user.FindFirst("email")?.Value)?.Trim().ToLowerInvariant()
             : null;
         return new TicketRequester(isStaff, user.IsAgencyOfficer() ? user.GetAgencyCode() : null, token, email);

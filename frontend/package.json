@@ -20,10 +20,8 @@
     "cf:typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
-    "@headlessui/react": "^2.2.6",
     "@heroicons/react": "^2.2.0",
     "@sanity/client": "^7.16.0",
-    "@sanity/image-url": "^2.0.3",
     "@sanity/vision": "^4.22.0",
     "@types/leaflet": "^1.9.21",
     "framer-motion": "^11.11.17",
@@ -36,7 +34,6 @@
     "react-dom": "19.1.0",
     "react-is": "^19.2.4",
     "react-leaflet": "^5.0.0",
-    "react-simple-maps": "^3.0.0",
     "recharts": "^3.7.0",
     "resend": "^6.16.0",
     "sanity": "^4.22.0",

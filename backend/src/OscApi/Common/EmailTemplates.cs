@@ -243,6 +243,14 @@ public static class EmailTemplates
             {Muted("This link expires in 1 hour. If you didn't request this, no action is needed — your password hasn't changed and you can ignore this email.")}
             """);
 
+    public static string EmailVerification(string name, string verificationUrl) =>
+        Wrap("Verify your OneStop Centre account email address.", "Account security", "Confirm your email address", $"""
+            {P($"Dear {name},")}
+            {P("Confirm that this is your email address, then choose the password for your account.")}
+            {Button(verificationUrl, "Verify email and choose password", Black, Gold)}
+            {Muted("This link expires in 24 hours. If you didn't create an account, you can ignore this email.")}
+            """);
+
     // ---- Contact / general inquiries -------------------------------------------------
 
     public static string ContactConfirmation(string name, string refNumber, string agencyName, string subject) =>

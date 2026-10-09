@@ -327,6 +327,41 @@ var app = builder.Build();
 
 // Middleware pipeline
 app.UseForwardedHeaders();
+// Cookies authenticate browser requests. Require their Origin (or Referer) to
+// match this API host or a configured frontend origin on every state-changing
+// request; CORS alone does not stop a browser from sending a forged request.
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    var allowedBrowserOrigins = allowedOrigins
+        .Select(origin => Uri.TryCreate(origin, UriKind.Absolute, out var parsed)
+            ? parsed.GetLeftPart(UriPartial.Authority) : null)
+        .Where(origin => origin is not null)
+        .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    app.Use(async (context, next) =>
+    {
+        var method = context.Request.Method;
+        var changesState = method != HttpMethods.Get && method != HttpMethods.Head &&
+            method != HttpMethods.Options && method != HttpMethods.Trace;
+        if (changesState && context.Request.Cookies.ContainsKey("osc-session"))
+        {
+            var source = context.Request.Headers["Origin"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(source) && context.Request.Headers["Referer"].Count > 0 &&
+                Uri.TryCreate(context.Request.Headers["Referer"][0], UriKind.Absolute, out var referer))
+                source = referer.GetLeftPart(UriPartial.Authority);
+
+            var requestOrigin = $"{context.Request.Scheme}://{context.Request.Host}";
+            if (string.IsNullOrWhiteSpace(source) ||
+                (!string.Equals(source, requestOrigin, StringComparison.OrdinalIgnoreCase) &&
+                 !allowedBrowserOrigins.Contains(source)))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return;
+            }
+        }
+
+        await next();
+    });
+}
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidationExceptionMiddleware>();
 // Note: User-based rate limiting is available in UserRateLimitingMiddleware.cs
@@ -374,15 +409,12 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("RunMigr
     {
         db.Database.Migrate();
 
-        // Seed default admin if not exists. Never ship a static production
-        // password: in Development a convenience default is used, but outside
-        // Development the password MUST come from configuration (Seed:AdminPassword,
-        // e.g. an env var / user-secret) or seeding is skipped with a warning.
+        // Seed default admin if not exists. Never ship a static seed password.
+        // Seed:AdminPassword must come from configuration (e.g. an environment
+        // variable or user-secret), or seeding is skipped with a warning.
         if (!db.AdminUsers.Any(a => a.Email == "admin@uia.go.ug"))
         {
-            var seedPassword = app.Environment.IsDevelopment()
-                ? (app.Configuration["Seed:AdminPassword"] ?? "Admin@2026!")
-                : app.Configuration["Seed:AdminPassword"];
+            var seedPassword = app.Configuration["Seed:AdminPassword"];
 
             if (string.IsNullOrWhiteSpace(seedPassword))
             {

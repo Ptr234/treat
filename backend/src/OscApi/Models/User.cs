@@ -33,6 +33,14 @@ public class User : AuditableEntity
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>True only after a verification link or trusted identity provider confirms this address.</summary>
+    public bool EmailVerified { get; set; }
+
+    [MaxLength(64)]
+    public string? EmailVerificationToken { get; set; }
+
+    public DateTimeOffset? EmailVerificationExpiresAt { get; set; }
+
     [MaxLength(200)]
     public string? PasswordResetToken { get; set; }
 

@@ -115,8 +115,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(json.error || 'Sign up failed');
       }
 
-      const user = extractUser(json.data);
-      setState({ user, isAuthenticated: true, isLoading: false, error: null });
+      // Password signup does not establish email ownership. The account only
+      // becomes a signed-in session after the mailbox verification flow.
+      setState({ user: null, isAuthenticated: false, isLoading: false, error: null });
     } catch (err) {
       setState(s => ({ ...s, isLoading: false }));
       throw err;

@@ -15,6 +15,7 @@ public interface IEmailService
     Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber);
     Task SendInvestorReferenceReminderAsync(string toEmail, string name, string referenceNumber);
     Task SendPasswordResetAsync(string toEmail, string name, string resetToken);
+    Task SendEmailVerificationAsync(string toEmail, string name, string verificationToken);
     Task SendContactConfirmationAsync(string toEmail, string name, string referenceNumber, string agencyName, string subject);
     Task SendContactNotificationToAgencyAsync(string agencyCode, string agencyName, string referenceNumber, string contactName, string contactEmail, string subject, string message, string? agencyEmail = null);
     Task SendAppointmentConfirmationAsync(string toEmail, string name, string referenceNumber, string agencyName, string date, string time);
@@ -26,20 +27,45 @@ public interface IEmailService
 
 public class EmailService : IEmailService
 {
-    private static readonly HttpClient Http = new();
+    // One shared client for the process (the service is a singleton). The
+    // default 100s timeout would let a stalled Resend call hold up every send
+    // queued behind the gate below, so cap each attempt.
+    private static readonly HttpClient SharedHttp = new() { Timeout = TimeSpan.FromSeconds(15) };
+
+    private const int MaxAttempts = 3;
+
+    private readonly HttpClient _http;
     private readonly string? _apiKey;
     private readonly string _fromAddress;
     private readonly string _adminEmail;
     private readonly string _siteUrl;
     private readonly ILogger<EmailService> _logger;
 
+    // Resend rate-limits each team (2 requests/second by default) and answers
+    // 429 beyond that. A single contact form fires three sends at once
+    // (investor confirmation, admin, agency), so sends are serialised and spaced.
+    private readonly SemaphoreSlim _sendGate = new(1, 1);
+    private readonly TimeSpan _minInterval;
+    private readonly TimeSpan _retryBaseDelay;
+    private DateTime _lastSendUtc = DateTime.MinValue;
+
     public EmailService(IConfiguration config, ILogger<EmailService> logger)
+        : this(config, logger, SharedHttp, TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(1)) { }
+
+    /// <summary>Test seam: inject the HTTP client and timings.</summary>
+    public EmailService(IConfiguration config, ILogger<EmailService> logger, HttpClient http, TimeSpan minInterval, TimeSpan retryBaseDelay)
     {
         _logger = logger;
+        _http = http;
+        _minInterval = minInterval;
+        _retryBaseDelay = retryBaseDelay;
         _apiKey = config["Resend:ApiKey"];
         _fromAddress = config["Resend:FromAddress"] ?? "notifications@oscdigitaltool.com";
         _adminEmail = config["Resend:AdminEmail"] ?? _fromAddress;
         _siteUrl = config["SiteUrl"] ?? "https://www.oscdigitaltool.com";
+
+        if (string.IsNullOrEmpty(_apiKey))
+            _logger.LogWarning("Resend:ApiKey is not set — no emails will be sent (from {From}).", _fromAddress);
     }
 
     // The tracking link carries the ticket's secret access token, never the
@@ -113,7 +139,7 @@ public class EmailService : IEmailService
         // Send to all configured escalation recipients
         if (additionalRecipients is not null)
         {
-            foreach (var recipient in additionalRecipients.Where(e => !string.IsNullOrEmpty(e) && e != _adminEmail))
+            foreach (var recipient in additionalRecipients.Where(e => !string.IsNullOrEmpty(e) && e != _adminEmail).Distinct())
             {
                 await SendAsync(recipient, subject, htmlBody: html, textBody: text);
             }
@@ -166,6 +192,16 @@ public class EmailService : IEmailService
             textBody: $"Dear {name},\n\nReset your password: {resetUrl}\n\nExpires in 1 hour.");
     }
 
+    public async Task SendEmailVerificationAsync(string toEmail, string name, string verificationToken)
+    {
+        // Keep the secret in the URL fragment so it is never sent in HTTP
+        // requests, server access logs, or Referer headers.
+        var verificationUrl = $"{_siteUrl}/auth/verify-email#token={Uri.EscapeDataString(verificationToken)}";
+        await SendAsync(toEmail, "Verify your OneStop Centre account",
+            htmlBody: EmailTemplates.EmailVerification(name, verificationUrl),
+            textBody: $"Dear {name},\n\nVerify your email address: {verificationUrl}\n\nThis link expires in 24 hours.");
+    }
+
     public async Task SendContactConfirmationAsync(
         string toEmail, string name, string referenceNumber, string agencyName, string subject)
     {
@@ -184,12 +220,12 @@ public class EmailService : IEmailService
         var html = EmailTemplates.ContactNotificationToAgency(agencyName, agencyCode, referenceNumber, contactName, contactEmail, subject, message, dashboardUrl);
         var text = $"New inquiry via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nFrom: {contactName} ({contactEmail})\nSubject: {subject}\n\nMessage:\n{message}\n\nReview: {dashboardUrl}";
 
-        // Send to admin
-        await SendAsync(_adminEmail, subjectLine, htmlBody: html, textBody: text);
+        // Replying goes straight to the investor rather than the no-reply sender.
+        await SendAsync(_adminEmail, subjectLine, htmlBody: html, textBody: text, replyTo: contactEmail);
 
         // Send to actual agency email if provided
         if (!string.IsNullOrEmpty(agencyEmail) && agencyEmail != _adminEmail)
-            await SendAsync(agencyEmail, subjectLine, htmlBody: html, textBody: text);
+            await SendAsync(agencyEmail, subjectLine, htmlBody: html, textBody: text, replyTo: contactEmail);
     }
 
     public async Task SendAppointmentConfirmationAsync(
@@ -212,10 +248,10 @@ public class EmailService : IEmailService
         var html = EmailTemplates.AppointmentNotificationToAgency(agencyName, agencyCode, referenceNumber, contactName, contactEmail, contactPhone, serviceType, purpose, date, time, durationMinutes, meetingType, dashboardUrl);
         var text = $"Appointment request via OSC portal.\n\nRef: {referenceNumber}\nAgency: {agencyName} ({agencyCode})\nContact: {contactName} ({contactEmail}, {contactPhone})\nService: {serviceType}\nPurpose: {purpose}\nDate: {date} at {time}\nDuration: {durationMinutes}min ({meetingType})\n\nReview: {dashboardUrl}";
 
-        await SendAsync(_adminEmail, subjectLine, htmlBody: html, textBody: text);
+        await SendAsync(_adminEmail, subjectLine, htmlBody: html, textBody: text, replyTo: contactEmail);
 
         if (!string.IsNullOrEmpty(agencyEmail) && agencyEmail != _adminEmail)
-            await SendAsync(agencyEmail, subjectLine, htmlBody: html, textBody: text);
+            await SendAsync(agencyEmail, subjectLine, htmlBody: html, textBody: text, replyTo: contactEmail);
     }
 
     private static readonly string[] ReservedTlds = [".invalid", ".local", ".localhost", ".test", ".example"];
@@ -226,7 +262,7 @@ public class EmailService : IEmailService
         return ReservedTlds.Any(tld => domain.EndsWith(tld, StringComparison.Ordinal));
     }
 
-    private async Task SendAsync(string to, string subject, string? textBody = null, string? htmlBody = null)
+    private async Task SendAsync(string to, string subject, string? textBody = null, string? htmlBody = null, string? replyTo = null)
     {
         if (string.IsNullOrEmpty(_apiKey))
         {
@@ -243,33 +279,108 @@ public class EmailService : IEmailService
             return;
         }
 
+        var payload = new Dictionary<string, object?>
+        {
+            ["from"] = _fromAddress,
+            ["to"] = new[] { to },
+            ["subject"] = subject,
+        };
+        if (!string.IsNullOrEmpty(htmlBody)) payload["html"] = htmlBody;
+        if (!string.IsNullOrEmpty(textBody)) payload["text"] = textBody;
+        if (!string.IsNullOrEmpty(replyTo) && !IsUndeliverable(replyTo)) payload["reply_to"] = new[] { replyTo };
+        var json = JsonSerializer.Serialize(payload);
+
+        // Same key on every retry: if an attempt timed out after Resend had
+        // already accepted it, the retry is deduplicated instead of delivered twice.
+        var idempotencyKey = Guid.NewGuid().ToString("N");
+
+        for (var attempt = 1; attempt <= MaxAttempts; attempt++)
+        {
+            TimeSpan? retryAfter = null;
+            try
+            {
+                using var response = await PostThrottledAsync(json, idempotencyKey);
+                if (response.IsSuccessStatusCode)
+                {
+                    var id = await ReadIdAsync(response);
+                    _logger.LogInformation("Email sent to {To}: {Subject} (Resend id {Id})", to, subject, id);
+                    return;
+                }
+
+                var status = (int)response.StatusCode;
+                var body = await response.Content.ReadAsStringAsync();
+                var transient = status == 429 || status >= 500;
+                if (!transient || attempt == MaxAttempts)
+                {
+                    // 401/403 (bad key, unverified sending domain) and 422
+                    // (invalid address) will not succeed on retry.
+                    _logger.LogError("Resend API error sending to {To}: {Status} {Body} (attempt {Attempt}/{Max}): {Subject}",
+                        to, status, body, attempt, MaxAttempts, subject);
+                    return;
+                }
+
+                retryAfter = response.Headers.RetryAfter?.Delta;
+                _logger.LogWarning("Resend returned {Status} for {To}; retrying (attempt {Attempt}/{Max})",
+                    status, to, attempt, MaxAttempts);
+            }
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+            {
+                if (attempt == MaxAttempts)
+                {
+                    _logger.LogError(ex, "Failed to send email to {To} after {Max} attempts: {Subject}", to, MaxAttempts, subject);
+                    return;
+                }
+                _logger.LogWarning(ex, "Network error sending email to {To}; retrying (attempt {Attempt}/{Max})",
+                    to, attempt, MaxAttempts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send email to {To}: {Subject}", to, subject);
+                return;
+            }
+
+            var backoff = TimeSpan.FromTicks(_retryBaseDelay.Ticks * (1L << (attempt - 1)));
+            await Task.Delay(retryAfter is { } ra && ra > backoff ? ra : backoff);
+        }
+    }
+
+    private async Task<HttpResponseMessage> PostThrottledAsync(string json, string idempotencyKey)
+    {
+        await _sendGate.WaitAsync();
         try
         {
-            var payload = new Dictionary<string, object?>
-            {
-                ["from"] = _fromAddress,
-                ["to"] = new[] { to },
-                ["subject"] = subject,
-            };
-            if (!string.IsNullOrEmpty(htmlBody)) payload["html"] = htmlBody;
-            if (!string.IsNullOrEmpty(textBody)) payload["text"] = textBody;
+            var wait = _lastSendUtc + _minInterval - DateTime.UtcNow;
+            if (wait > TimeSpan.Zero) await Task.Delay(wait);
 
             using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-            request.Content = new StringContent(
-                JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-
-            var response = await Http.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
+            request.Headers.Add("Idempotency-Key", idempotencyKey);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            try
             {
-                var body = await response.Content.ReadAsStringAsync();
-                _logger.LogError("Resend API error sending to {To}: {Status} {Body}",
-                    to, response.StatusCode, body);
+                return await _http.SendAsync(request);
+            }
+            finally
+            {
+                _lastSendUtc = DateTime.UtcNow;
             }
         }
-        catch (Exception ex)
+        finally
         {
-            _logger.LogError(ex, "Failed to send email to {To}: {Subject}", to, subject);
+            _sendGate.Release();
+        }
+    }
+
+    private static async Task<string?> ReadIdAsync(HttpResponseMessage response)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+            return doc.RootElement.TryGetProperty("id", out var id) ? id.GetString() : null;
+        }
+        catch (JsonException)
+        {
+            return null;
         }
     }
 }
