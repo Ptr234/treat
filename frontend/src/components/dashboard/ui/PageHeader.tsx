@@ -19,11 +19,11 @@ interface PageHeaderProps {
  */
 export default function PageHeader({ title, subtitle, backHref = '/dashboard', actions }: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
+    <div className="flex items-center justify-between gap-4 mb-8 flex-wrap border-b border-[#e1e7e1] pb-6">
       <div className="flex items-center gap-4">
         <Link
           href={backHref}
-          className="p-2 hover:bg-neutral-100 rounded-md transition-colors"
+          className="p-2.5 hover:bg-white rounded-xl transition-colors border border-transparent hover:border-[#e1e7e1]"
           aria-label="Back to dashboard"
         >
           <ArrowLeftIcon className="w-5 h-5 text-neutral-700" />

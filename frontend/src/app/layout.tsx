@@ -55,14 +55,14 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <meta name="theme-color" content="#10283f" />
+        <meta name="theme-color" content="#111111" />
         <JsonLd data={[organizationLd, websiteLd]} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#10283f" />
+        <meta name="msapplication-TileColor" content="#111111" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body

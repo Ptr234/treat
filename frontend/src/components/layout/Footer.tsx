@@ -73,13 +73,13 @@ export default function Footer() {
   return (
     <footer id="site-footer">
       {/* Brand and link columns stay on the dark gradient */}
-      <div className="relative isolate overflow-hidden bg-gradient-to-br from-black via-black to-red-700/60 text-white">
+      <div className="relative isolate overflow-hidden bg-gradient-to-br from-black via-black to-red-950 text-white">
         <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute -left-24 bottom-0 hidden h-80 w-80 translate-y-1/3 lg:block">
           <span className="absolute inset-0 border border-yellow-400/40" />
           <span className="absolute inset-12 border border-white/20" />
           <span className="absolute inset-24 border-2 border-red-600/70" />
         </div>
-        <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
           <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-10">
             <div className="sm:col-span-2 lg:col-span-1">
               <Link
@@ -128,7 +128,7 @@ export default function Footer() {
 
       {/* Contact and bottom bar are white, per request */}
       <div className="bg-white text-neutral-700">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <h2 className={headingClassLight}>Contact</h2>
           <ul className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-3">
             {CONTACTS.map((c) => (
@@ -147,7 +147,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-neutral-200">
-          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 sm:px-6 md:flex-row lg:px-8">
+          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 sm:px-6 md:flex-row lg:px-8">
             <p className="text-center text-xs text-neutral-600 sm:text-sm md:text-left">
               &copy; 2026 Uganda OneStop Centre. All rights reserved.
             </p>

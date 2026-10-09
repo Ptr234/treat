@@ -89,7 +89,7 @@ export default function Navigation() {
     <>
       {/* Utility strip */}
       <div className="hidden border-b border-neutral-200 bg-white text-[11px] text-neutral-600 md:block">
-        <div className="mx-auto flex h-8 max-w-6xl items-center justify-between px-6 lg:px-8">
+        <div className="mx-auto flex h-8 max-w-7xl items-center justify-between px-6 lg:px-8">
           <span className="font-semibold text-neutral-800">Republic of Uganda <span className="mx-2 text-neutral-400">|</span> Uganda Investment Authority</span>
           <div className="flex items-center gap-5">
             <Link href="/events" className="hover:text-red-600 transition-colors">News &amp; events</Link>
@@ -99,13 +99,13 @@ export default function Navigation() {
         </div>
       </div>
 
-      <header id="site-header" className="sticky top-0 z-50 border-b border-neutral-200 bg-white">
-        <div aria-hidden="true" className="mx-auto flex h-1 max-w-6xl">
+      <header id="site-header" className="sticky top-0 z-50 border-b border-neutral-200 bg-white/95 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur">
+        <div aria-hidden="true" className="mx-auto flex h-1 max-w-7xl">
           <span className="flex-1 bg-black" />
           <span className="flex-1 bg-yellow-400" />
           <span className="flex-1 bg-red-600" />
         </div>
-        <div className="mx-auto grid min-h-[68px] max-w-6xl grid-cols-[1fr_auto_1fr] items-stretch gap-2 px-3 sm:h-[76px] sm:gap-4 sm:px-6 lg:px-8">
+        <div className="mx-auto grid min-h-[68px] max-w-7xl grid-cols-[1fr_auto_1fr] items-stretch gap-2 px-3 sm:h-[76px] sm:gap-4 sm:px-6 lg:px-8">
           <div className="col-start-2 row-start-1 flex min-w-0 items-center justify-center">
             <Brand />
           </div>
@@ -166,7 +166,7 @@ export default function Navigation() {
             ) : (
               <>
                 <button onClick={() => setShowAuthModal(true)} className="whitespace-nowrap px-2 py-2 text-sm font-semibold text-neutral-800 hover:text-red-600">Log in</button>
-                <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap bg-black px-4 py-2.5 text-sm font-bold text-yellow-400 transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
+                <Link href="/investments/onboarding" className="inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg bg-black px-4 py-2.5 text-sm font-bold text-yellow-400 shadow-sm transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
                   Start here <ArrowRightIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </Link>
               </>
@@ -260,7 +260,7 @@ export default function Navigation() {
                 </div>
               ) : (
                 <>
-                  <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 bg-black px-4 py-3 text-center text-sm font-bold text-yellow-400">Start here</Link>
+                  <Link href="/investments/onboarding" onClick={closeMenus} className="mt-2 rounded-lg bg-black px-4 py-3 text-center text-sm font-bold text-yellow-400">Start here</Link>
                   <button onClick={() => { closeMenus(); setShowAuthModal(true); }} className="py-3 text-left text-sm font-semibold text-neutral-800">Log in</button>
                 </>
               )}

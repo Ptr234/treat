@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Roboto+Slab:wght@400;500;600;700;800&family=Source+Sans+3:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 /* Tailwind v4 does not auto-load the v3 JS config — without this line the
    brand palettes (primary/secondary/brand, gold #FFD700, red #CE1126) and
@@ -58,19 +58,19 @@
   --color-primary-900: #000000;
 
   --background: #ffffff;
-  --foreground: #172033;
+  --foreground: #171717;
   --surface: #ffffff;
-  --surface-muted: #f6f7f8;
-  --ink: #172033;
-  --ink-muted: #586273;
+  --surface-muted: #f4f4f4;
+  --ink: #171717;
+  --ink-muted: #525252;
   --brand-amber: #8a5a00;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Source Sans 3', Arial, sans-serif;
-  --font-display: 'Roboto Slab', Georgia, serif;
+  --font-sans: 'DM Sans', Arial, sans-serif;
+  --font-display: 'Manrope', 'DM Sans', sans-serif;
   --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
 }
 
@@ -97,7 +97,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   overflow-x: clip;
-  font-family: 'Source Sans 3', Arial, sans-serif;
+  font-family: 'DM Sans', Arial, sans-serif;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -142,7 +142,7 @@ html.low-bandwidth *, html.low-bandwidth *::before, html.low-bandwidth *::after 
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Roboto Slab', Georgia, serif;
+  font-family: 'Manrope', 'DM Sans', sans-serif;
   font-weight: 600;
   letter-spacing: -0.02em;
   text-wrap: pretty;
@@ -558,4 +558,251 @@ button, input, select, textarea {
   .hover-lift:hover {
     transform: none;
   }
+}
+
+/* OneStop Centre design system refresh */
+:root {
+  color-scheme: light;
+  --radius-card: 1rem;
+  --radius-control: 0.65rem;
+  --line: #dedede;
+  --shadow-soft: 0 16px 44px rgb(0 0 0 / 0.12);
+}
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'DM Sans', Arial, sans-serif;
+  line-height: 1.65;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Manrope', 'DM Sans', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.16;
+}
+::placeholder { color: #77847d; opacity: 1; }
+a { text-underline-offset: 0.2em; }
+button, [role="button"] { -webkit-tap-highlight-color: transparent; }
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: 0 2px 8px rgb(22 38 31 / 0.035);
+}
+.card:hover {
+  transform: translateY(-2px);
+  border-color: #CE1126;
+  box-shadow: var(--shadow-soft);
+}
+.input-base,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
+  border-color: #d5ddd6;
+  border-radius: var(--radius-control);
+}
+.input-base:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #CE1126;
+  box-shadow: 0 0 0 3px rgb(255 215 0 / 0.2);
+}
+.btn-base { border-radius: var(--radius-control); }
+.btn-primary {
+  background: #111111;
+  box-shadow: 0 5px 16px rgb(0 0 0 / 0.2);
+}
+.btn-primary:hover { background: #292929; }
+.btn-secondary {
+  background: #f1ca35;
+  box-shadow: 0 5px 16px rgb(151 17 38 / 0.14);
+}
+.btn-secondary:hover { background: #f7d84d; }
+@media (max-width: 640px) {
+  h1 { letter-spacing: -0.035em; }
+}
+/* Shared page content patterns used by public flows, tools and staff tables */
+main article[class*="border"] {
+  border-radius: var(--radius-card);
+  box-shadow: 0 2px 8px rgb(22 38 31 / 0.035);
+}
+main table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  background: #fff;
+  overflow: hidden;
+}
+main thead th {
+  background: #f2f5f0;
+  color: #33443d;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+main th, main td { border-bottom: 1px solid var(--line); }
+main tbody tr:last-child td { border-bottom: 0; }
+main tbody tr:hover { background-color: #fafbf8; }
+label { font-weight: 600; }
+
+/* Light section surfaces: replace flat white bands with a soft, layered canvas */
+main section.bg-white {
+  position: relative;
+  isolation: isolate;
+  background: #ffffff;
+  border-color: #e1e7e1;
+}
+main section.bg-white::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #FFD700 0%, #CE1126 42%, transparent 100%);
+  pointer-events: none;
+}
+main section.bg-white h2:not(.sr-only) {
+  color: #111111;
+}
+
+/* Uganda flag card system: white canvas, black cards, gold and red accents */
+.card, .flag-card,
+main article[class*="border"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) {
+  background: #111111 !important;
+  color: #ffffff;
+  border: 1px solid #3a3a3a;
+  border-top: 4px solid #FFD700;
+  border-left: 4px solid #CE1126;
+  border-radius: 1rem;
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.12);
+}
+.card:hover, .flag-card:hover,
+main article[class*="border"]:hover,
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]):hover {
+  border-color: #FFD700;
+  box-shadow: 0 18px 38px rgb(0 0 0 / 0.2);
+}
+.card h1, .card h2, .card h3, .card h4,
+.flag-card h1, .flag-card h2, .flag-card h3, .flag-card h4,
+main article[class*="border"] :is(h1,h2,h3,h4),
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) :is(h1,h2,h3,h4) {
+  color: #FFD700 !important;
+}
+.card :is(p,li,dd,dt,label), .flag-card :is(p,li,dd,dt,label),
+main article[class*="border"] :is(p,li,dd,dt,label),
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) :is(p,li,dd,dt,label) {
+  color: #f4f4f4 !important;
+}
+.card a, .flag-card a, main article[class*="border"] a,
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) a {
+  color: #FFD700;
+}
+.card a:hover, .flag-card a:hover, main article[class*="border"] a:hover,
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) a:hover {
+  color: #ff5969;
+}
+.card :is(span,strong)[class*="text-neutral-"],
+.flag-card :is(span,strong)[class*="text-neutral-"],
+main article[class*="border"] :is(span,strong)[class*="text-neutral-"] {
+  color: #e5e5e5 !important;
+}
+.card a[class*="bg-black"], .flag-card a[class*="bg-black"],
+main article[class*="border"] :is(a,button)[class*="bg-black"] {
+  background: #FFD700;
+  color: #111111;
+}
+/* Keep inherited utility colors legible on the dark card surfaces */
+.card [class*="text-black"], .card [class*="text-neutral-"], .card [class*="text-gray-"],
+.flag-card [class*="text-black"], .flag-card [class*="text-neutral-"], .flag-card [class*="text-gray-"],
+main article[class*="border"] [class*="text-black"],
+main article[class*="border"] [class*="text-neutral-"],
+main article[class*="border"] [class*="text-gray-"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="text-black"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="text-neutral-"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="text-gray-"] {
+  color: #f4f4f4 !important;
+}
+.card [class*="text-yellow-"], .flag-card [class*="text-yellow-"],
+main article[class*="border"] [class*="text-yellow-"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="text-yellow-"] {
+  color: #FFD700 !important;
+}
+.card [class*="text-red-"], .flag-card [class*="text-red-"],
+main article[class*="border"] [class*="text-red-"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="text-red-"] {
+  color: #ff6677 !important;
+}
+
+/* Preserve contrast for controls, badges and data panels placed inside cards */
+.card :is(input,select,textarea), .flag-card :is(input,select,textarea),
+main article[class*="border"] :is(input,select,textarea),
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) :is(input,select,textarea) {
+  background-color: #ffffff !important;
+  color: #171717 !important;
+}
+.card :is(table), .flag-card :is(table),
+main article[class*="border"] table,
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) table {
+  background: #ffffff !important;
+  color: #171717 !important;
+}
+.card table :is(th,td), .flag-card table :is(th,td),
+main article[class*="border"] table :is(th,td),
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) table :is(th,td) {
+  color: #262626 !important;
+}
+.card [class*="bg-yellow-100"], .flag-card [class*="bg-yellow-100"],
+main article[class*="border"] [class*="bg-yellow-100"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="bg-yellow-100"] {
+  background-color: #51430c !important;
+  color: #FFD700 !important;
+}
+.card [class*="bg-red-100"], .flag-card [class*="bg-red-100"],
+main article[class*="border"] [class*="bg-red-100"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="bg-red-100"] {
+  background-color: #541b24 !important;
+  color: #ff9aa6 !important;
+}
+.card [class*="bg-neutral-100"], .card [class*="bg-gray-100"],
+.flag-card [class*="bg-neutral-100"], .flag-card [class*="bg-gray-100"],
+main article[class*="border"] :is([class*="bg-neutral-100"],[class*="bg-gray-100"]),
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) :is([class*="bg-neutral-100"],[class*="bg-gray-100"]) {
+  background-color: #383838 !important;
+  color: #f4f4f4 !important;
+}
+.card [class*="bg-yellow-"][class*="text-black"],
+.flag-card [class*="bg-yellow-"][class*="text-black"],
+main article[class*="border"] [class*="bg-yellow-"][class*="text-black"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="bg-yellow-"][class*="text-black"] {
+  color: #111111 !important;
+}
+
+.card [class*="bg-white"], .flag-card [class*="bg-white"],
+main article[class*="border"] [class*="bg-white"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="bg-white"] {
+  background-color: #262626 !important;
+  color: #f4f4f4 !important;
+}
+.card [class*="text-primary-"], .flag-card [class*="text-primary-"],
+main article[class*="border"] [class*="text-primary-"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) [class*="text-primary-"] {
+  color: #f4f4f4 !important;
+}
+
+/* White controls and data tables stay light inside dark cards */
+.card :is(input,select,textarea)[class*="bg-white"],
+.flag-card :is(input,select,textarea)[class*="bg-white"],
+main article[class*="border"] :is(input,select,textarea)[class*="bg-white"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) :is(input,select,textarea)[class*="bg-white"] {
+  background-color: #ffffff !important;
+  color: #171717 !important;
+}
+.card table[class*="bg-white"], .flag-card table[class*="bg-white"],
+main article[class*="border"] table[class*="bg-white"],
+main div[class*="bg-white"][class*="border"][class*="p-"]:not([class*="print:"]) table[class*="bg-white"] {
+  background: #ffffff !important;
+  color: #171717 !important;
 }
