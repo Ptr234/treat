@@ -23,8 +23,9 @@ public class AuthController : ControllerBase
     private readonly IWebHostEnvironment _env;
     private readonly IConfiguration _config;
     private readonly ILogger<AuthController> _logger;
+    private readonly IGoogleTokenValidator _google;
 
-    public AuthController(OscDbContext db, IJwtService jwt, IPasswordService password, IEmailService email, ITotpService totp, IWebHostEnvironment env, IConfiguration config, ILogger<AuthController> logger)
+    public AuthController(OscDbContext db, IJwtService jwt, IPasswordService password, IEmailService email, ITotpService totp, IWebHostEnvironment env, IConfiguration config, ILogger<AuthController> logger, IGoogleTokenValidator google)
     {
         _db = db;
         _jwt = jwt;
@@ -34,6 +35,7 @@ public class AuthController : ControllerBase
         _env = env;
         _config = config;
         _logger = logger;
+        _google = google;
     }
 
     /// <summary>Append a best-effort audit entry (never throws into the request).</summary>
@@ -175,8 +177,7 @@ public class AuthController : ControllerBase
         Google.Apis.Auth.GoogleJsonWebSignature.Payload payload;
         try
         {
-            payload = await Google.Apis.Auth.GoogleJsonWebSignature.ValidateAsync(request.IdToken,
-                new Google.Apis.Auth.GoogleJsonWebSignature.ValidationSettings { Audience = [clientId] });
+            payload = await _google.ValidateAsync(request.IdToken, clientId);
         }
         catch (Exception ex)
         {
@@ -202,7 +203,16 @@ public class AuthController : ControllerBase
         }
 
         var email = payload.Email.ToLowerInvariant();
-        var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email && a.IsActive);
+
+        // Look the admin up without the IsActive filter: a deactivated member of
+        // staff must be refused outright, not fall through to the regular-user
+        // branch below and be issued a (new) investor session instead.
+        var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email);
+        if (admin is { IsActive: false })
+        {
+            await AuditAsync(admin.Email, admin.Role, "auth.login.failed", "Deactivated account (Google)", 401);
+            return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
+        }
 
         string role, name, id;
         if (admin is not null)
@@ -247,6 +257,12 @@ public class AuthController : ControllerBase
             }
             else
             {
+                // Same rule as password sign-in: a deactivated account gets no session.
+                if (!user.IsActive)
+                {
+                    await AuditAsync(user.Email, user.Role, "auth.login.failed", "Deactivated account (Google)", 401);
+                    return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
+                }
                 user.GoogleSubject = payload.Subject;
                 if (!string.IsNullOrEmpty(payload.Picture)) user.Picture = payload.Picture;
                 if (string.IsNullOrWhiteSpace(user.Name) && payload.Name is not null) user.Name = payload.Name;
@@ -258,10 +274,15 @@ public class AuthController : ControllerBase
             id = user.Id.ToString();
         }
 
-        var token = _jwt.CreateToken(id, email, name, role, payload.Picture, mfaEnabled: admin?.MfaEnabled ?? false);
+        // An agency officer's session must carry their agency, exactly as with
+        // password sign-in — without it every staff endpoint treats the session
+        // as a misconfigured officer and refuses it.
+        var token = _jwt.CreateToken(id, email, name, role, payload.Picture,
+            agencyCode: admin?.AgencyCode, mfaEnabled: admin?.MfaEnabled ?? false);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
+        await AuditAsync(email, role, "auth.login", "Successful sign-in (Google)", 200);
 
-        return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, role, payload.Picture)));
+        return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(id, email, name, role, payload.Picture, AgencyCode: admin?.AgencyCode)));
     }
 
     /// <summary>Logout (clear session cookie).</summary>

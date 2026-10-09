@@ -61,15 +61,33 @@ function persistMessages(messages: ChatMessage[]) {
   }
 }
 
-function getOrCreateSessionId(): string {
+// The session id is the only key to the conversation's server-side history, so
+// it must be unguessable: 122 random bits from the platform CSPRNG, never a
+// timestamp or Math.random(). The API rejects anything else.
+const SESSION_ID_FORMAT = /^chat-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+export function newSessionId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `chat-${crypto.randomUUID()}`;
+  }
+  // Older browsers without randomUUID still have getRandomValues (a CSPRNG).
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  b[6] = (b[6]! & 0x0f) | 0x40;
+  b[8] = (b[8]! & 0x3f) | 0x80;
+  const hex = Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+  return `chat-${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+export function getOrCreateSessionId(): string {
   try {
     const existing = localStorage.getItem(SESSION_KEY);
-    if (existing) return existing;
-    const id = `chat-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    // Ids saved by older versions (timestamp + Math.random()) are replaced.
+    if (existing && SESSION_ID_FORMAT.test(existing)) return existing;
+    const id = newSessionId();
     localStorage.setItem(SESSION_KEY, id);
     return id;
   } catch {
-    return `chat-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    return newSessionId();
   }
 }
 

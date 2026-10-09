@@ -17,8 +17,7 @@ public sealed record TicketRequester(bool IsStaff, string? AgencyScope, string? 
     {
         // Same bar as the Staff policy (MfaCompleteRequirement): a back-office
         // session that hasn't finished MFA enrolment gets no staff access here.
-        var isStaff = (user.IsAdminLevel() || user.IsAgencyOfficer())
-            && user.FindFirst("mfa_enabled")?.Value == "true";
+        var isStaff = user.IsStaffSession();
         var email = user.Identity?.IsAuthenticated == true
             ? (user.FindFirst(ClaimTypes.Email)?.Value ?? user.FindFirst("email")?.Value)?.Trim().ToLowerInvariant()
             : null;

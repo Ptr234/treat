@@ -455,3 +455,20 @@ firebase deploy
 - Backend: 255/255 tests (new `TicketLifecycleTests`, `TicketAccessIntegrationTests`, business-hours `SlaCalculatorTests`).
 - Frontend: `tsc` clean, ESLint clean, Jest 117/117, production build OK.
 - Live against Postgres 16 (Docker) with both new migrations applied: 29/29 end-to-end checks (public filing, token access, staff management, SLA re-derivation, rating). The dev admin's MFA was enrolled for the run and disabled afterwards.
+
+---
+
+## 2026-10-09 — Security Review Fixes
+
+Each reported finding was verified against the code before fixing.
+
+1. **MFA bypass (confirmed, High).** Investor list/update/delete, the admin branch of investor lookup, business-registration staff access (detail/payment/initiate/certificate) and document deletion checked the role only, so a back-office session that never completed MFA could use them. Now `[Authorize(Policy = AdminOnly)]` or the new `IsAdminSession()` / `IsStaffSession()` helpers (role **and** completed MFA). Remaining role checks only narrow scope inside policy-protected actions.
+2. **Google sign-in (confirmed, Medium) + two related bugs.** Deactivated users got a session; deactivated *admins* fell through to the user branch and were issued an investor session; agency officers signing in with Google got a session without their agency code (refused by every staff endpoint). All fixed; successful Google sign-ins are now audit-logged. Google token validation moved behind `IGoogleTokenValidator` so these rules are testable.
+3. **Duplicate payment checkouts (confirmed, Medium).** Each "Pay" opened a new pending transaction with its own payable link. Initiation now reuses the open checkout (24h window), closes stale ones, and a filtered unique index (`IX_payments_one_pending_per_registration`, migration `OnePendingPaymentPerRegistration`) makes it race-safe. The migration first closes existing duplicate pendings so the index can build. A second successful payment is still recorded but audit-flagged for refund.
+4. **Guessable chat session ids (confirmed, Medium).** Ids were timestamp + `Math.random()`. Now `chat-` + `crypto.randomUUID()`; old saved ids are replaced; the API rejects non-random ids on `/chatbot` and `/chatbot/clear`.
+5. **CORS on :3001 (not reproduced).** `appsettings.Development.json` already allows `localhost:3001`; verified with preflight requests. Fixed the Development `SiteUrl` (`:5000` → `:3000`) so dev email links work.
+6. **Upload storage (partly valid).** Both real deployments persist uploads (VPS dir + symlink, Docker volume) and run one instance. Added `Uploads:Directory` (absolute path) so production can write to `/var/www/osc/uploads` without depending on the per-deploy symlink; stored paths are reduced to a file name, so they can't escape the directory.
+
+Known limitation (unchanged): deactivating an account doesn't end an existing session — JWTs stay valid until expiry (24h).
+
+Verification: backend 272/272, frontend Jest 120/120, `tsc` and ESLint clean; payment migration tested on Postgres 16 with pre-existing duplicate pendings.

@@ -208,7 +208,7 @@ function ChatbotPageInner() {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          sessionId: `escalation-${Date.now().toString(36)}`,
+          sessionId: `escalation-${crypto.randomUUID()}`,
           userName: escalationData.name,
           userEmail: escalationData.email,
           userPhone: escalationData.phone,

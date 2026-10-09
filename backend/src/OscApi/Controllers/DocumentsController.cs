@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OscApi.Common;
@@ -12,9 +13,11 @@ public class DocumentsController : ControllerBase
 {
     private readonly OscDbContext _db;
     private readonly IWebHostEnvironment _env;
+    private readonly string _uploadsRoot;
 
-    public DocumentsController(OscDbContext db, IWebHostEnvironment env)
+    public DocumentsController(OscDbContext db, IWebHostEnvironment env, IConfiguration config)
     {
+        _uploadsRoot = UploadStorage.Root(config, env);
         _db = db;
         _env = env;
     }
@@ -58,7 +61,7 @@ public class DocumentsController : ControllerBase
         if (doc is null || !TicketAccess.CanView(doc.Ticket, who))
             return Problem(detail: "Document not found", statusCode: StatusCodes.Status404NotFound);
 
-        var filePath = Path.Combine(_env.ContentRootPath, doc.StorageUrl.TrimStart('/'));
+        var filePath = UploadStorage.PathFor(_uploadsRoot, doc.StorageUrl);
         if (!System.IO.File.Exists(filePath))
             return Problem(detail: "File is no longer available", statusCode: StatusCodes.Status404NotFound);
 
@@ -68,11 +71,11 @@ public class DocumentsController : ControllerBase
         return File(stream, doc.MimeType, doc.FileName);
     }
 
-    /// <summary>Delete a document from a ticket (admin-level staff only).</summary>
+    /// <summary>Delete a document from a ticket (MFA-complete admin-level staff only).</summary>
     [HttpDelete("{documentId:guid}")]
+    [Authorize(Policy = Roles.AdminOnlyPolicy)]
     public async Task<IActionResult> DeleteDocument(string refNumber, Guid documentId)
     {
-        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: StatusCodes.Status401Unauthorized);
 
         var doc = await _db.TicketDocuments
             .Include(d => d.Ticket)
@@ -82,7 +85,7 @@ public class DocumentsController : ControllerBase
             return Problem(detail: "Document not found", statusCode: StatusCodes.Status404NotFound);
 
         // Delete physical file
-        var filePath = Path.Combine(_env.ContentRootPath, doc.StorageUrl.TrimStart('/'));
+        var filePath = UploadStorage.PathFor(_uploadsRoot, doc.StorageUrl);
         if (System.IO.File.Exists(filePath))
             System.IO.File.Delete(filePath);
 

@@ -39,10 +39,12 @@ public class BusinessRegistrationsController : ControllerBase
     /// <summary>Staff with visibility into the registry: admin-level, or an officer
     /// of the owning agency (URSB). Officers of other agencies get no staff
     /// privilege here — the same rule List and Update enforce — so they, like
-    /// the public, must supply the filing email.</summary>
+    /// the public, must supply the filing email. A back-office session that
+    /// hasn't completed MFA gets no staff privilege either (same bar as the
+    /// Staff policy on List/Update).</summary>
     private bool CanSeeRegistry() =>
-        User.IsAdminLevel()
-        || (User.IsAgencyOfficer() && User.GetAgencyCode() == BusinessRegistrationService.OwningAgencyCode);
+        User.IsStaffSession()
+        && (User.IsAdminLevel() || User.GetAgencyCode() == BusinessRegistrationService.OwningAgencyCode);
 
     /// <summary>Check whether a proposed business name is available before submitting.</summary>
     [HttpGet("check-name")]

@@ -48,4 +48,24 @@ public static class ClaimsPrincipalExtensions
 
     public static bool IsAgencyOfficer(this ClaimsPrincipal user) =>
         user.GetRole() == Roles.AgencyOfficer;
+
+    /// <summary>
+    /// False for a back-office session that hasn't completed MFA enrolment — the
+    /// same rule as <see cref="MfaCompleteRequirement"/>. Regular users are
+    /// never subject to it.
+    /// </summary>
+    public static bool HasCompletedMfa(this ClaimsPrincipal user) =>
+        !Roles.BackOfficeRoles.Contains(user.GetRole()) || user.FindFirst("mfa_enabled")?.Value == "true";
+
+    /// <summary>
+    /// Admin-level <b>and</b> MFA-complete: the in-code equivalent of the
+    /// AdminOnly policy. Use this, never bare <see cref="IsAdminLevel"/>, to grant
+    /// privileges inside an action that isn't already behind the policy.
+    /// </summary>
+    public static bool IsAdminSession(this ClaimsPrincipal user) =>
+        user.IsAdminLevel() && user.HasCompletedMfa();
+
+    /// <summary>Any back-office role <b>and</b> MFA-complete: the in-code equivalent of the Staff policy.</summary>
+    public static bool IsStaffSession(this ClaimsPrincipal user) =>
+        (user.IsAdminLevel() || user.IsAgencyOfficer()) && user.HasCompletedMfa();
 }

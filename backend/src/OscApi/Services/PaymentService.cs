@@ -30,6 +30,11 @@ public class PaymentService : IPaymentService
     };
     private const decimal DefaultFeeUgx = 250_000m;
 
+    /// <summary>How long a pending checkout link is handed back again instead of
+    /// a new one being opened. Within this window every "Pay" click (retries,
+    /// double clicks, a second tab) returns the same transaction.</summary>
+    public static readonly TimeSpan PendingCheckoutReuseWindow = TimeSpan.FromHours(24);
+
     public static decimal FeeFor(string businessType) =>
         FeeScheduleUgx.TryGetValue(businessType, out var fee) ? fee : DefaultFeeUgx;
 
@@ -53,6 +58,31 @@ public class PaymentService : IPaymentService
             return new InitiatePaymentResponse(alreadyPaid.TxRef, alreadyPaid.PaymentLink ?? "", alreadyPaid.Amount, alreadyPaid.Currency, "successful");
 
         var amount = FeeFor(registration.BusinessType);
+
+        // Idempotent per registration: hand back the open checkout rather than
+        // opening another. Previously every click created a new pending
+        // transaction with its own payable link, so a retry or double click
+        // could get the applicant charged twice.
+        var pending = await _db.Payments
+            .Where(p => p.BusinessRegistrationRef == refNumber && p.Status == PaymentStatus.Pending)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+        var reusable = pending.FirstOrDefault(p =>
+            p.Amount == amount && p.Currency == "UGX" && !string.IsNullOrEmpty(p.PaymentLink)
+            && DateTimeOffset.UtcNow - p.CreatedAt < PendingCheckoutReuseWindow);
+        if (reusable is not null)
+            return new InitiatePaymentResponse(reusable.TxRef, reusable.PaymentLink!, reusable.Amount, reusable.Currency, "pending");
+
+        // Anything still pending is stale (expired window, or the fee changed):
+        // close it before opening a new one, so there is only ever one open
+        // checkout per registration. If the applicant does still pay an old link,
+        // the webhook records it — it only skips payments already Successful.
+        foreach (var old in pending)
+        {
+            old.Status = PaymentStatus.Failed;
+            old.FailureReason = "Superseded by a newer checkout";
+        }
+
         var txRef = $"{refNumber}-{Guid.NewGuid():N}";
         if (txRef.Length > 64) txRef = txRef[..64];
         var payment = new Payment
@@ -70,7 +100,23 @@ public class PaymentService : IPaymentService
         payment.PaymentLink = link;
 
         _db.Payments.Add(payment);
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch (DbUpdateException) when (pending.Count == 0)
+        {
+            // Lost a race with a concurrent request for the same registration: the
+            // unique "one pending payment per registration" index rejected this
+            // row. Return the checkout the other request opened instead.
+            _db.ChangeTracker.Clear();
+            var winner = await _db.Payments
+                .Where(p => p.BusinessRegistrationRef == refNumber && p.Status == PaymentStatus.Pending)
+                .OrderByDescending(p => p.CreatedAt)
+                .FirstOrDefaultAsync();
+            if (winner is null) throw;
+            return new InitiatePaymentResponse(winner.TxRef, winner.PaymentLink ?? "", winner.Amount, winner.Currency, "pending");
+        }
 
         return new InitiatePaymentResponse(payment.TxRef, link, amount, payment.Currency, "pending");
     }
@@ -123,8 +169,14 @@ public class PaymentService : IPaymentService
             throw new InvalidOperationException("Flutterwave transaction verification is temporarily unavailable");
 
         payment.ProviderTransactionId = verified.Id.ToString();
+        var isDuplicate = false;
         if (isSuccessful)
         {
+            // Record the money that actually moved, but flag a second successful
+            // payment for the same registration so finance can refund it.
+            isDuplicate = await _db.Payments.AnyAsync(p =>
+                p.BusinessRegistrationRef == payment.BusinessRegistrationRef
+                && p.Id != payment.Id && p.Status == PaymentStatus.Successful);
             payment.Status = PaymentStatus.Successful;
             payment.PaidAt = DateTimeOffset.UtcNow;
         }
@@ -140,6 +192,11 @@ public class PaymentService : IPaymentService
             isSuccessful ? "payments.flutterwave.succeeded" : "payments.flutterwave.failed",
             $"{payment.BusinessRegistrationRef}: {payment.Amount} {payment.Currency}",
             isSuccessful ? 200 : 400, ipAddress: null);
+
+        if (isDuplicate)
+            await _audit.LogAsync("(flutterwave-webhook)", "system", "payments.flutterwave.duplicate",
+                $"{payment.BusinessRegistrationRef}: second successful payment {payment.TxRef} — refund required",
+                409, ipAddress: null);
 
         return true;
     }

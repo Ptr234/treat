@@ -166,5 +166,12 @@ frontend's canonical URLs use the bare apex with no redirect to `www`, so both m
 Set in `/var/www/osc/aspnet/appsettings.Production.json`: `ConnectionStrings:DefaultConnection`,
 `Jwt:Secret` (must match the frontend's `JWT_SECRET` exactly), `Google:ClientId`,
 `Resend:ApiKey`/`FromAddress`/`AdminEmail`, `Groq:ApiKey`/`Model`, `Cors:AllowedOrigins`,
-`SiteUrl`, `Cookie:Domain`, `DataProtection:KeysDirectory`. Optional/not yet configured:
+`SiteUrl`, `Cookie:Domain`, `DataProtection:KeysDirectory`, `Uploads:Directory`. Optional/not yet configured:
 `Recaptcha:SecretKey`, `Sentry:Dsn`, `S3:SignedUrlSecret`, `Flutterwave:*`.
+
+**`Uploads:Directory`** — set it to `/var/www/osc/uploads` (absolute). Ticket documents are then
+written there directly, so they no longer depend on step 4's `ln -sfn .../uploads` symlink being
+recreated on every deploy (a skipped symlink would have put new uploads inside the release
+directory, where the next deploy or rollback loses them). If the systemd unit uses
+`ProtectSystem`/`ReadWritePaths`, the directory must be listed in `ReadWritePaths`. Storage is
+local disk: running more than one backend instance would need object storage instead.

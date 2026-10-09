@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using OscApi.Common;
@@ -19,10 +20,10 @@ public class InvestorsController : ControllerBase
     }
 
     /// <summary>List investor profiles (admin-level staff only).</summary>
+    [Authorize(Policy = Roles.AdminOnlyPolicy)]
     [HttpGet]
     public async Task<IActionResult> ListInvestors([FromQuery] int from = 0, [FromQuery] int to = 50, [FromQuery] string? status = null)
     {
-        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: 403);
         var result = await _investors.ListAsync(from, to, status);
         return Ok(new ApiResponse<object>(true, result));
     }
@@ -31,7 +32,9 @@ public class InvestorsController : ControllerBase
     [HttpGet("{refNumber}")]
     public async Task<IActionResult> GetInvestor(string refNumber, [FromQuery] string? email)
     {
-        var isAdmin = User.IsAdminLevel();
+        // MFA-complete admin session only — a bare role check would let a
+        // back-office session that never finished MFA read any profile.
+        var isAdmin = User.IsAdminSession();
         var result = await _investors.GetByRefAsync(refNumber, email, isAdmin);
         if (result is null)
             return isAdmin
@@ -55,20 +58,20 @@ public class InvestorsController : ControllerBase
     }
 
     /// <summary>Update an investor profile (admin-level staff only).</summary>
+    [Authorize(Policy = Roles.AdminOnlyPolicy)]
     [HttpPatch("{refNumber}")]
     public async Task<IActionResult> UpdateInvestor(string refNumber, [FromBody] UpdateInvestorRequest request)
     {
-        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: 403);
         var result = await _investors.UpdateAsync(refNumber, request);
         if (result is null) return Problem(detail: "Investor profile not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<InvestorResponse>(true, result));
     }
 
     /// <summary>Delete an investor profile (admin-level staff only).</summary>
+    [Authorize(Policy = Roles.AdminOnlyPolicy)]
     [HttpDelete("{refNumber}")]
     public async Task<IActionResult> DeleteInvestor(string refNumber)
     {
-        if (!User.IsAdminLevel()) return Problem(detail: "Admin access required", statusCode: 403);
         var deleted = await _investors.DeleteAsync(refNumber);
         if (!deleted) return Problem(detail: "Investor profile not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse(true));

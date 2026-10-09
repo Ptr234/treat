@@ -188,6 +188,13 @@ public class OscDbContext : DbContext
         {
             e.HasIndex(p => p.TxRef).IsUnique();
             e.HasIndex(p => p.BusinessRegistrationRef);
+            // At most one open checkout per registration: makes payment initiation
+            // race-safe (see PaymentService.InitiatePaymentAsync).
+            // (A named index: an unnamed HasIndex on the same column would modify
+            // the plain index above instead of adding a second one.)
+            e.HasIndex(p => p.BusinessRegistrationRef, "IX_payments_one_pending_per_registration")
+                .IsUnique()
+                .HasFilter("\"Status\" = 'Pending'");
             e.Property(p => p.Status).HasConversion<string>();
         });
 

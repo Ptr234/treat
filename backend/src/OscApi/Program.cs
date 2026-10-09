@@ -93,6 +93,7 @@ builder.Services.AddCors(options =>
 
 // Core services
 builder.Services.AddSingleton<IJwtService, JwtService>();
+builder.Services.AddSingleton<OscApi.Common.IGoogleTokenValidator, OscApi.Common.GoogleTokenValidator>();
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
 builder.Services.AddSingleton<ITotpService, TotpService>();
 builder.Services.AddSingleton<IEmailService, EmailService>();

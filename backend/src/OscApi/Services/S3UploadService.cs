@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using OscApi.Common;
 
 namespace OscApi.Services;
 
@@ -17,6 +18,7 @@ public interface IS3UploadService
 public class S3UploadService : IS3UploadService
 {
     private readonly IWebHostEnvironment _env;
+    private readonly string _uploadsRoot;
     private readonly ILogger<S3UploadService> _logger;
     private readonly string _s3Bucket;
     private readonly string _s3Region;
@@ -27,6 +29,7 @@ public class S3UploadService : IS3UploadService
     {
         _env = env;
         _logger = logger;
+        _uploadsRoot = UploadStorage.Root(config, env);
         _s3Bucket = config["S3:Bucket"] ?? "osc-uploads";
         _s3Region = config["S3:Region"] ?? "us-east-1";
         _s3BaseUrl = config["S3:BaseUrl"] ?? $"https://{_s3Bucket}.s3.{_s3Region}.amazonaws.com";
@@ -36,9 +39,9 @@ public class S3UploadService : IS3UploadService
 
     public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
     {
-        // For now, simulate S3 with local storage under /uploads
-        // When AWS credentials are configured, this will be replaced with actual S3 client
-        var uploadsDir = Path.Combine(_env.ContentRootPath, "uploads");
+        // Local-disk storage under Uploads:Directory (see UploadStorage). Object
+        // storage would replace this when running more than one instance.
+        var uploadsDir = _uploadsRoot;
         Directory.CreateDirectory(uploadsDir);
 
         var safeFileName = $"{Guid.NewGuid()}{Path.GetExtension(fileName)}";
@@ -51,7 +54,7 @@ public class S3UploadService : IS3UploadService
 
         // Return relative URL that DocumentsController can resolve
         var fileUrl = $"/uploads/{safeFileName}";
-        _logger.LogInformation("Uploaded file to S3: {FileName} ({ContentType})", safeFileName, contentType);
+        _logger.LogInformation("Stored upload {FileName} ({ContentType}) in {Directory}", safeFileName, contentType, uploadsDir);
         return fileUrl;
     }
 
@@ -69,14 +72,12 @@ public class S3UploadService : IS3UploadService
     public async Task DeleteFileAsync(string fileKey)
     {
         // For local simulation: extract file name from URL and delete
-        var fileName = Path.GetFileName(fileKey);
-        var uploadsDir = Path.Combine(_env.ContentRootPath, "uploads");
-        var localPath = Path.Combine(uploadsDir, fileName);
+        var localPath = UploadStorage.PathFor(_uploadsRoot, fileKey);
 
         if (File.Exists(localPath))
         {
             File.Delete(localPath);
-            _logger.LogInformation("Deleted file from S3: {FileKey}", fileKey);
+            _logger.LogInformation("Deleted stored upload {FileKey}", fileKey);
         }
 
         await Task.CompletedTask;

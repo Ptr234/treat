@@ -27,12 +27,29 @@ public class CreateTicketValidator : AbstractValidator<CreateTicketRequest>
     }
 }
 
+/// <summary>
+/// A chat session id is the only key to that conversation's server-side history,
+/// on endpoints anyone can call — so it must be unguessable. The widget sends
+/// "chat-" + a crypto.randomUUID() (122 random bits); anything short or
+/// non-opaque (like the old timestamp + Math.random() ids) is rejected.
+/// </summary>
+public static class ChatSessionIds
+{
+    private static readonly System.Text.RegularExpressions.Regex Format =
+        new("^[A-Za-z0-9_-]{32,100}$", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    public static bool IsValid(string? id) => id is not null && Format.IsMatch(id);
+
+    public const string Message = "sessionId must be a random identifier of 32-100 URL-safe characters";
+}
+
 public class ChatRequestValidator : AbstractValidator<OscApi.Dtos.Chatbot.ChatRequest>
 {
     private static readonly string[] ValidLanguages = ["en", "fr", "ar", "zh", "sw"];
 
     public ChatRequestValidator()
     {
+        RuleFor(x => x.SessionId).Must(ChatSessionIds.IsValid).WithMessage(ChatSessionIds.Message);
         RuleFor(x => x.Message).NotEmpty().MaximumLength(2000);
         RuleFor(x => x.Language).Must(l => ValidLanguages.Contains(l)).WithMessage("Invalid language");
     }
@@ -69,4 +86,10 @@ public class CreateInvestorValidator : AbstractValidator<OscApi.Dtos.Investors.C
         RuleFor(x => x.CapitalSource).Must(v => In(v, CapitalSources)).WithMessage("Invalid capital source");
         RuleFor(x => x.Timeframe).Must(v => In(v, Timeframes)).WithMessage("Invalid timeframe");
     }
+}
+
+public class ClearSessionValidator : AbstractValidator<OscApi.Dtos.Chatbot.ClearSessionRequest>
+{
+    public ClearSessionValidator() =>
+        RuleFor(x => x.SessionId).Must(ChatSessionIds.IsValid).WithMessage(ChatSessionIds.Message);
 }
