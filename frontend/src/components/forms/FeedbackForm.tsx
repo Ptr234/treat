@@ -187,9 +187,9 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                 <div className="text-center mb-6">
                   <div className="flex justify-center items-center space-x-2">
                     {feedbackData.rating >= 4 ? (
-                      <FaceSmileIcon className="w-8 h-8 text-yellow-500" />
+                      <FaceSmileIcon className="w-8 h-8 text-[#8a7200]" />
                     ) : (
-                      <FaceFrownIcon className="w-8 h-8 text-orange-500" />
+                      <FaceFrownIcon className="w-8 h-8 text-[#ce1126]" />
                     )}
                     <span className="text-lg font-medium text-black">
                       {feedbackData.rating >= 4 ? 'Great!' : 'We can do better!'}
@@ -200,7 +200,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-3">
+              <label className="gov-label">
                 What type of feedback is this?
               </label>
               <div className="grid grid-cols-1 gap-3">
@@ -236,26 +236,26 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             className="space-y-6"
           >
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Subject
               </label>
               <input
                 type="text"
                 value={feedbackData.subject}
                 onChange={(e) => updateFeedbackData('subject', e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                className="gov-input"
                 placeholder="Brief summary of your feedback"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Tell us more
               </label>
               <textarea
                 value={feedbackData.message}
                 onChange={(e) => updateFeedbackData('message', e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                className="gov-input"
                 rows={6}
                 placeholder="Please provide detailed feedback to help us improve..."
               />
@@ -288,7 +288,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
               </div>
               <button
                 onClick={() => updateFeedbackData('anonymous', !feedbackData.anonymous)}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:ring-offset-2 ${
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out     ${
                   feedbackData.anonymous ? 'bg-yellow-400' : 'bg-gray-200'
                 }`}
               >
@@ -303,40 +303,40 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
             {!feedbackData.anonymous && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">
+                  <label className="gov-label">
                     Name *
                   </label>
                   <input
                     type="text"
                     value={feedbackData.contactInfo.name}
                     onChange={(e) => updateContactInfo('name', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                    className="gov-input"
                     placeholder="Your full name"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">
+                  <label className="gov-label">
                     Email *
                   </label>
                   <input
                     type="email"
                     value={feedbackData.contactInfo.email}
                     onChange={(e) => updateContactInfo('email', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                    className="gov-input"
                     placeholder="your.email@example.com"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">
+                  <label className="gov-label">
                     Phone (Optional)
                   </label>
                   <input
                     type="tel"
                     value={feedbackData.contactInfo.phone}
                     onChange={(e) => updateContactInfo('phone', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                    className="gov-input"
                     placeholder="+256 XXX XXX XXX"
                   />
                 </div>
@@ -346,7 +346,7 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
                     type="checkbox"
                     checked={feedbackData.allowContact}
                     onChange={(e) => updateFeedbackData('allowContact', e.target.checked)}
-                    className="h-4 w-4 text-red-600 focus-visible:ring-red-600 border-neutral-400 rounded"
+                    className="h-4 w-4 text-red-600 border-neutral-400 rounded"
                   />
                   <label className="ml-2 block text-sm text-neutral-800">
                     Allow us to contact you for follow-up questions

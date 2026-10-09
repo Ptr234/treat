@@ -316,13 +316,13 @@ export default function TaxCalculator() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-2">
+                <label className="gov-label">
                   Calculation Type
                 </label>
                 <select
                   value={calculationType}
                   onChange={(e) => setCalculationType(e.target.value as 'paye' | 'corporate' | 'investment')}
-                  className="w-full px-4 py-2 border border-neutral-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-neutral-800"
+                  className="gov-input"
                 >
                   <option value="paye">PAYE (Individual Income Tax)</option>
                   <option value="corporate">Corporate Tax</option>
@@ -333,7 +333,7 @@ export default function TaxCalculator() {
               {calculationType === 'paye' ? (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Monthly Income (UGX) <span className="text-red-700">*</span>
                     </label>
                     <input
@@ -341,10 +341,10 @@ export default function TaxCalculator() {
                       value={income}
                       onChange={(e) => handleInputChange('income', e.target.value)}
                       placeholder="Enter your monthly income"
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white text-neutral-800 placeholder:text-neutral-600 ${
+                      className={`gov-input ${
                         errors.income
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-neutral-400 focus:ring-yellow-500'
+                          ? 'border-red-500 '
+                          : 'border-neutral-400 '
                       }`}
                     />
                     {errors.income && (
@@ -353,13 +353,13 @@ export default function TaxCalculator() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Business Type
                     </label>
                     <select
                       value={businessType}
                       onChange={(e) => handleInputChange('businessType', e.target.value)}
-                      className="w-full px-4 py-2 border border-neutral-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-neutral-800"
+                      className="gov-input"
                     >
                       <option value="individual">Individual</option>
                       <option value="company">Company</option>
@@ -370,7 +370,7 @@ export default function TaxCalculator() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Annual Turnover (UGX) <span className="text-red-700">*</span>
                     </label>
                     <input
@@ -378,10 +378,10 @@ export default function TaxCalculator() {
                       value={annualTurnover}
                       onChange={(e) => handleInputChange('annualTurnover', e.target.value)}
                       placeholder="Enter annual business turnover"
-                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white text-neutral-800 placeholder:text-neutral-600 ${
+                      className={`gov-input ${
                         errors.annualTurnover
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-neutral-400 focus:ring-yellow-500'
+                          ? 'border-red-500 '
+                          : 'border-neutral-400 '
                       }`}
                     />
                     {errors.annualTurnover && (
@@ -390,7 +390,7 @@ export default function TaxCalculator() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Number of Employees
                     </label>
                     <input
@@ -398,22 +398,22 @@ export default function TaxCalculator() {
                       value={employeeCount}
                       onChange={(e) => handleInputChange('employeeCount', e.target.value)}
                       placeholder="Enter number of employees"
-                      className="w-full px-4 py-2 border border-neutral-400 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent bg-white text-neutral-800 placeholder:text-neutral-600"
+                      className="gov-input"
                     />
                   </div>
 
                   {calculationType === 'investment' && (
                     <div>
-                      <label className="block text-sm font-medium text-neutral-800 mb-2">
+                      <label className="gov-label">
                         Investment Sector (ATMS) <span className="text-red-700">*</span>
                       </label>
                       <select
                         value={investmentSector}
                         onChange={(e) => handleInputChange('investmentSector', e.target.value)}
-                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-transparent bg-white text-neutral-800 ${
+                        className={`gov-input ${
                           errors.investmentSector
-                            ? 'border-red-500 focus:ring-red-500'
-                            : 'border-neutral-400 focus:ring-yellow-500'
+                            ? 'border-red-500 '
+                            : 'border-neutral-400 '
                         }`}
                       >
                         <option value="">Select sector</option>
@@ -440,7 +440,7 @@ export default function TaxCalculator() {
                   checked={vatApplicable || parseFloat(annualTurnover) >= 150000000}
                   onChange={(e) => setVatApplicable(e.target.checked)}
                   disabled={parseFloat(annualTurnover) >= 150000000}
-                  className="h-4 w-4 text-red-700 focus:ring-yellow-500 border-neutral-400 rounded"
+                  className="h-4 w-4 text-red-700 border-neutral-400 rounded"
                 />
                 <label htmlFor="vat" className="ml-2 block text-sm text-neutral-700">
                   VAT Applicable {parseFloat(annualTurnover) >= 150000000 ? '(Mandatory - Turnover > UGX 150M)' : '(Annual turnover > UGX 150M)'}

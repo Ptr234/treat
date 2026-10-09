@@ -1,4 +1,3 @@
-import PageBand from '@/components/ui/PageBand';
 import Link from 'next/link';
 import {
   BuildingOfficeIcon,
@@ -6,33 +5,33 @@ import {
   UserGroupIcon,
   WrenchScrewdriverIcon,
 } from '@heroicons/react/24/outline';
-
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+import PageHeader from '@/components/ui/PageHeader';
+import FactRow from '@/components/ui/FactRow';
+import SectionHeading from '@/components/ui/SectionHeading';
 
 const OFFERINGS = [
   {
     icon: BuildingOfficeIcon,
     title: 'Business registration',
-    description: 'Register your business online through a simplified process designed for first-time founders and experienced investors alike. The system guides you through each step, so you know which information and documents are needed. Support and guidance are available at the points where applications commonly stall. You can track your registration after submission.',
+    description: 'Register your business online through a simplified process designed for first-time founders and experienced investors alike. The system guides you through each step, so you know which information and documents are needed. You can track your registration after submission.',
     href: '/business/registration',
   },
   {
     icon: CurrencyDollarIcon,
     title: 'Investment support',
-    description: 'Explore investment opportunities and get professional help to take a project from idea to licence. Listings show the sector, investment range, lead agency and incentives for each project. Facilitation services connect you with the right officials and reduce the time spent on paperwork. Investors can contact the lead agency directly for the next steps.',
+    description: 'Explore investment opportunities and get professional help to take a project from idea to licence. Listings show the sector, investment range, lead agency and incentives for each project, and facilitation connects you with the right officials.',
     href: '/investments',
   },
   {
     icon: UserGroupIcon,
     title: 'Government services',
-    description: 'Contact the government agencies that regulate and support business in Uganda through one directory. Each agency entry explains its services and gives its contact details and operating hours. This saves time when you need to know which office handles a specific licence or tax question. Use the services guide to see which agency to approach at each step.',
+    description: 'Contact the government agencies that regulate and support business in Uganda through one directory. Each entry explains the agency’s services and gives its contact details and operating hours.',
     href: '/agencies',
   },
   {
     icon: WrenchScrewdriverIcon,
     title: 'Digital tools',
-    description: 'Use calculators, forms and checklists that help you plan and run your business. The tax calculator estimates your obligations, and the ROI calculator helps you compare opportunities. The invoice generator and document checklist support everyday paperwork. Each tool is designed around the requirements that apply in Uganda.',
+    description: 'Use calculators, forms and checklists that help you plan and run your business: the tax calculator, the ROI calculator, the invoice generator and the document checklist, each built around requirements that apply in Uganda.',
     href: '/tools',
   },
 ];
@@ -47,95 +46,61 @@ const IMPACT = [
 
 export default function AboutPage() {
   return (
- <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">About</li>
-          </ol>
-        </nav>
-      </div>
-
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">About</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">OneStop Centre Uganda</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Simplifying government services and investment processes for a prosperous Uganda.
-        </p>
-      </section>
-      </PageBand>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'About' }]}
+        caption="About us"
+        title="OneStop Centre Uganda"
+        lead="Simplifying government services and investment processes for a prosperous Uganda."
+      />
 
       {/* Mission and vision */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="mission-heading">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-16">
-          <div className="border-t border-neutral-200 pt-6">
-            <h2 id="mission-heading" className="text-2xl font-bold sm:text-3xl">Our mission</h2>
-            <p className="mt-5 leading-7 text-neutral-700">
-              OneStop Centre Uganda serves as the digital gateway to streamlined government services,
-              business registration, and investment opportunities. We are committed to making it easier
-              for entrepreneurs, investors, and businesses to navigate Uganda&apos;s regulatory landscape
-              with precision and efficiency.
+      <section className="gov-section" aria-labelledby="mission-heading">
+        <div className="gov-container grid gap-10 md:grid-cols-2 md:gap-16">
+          <div className="border-t-4 border-black pt-6">
+            <h2 id="mission-heading" className="gov-title-m">Our mission</h2>
+            <p className="gov-body mt-4 text-[17px]">
+              OneStop Centre Uganda serves as the digital gateway to streamlined government services, business
+              registration and investment opportunities. We make it easier for entrepreneurs, investors and businesses
+              to navigate Uganda&apos;s regulatory landscape with precision and efficiency.
             </p>
           </div>
-          <div className="border-t border-neutral-200 pt-6">
-            <h2 className="text-2xl font-bold sm:text-3xl">Our vision</h2>
-            <p className="mt-5 leading-7 text-neutral-700">
-              To be the leading digital platform that empowers economic growth in Uganda by
-              providing seamless access to government services and investment opportunities.
-              We envision a future where businesses thrive through simplified processes and
-              strategic government partnerships.
+          <div className="border-t-4 border-[#ffd700] pt-6">
+            <h2 className="gov-title-m">Our vision</h2>
+            <p className="gov-body mt-4 text-[17px]">
+              To be the leading digital platform that empowers economic growth in Uganda by providing seamless access
+              to government services and investment opportunities, where businesses thrive through simplified
+              processes and strategic government partnerships.
             </p>
           </div>
         </div>
       </section>
 
       {/* What we offer */}
-      <section className="border-t border-neutral-200 bg-neutral-50 py-16" aria-labelledby="offer-heading">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-10 max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">What we offer</p>
-            <h2 id="offer-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Services for your business journey in Uganda</h2>
-          </div>
-          <ul className="divide-y divide-neutral-200 border-y border-neutral-200">
+      <section className="gov-section gov-section--paper" aria-labelledby="offer-heading">
+        <div className="gov-container">
+          <SectionHeading id="offer-heading" kicker="What we offer" title="Services for your business journey in Uganda" />
+          <div className="grid gap-6 sm:grid-cols-2">
             {OFFERINGS.map((service) => (
-              <li key={service.title} className="grid gap-4 py-6 sm:grid-cols-[3rem_1fr_auto] sm:items-start sm:gap-6">
-                <service.icon className="h-7 w-7 text-red-600" aria-hidden="true" />
-                <div>
-                  <h3 className="text-lg font-bold">{service.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-neutral-700">{service.description}</p>
-                </div>
-                <Link href={service.href} className={`${linkClass} text-sm`}>
-                  Explore
-                  <span className="sr-only"> {service.title}</span>
-                </Link>
-              </li>
+              <article key={service.title} className="gov-card gov-card--link">
+                <service.icon className="h-8 w-8 text-[#ce1126]" aria-hidden="true" />
+                <h3 className="gov-card__title mt-4">
+                  <Link href={service.href}>{service.title}</Link>
+                </h3>
+                <p className="mt-3 text-[15px] leading-6 text-[#3b3934]">{service.description}</p>
+              </article>
             ))}
-          </ul>
+          </div>
         </div>
       </section>
 
       {/* Impact */}
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8" aria-labelledby="impact-heading">
-        <div className="mb-10 max-w-2xl">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Our impact</p>
-          <h2 id="impact-heading" className="mt-2 text-2xl font-bold sm:text-3xl">Measurable results for Uganda’s economic development</h2>
+      <section className="gov-section" aria-labelledby="impact-heading">
+        <div className="gov-container">
+          <SectionHeading id="impact-heading" kicker="Our impact" title="Results for Uganda’s economic development" />
+          <FactRow facts={IMPACT} />
+          <p className="gov-hint mt-4">Data as of October 2025. Source: Uganda Investment Authority.</p>
         </div>
-        <dl className="grid grid-cols-2 gap-x-8 gap-y-10 border-y border-neutral-200 py-10 lg:grid-cols-4">
-          {IMPACT.map((stat) => (
-            <div key={stat.label} className=" pl-4">
-              <dt className="text-sm font-medium text-neutral-600">{stat.label}</dt>
-              <dd className="mt-2 text-3xl font-bold text-black sm:text-4xl">{stat.value}</dd>
-            </div>
-          ))}
-        </dl>
-        <p className="mt-4 text-xs text-neutral-600">Data as of October 2025. Source: Uganda Investment Authority.</p>
       </section>
     </div>
   );

@@ -50,7 +50,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   if (isLoading) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+        <span role="status" aria-label="Loading" className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   };
 
   return (
- <div className="min-h-screen bg-white lg:flex">
+ <div className="osc-dashboard-shell min-h-screen bg-white lg:flex">
       {/* Sidebar — static on desktop, slide-in drawer on mobile */}
       <aside className="hidden lg:block lg:w-64 lg:flex-shrink-0 lg:sticky lg:top-0 lg:h-screen">
         <DashboardSidebar role={user?.role} />
@@ -97,7 +97,8 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       {/* Main column */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-neutral-200">
+        <header className="sticky top-0 z-30 border-b border-[#dcd8cf] bg-white">
+          <div className="gov-stripe" aria-hidden="true" />
           <div className="flex items-center gap-3 px-4 sm:px-6 h-14">
             <button
               onClick={() => setMobileOpen(true)}
@@ -123,7 +124,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             </div>
             <button
               onClick={handleLogout}
-              className="flex min-h-11 items-center gap-1.5 px-3 py-2 text-sm font-medium text-neutral-800 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+              className="flex min-h-11 items-center gap-1.5 px-3 py-2 text-sm font-bold text-black underline-offset-4 hover:underline"
             >
               <ArrowRightOnRectangleIcon className="w-5 h-5" />
               <span className="hidden sm:inline">Sign out</span>
@@ -131,7 +132,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </div>
         </header>
 
-        <main className="flex-1 min-w-0">{children}</main>
+        <main id="main-content" className="flex-1 min-w-0">{children}</main>
       </div>
     </div>
   );

@@ -145,7 +145,7 @@ export default function InvestorsPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-neutral-100 border border-neutral-200 text-black text-sm rounded-md px-3 py-2 focus:ring-2 focus-visible:ring-red-600"
+                className="gov-input"
               >
                 <option value="">All Statuses</option>
                 <option value="new">New</option>
@@ -164,7 +164,7 @@ export default function InvestorsPage() {
           <div className={selectedInvestor ? 'lg:col-span-2' : 'lg:col-span-3'}>
             {loading ? (
               <div className="flex justify-center py-20">
-                <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
               </div>
             ) : investors.length === 0 ? (
               <div className="text-center py-20 text-neutral-600">No investors found.</div>
@@ -205,7 +205,7 @@ export default function InvestorsPage() {
                         <select
                           value={statusKey(inv)}
                           onChange={(e) => handleStatusChange(inv, e.target.value)}
-                          className="text-xs text-black px-2 py-1.5 border border-neutral-300 focus:border-black focus:outline-none"
+                          className="gov-input"
                         >
                           <option value="new">New</option>
                           <option value="contacted">Contacted</option>

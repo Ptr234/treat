@@ -1,604 +1,225 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useMemo, useEffect, useRef } from 'react';
-import { Settings, Building2, FileText, HelpCircle, Search, Star, Phone, Mail, ExternalLink, Clock, Zap } from 'lucide-react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { ugandaAgencies } from '@/data/agencies';
 import investmentOpportunities from '@/data/investment-opportunities.json';
+import PageHeader from '@/components/ui/PageHeader';
 
-// export const metadata: Metadata = {
-//   title: 'Search',
-//   description: 'Search for services, agencies, documents, and information across OneStop Centre Uganda.',
-// };
+type ResultType = 'Agency' | 'Service' | 'Investment' | 'Guidance';
 
 type SearchResult = {
   id: string;
   title: string;
-  type: 'Agency' | 'Service' | 'Investment' | 'Document' | 'Guide';
+  type: ResultType;
   description: string;
   url: string;
   relevance: number;
-  category?: string;
-  contact?: {
-    email?: string;
-    phone?: string;
-    website?: string;
-  };
-  metadata?: {
-    roi?: string;
-    investmentRange?: string;
-    timeline?: string;
-    priority?: string;
-  };
+  meta?: string;
+};
+
+// Pages on this site that answer common tasks directly.
+const SERVICE_PAGES: Omit<SearchResult, 'relevance'>[] = [
+  { id: 'business-reg', type: 'Service', title: 'Register a business', url: '/business/registration', description: 'Reserve a business name and incorporate a company with the Uganda Registration Services Bureau (URSB). Lists the documents and fees for each stage.', meta: 'URSB · company registration incorporation name reservation' },
+  { id: 'tax-reg', type: 'Service', title: 'Tax registration and compliance (TIN)', url: '/services#starting', description: 'Get a Tax Identification Number (TIN) from the Uganda Revenue Authority before most business dealings with government and banks.', meta: 'URA · tax certificate TIN VAT' },
+  { id: 'investment-licence', type: 'Service', title: 'Investment licence', url: '/investments/process', description: 'Apply to the Uganda Investment Authority for an investment licence before you start operating. The licence is free and unlocks incentives.', meta: 'UIA · investment license licence certificate incentives' },
+  { id: 'work-permit', type: 'Service', title: 'Work permits for foreign staff', url: '/services#foreign', description: 'Work and residence permits from the Directorate of Citizenship and Immigration Control, sponsored by the employing organisation.', meta: 'DCIC · immigration visa work permit foreign' },
+  { id: 'environment', type: 'Service', title: 'Environmental impact assessment', url: '/services#operations', description: 'NEMA reviews the Environmental and Social Impact Assessment (ESIA) before approving most large projects.', meta: 'NEMA · environment permit ESIA clearance' },
+  { id: 'track', type: 'Service', title: 'Track an application', url: '/track', description: 'Check the progress of a business registration using your reference number.', meta: 'status reference tracking' },
+  { id: 'incentives', type: 'Guidance', title: 'Investment incentives', url: '/incentives', description: 'Tax holidays, exemptions and allowances under the Investment Code Act 2019 and the Income Tax Act.', meta: 'tax holiday exemption allowance free zone' },
+  { id: 'process', type: 'Guidance', title: 'Investment process', url: '/investments/process', description: 'The five steps from company registration to an operating licence, and the agency responsible for each.', meta: 'steps how to invest' },
+  { id: 'downloads', type: 'Guidance', title: 'Forms and downloads', url: '/downloads', description: 'Application forms and guidance documents published by government agencies.', meta: 'forms documents templates' },
+  { id: 'checklist', type: 'Guidance', title: 'Document checklist', url: '/tools/document-checklist', description: 'The documents needed for business registration and licensing.', meta: 'documents requirements checklist' },
+  { id: 'tax-calc', type: 'Guidance', title: 'Tax calculator', url: '/tools/tax-calculator', description: 'Estimate income tax, corporation tax and VAT using URA rates.', meta: 'tax calculator PAYE VAT corporation' },
+  { id: 'faq', type: 'Guidance', title: 'Frequently asked questions', url: '/support#faq-heading', description: 'Answers about registration timelines, documents, minimum investment and tax obligations.', meta: 'faq questions help fees' },
+];
+
+const POPULAR = ['Company registration fees', 'Investment licence', 'Work permit', 'TIN registration', 'Tax holiday', 'Environmental permit'];
+const FILTERS: Array<'All' | ResultType> = ['All', 'Service', 'Agency', 'Investment', 'Guidance'];
+const FILTER_LABELS: Record<string, string> = { All: 'All results', Service: 'Services', Agency: 'Agencies', Investment: 'Investment projects', Guidance: 'Guidance and tools' };
+
+function score(query: string, fields: Array<[string | undefined, number]>) {
+  const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 1);
+  if (!words.length) return 0;
+  let total = 0;
+  for (const word of words) {
+    let best = 0;
+    for (const [text, weight] of fields) {
+      if (text && text.toLowerCase().includes(word)) best = Math.max(best, weight);
+    }
+    if (!best) return 0; // every word must match somewhere
+    total += best;
+  }
+  return total;
+}
+
+function search(query: string): SearchResult[] {
+  const results: SearchResult[] = [];
+  for (const agency of ugandaAgencies) {
+    const relevance = score(query, [[agency.name, 40], [agency.acronym, 40], [agency.services.join(' '), 30], [agency.description, 20], [agency.category, 15]]);
+    if (relevance) {
+      results.push({ id: `agency-${agency.id}`, type: 'Agency', title: `${agency.name} (${agency.acronym})`, url: `/agencies/${agency.id}`, description: agency.description, relevance, meta: agency.contact.phone });
+    }
+  }
+  for (const opp of investmentOpportunities) {
+    const relevance = score(query, [[opp.title, 40], [opp.category, 30], [opp.agency, 25], [opp.description, 20]]);
+    if (relevance) {
+      results.push({ id: `opp-${opp.id}`, type: 'Investment', title: opp.title, url: `/investments/${opp.id}`, description: opp.description, relevance, meta: `${opp.investmentRange} · ${opp.category}` });
+    }
+  }
+  for (const page of SERVICE_PAGES) {
+    const relevance = score(query, [[page.title, 45], [page.meta, 30], [page.description, 20]]);
+    if (relevance) results.push({ ...page, relevance: relevance + 5, meta: undefined });
+  }
+  return results.sort((a, b) => b.relevance - a.relevance);
+}
+
+const TAG: Record<ResultType, string> = {
+  Service: 'gov-tag',
+  Agency: 'gov-tag gov-tag--outline',
+  Investment: 'gov-tag gov-tag--gold',
+  Guidance: 'gov-tag gov-tag--grey',
 };
 
 export default function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [selectedFilter, setSelectedFilter] = useState('All');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const searchInputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [input, setInput] = useState('');
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<'All' | ResultType>('All');
 
-  const recentSearches = [
-    'business registration',
-    'tax certificate',
-    'investment license',
-    'UIA contact',
-    'company registration fees'
-  ];
-
-  const popularSearches = [
-    'How to register a business',
-    'Investment incentives Uganda',
-    'Tax registration requirements',
-    'Business license application',
-    'Foreign investment rules',
-    'Company name reservation',
-    'VAT registration process',
-    'Investment opportunities'
-  ];
-
-  const searchCategories = [
-    {
-      title: 'Services',
-      description: 'Search for the services and procedures you need to run a business in Uganda. Results explain what each procedure involves and which agency handles it. You can move from a procedure to the forms and guides that support it. Use this when you know the outcome you need but not the agency responsible.',
-      icon: <Settings className="w-8 h-8 text-blue-600" />,
-      count: '150+ services'
-    },
-    {
-      title: 'Agencies',
-      description: 'Find the public agencies and departments involved in business and investment. Each agency entry lists its services, contact details and operating hours. This helps you identify the right office before you call or visit. Use it when you need to know who regulates or supports a particular activity.',
-      icon: <Building2 className="w-8 h-8 text-yellow-600" />,
-      count: '25+ agencies'
-    },
-    {
-      title: 'Documents',
-      description: 'Find the forms, step-by-step guides and templates that support your applications. Documents are grouped so you can see what each one is for. Downloading the right template early saves time when you complete an application. Start with the document checklist if you are unsure which form you need.',
-      icon: <FileText className="w-8 h-8 text-purple-600" />,
-      count: '200+ documents'
-    },
-    {
-      title: 'Help & Guides',
-      description: 'Learn how to complete common tasks through short, step-by-step tutorials. Each guide walks through the process in the order you will need it. Tutorials are useful if you are new to registration, tax or investment processes. Use them alongside the services list to see the full picture.',
-      icon: <HelpCircle className="w-8 h-8 text-orange-600" />,
-      count: '50+ guides'
-    }
-  ];
-
-  // Generate search suggestions based on available data
-  const allSuggestions = useMemo(() => {
-    const agencySuggestions = ugandaAgencies.flatMap(agency => [
-      agency.name,
-      agency.acronym,
-      ...agency.services.slice(0, 2), // Limit services to avoid too many suggestions
-      agency.category.replace('_', ' ')
-    ]);
-    
-    const investmentSuggestions = investmentOpportunities.flatMap(opp => [
-      opp.title,
-      opp.category,
-      opp.agency
-    ]);
-    
-    const serviceSuggestions = [
-      'business registration',
-      'tax certificate',
-      'investment license',
-      'company registration',
-      'work permit',
-      'environmental permit',
-      'import license',
-      'export license'
-    ];
-    
-    return [...new Set([...agencySuggestions, ...investmentSuggestions, ...serviceSuggestions])];
+  // The header search box and popular-search links arrive as /search?q=…
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('q') ?? '';
+    setInput(q);
+    setQuery(q);
   }, []);
 
-  // Filter suggestions based on search query
-  useEffect(() => {
-    if (searchQuery.length > 1) {
-      const filtered = allSuggestions
-        .filter(suggestion => 
-          suggestion.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        .slice(0, 8); // Limit to 8 suggestions
-      setSuggestions(filtered);
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
-    }
-  }, [searchQuery, allSuggestions]);
+  const allResults = useMemo(() => (query.trim() ? search(query) : []), [query]);
+  const results = filter === 'All' ? allResults : allResults.filter((r) => r.type === filter);
+  const countFor = (type: 'All' | ResultType) => (type === 'All' ? allResults.length : allResults.filter((r) => r.type === type).length);
 
-  // Perform search across all data sources
-  const performSearch = (query: string) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    const results: SearchResult[] = [];
-    const lowerQuery = query.toLowerCase();
-
-    // Search agencies
-    ugandaAgencies.forEach(agency => {
-      let relevance = 0;
-      const titleMatch = agency.name.toLowerCase().includes(lowerQuery);
-      const acronymMatch = agency.acronym.toLowerCase().includes(lowerQuery);
-      const descMatch = agency.description.toLowerCase().includes(lowerQuery);
-      const serviceMatch = agency.services.some(service => 
-        service.toLowerCase().includes(lowerQuery)
-      );
-
-      if (titleMatch) relevance += 40;
-      if (acronymMatch) relevance += 35;
-      if (descMatch) relevance += 20;
-      if (serviceMatch) relevance += 30;
-
-      if (relevance > 0) {
-        results.push({
-          id: agency.id,
-          title: `${agency.name} (${agency.acronym})`,
-          type: 'Agency',
-          description: agency.description,
-          url: `/agencies#${agency.id}`,
-          relevance,
-          category: agency.category.replace('_', ' '),
-          contact: {
-            email: agency.contact.email,
-            phone: agency.contact.phone,
-            website: agency.contact.website
-          }
-        });
-      }
-    });
-
-    // Search investment opportunities
-    investmentOpportunities.forEach(opp => {
-      let relevance = 0;
-      const titleMatch = opp.title.toLowerCase().includes(lowerQuery);
-      const categoryMatch = opp.category.toLowerCase().includes(lowerQuery);
-      const descMatch = opp.description.toLowerCase().includes(lowerQuery);
-      const agencyMatch = opp.agency.toLowerCase().includes(lowerQuery);
-
-      if (titleMatch) relevance += 40;
-      if (categoryMatch) relevance += 30;
-      if (descMatch) relevance += 20;
-      if (agencyMatch) relevance += 25;
-
-      if (relevance > 0) {
-        results.push({
-          id: opp.id.toString(),
-          title: opp.title,
-          type: 'Investment',
-          description: opp.description,
-          url: `/investments/${opp.id}`,
-          relevance,
-          category: opp.category,
-          contact: {
-            email: opp.contact.email,
-            phone: opp.contact.phone,
-            website: opp.contact.website
-          },
-          metadata: {
-            roi: opp.roi,
-            investmentRange: opp.investmentRange,
-            timeline: opp.timeline,
-            priority: opp.priority
-          }
-        });
-      }
-    });
-
-    // Add some mock service results
-    const mockServices = [
-      {
-        id: 'business-reg',
-        title: 'Business Registration Process',
-        type: 'Service' as const,
-        description: 'This guide explains how to register a business in Uganda, step by step. It lists the documents you will need and the fees that apply at each stage. Following the sequence avoids returned applications and repeated visits. Read it before you approach the Uganda Registration Services Bureau.',
-        url: '/business/registration',
-        category: 'Registration'
-      },
-      {
-        id: 'tax-cert',
-        title: 'Tax Registration Certificate',
-        type: 'Service' as const,
-        description: 'Obtain your Tax Identification Number (TIN) and tax registration certificate from the Uganda Revenue Authority. You will need a TIN before most business dealings with government and banks. The process confirms your tax identity for filing returns and paying taxes. Keep the certificate with your business records once it is issued.',
-        url: '/services/tax-registration',
-        category: 'Taxation'
-      },
-      {
-        id: 'work-permit',
-        title: 'Work Permit Application',
-        type: 'Service' as const,
-        description: 'Apply for work permits and special passes for foreign employees working in Uganda. Plan these applications early, because they determine when key staff can begin work. The Directorate of Citizenship and Immigration Control handles the process. Check the documents required for each role before you submit.',
-        url: '/services/work-permit',
-        category: 'Immigration'
-      }
-    ];
-
-    mockServices.forEach(service => {
-      const titleMatch = service.title.toLowerCase().includes(lowerQuery);
-      const descMatch = service.description.toLowerCase().includes(lowerQuery);
-      const categoryMatch = service.category.toLowerCase().includes(lowerQuery);
-
-      let relevance = 0;
-      if (titleMatch) relevance += 40;
-      if (descMatch) relevance += 20;
-      if (categoryMatch) relevance += 30;
-
-      if (relevance > 0) {
-        results.push({
-          ...service,
-          relevance
-        });
-      }
-    });
-
-    // Sort by relevance and filter by selected type
-    let filteredResults = results.sort((a, b) => b.relevance - a.relevance);
-    
-    if (selectedFilter !== 'All') {
-      filteredResults = filteredResults.filter(result => {
-        if (selectedFilter === 'Services') return result.type === 'Service';
-        if (selectedFilter === 'Agencies') return result.type === 'Agency';
-        if (selectedFilter === 'Investments') return result.type === 'Investment';
-        return true;
-      });
-    }
-
-    setSearchResults(filteredResults);
+  const runSearch = (q: string) => {
+    setQuery(q);
+    setFilter('All');
+    router.replace(q ? `/search?q=${encodeURIComponent(q)}` : '/search', { scroll: false });
   };
 
-  const handleSearch = () => {
-    performSearch(searchQuery);
-    setShowSuggestions(false);
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    runSearch(input.trim());
   };
-
-  const handleSuggestionClick = (suggestion: string) => {
-    setSearchQuery(suggestion);
-    setShowSuggestions(false);
-    performSearch(suggestion);
-  };
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node) &&
-          searchInputRef.current && !searchInputRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Search Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight text-black mb-6">
-            Search OneStop Centre
-          </h1>
-          <p className="text-lg text-neutral-700 mb-8">
-            Find services, agencies, documents, and information to help with your business needs.
-          </p>
-          
-          {/* Search Box */}
-          <div className="relative max-w-2xl mx-auto mb-8">
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Search' }]}
+        caption="Search"
+        title="Search this website"
+        lead="Find services, government agencies, investment projects and guidance."
+      >
+        <form role="search" onSubmit={submit} className="max-w-2xl">
+          <label htmlFor="site-search" className="gov-label text-lg">Search</label>
+          <div className="gov-search">
             <input
-              ref={searchInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              onFocus={() => searchQuery.length > 1 && setShowSuggestions(true)}
-              placeholder="Search for services, agencies, investments..."
-              aria-label="Search for services, agencies, and investment opportunities"
-              aria-expanded={showSuggestions}
-              aria-haspopup="listbox"
-              aria-controls="search-suggestions"
-              role="combobox"
+              id="site-search"
+              type="search"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="For example, work permit"
               autoComplete="off"
-              className="w-full border-2 border-black bg-white px-4 py-4 pr-16 text-lg text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+              className="!min-h-[3.25rem] !text-lg"
             />
-            <button 
-              onClick={handleSearch}
-              aria-label="Search"
-              className="absolute right-2 top-2 bottom-2 px-5 bg-black text-yellow-400 hover:bg-neutral-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-            
-            {/* Autocomplete Suggestions */}
-            {showSuggestions && suggestions.length > 0 && (
-              <div 
-                ref={suggestionsRef}
-                id="search-suggestions"
-                role="listbox"
-                aria-label="Search suggestions"
-                className="absolute top-full left-0 right-0 bg-white border-2 border-black mt-1 z-50 max-h-64 overflow-y-auto"
-              >
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    role="option"
-                    aria-selected="false"
-                    className="w-full px-4 py-3 text-left hover:bg-neutral-50 border-b border-neutral-200 last:border-b-0 flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-red-600"
-                  >
-                    <Search className="w-4 h-4 text-gray-400" />
-                    <span className="text-gray-700">{suggestion}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Search Filters */}
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-8">
-            {['All', 'Services', 'Agencies', 'Investments', 'Documents', 'Guides'].map((filter) => (
-              <button 
-                key={filter}
-                onClick={() => {
-                  setSelectedFilter(filter);
-                  if (searchQuery) performSearch(searchQuery);
-                }}
-                className={`border-b-2 px-1 py-2 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
-                  selectedFilter === filter
-                    ? 'border-red-600 text-red-600'
-                    : 'border-transparent text-neutral-700 hover:text-red-600'
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Search Results */}
-        {searchResults.length > 0 && (
-          <div className="mb-12">
-            <div className="border-b border-neutral-200 pb-3 mb-6">
-              <h2 className="text-xl font-bold text-black">Search results</h2>
-              <p className="text-neutral-700 text-sm mt-1">
-                Showing {searchResults.length} results for &quot;{searchQuery}&quot;
-                {selectedFilter !== 'All' && ` in ${selectedFilter}`}
-              </p>
-            </div>
-            <div>
-              <div className="divide-y divide-neutral-200">
-                {searchResults.map((result) => (
-                  <div key={result.id} className="py-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-2">
-                          <Link href={result.url} className="text-xl font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600">
-                            {result.title}
-                          </Link>
-                          <span className="ml-3 text-xs font-bold uppercase tracking-wider text-red-600">
-                            {result.type}
-                          </span>
-                          {result.metadata?.priority && (
-                            <span className="ml-2 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-neutral-700">
-                              <Star className="w-3 h-3" />
-                              {result.metadata.priority}
-                            </span>
-                          )}
-                        </div>
-                        
-                        {result.category && (
-                          <p className="text-sm text-neutral-600 mb-1 capitalize">{result.category}</p>
-                        )}
-                        
-                        <p className="text-neutral-700 leading-7 mb-3">{result.description}</p>
-                        
-                        {/* Investment metadata */}
-                        {result.metadata && (
-                          <div className="flex flex-wrap gap-4 mb-3">
-                            {result.metadata.roi && (
-                              <div className="flex items-center gap-1 text-sm text-black">
-                                <Zap className="w-4 h-4" />
-                                <span>ROI: {result.metadata.roi}</span>
-                              </div>
-                            )}
-                            {result.metadata.investmentRange && (
-                              <div className="flex items-center gap-1 text-sm text-neutral-800">
-                                <span>Investment: {result.metadata.investmentRange}</span>
-                              </div>
-                            )}
-                            {result.metadata.timeline && (
-                              <div className="flex items-center gap-1 text-sm text-neutral-800">
-                                <Clock className="w-4 h-4" />
-                                <span>{result.metadata.timeline}</span>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        
-                        {/* Contact information */}
-                        {result.contact && (
-                          <div className="flex flex-wrap gap-4 mb-3">
-                            {result.contact.phone && (
-                              <div className="flex items-center gap-1 text-sm text-neutral-700">
-                                <Phone className="w-4 h-4" />
-                                <span>{result.contact.phone}</span>
-                              </div>
-                            )}
-                            {result.contact.email && (
-                              <div className="flex items-center gap-1 text-sm text-neutral-700">
-                                <Mail className="w-4 h-4" />
-                                <span>{result.contact.email}</span>
-                              </div>
-                            )}
-                            {result.contact.website && (
-                              <a 
-                                href={result.contact.website} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1 text-sm font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
-                              >
-                                <ExternalLink className="w-4 h-4" />
-                                <span>Website</span>
-                              </a>
-                            )}
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center text-sm text-neutral-600">
-                          <span className="font-semibold text-black">{result.url}</span>
-                          <span className="mx-2">•</span>
-                          <span>{result.relevance}% relevant</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* No results message */}
-        {searchQuery && searchResults.length === 0 && (
-          <div className="border-l-4 border-red-600 bg-neutral-50 p-6 mb-8">
-            <div className="text-neutral-500 mb-4">
-              <Search className="w-16 h-16 mx-auto" />
-            </div>
-            <h3 className="text-xl font-bold text-black mb-2">
-              No results found for &quot;{searchQuery}&quot;
-            </h3>
-            <p className="text-neutral-700 mb-4">
-              Try adjusting your search terms or browse the categories below.
-            </p>
-            <button 
-              onClick={() => {
-                setSearchQuery('');
-                setSearchResults([]);
-              }}
-              className="font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
-            >
-              Clear search
+            <button type="submit" aria-label="Search" className="!min-h-[3.25rem] !w-[3.25rem]">
+              <MagnifyingGlassIcon className="h-6 w-6" aria-hidden="true" />
             </button>
           </div>
+        </form>
+      </PageHeader>
+
+      <div className="gov-container py-12">
+        {query ? (
+          <div className="grid gap-10 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-14">
+            <aside aria-label="Filter results">
+              <fieldset className="bg-[#f5f3ee] p-5">
+                <legend className="sr-only">Type of result</legend>
+                <p className="gov-label">Type of result</p>
+                <div className="mt-2 space-y-2.5">
+                  {FILTERS.map((f) => (
+                    <label key={f} className="flex items-center gap-3 text-[15px] font-normal">
+                      <input type="radio" name="result-type" className="h-5 w-5 shrink-0" checked={filter === f} onChange={() => setFilter(f)} />
+                      <span className="flex-1">{FILTER_LABELS[f]}</span>
+                      <span className="font-data text-sm text-[#5c5850]">{countFor(f)}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            </aside>
+
+            <section aria-labelledby="results-heading">
+              <h2 id="results-heading" className="border-b-2 border-black pb-3 text-xl font-bold" aria-live="polite">
+                {results.length} {results.length === 1 ? 'result' : 'results'} for &lsquo;{query}&rsquo;
+              </h2>
+              {results.length === 0 ? (
+                <div className="mt-6 max-w-2xl">
+                  <p className="text-[17px] font-bold">There are no matching results.</p>
+                  <p className="mt-3 text-[15px] text-[#3b3934]">Improve your search results by:</p>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px] text-[#3b3934]">
+                    <li>checking your spelling</li>
+                    <li>using fewer or different words, such as an agency acronym (URA, URSB, UIA)</li>
+                    <li>choosing &lsquo;All results&rsquo; under type of result</li>
+                  </ul>
+                  <p className="mt-4 text-[15px]">Or <Link href="/support" className="gov-link">contact the OneStop Centre</Link>.</p>
+                </div>
+              ) : (
+                <ol>
+                  {results.map((result) => (
+                    <li key={result.id} className="border-b border-[#dcd8cf] py-5">
+                      <span className={TAG[result.type]}>{result.type === 'Investment' ? 'Investment project' : result.type}</span>
+                      <h3 className="mt-2 text-lg font-bold leading-snug">
+                        <Link href={result.url} className="text-black underline decoration-1 underline-offset-4 hover:text-[#9a0d1c] hover:decoration-[3px]">
+                          {result.title}
+                        </Link>
+                      </h3>
+                      <p className="mt-1 line-clamp-2 max-w-3xl text-[15px] leading-6 text-[#3b3934]">{result.description}</p>
+                      {result.meta && <p className="mt-1 text-sm text-[#5c5850]">{result.meta}</p>}
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </section>
+          </div>
+        ) : (
+          <div className="grid gap-12 lg:grid-cols-2">
+            <section aria-labelledby="popular-heading">
+              <h2 id="popular-heading" className="gov-title-m border-b-2 border-black pb-3">Popular searches</h2>
+              <ul className="mt-4 space-y-3 text-[17px]">
+                {POPULAR.map((term) => (
+                  <li key={term}>
+                    <button type="button" onClick={() => { setInput(term); runSearch(term); }} className="gov-link">{term}</button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <section aria-labelledby="browse-heading">
+              <h2 id="browse-heading" className="gov-title-m border-b-2 border-black pb-3">Browse instead</h2>
+              <ul className="mt-4 space-y-4">
+                {[
+                  { label: 'Government services', href: '/services', note: 'Licences, permits, tax and registration' },
+                  { label: 'Government agencies', href: '/agencies', note: `${ugandaAgencies.length} agencies with contact details` },
+                  { label: 'Investment projects', href: '/investments', note: `${investmentOpportunities.length} published projects` },
+                  { label: 'Forms and downloads', href: '/downloads', note: 'Application forms and guidance' },
+                ].map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href} className="gov-arrow-link text-[17px]">{item.label}</Link>
+                    <p className="text-[15px] text-[#5c5850]">{item.note}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
         )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Recent Searches */}
-          <div>
-            <div className="border-b border-neutral-200 pb-3">
-              <h3 className="text-lg font-bold text-black">Recent searches</h3>
-            </div>
-            <div className="pt-4">
-              <div className="space-y-3">
-                {recentSearches.map((search, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setSearchQuery(search);
-                      performSearch(search);
-                    }}
-                    className="flex items-center w-full border-b border-neutral-200 py-3 text-left text-neutral-800 hover:text-red-600 transition-colors"
-                  >
-                    <Clock className="w-4 h-4 text-neutral-500 mr-3" />
-                    {search}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Popular Searches */}
-          <div>
-            <div className="border-b border-neutral-200 pb-3">
-              <h3 className="text-lg font-bold text-black">Popular searches</h3>
-            </div>
-            <div className="pt-4">
-              <div className="space-y-3">
-                {popularSearches.map((search, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setSearchQuery(search);
-                      performSearch(search);
-                    }}
-                    className="flex items-center w-full border-b border-neutral-200 py-3 text-left text-neutral-800 hover:text-red-600 transition-colors"
-                  >
-                    <Star className="w-4 h-4 text-neutral-500 mr-3" />
-                    {search}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Search Categories */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          {searchCategories.map((category, index) => (
-            <div key={index} className="border-t border-neutral-200 pt-6 text-left transition-colors hover:border-red-600">
-              <div className="mb-4">
-                {category.icon}
-              </div>
-              <h3 className="text-lg font-bold text-black mb-2">
-                {category.title}
-              </h3>
-              <p className="text-neutral-700 text-sm leading-6 mb-3">
-                {category.description}
-              </p>
-              <p className="text-red-600 font-bold text-sm">
-                {category.count}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Search Tips */}
-        <div className="mt-16 pt-8">
-          <h3 className="text-lg font-bold text-black mb-6">Search tips</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div>
-              <h4 className="font-bold text-black mb-2">Use specific keywords</h4>
-              <p className="text-neutral-700">Try &quot;business registration&quot; instead of &quot;register business&quot;</p>
-            </div>
-            <div>
-              <h4 className="font-bold text-black mb-2">Include location</h4>
-              <p className="text-neutral-700">Add &quot;Uganda&quot; or city names for location-specific results</p>
-            </div>
-            <div>
-              <h4 className="font-bold text-black mb-2">Use quotation marks</h4>
-              <p className="text-neutral-700">Search for exact phrases using &quot;quotation marks&quot;</p>
-            </div>
-            <div>
-              <h4 className="font-bold text-black mb-2">Filter by category</h4>
-              <p className="text-neutral-700">Use the filter buttons to narrow your search</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

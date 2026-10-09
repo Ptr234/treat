@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import PageHeader from '@/components/ui/PageHeader';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginForm from '@/components/auth/LoginForm';
@@ -30,34 +30,18 @@ export default function LoginPage() {
   }, [isAuthenticated, user, router]);
 
   return (
- <div className="min-h-screen bg-white flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md">
-        <Link href="/" className="flex items-center justify-center gap-3 mb-8 group">
-          <Image
-            src="/images/oneStopCenter-logo.jpeg"
-            alt="OneStop Centre Uganda logo"
-            width={44}
-            height={44}
-            className="rounded-lg object-contain bg-white flex-shrink-0"
-          />
-          <span className="leading-tight">
-            <span className="block text-lg font-black text-black group-hover:text-red-600 transition-colors">
-              OneStop Centre
-            </span>
-            <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-red-600">
-              Uganda
-            </span>
-          </span>
-        </Link>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Staff sign in' }]}
+        caption="Staff"
+        title="Sign in to the staff console"
+        lead="For authorised Uganda Investment Authority and partner-agency staff."
+      />
 
-        <div className=" pt-8">
-          <h1 className="text-2xl font-bold text-black mb-4">Admin sign in</h1>
-
-          <div className="flex items-start gap-3 mb-6 border-l-4 border-red-600 pl-4">
-            <ShieldCheckIcon className="mt-0.5 w-5 h-5 text-red-600 flex-shrink-0" />
-            <p className="text-sm text-neutral-800">
-              Authorized UIA administrators only.
-            </p>
+      <div className="gov-container grid gap-12 py-12 lg:grid-cols-[minmax(0,28rem)_1fr] lg:py-16">
+        <div>
+          <div className="gov-warning mb-8 text-[15px]">
+            <p>Only authorised staff may use this service. Sign-in activity is recorded.</p>
           </div>
 
           <GoogleSignInButton
@@ -69,26 +53,31 @@ export default function LoginPage() {
             disabled={isLoading}
           />
 
-          {googleError && (
-            <div className="mt-2 text-red-600 text-sm text-center">
-              {googleError}
-            </div>
-          )}
+          {googleError && <p role="alert" className="gov-inset gov-inset--red mt-3 text-sm font-semibold">{googleError}</p>}
 
-          <div className="flex items-center my-5">
-            <div className="flex-1 border-t border-neutral-300" />
-            <span className="px-3 text-sm text-neutral-600">or</span>
-            <div className="flex-1 border-t border-neutral-300" />
+          <div className="my-6 flex items-center">
+            <div className="flex-1 border-t border-[#b9b4a9]" />
+            <span className="px-3 text-sm font-semibold text-[#5c5850]">or sign in with email</span>
+            <div className="flex-1 border-t border-[#b9b4a9]" />
           </div>
 
           <LoginForm />
         </div>
 
-        <p className="mt-8 text-center text-sm text-neutral-700">
-          <Link href="/" className="font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600">
-            &larr; Back to homepage
-          </Link>
-        </p>
+        <aside className="lg:pl-12">
+          <div className="gov-related">
+            <h2>Not a staff member?</h2>
+            <p className="text-[15px] text-[#3b3934]">Investors and business owners can sign in from the top of any page, or use the public services without an account.</p>
+            <ul className="mt-3 text-[15px]">
+              <li><Link href="/services" className="gov-link">Government services</Link></li>
+              <li><Link href="/support" className="gov-link">Help and contact</Link></li>
+            </ul>
+          </div>
+          <div className="mt-8 flex items-center gap-3 text-sm text-[#5c5850]">
+            <ShieldCheckIcon className="h-5 w-5 text-black" aria-hidden="true" />
+            If two-factor authentication is set up on your account, you will be asked for a 6-digit code.
+          </div>
+        </aside>
       </div>
     </div>
   );

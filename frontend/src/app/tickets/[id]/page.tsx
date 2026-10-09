@@ -13,7 +13,7 @@ export default async function TicketDetailPage({ params }: PageProps) {
       fallback={
  <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
-            <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black mx-auto mb-4" />
             <p className="text-gray-600 font-medium">Loading...</p>
           </div>
         </div>

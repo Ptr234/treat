@@ -1,6 +1,6 @@
 'use client';
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, LabelList, CartesianGrid } from 'recharts';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon, MinusIcon } from '@heroicons/react/24/solid';
 import type { SectorAnalyticsData } from '@/types';
 
@@ -8,16 +8,12 @@ interface SectorDistributionChartProps {
   data: SectorAnalyticsData[];
 }
 
-const GREEN_SHADES = [
-  '#166534', // neutral-800
-  '#15803d', // yellow-700
-  '#16a34a', // yellow-600
-  '#22c55e', // yellow-500
-  '#4ade80', // yellow-400
-  '#86efac', // yellow-300
-  '#bbf7d0', // yellow-200
-  '#dcfce7', // yellow-100
-];
+// Sectors are named on the axis, so colour does not carry identity here:
+// one ink per measure (black = enquiry count, dark gold = investment value).
+const COUNT_INK = '#0b0b0b';
+const VALUE_INK = '#8a7200';
+const AXIS_INK = '#5c5850';
+const GRID_INK = '#e7e3da';
 
 export default function SectorDistributionChart({ data }: SectorDistributionChartProps) {
   const formatCurrency = (value: number) => {
@@ -30,7 +26,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
     if (active && payload && payload.length) {
       const data = payload[0]?.payload as SectorAnalyticsData;
       return (
-        <div className="p-4 border-t border-neutral-200 pt-5">
+        <div className="border border-[#dcd8cf] border-t-4 border-t-black bg-white p-4 shadow-[0_6px_18px_rgb(0_0_0/0.12)]">
           <p className="font-semibold text-black mb-2">{data.sector}</p>
           <p className="text-sm text-neutral-700">Count: <span className="font-medium">{data.count}</span></p>
           <p className="text-sm text-neutral-700">Percentage: <span className="font-medium">{data.percentage.toFixed(1)}%</span></p>
@@ -44,7 +40,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
   const TrendIcon = ({ trend, percentage }: { trend: 'up' | 'down' | 'stable'; percentage: number }) => {
     if (trend === 'up') {
       return (
-        <span className="inline-flex items-center text-red-600 text-xs font-medium">
+        <span className="inline-flex items-center text-black text-xs font-bold">
           <ArrowTrendingUpIcon className="w-3 h-3 mr-0.5" />
           {percentage.toFixed(1)}%
         </span>
@@ -52,7 +48,7 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
     }
     if (trend === 'down') {
       return (
-        <span className="inline-flex items-center text-red-600 text-xs font-medium">
+        <span className="inline-flex items-center text-[#9a0d1c] text-xs font-bold">
           <ArrowTrendingDownIcon className="w-3 h-3 mr-0.5" />
           {Math.abs(percentage).toFixed(1)}%
         </span>
@@ -66,81 +62,65 @@ export default function SectorDistributionChart({ data }: SectorDistributionChar
     );
   };
 
+  const byCount = [...data].sort((a, b) => b.count - a.count);
+  const byValue = [...data].sort((a, b) => b.investmentValue - a.investmentValue);
+  const barHeight = (n: number) => Math.max(220, n * 44 + 40);
+
   return (
-    <div className="space-y-8">
-      {/* Pie Chart (Donut) */}
+    <div className="space-y-10">
+      {/* Share of enquiries */}
       <div>
-        <h3 className="text-lg font-semibold text-black mb-4">Sector Distribution</h3>
-        <ResponsiveContainer width="100%" height={400}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ percent }) => `${((percent ?? 0) * 100).toFixed(1)}%`}
-              outerRadius={140}
-              innerRadius={80}
-              fill="#8884d8"
-              dataKey="count"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={GREEN_SHADES[index % GREEN_SHADES.length]} />
-              ))}
-            </Pie>
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              layout="horizontal"
-              align="center"
-              verticalAlign="bottom"
-              wrapperStyle={{ paddingTop: '20px' }}
-            />
-          </PieChart>
+        <h3 className="text-lg font-bold text-black">Enquiries by sector</h3>
+        <p className="mb-4 text-sm text-[#5c5850]">Share of all enquiries, largest first</p>
+        <ResponsiveContainer width="100%" height={barHeight(byCount.length)}>
+          <BarChart data={byCount} layout="vertical" margin={{ top: 0, right: 64, left: 0, bottom: 0 }} barCategoryGap={10}>
+            <CartesianGrid horizontal={false} stroke={GRID_INK} />
+            <XAxis type="number" hide />
+            <YAxis type="category" dataKey="sector" width={190} tick={{ fontSize: 13, fill: '#262522' }} axisLine={false} tickLine={false} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f5f3ee' }} />
+            <Bar dataKey="count" fill={COUNT_INK} radius={[0, 4, 4, 0]} maxBarSize={22}>
+              <LabelList dataKey="percentage" position="right" formatter={(v: unknown) => (typeof v === 'number' ? `${v.toFixed(1)}%` : '')} style={{ fill: '#262522', fontSize: 13, fontWeight: 700 }} />
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Sector Trend List */}
+      {/* Sector trends */}
       <div>
-        <h4 className="text-md font-semibold text-black mb-3">Sector Trends</h4>
-        <div className="space-y-2">
-          {data.map((sector, index) => (
-            <div key={sector.sector} className="flex items-center justify-between p-3 bg-neutral-50 rounded-md hover:bg-neutral-100 transition-colors">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: GREEN_SHADES[index % GREEN_SHADES.length] }}
-                />
-                <span className="text-sm font-medium text-neutral-800">{sector.sector}</span>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm text-neutral-700">{sector.count} inquiries</span>
-                <TrendIcon trend={sector.trend} percentage={sector.trendPercentage} />
-              </div>
-            </div>
-          ))}
-        </div>
+        <h4 className="mb-3 text-base font-bold text-black">Sector trends</h4>
+        <table className="gov-table">
+          <thead>
+            <tr><th scope="col">Sector</th><th scope="col" className="text-right">Enquiries</th><th scope="col" className="text-right">Change</th></tr>
+          </thead>
+          <tbody>
+            {byCount.map((sector) => (
+              <tr key={sector.sector}>
+                <th scope="row" className="font-semibold text-black">{sector.sector}</th>
+                <td className="text-right font-data">{sector.count}</td>
+                <td className="text-right"><TrendIcon trend={sector.trend} percentage={sector.trendPercentage} /></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* Bar Chart Comparison */}
+      {/* Investment value */}
       <div>
-        <h4 className="text-md font-semibold text-black mb-3">Investment Value by Sector</h4>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} layout="vertical">
-            <XAxis type="number" tickFormatter={formatCurrency} />
-            <YAxis
-              type="category"
-              dataKey="sector"
-              width={200}
-              tick={{ fontSize: 12 }}
-            />
+        <h4 className="text-base font-bold text-black">Investment value by sector</h4>
+        <p className="mb-4 text-sm text-[#5c5850]">US dollars, largest first</p>
+        <ResponsiveContainer width="100%" height={barHeight(byValue.length)}>
+          <BarChart data={byValue} layout="vertical" margin={{ top: 0, right: 72, left: 0, bottom: 0 }} barCategoryGap={10}>
+            <CartesianGrid horizontal={false} stroke={GRID_INK} />
+            <XAxis type="number" tickFormatter={formatCurrency} tick={{ fontSize: 12, fill: AXIS_INK }} stroke={GRID_INK} />
+            <YAxis type="category" dataKey="sector" width={190} tick={{ fontSize: 13, fill: '#262522' }} axisLine={false} tickLine={false} />
             <Tooltip
-              formatter={(value) => typeof value === 'number' ? formatCurrency(value) : ''}
-              labelStyle={{ color: '#111827' }}
+              formatter={(value) => (typeof value === 'number' ? formatCurrency(value) : '')}
+              labelStyle={{ color: '#0b0b0b', fontWeight: 700 }}
+              contentStyle={{ borderRadius: 0, border: '1px solid #dcd8cf', borderTop: '4px solid #0b0b0b' }}
+              cursor={{ fill: '#f5f3ee' }}
             />
-            <Bar dataKey="investmentValue" radius={[0, 8, 8, 0]}>
-              {data.map((entry, index) => (
-                <Cell key={`bar-${index}`} fill={GREEN_SHADES[index % GREEN_SHADES.length]} />
-              ))}
+            <Bar dataKey="investmentValue" name="Investment value" fill={VALUE_INK} radius={[0, 4, 4, 0]} maxBarSize={22}>
+              <LabelList dataKey="investmentValue" position="right" formatter={(v: unknown) => (typeof v === 'number' ? formatCurrency(v) : '')} style={{ fill: '#262522', fontSize: 13, fontWeight: 700 }} />
             </Bar>
           </BarChart>
         </ResponsiveContainer>

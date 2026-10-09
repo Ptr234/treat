@@ -60,12 +60,12 @@ export default function StatusTimeline({ currentStatus, history }: StatusTimelin
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                       isComplete
-                        ? 'bg-yellow-600 border-yellow-600'
+                        ? 'bg-black border-black'
                         : 'bg-white border-gray-300'
-                    } ${isCurrent ? 'ring-4 ring-yellow-100' : ''}`}
+                    } ${isCurrent ? 'ring-4 ring-[#ffd700]' : ''}`}
                   >
                     {isComplete ? (
-                      <CheckIcon className="w-6 h-6 text-white" />
+                      <CheckIcon className="w-6 h-6 text-[#ffd700]" />
                     ) : (
                       <span className="w-3 h-3 rounded-full bg-gray-300" />
                     )}
@@ -73,7 +73,7 @@ export default function StatusTimeline({ currentStatus, history }: StatusTimelin
 
                   {/* Label */}
                   <div className="mt-3 text-center">
-                    <p className={`text-sm font-medium ${isComplete ? 'text-gray-900' : 'text-gray-500'}`}>
+                    <p className={`text-sm font-medium ${isComplete ? 'font-bold text-black' : 'text-gray-600'}`}>
                       {statusLabels[status]}
                     </p>
                     {statusDate && (
@@ -87,7 +87,7 @@ export default function StatusTimeline({ currentStatus, history }: StatusTimelin
                   <div className="flex-1 h-0.5 mx-2 mb-8">
                     <div
                       className={`h-full ${
-                        isComplete ? 'bg-yellow-600' : 'bg-gray-300'
+                        isComplete ? 'bg-black' : 'bg-gray-300'
                       }`}
                     />
                   </div>
@@ -113,12 +113,12 @@ export default function StatusTimeline({ currentStatus, history }: StatusTimelin
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
                       isComplete
-                        ? 'bg-yellow-600 border-yellow-600'
+                        ? 'bg-black border-black'
                         : 'bg-white border-gray-300'
-                    } ${isCurrent ? 'ring-4 ring-yellow-100' : ''}`}
+                    } ${isCurrent ? 'ring-4 ring-[#ffd700]' : ''}`}
                   >
                     {isComplete ? (
-                      <CheckIcon className="w-5 h-5 text-white" />
+                      <CheckIcon className="w-5 h-5 text-[#ffd700]" />
                     ) : (
                       <span className="w-2.5 h-2.5 rounded-full bg-gray-300" />
                     )}
@@ -129,7 +129,7 @@ export default function StatusTimeline({ currentStatus, history }: StatusTimelin
                     <div className="w-0.5 h-12 my-1">
                       <div
                         className={`h-full ${
-                          isComplete ? 'bg-yellow-600' : 'bg-gray-300'
+                          isComplete ? 'bg-black' : 'bg-gray-300'
                         }`}
                       />
                     </div>
@@ -138,7 +138,7 @@ export default function StatusTimeline({ currentStatus, history }: StatusTimelin
 
                 {/* Label */}
                 <div className="pt-1">
-                  <p className={`text-sm font-medium ${isComplete ? 'text-gray-900' : 'text-gray-500'}`}>
+                  <p className={`text-sm font-medium ${isComplete ? 'font-bold text-black' : 'text-gray-600'}`}>
                     {statusLabels[status]}
                   </p>
                   {statusDate && (

@@ -16,7 +16,7 @@ export default function MapLegend() {
 
   return (
     <div className="p-4 max-w-xs border-t border-neutral-200 pt-5">
-      <h3 className="font-bold text-yellow-500 text-sm mb-3">Map Legend</h3>
+      <h3 className="mb-3 border-b-2 border-black pb-2 text-sm font-bold text-black">Map key</h3>
 
       <div className="mb-4">
         <p className="text-xs font-semibold text-neutral-700 mb-2 uppercase tracking-wider">Sector Colors</p>
@@ -39,7 +39,7 @@ export default function MapLegend() {
           {investmentSizes.map((size) => (
             <div key={size.label} className="flex items-center gap-2">
               <div
-                className="rounded-full bg-yellow-500 flex-shrink-0"
+                className="rounded-full bg-black flex-shrink-0"
                 style={{ width: size.size, height: size.size }}
               />
               <span className="text-xs text-neutral-700">{size.label}</span>

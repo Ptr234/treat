@@ -115,17 +115,32 @@ const config: Config = {
         },
 
         // Neutral grays for backgrounds and text
+        // Warm paper-and-ink neutrals shared with globals.css (--gov-*).
         neutral: {
-          50: '#fafafa',
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
-          400: '#a3a3a3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
+          50: '#f7f5f1',
+          100: '#f0ede7',
+          200: '#dcd8cf',
+          300: '#c9c4b9',
+          400: '#a39e94',
+          500: '#75706a',
+          600: '#5c5850',
+          700: '#3b3934',
+          800: '#262522',
+          900: '#171614',
+          950: '#0b0b0b',
+        },
+        gray: {
+          50: '#f7f5f1',
+          100: '#f0ede7',
+          200: '#dcd8cf',
+          300: '#c9c4b9',
+          400: '#a39e94',
+          500: '#75706a',
+          600: '#5c5850',
+          700: '#3b3934',
+          800: '#262522',
+          900: '#171614',
+          950: '#0b0b0b',
         },
 
         // Status colors (semantic)
@@ -183,8 +198,9 @@ const config: Config = {
       },
 
       fontFamily: {
-        sans: ['Source Sans 3', 'Arial', 'sans-serif'],
-        serif: ['Georgia', 'serif'],
+        sans: ['var(--font-public)', 'Public Sans', 'Arial', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Source Serif 4', 'Georgia', 'serif'],
+        display: ['var(--font-serif)', 'Source Serif 4', 'Georgia', 'serif'],
         mono: ['Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
 
@@ -212,14 +228,16 @@ const config: Config = {
       },
 
       borderRadius: {
+        // Official-service look: square or near-square corners everywhere
+        // except true circles (avatars, status dots, spinners).
         'none': '0',
-        'sm': '0.125rem',
-        'DEFAULT': '0.25rem',
-        'md': '0.375rem',
-        'lg': '0.5rem',
-        'xl': '0.75rem',
-        '2xl': '1rem',
-        '3xl': '1.5rem',
+        'sm': '1px',
+        'DEFAULT': '2px',
+        'md': '2px',
+        'lg': '3px',
+        'xl': '4px',
+        '2xl': '4px',
+        '3xl': '6px',
         'full': '9999px',
       },
 

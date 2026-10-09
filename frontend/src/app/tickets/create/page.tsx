@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { TicketCategory, TicketPriority } from '@/types';
 import { apiFetch, resolveApiUrl } from '@/lib/api-client';
+import PageHeader from '@/components/ui/PageHeader';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Files are held locally and uploaded only after the ticket exists — the
@@ -299,21 +300,14 @@ export default function CreateTicketPage() {
   const selectedCategory = categories.find(c => c.value === formData.category);
 
   return (
- <div className="min-h-screen bg-white py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={() => router.push(isStaff ? '/tickets/' : '/support')}
-            className="flex items-center gap-2 text-neutral-700 hover:text-black mb-4"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            {isStaff ? 'Back to Tickets' : 'Back to Support'}
-          </button>
-          <h1 className="text-3xl font-bold text-black">Create New Ticket</h1>
-          <p className="text-neutral-700 mt-2">Submit your inquiry or issue</p>
-        </div>
-
+    <div className="bg-white">
+      <PageHeader
+        crumbs={isStaff ? [{ label: 'Support tickets', href: '/tickets/' }, { label: 'New ticket' }] : [{ label: 'Help and contact', href: '/support' }, { label: 'Submit a support ticket' }]}
+        caption="Help and contact"
+        title="Submit a support ticket"
+        lead="Tell us about your enquiry or issue. You will get a reference number so you can track progress."
+      />
+      <div className="gov-container max-w-4xl py-10">
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -321,17 +315,17 @@ export default function CreateTicketPage() {
               <React.Fragment key={step}>
                 <div className="flex flex-col items-center">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
+                    className={`grid h-10 w-10 place-items-center rounded-full border-2 font-bold ${
                       step < currentStep
-                        ? 'bg-yellow-400 text-black'
+                        ? 'border-black bg-black text-[#ffd700]'
                         : step === currentStep
-                        ? 'bg-yellow-400 text-black ring-4 ring-yellow-100'
-                        : 'bg-gray-200 text-neutral-600'
+                        ? 'border-black bg-[#ffd700] text-black'
+                        : 'border-[#b9b4a9] bg-white text-[#5c5850]'
                     }`}
                   >
                     {step < currentStep ? <CheckCircleIcon className="w-6 h-6" /> : step}
                   </div>
-                  <p className="text-xs mt-2 text-neutral-700 hidden sm:block">
+                  <p className="mt-2 hidden text-sm font-bold text-[#3b3934] sm:block">
                     {step === 1 && 'Category'}
                     {step === 2 && 'Details'}
                     {step === 3 && 'Contact'}
@@ -342,7 +336,7 @@ export default function CreateTicketPage() {
                   <div className="flex-1 h-0.5 mx-2">
                     <div
                       className={`h-full ${
-                        step < currentStep ? 'bg-yellow-400' : 'bg-gray-200'
+                        step < currentStep ? 'bg-black' : 'bg-[#dcd8cf]'
                       }`}
                     />
                   </div>
@@ -353,7 +347,7 @@ export default function CreateTicketPage() {
         </div>
 
         {/* Form Steps */}
-        <div className="border-t border-neutral-200 pt-6 md:pt-8">
+        <div className="border-t-2 border-black pt-6 md:pt-8">
           {/* initial={false}: step 1 is already visible in the server-rendered
               HTML, so it must not depend on the mount animation to reveal it —
               a hydration mismatch elsewhere on the page (e.g. browser-injected
@@ -368,7 +362,7 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-black mb-2">Select Category</h2>
+                <h2 className="gov-title-l mb-2">Select Category</h2>
                 <p className="text-neutral-700 mb-6">Choose the type of issue or inquiry</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -385,10 +379,12 @@ export default function CreateTicketPage() {
                           });
                           setErrors({});
                         }}
-                        className={`p-5 rounded-md border-2 text-left transition-all ${
+                        type="button"
+                        aria-pressed={formData.category === category.value}
+                        className={`border-2 p-5 text-left transition-colors ${
                           formData.category === category.value
-                            ? 'border-yellow-600 bg-yellow-50'
-                            : 'border-neutral-200 hover:border-yellow-300'
+                            ? 'border-black bg-[#fffbea] shadow-[inset_6px_0_0_#ffd700]'
+                            : 'border-[#dcd8cf] hover:border-black'
                         }`}
                       >
                         <Icon className={`w-8 h-8 mb-3 ${
@@ -403,7 +399,7 @@ export default function CreateTicketPage() {
                 </div>
 
                 {errors.category && (
-                  <p className="text-red-600 text-sm mt-2">{errors.category}</p>
+                  <p className="mt-2 text-sm font-bold text-[#9a0d1c]">{errors.category}</p>
                 )}
               </motion.div>
             )}
@@ -416,60 +412,55 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-black mb-2">Issue Details</h2>
+                <h2 className="gov-title-l mb-2">Issue Details</h2>
                 <p className="text-neutral-700 mb-6">Describe your inquiry or issue</p>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
-                      Title <span className="text-red-500">*</span>
+                    <label className="gov-label">
+                      Title <span className="text-[#ce1126]">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       placeholder="Brief summary of your issue"
-                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
-                        errors.title ? 'border-red-500' : 'border-neutral-400'
+                      className={`gov-input ${
+                        errors.title ? '!border-[#ce1126]' : ''
                       }`}
                     />
                     {errors.title && (
-                      <p className="text-red-600 text-sm mt-1">{errors.title}</p>
+                      <p className="mt-1 text-sm font-bold text-[#9a0d1c]">{errors.title}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
-                      Description <span className="text-red-500">*</span>
+                    <label className="gov-label">
+                      Description <span className="text-[#ce1126]">*</span>
                     </label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Provide detailed information about your inquiry or issue..."
                       rows={6}
-                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
-                        errors.description ? 'border-red-500' : 'border-neutral-400'
+                      className={`gov-input ${
+                        errors.description ? '!border-[#ce1126]' : ''
                       }`}
                     />
                     <p className="text-xs text-neutral-600 mt-1">
                       {formData.description.length} characters (minimum 20)
                     </p>
                     {errors.description && (
-                      <p className="text-red-600 text-sm mt-1">{errors.description}</p>
+                      <p className="mt-1 text-sm font-bold text-[#9a0d1c]">{errors.description}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Priority
                     </label>
                     <div className="flex items-center gap-2 py-2 border-b border-neutral-200">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        formData.priority === 'critical' ? 'bg-red-100 text-red-700' :
-                        formData.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                        formData.priority === 'medium' ? 'bg-yellow-100 text-red-600' :
-                        'bg-yellow-100 text-red-600'
-                      }`}>
+                      <span className={`gov-tag ${formData.priority === 'critical' ? 'gov-tag--red' : formData.priority === 'high' ? 'gov-tag--gold' : formData.priority === 'medium' ? 'gov-tag--outline' : 'gov-tag--grey'}`}>
                         {formData.priority.toUpperCase()}
                       </span>
                       <span className="text-sm text-neutral-700">
@@ -489,66 +480,66 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-black mb-2">Contact Information</h2>
+                <h2 className="gov-title-l mb-2">Contact Information</h2>
                 <p className="text-neutral-700 mb-6">How can we reach you?</p>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
-                      Full Name <span className="text-red-500">*</span>
+                    <label className="gov-label">
+                      Full Name <span className="text-[#ce1126]">*</span>
                     </label>
                     <input
                       type="text"
                       value={formData.contactName}
                       onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
                       placeholder="Your full name"
-                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
-                        errors.contactName ? 'border-red-500' : 'border-neutral-400'
+                      className={`gov-input ${
+                        errors.contactName ? '!border-[#ce1126]' : ''
                       }`}
                     />
                     {errors.contactName && (
-                      <p className="text-red-600 text-sm mt-1">{errors.contactName}</p>
+                      <p className="mt-1 text-sm font-bold text-[#9a0d1c]">{errors.contactName}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
-                      Email Address <span className="text-red-500">*</span>
+                    <label className="gov-label">
+                      Email Address <span className="text-[#ce1126]">*</span>
                     </label>
                     <input
                       type="email"
                       value={formData.contactEmail}
                       onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
                       placeholder="your.email@example.com"
-                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
-                        errors.contactEmail ? 'border-red-500' : 'border-neutral-400'
+                      className={`gov-input ${
+                        errors.contactEmail ? '!border-[#ce1126]' : ''
                       }`}
                     />
                     {errors.contactEmail && (
-                      <p className="text-red-600 text-sm mt-1">{errors.contactEmail}</p>
+                      <p className="mt-1 text-sm font-bold text-[#9a0d1c]">{errors.contactEmail}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
-                      Phone Number <span className="text-red-500">*</span>
+                    <label className="gov-label">
+                      Phone Number <span className="text-[#ce1126]">*</span>
                     </label>
                     <input
                       type="tel"
                       value={formData.contactPhone}
                       onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
                       placeholder="+256 700 000 000"
-                      className={`w-full px-4 py-2.5 border rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent ${
-                        errors.contactPhone ? 'border-red-500' : 'border-neutral-400'
+                      className={`gov-input ${
+                        errors.contactPhone ? '!border-[#ce1126]' : ''
                       }`}
                     />
                     {errors.contactPhone && (
-                      <p className="text-red-600 text-sm mt-1">{errors.contactPhone}</p>
+                      <p className="mt-1 text-sm font-bold text-[#9a0d1c]">{errors.contactPhone}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Attachments (Optional)
                     </label>
                     <input
@@ -560,7 +551,7 @@ export default function CreateTicketPage() {
                       className="hidden"
                     />
                     <div
-                      className="border-2 border-dashed border-neutral-400 p-6 text-center cursor-pointer hover:border-black transition-colors"
+                      className="cursor-pointer border-2 border-dashed border-[#262522] bg-[#f5f3ee] p-6 text-center transition-colors hover:bg-[#ebe8e1]"
                       onClick={() => {
                         if (formData.attachments.length < MAX_FILES) {
                           fileInputRef.current?.click();
@@ -627,7 +618,7 @@ export default function CreateTicketPage() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <h2 className="text-2xl font-bold text-black mb-2">Review & Submit</h2>
+                <h2 className="gov-title-l mb-2">Review & Submit</h2>
                 <p className="text-neutral-700 mb-6">Please review your information before submitting</p>
 
                 <div className="space-y-6">
@@ -648,16 +639,11 @@ export default function CreateTicketPage() {
 
                   <div>
                     <h3 className="font-semibold text-black mb-2">Issue Details</h3>
-                    <div className=" pl-4 py-2">
+                    <div className="border-l-4 border-[#ffd700] py-2 pl-4">
                       <p className="font-medium text-black mb-2">{formData.title}</p>
                       <p className="text-sm text-neutral-800 whitespace-pre-wrap">{formData.description}</p>
                       <div className="mt-3">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                          formData.priority === 'critical' ? 'bg-red-100 text-red-700' :
-                          formData.priority === 'high' ? 'bg-orange-100 text-orange-700' :
-                          formData.priority === 'medium' ? 'bg-yellow-100 text-red-600' :
-                          'bg-yellow-100 text-red-600'
-                        }`}>
+                        <span className={`gov-tag ${formData.priority === 'critical' ? 'gov-tag--red' : formData.priority === 'high' ? 'gov-tag--gold' : formData.priority === 'medium' ? 'gov-tag--outline' : 'gov-tag--grey'}`}>
                           {formData.priority.toUpperCase()} PRIORITY
                         </span>
                       </div>
@@ -666,7 +652,7 @@ export default function CreateTicketPage() {
 
                   <div>
                     <h3 className="font-semibold text-black mb-2">Contact Information</h3>
-                    <div className=" pl-4 py-2 space-y-2">
+                    <div className="space-y-2 border-l-4 border-[#ffd700] py-2 pl-4">
                       <p className="text-sm"><span className="font-medium">Name:</span> {formData.contactName}</p>
                       <p className="text-sm"><span className="font-medium">Email:</span> {formData.contactEmail}</p>
                       <p className="text-sm"><span className="font-medium">Phone:</span> {formData.contactPhone}</p>
@@ -676,7 +662,7 @@ export default function CreateTicketPage() {
                   {formData.attachments.length > 0 && (
                     <div>
                       <h3 className="font-semibold text-black mb-2">Attachments</h3>
-                      <div className=" pl-4 py-2">
+                      <div className="border-l-4 border-[#ffd700] py-2 pl-4">
                         <ul className="space-y-1">
                           {formData.attachments.map((att) => (
                             <li key={att.id} className="flex items-center gap-2 text-sm text-neutral-800">
@@ -697,7 +683,7 @@ export default function CreateTicketPage() {
           </AnimatePresence>
 
           {submitError && (
-            <p role="alert" className="mt-6 border-l-4 border-red-600 py-2 pl-4 text-sm text-red-700">
+            <p role="alert" className="gov-inset gov-inset--red mt-6 text-[15px] font-semibold">
               {submitError}
             </p>
           )}
@@ -707,7 +693,7 @@ export default function CreateTicketPage() {
             {currentStep > 1 ? (
               <button
                 onClick={handleBack}
-                className="flex items-center gap-2 px-6 py-2.5 border border-neutral-400 text-neutral-800 rounded-md hover:bg-neutral-50 font-medium transition-colors"
+                className="gov-btn gov-btn--secondary"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
                 Back
@@ -719,7 +705,7 @@ export default function CreateTicketPage() {
             {currentStep < 4 ? (
               <button
                 onClick={handleNext}
-                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-black rounded-md font-medium transition-colors"
+                className="gov-btn"
               >
                 Next
                 <ArrowRightIcon className="w-4 h-4" />
@@ -728,7 +714,7 @@ export default function CreateTicketPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex items-center gap-2 px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 disabled:bg-neutral-300 disabled:cursor-not-allowed text-black rounded-md font-medium transition-colors"
+                className="gov-btn"
               >
                 <CheckCircleIcon className="w-5 h-5" />
                 {submitting ? 'Submitting…' : 'Submit Ticket'}

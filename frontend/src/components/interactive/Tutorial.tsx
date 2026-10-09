@@ -219,7 +219,7 @@ export default function Tutorial({ isOpen, onClose, steps = [], autoStart = fals
               
               <button
                 onClick={nextStep}
-                className="flex items-center space-x-2 px-6 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 transition-all"
+                className="gov-btn gov-btn--gold gov-btn--sm"
               >
                 <span>
                   {currentStep === tutorialSteps.length - 1 ? 'Finish' : 'Next'}

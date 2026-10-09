@@ -17,20 +17,20 @@ export default function InvestmentDetailClient({ opportunity }: InvestmentDetail
   };
 
   return (
-    <section className="border-t border-neutral-200 pt-6" aria-labelledby="quick-actions-heading">
-      <h3 id="quick-actions-heading" className="text-lg font-bold text-black">Next steps</h3>
-      <div className="mt-4 space-y-3">
+    <section className="gov-panel" aria-labelledby="quick-actions-heading">
+      <h3 id="quick-actions-heading" className="font-display text-2xl font-semibold text-white">Next steps</h3>
+      <div className="mt-5 flex flex-col gap-4">
         <button
           type="button"
           onClick={openAssistant}
-          className="flex w-full items-center justify-center gap-2 rounded-md bg-black px-4 py-3 text-sm font-bold text-yellow-400 transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          className="gov-btn gov-btn--gold w-full"
         >
           <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
           Ask the AI assistant
         </button>
         <Link
           href="/investments/onboarding"
-          className="block w-full rounded-md border-2 border-black px-4 py-3 text-center text-sm font-bold text-black transition-colors hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+          className="gov-btn gov-btn--outline-inverse w-full"
         >
           Start onboarding
         </Link>

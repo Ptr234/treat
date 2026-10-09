@@ -124,7 +124,7 @@ export default function AgencyManagementPage() {
           subtitle="Manage government agencies, contact details, and SLA hours"
           actions={
             <button onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors">
+              className="gov-btn gov-btn--gold gov-btn--sm">
               <PlusIcon className="w-5 h-5" />
               Add Agency
             </button>
@@ -167,7 +167,7 @@ export default function AgencyManagementPage() {
             <div className="flex gap-3 justify-end">
               <button onClick={resetForm} className="px-4 py-2 text-neutral-700 hover:text-red-600 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.name || !form.code}
-                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 disabled:opacity-50 transition-colors">
+                className="gov-btn gov-btn--gold gov-btn--sm">
                 {saving ? 'Saving...' : editingId ? 'Update Agency' : 'Add Agency'}
               </button>
             </div>
@@ -176,7 +176,7 @@ export default function AgencyManagementPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+            <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
           </div>
         ) : agencies.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">

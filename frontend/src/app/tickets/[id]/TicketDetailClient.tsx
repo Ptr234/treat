@@ -88,19 +88,19 @@ const statusApiValues: Record<TicketStatus, string> = {
 };
 
 const priorityColors: Record<string, string> = {
-  low: 'bg-yellow-50 text-red-600 border-yellow-200',
-  medium: 'bg-yellow-50 text-red-600 border-yellow-200',
-  high: 'bg-orange-50 text-orange-700 border-orange-200',
-  critical: 'bg-red-50 text-red-700 border-red-200',
+  low: 'gov-tag gov-tag--grey',
+  medium: 'gov-tag gov-tag--outline',
+  high: 'gov-tag gov-tag--gold',
+  critical: 'gov-tag gov-tag--red',
 };
 
 const statusColors: Record<string, string> = {
-  NEW: 'bg-blue-100 text-blue-800 border-blue-200',
-  ASSIGNED: 'bg-purple-100 text-purple-800 border-purple-200',
-  IN_PROGRESS: 'bg-yellow-100 text-neutral-800 border-yellow-200',
-  PENDING_EXTERNAL: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  RESOLVED: 'bg-yellow-200 text-neutral-900 border-yellow-300',
-  CLOSED: 'bg-neutral-100 text-neutral-800 border-neutral-200',
+  NEW: 'gov-tag gov-tag--red',
+  ASSIGNED: 'gov-tag gov-tag--outline',
+  IN_PROGRESS: 'gov-tag gov-tag--gold',
+  PENDING_EXTERNAL: 'gov-tag gov-tag--grey',
+  RESOLVED: 'gov-tag',
+  CLOSED: 'gov-tag gov-tag--grey',
 };
 
 const formatDate = (dateString: string) =>
@@ -117,7 +117,7 @@ function Notice({ kind, children }: { kind: 'error' | 'success'; children: React
     <p
       role={kind === 'error' ? 'alert' : 'status'}
       className={`mb-4 border-l-4 py-2 pl-4 text-sm ${
-        kind === 'error' ? 'border-red-600 text-red-700' : 'border-black text-black'
+        kind === 'error' ? 'border-[#ce1126] font-semibold text-[#9a0d1c]' : 'border-black text-black'
       }`}
     >
       {children}
@@ -292,11 +292,11 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-neutral-700 font-medium">Loading ticket details...</p>
-        </div>
+      <div className="gov-container py-24">
+        <p role="status" className="flex items-center gap-3 text-[#3b3934]">
+          <span className="h-6 w-6 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" aria-hidden="true" />
+          Loading ticket details…
+        </p>
       </div>
     );
   }
@@ -305,14 +305,14 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   if (loadError || !ticket) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="max-w-md w-full pt-8 text-center">
-          <ExclamationTriangleIcon className="w-12 h-12 text-orange-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-black mb-2">Unable to Load Ticket</h2>
+      <div className="gov-container py-20">
+        <div className="gov-inset gov-inset--red max-w-xl">
+          <ExclamationTriangleIcon className="mb-3 h-8 w-8 text-[#ce1126]" aria-hidden="true" />
+          <h1 className="gov-title-m mb-2">We could not load this ticket</h1>
           <p className="text-neutral-700 mb-6">{loadError || 'Ticket not found.'}</p>
           <button
             onClick={() => router.push(isStaff ? '/tickets/' : '/')}
-            className="px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-800 transition-colors"
+            className="gov-btn"
           >
             {isStaff ? 'Back to tickets' : 'Return Home'}
           </button>
@@ -330,47 +330,43 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
 
   const roleStyle = (role: string, internal?: boolean) =>
     internal
-      ? 'bg-yellow-50 border-yellow-300'
+      ? 'border-l-[6px] border-[#ffd700] bg-[#fffbea]'
       : role === 'officer'
-        ? 'bg-purple-50 border-purple-100'
+        ? 'border-l-[6px] border-black bg-white'
         : role === 'system'
-          ? 'bg-neutral-50 border-neutral-200'
-          : 'bg-blue-50 border-blue-100';
+          ? 'border-l-[6px] border-[#b9b4a9] bg-[#f5f3ee]'
+          : 'border-l-[6px] border-[#ce1126] bg-white';
 
   const roleBadge = (role: string) =>
-    role === 'officer'
-      ? 'bg-purple-100 text-purple-800'
-      : role === 'system'
-        ? 'bg-neutral-100 text-neutral-800'
-        : 'bg-blue-100 text-blue-800';
+    role === 'officer' ? 'gov-tag' : role === 'system' ? 'gov-tag gov-tag--grey' : 'gov-tag gov-tag--red';
 
   const roleLabel = (role: string) =>
     role === 'officer' ? 'OneStop Centre' : role === 'system' ? 'System' : isStaff ? 'Investor' : 'You';
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <div className="bg-white">
+      <div className="gov-container py-8">
         {/* Header */}
         <div className="mb-6">
           <button
             onClick={() => router.push(isStaff ? '/tickets/' : isAuthenticated ? '/account' : '/')}
-            className="flex items-center gap-2 text-neutral-700 hover:text-black mb-4"
+            className="gov-link mb-6 inline-flex items-center gap-2"
           >
             <ArrowLeftIcon className="w-4 h-4" />
             {isStaff ? 'Back to tickets' : isAuthenticated ? 'Back to my submissions' : 'Back to Home'}
           </button>
 
           {justCreated && !isStaff && (
-            <div role="status" className="mb-6 flex gap-3 border-l-4 border-black bg-yellow-50 p-4">
-              <CheckCircleIcon className="h-6 w-6 flex-shrink-0 text-black" />
-              <div className="text-sm text-black">
-                <p className="font-bold">Your ticket has been submitted.</p>
+            <div role="status" className="gov-panel mb-8 flex gap-4">
+              <CheckCircleIcon className="h-8 w-8 flex-shrink-0 text-[#ffd700]" aria-hidden="true" />
+              <div className="text-[15px] text-white">
+                <p className="font-display text-2xl font-semibold">Your ticket has been submitted</p>
                 <p className="mt-1">
                   Bookmark this page — it&apos;s your private link to this ticket. We&apos;ve also emailed it to{' '}
                   <strong>{ticket.contactEmail}</strong>, and we&apos;ll email you whenever the OneStop Centre replies.
                 </p>
                 {uploadFailed && (
-                  <p className="mt-2 font-semibold text-red-700">
+                  <p className="mt-2 font-semibold text-[#ffd700]">
                     Your attachments could not be uploaded. Please add them again under &ldquo;Attached Documents&rdquo; below.
                   </p>
                 )}
@@ -381,24 +377,22 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
               <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h1 className="text-2xl font-bold text-black">{ticket.referenceNumber}</h1>
+                <h1 className="font-mono text-2xl font-bold text-black">{ticket.referenceNumber}</h1>
                 <span
-                  className={`px-3 py-1 text-sm font-medium rounded border ${
-                    statusColors[ticket.status] || 'bg-neutral-100 text-neutral-800 border-neutral-200'
-                  }`}
+                  className={statusColors[ticket.status] || 'gov-tag gov-tag--grey'}
                 >
                   {statusLabels[ticket.status] || ticket.status}
                 </span>
-                <span className={`px-3 py-1 text-sm font-medium rounded border ${priorityColors[ticket.priority] || ''}`}>
+                <span className={priorityColors[ticket.priority] || 'gov-tag gov-tag--grey'}>
                   {ticket.priority.toUpperCase()}
                 </span>
                 {ticket.isEscalated && (
-                  <span className="px-3 py-1 text-sm font-medium rounded border bg-red-100 text-red-800 border-red-200">
+                  <span className="gov-tag gov-tag--red">
                     ESCALATED
                   </span>
                 )}
               </div>
-              <h2 className="text-xl text-black font-semibold">{ticket.title}</h2>
+              <h2 className="gov-title-l mt-2">{ticket.title}</h2>
             </div>
           </div>
         </div>
@@ -406,16 +400,14 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
         {/* SLA Bar */}
         {slaDeadline && !isResolved && (
           <div
-            className={`rounded-md p-4 mb-6 flex items-center gap-3 ${
-              isSlaPassed ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'
-            }`}
+            className={`mb-8 flex items-center gap-3 ${isSlaPassed ? 'gov-inset gov-inset--red' : 'gov-inset'}`}
           >
-            <ClockIcon className={`w-5 h-5 ${isSlaPassed ? 'text-red-600' : 'text-blue-600'}`} />
+            <ClockIcon className={`h-6 w-6 ${isSlaPassed ? 'text-[#ce1126]' : 'text-black'}`} />
             <div>
-              <p className={`font-semibold text-sm ${isSlaPassed ? 'text-red-800' : 'text-blue-800'}`}>
+              <p className="font-bold">
                 {isSlaPassed ? 'Response deadline passed' : 'Response due by'}
               </p>
-              <p className={`text-sm ${isSlaPassed ? 'text-red-600' : 'text-blue-600'}`}>
+              <p className="text-[15px] text-[#3b3934]">
                 {formatDate(ticket.slaDeadlineAt!)}{' '}
                 <span className="text-xs">(office hours: Mon–Fri, 8:00–17:00 EAT)</span>
               </p>
@@ -428,14 +420,14 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Description */}
-            <div className="border-t border-neutral-200 pt-6">
-              <h3 className="text-lg font-semibold text-black mb-3">Description</h3>
+            <div className="border-t-4 border-black pt-5">
+              <h3 className="gov-title-m mb-3">Description</h3>
               <p className="text-neutral-800 whitespace-pre-wrap">{ticket.description}</p>
             </div>
 
             {/* Messages */}
             <div className="border-t border-neutral-200 pt-6">
-              <h3 className="text-lg font-semibold text-black mb-4">Messages & Updates</h3>
+              <h3 className="gov-title-m mb-4">Messages and updates</h3>
               {ticket.messages.length === 0 ? (
                 <p className="text-neutral-600 text-sm">
                   {isStaff
@@ -445,15 +437,15 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
               ) : (
                 <div className="space-y-4">
                   {ticket.messages.map((msg) => (
-                    <div key={msg.id} className={`p-4 rounded-md border ${roleStyle(msg.authorRole, msg.isInternal)}`}>
+                    <div key={msg.id} className={`border border-[#dcd8cf] p-4 ${roleStyle(msg.authorRole, msg.isInternal)}`}>
                       <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-sm text-black">{msg.authorName}</span>
-                          <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${roleBadge(msg.authorRole)}`}>
+                          <span className={roleBadge(msg.authorRole)}>
                             {roleLabel(msg.authorRole)}
                           </span>
                           {msg.isInternal && (
-                            <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-black text-yellow-400">
+                            <span className="gov-tag gov-tag--gold">
                               Internal note
                             </span>
                           )}
@@ -474,7 +466,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
                 filer until the ticket is closed. */}
             {(isStaff || !isClosed) && (
               <div className="border-t border-neutral-200 pt-6">
-                <h3 className="text-lg font-semibold text-black mb-4">
+                <h3 className="gov-title-m mb-4">
                   {isStaff ? 'Reply or add a note' : 'Add a message'}
                 </h3>
                 {commentNotice && <Notice kind={commentNotice.kind}>{commentNotice.text}</Notice>}
@@ -489,7 +481,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
                     placeholder={isStaff ? 'Write a reply to the investor, or an internal note…' : 'Add additional information or updates...'}
                     rows={4}
                     maxLength={5000}
-                    className="w-full px-4 py-3 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent mb-3"
+                    className="gov-input mb-3"
                   />
                   {isStaff && (
                     <label className="flex items-center gap-2 mb-3 text-sm text-neutral-800">
@@ -497,7 +489,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
                         type="checkbox"
                         checked={isInternalNote}
                         onChange={(e) => setIsInternalNote(e.target.checked)}
-                        className="rounded border-neutral-400 text-red-600 focus-visible:ring-red-600"
+                        className="h-5 w-5"
                       />
                       Internal note (not visible to the investor, no email sent)
                     </label>
@@ -505,7 +497,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
                   <button
                     type="submit"
                     disabled={!comment.trim() || isSubmittingComment}
-                    className="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 disabled:bg-neutral-300 disabled:cursor-not-allowed text-black rounded-md font-medium transition-colors"
+                    className="gov-btn"
                   >
                     {isSubmittingComment ? 'Sending...' : isStaff && !isInternalNote ? 'Send reply' : 'Submit'}
                   </button>
@@ -519,8 +511,8 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
             {isStaff && <StaffPanel ticket={ticket} onSaved={fetchTicket} />}
 
             {/* Ticket Details */}
-            <div className="border-t border-neutral-200 pt-6">
-              <h3 className="text-lg font-semibold text-black mb-4">Ticket Details</h3>
+            <div>
+              <h3 className="border-t-4 border-black pt-4 text-lg font-bold mb-4">Ticket Details</h3>
               <div className="space-y-4">
                 <div>
                   <p className="text-sm text-neutral-700 mb-1">Category</p>
@@ -580,7 +572,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
             {/* Satisfaction Rating — the investor's own, never staff's */}
             {isResolved && !isStaff && (
               <div className="border-t border-neutral-200 pt-6">
-                <h3 className="text-lg font-semibold text-black mb-3">Rate This Service</h3>
+                <h3 className="border-t-4 border-[#ffd700] pt-4 text-lg font-bold mb-3">Rate This Service</h3>
                 <p className="text-sm text-neutral-700 mb-4">How satisfied are you with the resolution?</p>
                 {ratingError && <Notice kind="error">{ratingError}</Notice>}
                 <div className="flex gap-2" role="group" aria-label="Rate from 1 to 5 stars">
@@ -594,7 +586,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
                       className="transition-transform hover:scale-110 disabled:opacity-50"
                     >
                       {star <= rating ? (
-                        <StarIconSolid className="w-8 h-8 text-yellow-400" />
+                        <StarIconSolid className="w-8 h-8 text-[#e6c200]" />
                       ) : (
                         <StarIcon className="w-8 h-8 text-gray-300" />
                       )}
@@ -616,11 +608,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
                 <button
                   onClick={handleEscalation}
                   disabled={ticket.isEscalated || isEscalating}
-                  className={`w-full px-6 py-3 rounded-md font-medium flex items-center justify-center gap-2 transition-colors ${
-                    ticket.isEscalated
-                      ? 'bg-red-100 border border-red-200 text-red-700 cursor-default'
-                      : 'bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700'
-                  }`}
+                  className={`gov-btn w-full ${ticket.isEscalated ? 'gov-btn--secondary !cursor-default' : 'gov-btn--warning'}`}
                 >
                   <ExclamationTriangleIcon className="w-5 h-5" />
                   {ticket.isEscalated ? 'Escalated' : isEscalating ? 'Requesting...' : isStaff ? 'Escalate' : 'Request Escalation'}
@@ -694,12 +682,12 @@ function RequestLinkView({ ticketId, initialEmail, hadLink }: { ticketId: string
             placeholder="your@email.com"
             required
             autoComplete="email"
-            className="w-full px-4 py-3 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent mb-4"
+            className="gov-input mb-4"
           />
           <button
             type="submit"
             disabled={!email.trim() || sending}
-            className="w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-800 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-colors"
+            className="gov-btn w-full"
           >
             {sending ? 'Sending…' : 'Email me a link'}
           </button>
@@ -779,13 +767,13 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
   };
 
   const fieldClass =
-    'w-full rounded-md border border-neutral-400 bg-white px-3 py-2 text-sm text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600';
-  const labelClass = 'mb-1 block text-sm font-bold text-black';
+    'gov-input';
+  const labelClass = 'gov-label';
   const agencyKnown = agencies.some((a) => a.code === agency);
 
   return (
     <form onSubmit={save} className="border-2 border-black p-4" aria-labelledby="manage-ticket-heading">
-      <h3 id="manage-ticket-heading" className="mb-4 text-lg font-semibold text-black">
+      <h3 id="manage-ticket-heading" className="mb-4 text-lg font-bold">
         Manage ticket
       </h3>
       {notice && <Notice kind={notice.kind}>{notice.text}</Notice>}
@@ -832,7 +820,7 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
         <button
           type="submit"
           disabled={!dirty || saving}
-          className="w-full bg-black px-4 py-2.5 text-sm font-bold text-yellow-400 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="gov-btn w-full"
         >
           {saving ? 'Saving…' : 'Save changes'}
         </button>
@@ -922,7 +910,7 @@ function TicketDocuments({ ticketId, token, isStaff }: { ticketId: string; token
   return (
     <div className="border-t border-neutral-200 pt-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-black">Attached Documents</h3>
+        <h3 className="text-lg font-bold">Attached Documents</h3>
         <input
           ref={fileInputRef}
           id="ticket-doc-upload"
@@ -936,7 +924,7 @@ function TicketDocuments({ ticketId, token, isStaff }: { ticketId: string; token
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
-          className="border-2 border-black px-3 py-1.5 text-xs font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="gov-btn gov-btn--secondary gov-btn--sm"
         >
           {uploading ? 'Uploading…' : 'Add documents'}
         </button>
@@ -970,7 +958,7 @@ function TicketDocuments({ ticketId, token, isStaff }: { ticketId: string; token
               href={resolveApiUrl(`/api/tickets/${ticketId}/documents/${doc.id}/content${tokenQuery}`)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-red-600 hover:text-red-600 font-medium flex-shrink-0 ml-2"
+              className="ml-2 flex-shrink-0 text-sm font-semibold text-[#9a0d1c] underline underline-offset-4"
             >
               Download
             </a>

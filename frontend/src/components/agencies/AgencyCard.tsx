@@ -95,7 +95,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
           <button
             type="button"
             onClick={openAssistant}
-            className="flex min-h-11 items-center justify-center gap-2 bg-yellow-400 px-4 py-2.5 font-bold text-black hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+            className="gov-btn gov-btn--gold"
           >
             <ChatBubbleLeftRightIcon className="h-5 w-5" aria-hidden="true" />
             <span>Ask about {agency.acronym}</span>
@@ -104,7 +104,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
           <div className="grid grid-cols-2 gap-2">
             <Link
               href={`/agencies/${agency.id}`}
-              className="flex min-h-11 items-center justify-center gap-2 border-2 border-black px-4 py-2 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="gov-btn gov-btn--outline gov-btn--sm"
             >
               <BuildingOfficeIcon className="h-4 w-4" aria-hidden="true" />
               <span>View services</span>
@@ -114,7 +114,7 @@ export default function AgencyCard({ agency, className = '' }: AgencyCardProps) 
               <button
                 type="button"
                 onClick={() => setShowAppointmentModal(true)}
-                className="flex min-h-11 items-center justify-center gap-2 bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                className="flex min-h-11 items-center justify-center gap-2 bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-700"
               >
                 <CalendarIcon className="h-4 w-4" aria-hidden="true" />
                 <span>Book appointment</span>

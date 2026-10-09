@@ -446,10 +446,10 @@ export default function BusinessRegistrationWizard() {
       case 1:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-black">Business Type & Structure</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Business Type & Structure</h3>
             
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-3">
+              <label className="gov-label">
                 Choose your business type:
               </label>
               {errors.businessType && (
@@ -459,10 +459,10 @@ export default function BusinessRegistrationWizard() {
                 {businessTypes.map((type) => (
                   <div
                     key={type.value}
-                    className={`border rounded-md p-4 cursor-pointer transition-colors ${
+                    className={`border-2 p-4 cursor-pointer transition-colors ${
                       businessData.businessType === type.value
-                        ? 'border-yellow-600 bg-yellow-50'
-                        : 'border-neutral-400 hover:border-gray-400'
+                        ? 'border-black bg-[#fffbea] shadow-[inset_6px_0_0_#ffd700]'
+                        : 'border-[#dcd8cf] hover:border-black'
                     }`}
                     onClick={() => handleInputChange('businessType', type.value)}
                   >
@@ -487,7 +487,7 @@ export default function BusinessRegistrationWizard() {
 
             {businessData.businessType && businessStructures[businessData.businessType as keyof typeof businessStructures] && (
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-3">
+                <label className="gov-label">
                   Choose your business structure:
                 </label>
                 {errors.businessStructure && (
@@ -497,10 +497,10 @@ export default function BusinessRegistrationWizard() {
                   {businessStructures[businessData.businessType as keyof typeof businessStructures]?.map((structure) => (
                     <div
                       key={structure.value}
-                      className={`border rounded-md p-3 cursor-pointer transition-colors ${
+                      className={`border-2 p-3 cursor-pointer transition-colors ${
                         businessData.businessStructure === structure.value
-                          ? 'border-yellow-600 bg-yellow-50'
-                          : 'border-neutral-400 hover:border-gray-400'
+                          ? 'border-black bg-[#fffbea] shadow-[inset_6px_0_0_#ffd700]'
+                          : 'border-[#dcd8cf] hover:border-black'
                       }`}
                       onClick={() => handleInputChange('businessStructure', structure.value)}
                     >
@@ -526,18 +526,18 @@ export default function BusinessRegistrationWizard() {
       case 2:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-black">Business Details</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Business Details</h3>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Business Name
               </label>
               <input
                 type="text"
                 value={businessData.businessName}
                 onChange={(e) => handleInputChange('businessName', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                  errors.businessName ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                className={`gov-input ${
+                  errors.businessName ? '!border-[#ce1126]' : ''
                 }`}
                 placeholder="Enter your business name"
               />
@@ -548,7 +548,7 @@ export default function BusinessRegistrationWizard() {
                 <p className={`text-sm mt-1 ${
                   nameCheck.checking ? 'text-neutral-600'
                     : nameCheck.available === false ? 'text-red-600'
-                    : nameCheck.available === true ? 'text-green-600' : 'text-neutral-600'
+                    : nameCheck.available === true ? 'text-black' : 'text-neutral-600'
                 }`}>
                   {nameCheck.checking
                     ? 'Checking availability against the URSB registry…'
@@ -562,14 +562,14 @@ export default function BusinessRegistrationWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Business Description
               </label>
               <textarea
                 value={businessData.businessDescription}
                 onChange={(e) => handleInputChange('businessDescription', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                  errors.businessDescription ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                className={`gov-input ${
+                  errors.businessDescription ? '!border-[#ce1126]' : ''
                 }`}
                 rows={4}
                 placeholder="Describe what your business does"
@@ -580,14 +580,14 @@ export default function BusinessRegistrationWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Business Sector
               </label>
               <select
                 value={businessData.sector}
                 onChange={(e) => handleInputChange('sector', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                  errors.sector ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                className={`gov-input ${
+                  errors.sector ? '!border-[#ce1126]' : ''
                 }`}
               >
                 <option value="">Select a sector</option>
@@ -603,14 +603,14 @@ export default function BusinessRegistrationWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Business Location
               </label>
               <select
                 value={businessData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                  errors.location ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                className={`gov-input ${
+                  errors.location ? '!border-[#ce1126]' : ''
                 }`}
               >
                 <option value="">Select a location</option>
@@ -633,13 +633,13 @@ export default function BusinessRegistrationWizard() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">Your Name</label>
+                  <label className="gov-label">Your Name</label>
                   <input
                     type="text"
                     value={businessData.contactName}
                     onChange={(e) => handleInputChange('contactName', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                      errors.contactName ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                    className={`gov-input ${
+                      errors.contactName ? '!border-[#ce1126]' : ''
                     }`}
                     placeholder="Your full name"
                   />
@@ -649,24 +649,24 @@ export default function BusinessRegistrationWizard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">Phone (optional)</label>
+                  <label className="gov-label">Phone (optional)</label>
                   <input
                     type="tel"
                     value={businessData.contactPhone}
                     onChange={(e) => handleInputChange('contactPhone', e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black min-h-[44px]"
+                    className="gov-input"
                     placeholder="+256 700 000 000"
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">Email Address</label>
+                  <label className="gov-label">Email Address</label>
                   <input
                     type="email"
                     value={businessData.contactEmail}
                     onChange={(e) => handleInputChange('contactEmail', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                      errors.contactEmail ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                    className={`gov-input ${
+                      errors.contactEmail ? '!border-[#ce1126]' : ''
                     }`}
                     placeholder="your.email@example.com"
                   />
@@ -682,7 +682,7 @@ export default function BusinessRegistrationWizard() {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-black">Ownership Information</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Ownership Information</h3>
             
             {errors.totalPercentage && (
               <div className="border-l-4 border-red-600 pl-4 py-2 text-red-700">
@@ -691,7 +691,7 @@ export default function BusinessRegistrationWizard() {
             )}
             
             <div className="border-l border-neutral-200 pl-4 py-2">
-              <p className="text-blue-700 text-sm">
+              <p className="text-black font-semibold text-sm">
                 Current Total Ownership: {businessData.owners.reduce((sum, owner) => {
                   const percentage = parseFloat(owner.percentage) || 0;
                   return sum + percentage;
@@ -717,15 +717,15 @@ export default function BusinessRegistrationWizard() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Full Name
                     </label>
                     <input
                       type="text"
                       value={owner.name}
                       onChange={(e) => handleInputChange('owners', { name: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                        errors[`owner_${index}_name`] ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                      className={`gov-input ${
+                        errors[`owner_${index}_name`] ? '!border-[#ce1126]' : ''
                       }`}
                       placeholder="Enter full name"
                     />
@@ -735,15 +735,15 @@ export default function BusinessRegistrationWizard() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Nationality
                     </label>
                     <input
                       type="text"
                       value={owner.nationality}
                       onChange={(e) => handleInputChange('owners', { nationality: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                        errors[`owner_${index}_nationality`] ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                      className={`gov-input ${
+                        errors[`owner_${index}_nationality`] ? '!border-[#ce1126]' : ''
                       }`}
                       placeholder="Enter nationality"
                     />
@@ -753,15 +753,15 @@ export default function BusinessRegistrationWizard() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       ID Number
                     </label>
                     <input
                       type="text"
                       value={owner.idNumber}
                       onChange={(e) => handleInputChange('owners', { idNumber: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                        errors[`owner_${index}_idNumber`] ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                      className={`gov-input ${
+                        errors[`owner_${index}_idNumber`] ? '!border-[#ce1126]' : ''
                       }`}
                       placeholder="Enter ID number"
                     />
@@ -771,15 +771,15 @@ export default function BusinessRegistrationWizard() {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Ownership Percentage
                     </label>
                     <input
                       type="number"
                       value={owner.percentage}
                       onChange={(e) => handleInputChange('owners', { percentage: e.target.value }, index)}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                        errors[`owner_${index}_percentage`] ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                      className={`gov-input ${
+                        errors[`owner_${index}_percentage`] ? '!border-[#ce1126]' : ''
                       }`}
                       placeholder="Enter percentage"
                       min="0"
@@ -795,7 +795,7 @@ export default function BusinessRegistrationWizard() {
             
             <button
               onClick={addOwner}
-              className="w-full py-2 px-4 border border-dashed border-neutral-400 rounded-md text-neutral-800 hover:border-gray-400 transition-colors"
+              className="w-full border-2 border-dashed border-[#262522] bg-[#f5f3ee] px-4 py-3 font-bold text-black hover:bg-[#ebe8e1]"
             >
               + Add Another Owner
             </button>
@@ -805,18 +805,18 @@ export default function BusinessRegistrationWizard() {
       case 4:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-black">Financial Information</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Financial Information</h3>
             
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Initial Capital (UGX)
               </label>
               <input
                 type="number"
                 value={businessData.initialCapital}
                 onChange={(e) => handleInputChange('initialCapital', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                  errors.initialCapital ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                className={`gov-input ${
+                  errors.initialCapital ? '!border-[#ce1126]' : ''
                 }`}
                 placeholder="Enter initial capital"
               />
@@ -826,15 +826,15 @@ export default function BusinessRegistrationWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Projected Annual Turnover (UGX)
               </label>
               <input
                 type="number"
                 value={businessData.projectedTurnover}
                 onChange={(e) => handleInputChange('projectedTurnover', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black min-h-[44px] ${
-                  errors.projectedTurnover ? 'border-red-500 focus:ring-red-500' : 'border-neutral-400 focus-visible:ring-red-600'
+                className={`gov-input ${
+                  errors.projectedTurnover ? '!border-[#ce1126]' : ''
                 }`}
                 placeholder="Enter projected turnover"
               />
@@ -848,13 +848,13 @@ export default function BusinessRegistrationWizard() {
       case 5:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-black">Registration Requirements</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Registration Requirements</h3>
             
             <div className="border-l border-neutral-200 pl-4 py-2">
-              <h4 className="text-lg font-medium text-blue-900 mb-2">
+              <h4 className="text-lg font-medium text-black mb-2">
                 Estimated Cost: UGX {businessData.estimatedCost.toLocaleString()}
               </h4>
-              <p className="text-blue-700">
+              <p className="text-black font-semibold">
                 Estimated Timeframe: {businessData.timeframe}
               </p>
             </div>
@@ -899,15 +899,15 @@ export default function BusinessRegistrationWizard() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6">
+    <div>
       {/* Success Banner */}
       {submitResult && (
-        <div className="mb-6 border-l border-neutral-200 pl-4 py-2">
-          <h4 className="text-lg font-semibold text-green-800">Registration Submitted Successfully!</h4>
-          <p className="text-green-700 mt-1">
+        <div role="status" className="gov-panel mb-8">
+          <h4 className="font-display text-2xl font-semibold text-white">Registration submitted</h4>
+          <p className="mt-2 text-white">
             Reference Number: <strong>{submitResult.referenceNumber}</strong>
           </p>
-          <p className="text-green-600 text-sm mt-2">
+          <p className="mt-2 text-sm text-white/80">
             A confirmation has been sent to your email. URSB will review your business name next. The
             registration fee can be paid from the tracking page below at any point — it must be settled
             before your certificate can be issued.
@@ -915,13 +915,13 @@ export default function BusinessRegistrationWizard() {
           <div className="mt-3 flex flex-wrap gap-3 items-center">
             <a
               href={`/business/registration/${submitResult.referenceNumber}/`}
-              className="text-sm font-medium text-black bg-yellow-500 hover:bg-yellow-400 rounded-md px-4 py-2"
+              className="gov-btn gov-btn--gold gov-btn--sm"
             >
               Track This Registration
             </a>
             <button
               onClick={() => setSubmitResult(null)}
-              className="text-sm text-green-700 underline"
+              className="text-sm text-white underline underline-offset-4"
             >
               Dismiss
             </button>
@@ -945,7 +945,7 @@ export default function BusinessRegistrationWizard() {
                 key={step}
                 className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 text-sm sm:text-base ${
                   currentStep >= step
-                    ? 'border-yellow-600 bg-yellow-400 text-black'
+                    ? 'border-black bg-black text-[#ffd700]'
                     : 'border-neutral-400 bg-white text-neutral-600'
                 }`}
               >
@@ -955,9 +955,9 @@ export default function BusinessRegistrationWizard() {
           </div>
         </div>
         <div className="mt-2">
-          <div className="bg-neutral-200 h-2">
+          <div className="h-2 bg-[#dcd8cf]">
             <div
-              className="bg-yellow-400 h-2 rounded-full transition-all duration-300"
+              className="h-2 bg-black transition-all duration-300"
               style={{ width: `${(currentStep / 5) * 100}%` }}
             />
           </div>
@@ -988,7 +988,7 @@ export default function BusinessRegistrationWizard() {
         <button
           onClick={prevStep}
           disabled={currentStep === 1}
-          className="px-6 py-2 border border-neutral-400 text-neutral-800 rounded-md hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+          className="gov-btn gov-btn--secondary"
         >
           Previous
         </button>
@@ -996,19 +996,19 @@ export default function BusinessRegistrationWizard() {
         {currentStep < 5 ? (
           <button
             onClick={nextStep}
-            className="px-6 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 min-h-[44px]"
+            className="gov-btn"
           >
-            Next
+            Continue
           </button>
         ) : (
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="px-6 py-2 bg-yellow-400 text-black rounded-md hover:bg-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]"
+            className="gov-btn"
           >
             {isSubmitting ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" aria-hidden="true" />
                 Processing...
               </>
             ) : (

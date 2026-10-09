@@ -332,13 +332,14 @@ export default function ChatWidget() {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             data-chat-widget="true"
-            className="fixed bottom-[4.5rem] left-2 right-2 sm:bottom-24 sm:left-auto sm:right-6 z-50 w-auto sm:w-[400px] h-[calc(100dvh-6rem)] sm:h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-[4.5rem] left-2 right-2 sm:bottom-24 sm:left-auto sm:right-6 z-50 w-auto sm:w-[400px] h-[calc(100dvh-6rem)] sm:h-[500px] bg-white border border-[#262522] border-t-0 shadow-[0_18px_48px_rgb(0_0_0/0.28)] flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-white px-4 py-3 flex items-center justify-between">
+            <div className="gov-stripe" aria-hidden="true" />
+            <div className="bg-black px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-yellow-400" />
-                <h3 className="text-black font-semibold text-sm">AI Investment Assistant</h3>
+                <MessageCircle className="w-5 h-5 text-[#ffd700]" aria-hidden="true" />
+                <h3 className="text-white font-bold text-sm">Investment assistant</h3>
               </div>
               <div className="flex items-center gap-2">
                 <LanguageSelector
@@ -347,7 +348,7 @@ export default function ChatWidget() {
                 />
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="text-black hover:bg-white/10 rounded-lg p-1 transition-colors"
+                  className="text-white hover:bg-white/10 p-1 transition-colors"
                   aria-label="Close chat"
                 >
                   <X className="w-5 h-5" />
@@ -359,8 +360,8 @@ export default function ChatWidget() {
             {!userInfo ? (
               <div className="flex-1 overflow-y-auto p-4 bg-white">
                 <div className="text-center mb-4">
-                  <div className="w-14 h-14 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <User className="w-7 h-7 text-yellow-400" />
+                  <div className="w-14 h-14 bg-black flex items-center justify-center mx-auto mb-3">
+                    <User className="w-7 h-7 text-[#ffd700]" />
                   </div>
                   <h4 className="text-lg font-semibold text-black">{labels.title}</h4>
                   <p className="text-sm text-neutral-700 mt-1">{labels.subtitle}</p>
@@ -394,7 +395,7 @@ export default function ChatWidget() {
                   <form onSubmit={handleFormSubmit} className="space-y-3">
                     <div>
                       <label className="block text-xs font-medium text-neutral-700 mb-1">
-                        {labels.name} <span className="text-red-400">*</span>
+                        {labels.name} <span className="text-[#ce1126]">*</span>
                       </label>
                       <input
                         type="text"
@@ -404,14 +405,14 @@ export default function ChatWidget() {
                         maxLength={100}
                         className={`w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border ${
                           formErrors.name ? 'border-red-500' : 'border-neutral-200'
-                        } focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent`}
+                        }    focus:border-transparent`}
                       />
-                      {formErrors.name && <p className="text-red-400 text-xs mt-1">{formErrors.name}</p>}
+                      {formErrors.name && <p className="text-[#9a0d1c] text-xs font-bold mt-1">{formErrors.name}</p>}
                     </div>
 
                     <div>
                       <label className="block text-xs font-medium text-neutral-700 mb-1">
-                        {labels.email} <span className="text-red-400">*</span>
+                        {labels.email} <span className="text-[#ce1126]">*</span>
                       </label>
                       <input
                         type="email"
@@ -421,14 +422,14 @@ export default function ChatWidget() {
                         maxLength={200}
                         className={`w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border ${
                           formErrors.email ? 'border-red-500' : 'border-neutral-200'
-                        } focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent`}
+                        }    focus:border-transparent`}
                       />
-                      {formErrors.email && <p className="text-red-400 text-xs mt-1">{formErrors.email}</p>}
+                      {formErrors.email && <p className="text-[#9a0d1c] text-xs font-bold mt-1">{formErrors.email}</p>}
                     </div>
 
                     <div>
                       <label className="block text-xs font-medium text-neutral-700 mb-1">
-                        {labels.phone} <span className="text-red-400">*</span>
+                        {labels.phone} <span className="text-[#ce1126]">*</span>
                       </label>
                       <input
                         type="tel"
@@ -438,9 +439,9 @@ export default function ChatWidget() {
                         maxLength={30}
                         className={`w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border ${
                           formErrors.phone ? 'border-red-500' : 'border-neutral-200'
-                        } focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent`}
+                        }    focus:border-transparent`}
                       />
-                      {formErrors.phone && <p className="text-red-400 text-xs mt-1">{formErrors.phone}</p>}
+                      {formErrors.phone && <p className="text-[#9a0d1c] text-xs font-bold mt-1">{formErrors.phone}</p>}
                     </div>
 
                     <div>
@@ -453,7 +454,7 @@ export default function ChatWidget() {
                         onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
                         placeholder={labels.locationPlaceholder}
                         maxLength={200}
-                        className="w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        className="w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border border-neutral-200 focus:border-transparent"
                       />
                     </div>
 
@@ -467,7 +468,7 @@ export default function ChatWidget() {
                       </button>
                       <button
                         type="submit"
-                        className="flex-1 py-2.5 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-400 transition-colors text-sm"
+                        className="gov-btn gov-btn--gold flex-1"
                       >
                         {labels.submit}
                       </button>
@@ -481,8 +482,8 @@ export default function ChatWidget() {
                 <div className="flex-1 overflow-y-auto p-4 bg-white">
                   {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center px-6">
-                      <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mb-4">
-                        <MessageCircle className="w-8 h-8 text-yellow-400" />
+                      <div className="w-16 h-16 bg-black flex items-center justify-center mb-4">
+                        <MessageCircle className="w-8 h-8 text-[#ffd700]" />
                       </div>
                       <h4 className="text-lg font-semibold text-black mb-2">
                         Welcome to UIA Assistant
@@ -512,13 +513,13 @@ export default function ChatWidget() {
                       onKeyDown={handleKeyDown}
                       placeholder="Type your question..."
                       maxLength={2000}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-sm text-gray-900 placeholder-gray-500 bg-white"
+                      className="flex-1 min-h-10 px-3 py-2 border-2 border-[#262522] text-sm text-black placeholder-[#75706a] bg-white"
                       disabled={isTyping}
                     />
                     <button
                       onClick={handleSendMessage}
                       disabled={!inputValue.trim() || isTyping}
-                      className="bg-black text-yellow-400 p-2 rounded-full hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="grid h-10 w-10 place-items-center bg-black text-white hover:bg-[#262522] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                       aria-label="Send message"
                     >
                       <Send className="w-5 h-5" />
@@ -542,14 +543,14 @@ export default function ChatWidget() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleEscalate}
-                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white border border-red-500 text-red-500 rounded-full hover:bg-red-50 transition-colors text-xs font-medium"
+                      className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-white border-2 border-[#ce1126] text-[#9a0d1c] hover:bg-[#fdf1f2] transition-colors text-xs font-bold"
                     >
                       <AlertCircle className="w-4 h-4" />
                       Escalate to Officer
                     </button>
                     <Link
                       href="/chatbot"
-                      className="flex items-center justify-center gap-2 px-3 py-2 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors text-xs font-medium"
+                      className="flex items-center justify-center gap-2 px-3 py-2 bg-[#ebe8e1] text-black hover:bg-[#dcd8cf] transition-colors text-xs font-bold"
                       onClick={() => setIsOpen(false)}
                     >
                       <ExternalLink className="w-4 h-4" />
@@ -571,11 +572,11 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             data-chat-widget="true"
-            className="fixed bottom-[4.5rem] right-4 sm:bottom-24 sm:right-6 z-50 bg-white rounded-xl shadow-xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-[180px] sm:max-w-[220px] border border-yellow-300"
+            className="fixed bottom-[4.5rem] right-4 sm:bottom-24 sm:right-6 z-50 bg-white shadow-xl px-3 py-2.5 sm:px-4 sm:py-3 max-w-[180px] sm:max-w-[220px] border-2 border-black"
           >
             <p className="text-xs sm:text-sm font-medium text-gray-800">How can I help you invest?</p>
             <p className="text-[10px] sm:text-xs text-gray-700 mt-0.5 sm:mt-1">Ask me anything about Uganda</p>
-            <div className="absolute -bottom-2 right-6 sm:right-8 w-3 h-3 sm:w-4 sm:h-4 bg-white border-r border-b border-yellow-300 rotate-45"></div>
+            <div className="absolute -bottom-2 right-6 sm:right-8 w-3 h-3 sm:w-4 sm:h-4 bg-white border-r-2 border-b-2 border-black rotate-45"></div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -587,7 +588,7 @@ export default function ChatWidget() {
           setIsOpen(!isOpen);
           setShowTooltip(false);
         }}
-        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center gap-2 w-12 h-12 sm:w-auto sm:h-14 bg-yellow-500 text-black rounded-full shadow-lg shadow-yellow-500/25 hover:shadow-yellow-400/40 sm:px-5 ring-2 ring-yellow-400/20 sm:ring-4 hover:ring-yellow-400/40 ${
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex items-center justify-center gap-2 w-12 h-12 sm:w-auto sm:h-12 bg-black text-white sm:px-5 shadow-[0_4px_0_#ffd700,0_10px_24px_rgb(0_0_0/0.25)] hover:bg-[#262522] ${
           hideLauncher ? 'pointer-events-none' : ''
         }`}
         // Opacity is animated through Framer rather than a Tailwind class:
@@ -626,7 +627,7 @@ export default function ChatWidget() {
                 <motion.span
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-1.5 -right-1.5 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-black text-[10px] sm:text-xs font-bold rounded-full flex items-center justify-center"
+                  className="absolute -top-1.5 -right-1.5 w-4 h-4 sm:w-5 sm:h-5 bg-[#ce1126] text-white text-[10px] sm:text-xs font-bold rounded-full flex items-center justify-center"
                 >
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </motion.span>
@@ -636,23 +637,9 @@ export default function ChatWidget() {
         </AnimatePresence>
 
         <span className="hidden sm:inline text-sm font-bold">
-          {isOpen ? '' : 'Ask Assistant'}
+          {isOpen ? 'Close' : 'Ask the assistant'}
         </span>
 
-        {!isOpen && (
-          <motion.div
-            className="absolute inset-0 rounded-full bg-yellow-500 hidden sm:block"
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.4, 0, 0.4],
-            }}
-            transition={{
-              duration: 2.5,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        )}
       </motion.button>
     </>
   );

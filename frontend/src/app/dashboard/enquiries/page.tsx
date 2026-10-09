@@ -66,14 +66,14 @@ const TIER_LABELS: Record<string, string> = {
 };
 
 const SENTIMENT_CONFIG: Record<string, { label: string; color: string; icon: typeof FaceSmileIcon }> = {
-  positive: { label: 'Positive', color: 'text-green-600 bg-green-100', icon: FaceSmileIcon },
+  positive: { label: 'Positive', color: 'text-black bg-[#fffbea]', icon: FaceSmileIcon },
   neutral: { label: 'Neutral', color: 'text-neutral-700 bg-neutral-100', icon: MinusCircleIcon },
   negative: { label: 'Negative', color: 'text-red-600 bg-red-100', icon: FaceFrownIcon },
 };
 
 const TIER_CONFIG: Record<string, { icon: typeof CpuChipIcon; color: string }> = {
-  ai: { icon: CpuChipIcon, color: 'text-purple-600 bg-purple-100' },
-  kb: { icon: BookOpenIcon, color: 'text-blue-600 bg-blue-100' },
+  ai: { icon: CpuChipIcon, color: 'text-black bg-[#ffd700]' },
+  kb: { icon: BookOpenIcon, color: 'text-white bg-black' },
   suggestions: { icon: LightBulbIcon, color: 'text-red-600 bg-yellow-100' },
   escalation: { icon: FaceFrownIcon, color: 'text-red-600 bg-red-100' },
 };
@@ -194,7 +194,7 @@ export default function EnquiriesPage() {
           </div>
           <h1 className="text-2xl font-bold text-black mb-3">Chat Enquiries</h1>
           <p className="text-neutral-700 mb-6">Admin authorization required to view chat enquiry data.</p>
-          <Link href="/" className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-100 transition-colors">
+          <Link href="/" className="gov-btn w-full">
             Return Home
           </Link>
         </div>
@@ -307,7 +307,7 @@ export default function EnquiriesPage() {
 
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="w-8 h-8 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+              <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
             </div>
           ) : enquiries.length === 0 ? (
             <div className="text-center py-16">
@@ -479,7 +479,7 @@ export default function EnquiriesPage() {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {sessionLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-8 h-8 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
                 </div>
               ) : sessionMessages.length === 0 ? (
                 <p className="text-center text-neutral-500 py-8">No messages found</p>

@@ -1,42 +1,49 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import BusinessRegistrationWizard from '@/components/forms/BusinessRegistrationWizard';
+import PageHeader from '@/components/ui/PageHeader';
 
-// Note: Metadata cannot be used in client components, so we'll handle SEO differently
-// export const metadata: Metadata = {
-//   title: 'Business Registration',
-//   description: 'Streamlined business registration process with digital document submission and comprehensive support.',
-// };
+// Metadata is provided by ./layout.tsx — this page is a client component.
 
 export default function BusinessRegistrationPage() {
   return (
- <div className="min-h-screen bg-white text-black">
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <div>
-          <div className="mb-10 max-w-3xl">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.18em] text-red-600">Business registration</p>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-              Business Registration Wizard
-            </h1>
-            <p className="mt-5 text-base leading-7 text-neutral-700 sm:text-lg">
-              Use the guided steps to identify the registration path for your business and understand the information you may need to prepare. The wizard helps you review likely documents, process stages and estimated costs before you proceed. Take time to check names, ownership details and contact information as you enter them. This tool provides planning guidance; the final requirements, fees and filing decision are set by the responsible authorities.
-            </p>
-          </div>
-          
-          <div className="border-t border-neutral-200 pt-10">
-            <BusinessRegistrationWizard />
-          </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Services', href: '/services' }, { label: 'Register a business' }]}
+        caption="Uganda Registration Services Bureau"
+        title="Register a business"
+        lead="Reserve a name and register your company step by step. Check names, ownership details and contact information carefully as you enter them — you can track your application afterwards with the reference number."
+      />
 
-          <div className="mt-12 border-l-4 border-red-600 pl-6">
-            <h3 className="mb-2 text-lg font-bold text-black">Important note</h3>
-            <p className="text-sm leading-7 text-neutral-700">
-              This wizard provides estimates and guidance for business registration in Uganda. 
-              Final costs and requirements may vary. Please verify with the relevant authorities 
-              before proceeding with your registration.
+      <div className="gov-container grid gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-16">
+        <div className="min-w-0">
+          <BusinessRegistrationWizard />
+        </div>
+
+        <aside className="space-y-8 lg:sticky lg:top-6 lg:self-start">
+          <div className="gov-related">
+            <h2>Before you start</h2>
+            <p className="text-[15px] text-[#3b3934]">Have these ready:</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px] text-[#3b3934]">
+              <li>proposed business names</li>
+              <li>identity documents for directors and shareholders</li>
+              <li>your registered physical address</li>
+            </ul>
+            <Link href="/tools/document-checklist" className="gov-link mt-3 inline-block">Full document checklist</Link>
+          </div>
+          <div className="gov-inset gov-inset--red text-[15px]">
+            <p className="font-bold">Important</p>
+            <p className="mt-1 leading-6 text-[#3b3934]">
+              Costs shown are estimates. Final fees and requirements are set by URSB — verify them before you pay.
             </p>
           </div>
-        </div>
+          <div className="gov-related !border-black">
+            <h2>Already applied?</h2>
+            <Link href="/track" className="gov-link">Track your application</Link>
+          </div>
+        </aside>
       </div>
     </div>
   );

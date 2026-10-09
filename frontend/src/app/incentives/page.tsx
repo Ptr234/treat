@@ -1,8 +1,7 @@
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
 import Link from 'next/link';
 
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+const linkClass = 'gov-link';
 
 interface Incentive {
   title: string;
@@ -103,133 +102,106 @@ const INCENTIVES: Incentive[] = [
 
 export default function IncentivesPage() {
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/investments/" className="text-red-600 hover:underline underline-offset-4">Investments</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Incentives</li>
-          </ol>
-        </nav>
-      </div>
-
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Investment incentives</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Tax holidays, exemptions and allowances</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Uganda offers incentives under three laws: the Investment Code Act 2019, the Income Tax Act and the free zones provisions.
-          Each incentive has its own qualifying amount, sector and conditions, so read the rule that applies to your project.
-        </p>
-      </section>
-      </PageBand>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Investments', href: '/investments/' }, { label: 'Tax incentives' }]}
+        caption="Invest"
+        title="Tax holidays, exemptions and allowances"
+        lead="Uganda offers incentives under three laws: the Investment Code Act 2019, the Income Tax Act and the free zones provisions. Each incentive has its own qualifying amount, sector and conditions."
+      />
 
       {/* Eligibility */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-labelledby="eligibility-heading">
-        <h2 id="eligibility-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Who qualifies</h2>
-        <ol className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-3">
-          <li className=" pt-4">
-            <p className="text-xs font-bold uppercase tracking-wider text-red-600">01</p>
-            <h3 className="mt-2 font-bold">Started after the Act took effect</h3>
-            <p className="mt-2 text-sm leading-6 text-neutral-700">The investment must commence after the Investment Code Act 2019 came into force on 29 March 2019.</p>
-          </li>
-          <li className=" pt-4">
-            <p className="text-xs font-bold uppercase tracking-wider text-red-600">02</p>
-            <h3 className="mt-2 font-bold">Meets the minimum capital</h3>
-            <p className="mt-2 text-sm leading-6 text-neutral-700">The minimum investment capital is set by the Minister through statutory instrument, separately for domestic and foreign investors. Confirm the current amount with UIA.</p>
-          </li>
-          <li className=" pt-4">
-            <p className="text-xs font-bold uppercase tracking-wider text-red-600">03</p>
-            <h3 className="mt-2 font-bold">Works in a priority area</h3>
-            <p className="mt-2 text-sm leading-6 text-neutral-700">The activity must fall within the priority areas listed in Schedule 2 of the Investment Code Act 2019.</p>
-          </li>
-        </ol>
+      <section className="gov-section" aria-labelledby="eligibility-heading">
+        <div className="gov-container">
+          <h2 id="eligibility-heading" className="gov-title-l">Who qualifies</h2>
+          <p className="gov-body mt-2">Your project must meet all three conditions.</p>
+          <ol className="mt-8 grid gap-6 md:grid-cols-3">
+            {[
+              { title: 'Started after the Act took effect', body: 'The investment must commence after the Investment Code Act 2019 came into force on 29 March 2019.' },
+              { title: 'Meets the minimum capital', body: 'The minimum investment capital is set by the Minister through statutory instrument, separately for domestic and foreign investors. Confirm the current amount with UIA.' },
+              { title: 'Works in a priority area', body: 'The activity must fall within the priority areas listed in Schedule 2 of the Investment Code Act 2019.' },
+            ].map((item, i) => (
+              <li key={item.title} className="gov-card gov-card--gold">
+                <span className="font-display text-4xl font-semibold text-[#ce1126]">{i + 1}</span>
+                <h3 className="mt-3 text-lg font-bold">{item.title}</h3>
+                <p className="mt-2 text-[15px] leading-6 text-[#3b3934]">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
       </section>
 
       {/* Incentive list */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-labelledby="list-heading">
-        <h2 id="list-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Incentives</h2>
-        <ul className="mt-2 divide-y divide-neutral-200">
-          {INCENTIVES.map((item) => (
-            <li key={item.title} className="grid gap-6 py-8 lg:grid-cols-[1fr_1.4fr]">
-              <div>
-                <h3 className="text-lg font-bold leading-snug">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-neutral-700">{item.who}</p>
-              </div>
-              <dl className="space-y-3 bg-neutral-50 py-4 pl-5 pr-4 text-sm">
-                <div>
-                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Benefit</dt>
-                  <dd className="mt-1 font-semibold text-black">{item.benefit}</dd>
+      <section className="gov-section gov-section--paper" aria-labelledby="list-heading">
+        <div className="gov-container">
+          <h2 id="list-heading" className="gov-title-l">Incentives</h2>
+          <div className="mt-8 space-y-6">
+            {INCENTIVES.map((item) => (
+              <article key={item.title} className="grid border border-[#dcd8cf] bg-white lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+                <div className="border-b-4 border-black p-6 lg:border-b-0 lg:border-r-4 lg:border-r-black">
+                  <h3 className="text-xl font-bold leading-snug">{item.title}</h3>
+                  <p className="mt-2 text-[15px] text-[#3b3934]">{item.who}</p>
+                  <p className="mt-5 text-xs font-bold uppercase tracking-[0.12em] text-[#5c5850]">Benefit</p>
+                  <p className="mt-1 font-display text-2xl font-semibold leading-tight text-black">{item.benefit}</p>
+                  {item.duration && <p className="mt-3"><span className="gov-tag gov-tag--gold">{item.duration}</span></p>}
                 </div>
-                {item.duration && (
+                <dl className="gov-summary m-6 text-[15px]">
                   <div>
-                    <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Duration</dt>
-                    <dd className="mt-1 text-neutral-800">{item.duration}</dd>
+                    <dt>Conditions</dt>
+                    <dd>
+                      <ul className="list-disc space-y-1 pl-5">
+                        {item.conditions.map((condition) => <li key={condition}>{condition}</li>)}
+                      </ul>
+                    </dd>
                   </div>
-                )}
-                <div>
-                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Conditions</dt>
-                  <dd className="mt-1">
-                    <ul className="list-disc space-y-1 pl-5 text-neutral-800">
-                      {item.conditions.map((condition) => (
-                        <li key={condition}>{condition}</li>
-                      ))}
-                    </ul>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Law</dt>
-                  <dd className="mt-1 text-neutral-800">{item.law}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Source</dt>
-                  <dd className="mt-1">
-                    <a href={item.source.href} target="_blank" rel="noopener noreferrer" className={linkClass}>{item.source.label}</a>
-                  </dd>
-                </div>
-              </dl>
-            </li>
-          ))}
-        </ul>
+                  <div><dt>Law</dt><dd>{item.law}</dd></div>
+                  <div>
+                    <dt>Source</dt>
+                    <dd><a href={item.source.href} target="_blank" rel="noopener noreferrer" className={linkClass}>{item.source.label}</a></dd>
+                  </div>
+                </dl>
+              </article>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Next steps and disclaimer */}
-      <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8" aria-labelledby="next-heading">
-        <div className="grid gap-10 pt-10 lg:grid-cols-2">
+      <section className="gov-section" aria-labelledby="next-heading">
+        <div className="gov-container grid gap-12 lg:grid-cols-2">
           <div>
-            <h2 id="next-heading" className="text-xl font-bold sm:text-2xl">How to apply</h2>
-            <p className="mt-3 text-sm leading-6 text-neutral-700">
-              Incentives are granted through the Uganda Investment Authority as part of the investment licence. Start with the investment onboarding form or read the licence steps.
+            <h2 id="next-heading" className="gov-title-l">How to apply</h2>
+            <p className="gov-body mt-3 text-[17px]">
+              Incentives are granted through the Uganda Investment Authority as part of the investment licence. Start with investor onboarding or read the licence steps.
             </p>
-            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-              <Link href="/investments/onboarding/" className={linkClass}>Start investment onboarding</Link>
-              <Link href="/tools/roi-calculator/" className={linkClass}>Estimate returns with ATMS incentives</Link>
-              <Link href="/support/" className={linkClass}>Ask a question</Link>
+            <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
+              <Link href="/investments/onboarding/" className="gov-btn gov-btn--start">Start investor onboarding</Link>
+              <Link href="/investments/process/" className={linkClass}>Read the investment process</Link>
             </div>
-          </div>
-          <div className="border-l-4 border-red-600 pl-6">
-            <h2 className="text-lg font-bold">Important</h2>
-            <p className="mt-3 text-sm leading-7 text-neutral-700">
-              This page summarises published information for general guidance. It is not tax or legal advice. Incentives depend on eligibility, approval and the law in force when you invest, and the thresholds above change through statutory instruments and tax amendments.
-              Confirm your position with the Uganda Investment Authority and the Uganda Revenue Authority before you commit capital.
-            </p>
-            <h3 className="mt-6 font-bold">Sources</h3>
-            <ul className="mt-3 space-y-2 text-sm">
-              <li><a href="https://www.state.gov/reports/2024-investment-climate-statements/uganda" target="_blank" rel="noopener noreferrer" className={linkClass}>US State Department, 2024 Investment Climate Statement: Uganda</a></li>
-              <li><a href="https://investmentpolicy.unctad.org/investment-policy-monitor/measures/3397/adoption-of-new-investment-code" target="_blank" rel="noopener noreferrer" className={linkClass}>UNCTAD, adoption of the new Investment Code</a></li>
-              <li><a href="https://taxsummaries.pwc.com/uganda/corporate/tax-credits-and-incentives" target="_blank" rel="noopener noreferrer" className={linkClass}>PwC Tax Summaries: Uganda, tax credits and incentives</a></li>
-              <li><a href="https://www.pwc.com/ug/en/assets/pdf/legal-alert-investment-code-act-2019.pdf" target="_blank" rel="noopener noreferrer" className={linkClass}>PwC Uganda, legal alert on the Investment Code Act 2019</a></li>
-              <li><a href="https://ugandainvest.go.ug/investing-in-uganda-how-to-apply-for-an-investment-license-certificate/" target="_blank" rel="noopener noreferrer" className={linkClass}>Uganda Investment Authority, how to apply for an investment licence</a></li>
+            <ul className="mt-6 space-y-2 text-[15px]">
+              <li><Link href="/tools/roi-calculator/" className={linkClass}>Estimate returns with ATMS incentives</Link></li>
+              <li><Link href="/support/" className={linkClass}>Ask a question</Link></li>
             </ul>
+          </div>
+          <div>
+            <div className="gov-warning text-[15px]">
+              <p>
+                This page summarises published information for general guidance. It is not tax or legal advice. Confirm your position with the Uganda Investment Authority and the Uganda Revenue Authority before you commit capital.
+              </p>
+            </div>
+            <p className="gov-body mt-4 text-[15px]">
+              Incentives depend on eligibility, approval and the law in force when you invest, and thresholds change through statutory instruments and tax amendments.
+            </p>
+            <div className="gov-related mt-8">
+              <h2>Sources</h2>
+              <ul className="text-[15px]">
+                <li><a href="https://www.state.gov/reports/2024-investment-climate-statements/uganda" target="_blank" rel="noopener noreferrer" className={linkClass}>US State Department, 2024 Investment Climate Statement: Uganda</a></li>
+                <li><a href="https://investmentpolicy.unctad.org/investment-policy-monitor/measures/3397/adoption-of-new-investment-code" target="_blank" rel="noopener noreferrer" className={linkClass}>UNCTAD, adoption of the new Investment Code</a></li>
+                <li><a href="https://taxsummaries.pwc.com/uganda/corporate/tax-credits-and-incentives" target="_blank" rel="noopener noreferrer" className={linkClass}>PwC Tax Summaries: Uganda, tax credits and incentives</a></li>
+                <li><a href="https://www.pwc.com/ug/en/assets/pdf/legal-alert-investment-code-act-2019.pdf" target="_blank" rel="noopener noreferrer" className={linkClass}>PwC Uganda, legal alert on the Investment Code Act 2019</a></li>
+                <li><a href="https://ugandainvest.go.ug/investing-in-uganda-how-to-apply-for-an-investment-license-certificate/" target="_blank" rel="noopener noreferrer" className={linkClass}>Uganda Investment Authority, how to apply for an investment licence</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>

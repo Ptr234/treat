@@ -36,12 +36,12 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
           <p className="font-semibold text-black mb-3">{formatMonth(label ?? '')}</p>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-yellow-200" />
+              <div className="w-3 h-3 rounded-full bg-[#8a7200]" />
               <span className="text-sm text-neutral-700">Inquiries:</span>
               <span className="text-sm font-medium text-black">{data.inquiries}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-neutral-100" />
+              <div className="w-3 h-3 rounded-full bg-black" />
               <span className="text-sm text-neutral-700">Conversions:</span>
               <span className="text-sm font-medium text-black">{data.conversions}</span>
             </div>
@@ -72,21 +72,21 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
         >
           <defs>
             <linearGradient id="colorInquiries" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+              <stop offset="5%" stopColor="#ffd700" stopOpacity={0.35}/>
+              <stop offset="95%" stopColor="#ffd700" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#e7e3da" />
           <XAxis
             dataKey="date"
             tickFormatter={formatMonth}
             tick={{ fontSize: chartHeight < 300 ? 10 : 12 }}
-            stroke="#9ca3af"
+            stroke="#75706a"
             interval={chartHeight < 300 ? 1 : 0}
           />
           <YAxis
             tick={{ fontSize: 12 }}
-            stroke="#9ca3af"
+            stroke="#75706a"
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
@@ -96,7 +96,7 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
           <Area
             type="monotone"
             dataKey="inquiries"
-            stroke="#16a34a"
+            stroke="#8a7200"
             strokeWidth={2}
             fill="url(#colorInquiries)"
             name="Inquiries"
@@ -104,10 +104,10 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
           <Line
             type="monotone"
             dataKey="conversions"
-            stroke="#166534"
+            stroke="#0b0b0b"
             strokeWidth={2}
             strokeDasharray="5 5"
-            dot={{ fill: '#166534', r: 4 }}
+            dot={{ fill: '#0b0b0b', r: 4, stroke: '#ffffff', strokeWidth: 2 }}
             name="Conversions"
           />
         </AreaChart>

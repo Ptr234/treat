@@ -127,7 +127,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
           <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-1">
+                <label className="gov-label">
                   Full Name *
                 </label>
                 <input
@@ -136,12 +136,12 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                  className="gov-input"
                   placeholder="Your full name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-1">
+                <label className="gov-label">
                   Email Address *
                 </label>
                 <input
@@ -150,7 +150,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                  className="gov-input"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -158,7 +158,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-1">
+                <label className="gov-label">
                   Phone Number *
                 </label>
                 <input
@@ -167,12 +167,12 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                  className="gov-input"
                   placeholder="+256 XXX XXX XXX"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-1">
+                <label className="gov-label">
                   Company/Organization
                 </label>
                 <input
@@ -180,7 +180,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   name="company"
                   value={formData.company}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                  className="gov-input"
                   placeholder="Your company name (optional)"
                 />
               </div>
@@ -188,7 +188,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-1">
+                <label className="gov-label">
                   Service Required *
                 </label>
                 <select
@@ -196,7 +196,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                   value={formData.serviceType}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                  className="gov-input"
                 >
                   <option value="">Select a service</option>
                   {agency.services.map((service, index) => (
@@ -208,14 +208,14 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-1">
+                <label className="gov-label">
                   Priority Level
                 </label>
                 <select
                   name="urgency"
                   value={formData.urgency}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                  className="gov-input"
                 >
                   <option value="low">Low Priority</option>
                   <option value="normal">Normal Priority</option>
@@ -225,7 +225,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-1">
+              <label className="gov-label">
                 Subject *
               </label>
               <input
@@ -234,13 +234,13 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                 value={formData.subject}
                 onChange={handleInputChange}
                 required
-                className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                className="gov-input"
                 placeholder="Brief description of your inquiry"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-1">
+              <label className="gov-label">
                 Detailed Message *
               </label>
               <textarea
@@ -249,14 +249,14 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
                 onChange={handleInputChange}
                 required
                 rows={4}
-                className="w-full px-3 py-3 sm:py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 text-black"
+                className="gov-input"
                 placeholder="Please provide detailed information about your inquiry..."
               />
             </div>
 
             {/* File Upload */}
             <div>
-              <label className="block text-sm font-medium text-neutral-800 mb-2">
+              <label className="gov-label">
                 Attachments (Optional)
               </label>
               <div className="-2 -dashed p-4 border-t border-neutral-200 pt-5">
@@ -309,7 +309,7 @@ export default function ContactModal({ agency, isOpen, onClose }: ContactModalPr
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="min-h-[44px] flex items-center space-x-2 px-6 py-2 bg-black text-yellow-400 rounded-md hover:bg-neutral-100 transition-colors disabled:opacity-50"
+                className="gov-btn gov-btn--sm"
               >
                 {isSubmitting ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>

@@ -1,8 +1,8 @@
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
+import FactRow from '@/components/ui/FactRow';
 import Link from 'next/link';
 
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+const linkClass = 'gov-link';
 
 const STEPS = [
   {
@@ -59,101 +59,70 @@ const STEPS = [
 
 export default function InvestmentProcessPage() {
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/investments/" className="text-red-600 hover:underline underline-offset-4">Investments</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Investment process</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Investments', href: '/investments/' }, { label: 'Investment process' }]}
+        caption="Step by step"
+        title="From company registration to operating licence"
+        lead="Setting up an investment in Uganda follows five steps. The first three must be complete before you start operating. Each step is handled by a different agency, so this page shows who to contact and what to prepare."
+      >
+        <FactRow
+          facts={[
+            { label: 'Steps', value: '5' },
+            { label: 'Investment licence fee', value: 'Free' },
+            { label: 'Online platform', value: 'eBiz' },
+          ]}
+        />
+      </PageHeader>
 
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Investment process</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">From company registration to operating licence</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Setting up an investment in Uganda follows five steps. The first three must be completed before you start operating.
-          Each step is handled by a different agency, so this page shows who to contact and what to prepare.
-        </p>
-        <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Steps</dt>
-            <dd className="mt-1 text-2xl font-bold">5</dd>
-          </div>
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Investment licence fee</dt>
-            <dd className="mt-1 text-2xl font-bold">Free of charge</dd>
-          </div>
-          <div className="border-l-4 border-red-600 pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Online platform</dt>
-            <dd className="mt-1 text-2xl font-bold">eBiz</dd>
-          </div>
-        </dl>
-      </section>
-      </PageBand>
-
-      {/* Steps */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-labelledby="steps-heading">
-        <h2 id="steps-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">The steps</h2>
-        <ol className="mt-2 divide-y divide-neutral-200">
-          {STEPS.map((step) => (
-            <li key={step.title} className="grid gap-6 py-8 lg:grid-cols-[1fr_1.2fr]">
-              <div>
-                <h3 className="text-lg font-bold leading-snug">{step.title}</h3>
-                <p className="mt-2 text-xs font-bold uppercase tracking-wider text-red-600">{step.agency}</p>
-              </div>
-              <div>
-                <p className="text-sm leading-7 text-neutral-700">{step.summary}</p>
-                <ul className="mt-4 list-disc space-y-1.5 pl-5 text-sm text-neutral-800">
+      <div className="gov-container grid gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-16">
+        <section aria-labelledby="steps-heading">
+          <h2 id="steps-heading" className="gov-title-l mb-8">The steps</h2>
+          <ol className="gov-steps">
+            {STEPS.map((step, i) => (
+              <li key={step.title} className="!pb-12">
+                <p className="flex flex-wrap items-center gap-2">
+                  <span className="gov-tag">{step.agency}</span>
+                  {i < 3 && <span className="gov-tag gov-tag--gold">Before you operate</span>}
+                </p>
+                <h3 className="mt-3 text-[22px] font-bold leading-snug">{step.title}</h3>
+                <p className="gov-body mt-3 text-[17px]">{step.summary}</p>
+                <ul className="mt-4 list-disc space-y-2 pl-5 text-[15px] text-[#262522]">
                   {step.details.map((detail) => (
                     <li key={detail}>{detail}</li>
                   ))}
                 </ul>
-                <p className="mt-4 text-xs text-neutral-600">
+                <p className="gov-hint mt-4">
                   Source:{' '}
-                  <a href={step.source.href} target="_blank" rel="noopener noreferrer" className={linkClass}>{step.source.label}</a>
+                  <a href={step.source.href} target="_blank" rel="noopener noreferrer" className="gov-link font-normal">{step.source.label}</a>
                 </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-      {/* Next steps */}
-      <section className="mx-auto max-w-6xl px-4 pb-20 sm:px-6 lg:px-8" aria-labelledby="process-next-heading">
-        <div className="grid gap-10 pt-10 lg:grid-cols-2">
-          <div>
-            <h2 id="process-next-heading" className="text-xl font-bold sm:text-2xl">Prepare before you start</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-neutral-700">
+        <aside className="space-y-10 lg:sticky lg:top-6 lg:self-start" aria-labelledby="process-next-heading">
+          <div className="gov-related">
+            <h2 id="process-next-heading">Prepare before you start</h2>
+            <ul className="list-disc space-y-2 pl-5 text-[15px] text-[#3b3934]">
               <li>Gather the documents for each step with the document checklist.</li>
-              <li>Check which incentives apply to your project before you apply for the licence.</li>
-              <li>Read the investment incentives page, so you know the conditions attached to each one.</li>
+              <li>Check which incentives apply before you apply for the licence.</li>
+              <li>Read the conditions attached to each incentive.</li>
             </ul>
-            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-              <Link href="/tools/document-checklist/" className={linkClass}>Document checklist</Link>
-              <Link href="/incentives/" className={linkClass}>Investment incentives</Link>
-              <Link href="/investments/onboarding/" className={linkClass}>Start onboarding</Link>
-            </div>
+            <ul className="mt-5 text-[15px]">
+              <li><Link href="/tools/document-checklist/" className={linkClass}>Document checklist</Link></li>
+              <li><Link href="/incentives/" className={linkClass}>Investment incentives</Link></li>
+            </ul>
+            <Link href="/investments/onboarding/" className="gov-btn mt-6 w-full">Start onboarding</Link>
           </div>
-          <div className="border-l-4 border-red-600 pl-6">
-            <h2 className="text-lg font-bold">Important</h2>
-            <p className="mt-3 text-sm leading-7 text-neutral-700">
-              This page summarises the process as published by the Uganda Investment Authority. Requirements, fees and timelines can change, and approvals depend on a complete and accurate application. Confirm current requirements with UIA, URSB and URA before you commit capital.
+          <div className="gov-inset gov-inset--red text-[15px]">
+            <p className="font-bold">Important</p>
+            <p className="mt-2 leading-6 text-[#3b3934]">
+              This page summarises the process as published by the Uganda Investment Authority. Requirements, fees and timelines can change. Confirm current requirements with UIA, URSB and URA before you commit capital.
             </p>
           </div>
-        </div>
-      </section>
+        </aside>
+      </div>
     </div>
   );
 }

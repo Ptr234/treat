@@ -200,12 +200,9 @@ export default function ROICalculator() {
     );
   };
 
-  const inputClass = (hasError?: boolean) =>
-    `w-full rounded-md border bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1 ${
-      hasError ? 'border-red-600' : 'border-neutral-400'
-    }`;
-  const labelClass = 'mb-2 block text-sm font-bold text-black';
-  const errorClass = 'mt-1 text-sm font-semibold text-red-600';
+  const inputClass = (hasError?: boolean) => `gov-input ${hasError ? '!border-[#ce1126]' : ''}`;
+  const labelClass = 'gov-label';
+  const errorClass = 'mt-1 text-sm font-bold text-[#9a0d1c]';
 
   const SECTORS = [
     { name: 'Agriculture', detail: '20% growth multiplier, 10% ATMS tax credit. Farming, livestock, agro-processing.' },
@@ -371,7 +368,7 @@ export default function ROICalculator() {
             <button
               type="button"
               onClick={calculateROI}
-              className="w-full rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="gov-btn w-full"
             >
               Calculate ROI
             </button>

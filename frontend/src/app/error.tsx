@@ -15,30 +15,24 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <div className="min-h-[60vh] flex items-center justify-center px-4">
-      <div className="text-center max-w-md">
-        <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
-          <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-        <p className="text-gray-600 mb-6">
-          An unexpected error occurred. Please try again or return to the home page.
-        </p>
-        <div className="flex gap-3 justify-center">
-          <button
-            onClick={reset}
-            className="px-5 py-2.5 bg-black text-white font-medium rounded-lg hover:bg-neutral-800 transition-colors"
-          >
-            Try again
-          </button>
-          <Link
-            href="/"
-            className="px-5 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Go home
-          </Link>
+    <div className="bg-white">
+      <div className="gov-container py-16 lg:py-24">
+        <div className="flex max-w-3xl gap-6">
+          <span className="gov-flagbar hidden sm:block" aria-hidden="true" />
+          <div>
+            <p className="gov-caption">Service error</p>
+            <h1 className="gov-title-xl mt-2">Sorry, there is a problem with the service</h1>
+            <p className="gov-lead mt-6">Try again now. If it keeps happening, try again later — anything you entered may not have been saved.</p>
+            <p className="gov-body mt-3 text-[17px]">
+              You can also <Link href="/support" className="gov-link">contact the OneStop Centre</Link> or call{' '}
+              <a href="tel:+256414301000" className="gov-link">+256 414 301 000</a>.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
+              <button type="button" onClick={reset} className="gov-btn">Try again</button>
+              <Link href="/" className="gov-link">Go to the homepage</Link>
+            </div>
+            {error.digest && <p className="gov-hint mt-8">Error reference: <span className="font-mono">{error.digest}</span></p>}
+          </div>
         </div>
       </div>
     </div>

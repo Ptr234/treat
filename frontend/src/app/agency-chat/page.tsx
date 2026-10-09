@@ -72,20 +72,14 @@ interface ReplyTarget {
 }
 
 // ── Agency colour map ────────────────────────────────────────────────
+// Every avatar shows the agency acronym, so colour does not carry identity:
+// UIA (the host agency) is gold, every other agency is black on paper.
 
 const AGENCY_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
-  UIA:   { bg: 'bg-yellow-100', text: 'text-yellow-800', ring: 'ring-yellow-300' },
-  URSB:  { bg: 'bg-blue-100',   text: 'text-blue-800',   ring: 'ring-blue-300' },
-  URA:   { bg: 'bg-green-100',  text: 'text-green-800',  ring: 'ring-green-300' },
-  DCIC:  { bg: 'bg-purple-100', text: 'text-purple-800', ring: 'ring-purple-300' },
-  NEMA:  { bg: 'bg-emerald-100',text: 'text-emerald-800',ring: 'ring-emerald-300' },
-  KCCA:  { bg: 'bg-orange-100', text: 'text-orange-800', ring: 'ring-orange-300' },
-  LANDS: { bg: 'bg-amber-100',  text: 'text-amber-800',  ring: 'ring-amber-300' },
-  UNBS:  { bg: 'bg-cyan-100',   text: 'text-cyan-800',   ring: 'ring-cyan-300' },
-  ERA:   { bg: 'bg-rose-100',   text: 'text-rose-800',   ring: 'ring-rose-300' },
+  UIA: { bg: 'bg-[#ffd700]', text: 'text-black', ring: 'ring-black' },
 };
 
-const DEFAULT_COLOR = { bg: 'bg-neutral-200', text: 'text-neutral-700', ring: 'ring-neutral-400' };
+const DEFAULT_COLOR = { bg: 'bg-black', text: 'text-white', ring: 'ring-black' };
 
 const AGENCY_CODES = ['UIA', 'URSB', 'URA', 'DCIC', 'NEMA', 'KCCA', 'LANDS', 'UNBS', 'ERA'] as const;
 
@@ -557,7 +551,7 @@ export default function AgencyChatPage() {
           </p>
           <Link
             href="/"
-            className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-100 transition-colors"
+            className="gov-btn w-full"
           >
             Return Home
           </Link>
@@ -611,7 +605,7 @@ export default function AgencyChatPage() {
             <div className="px-4 py-4 border-b border-neutral-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <UserGroupIcon className="w-5 h-5 text-yellow-500" />
+                  <UserGroupIcon className="w-5 h-5 text-[#8a7200]" />
                   <h2 className="text-sm font-semibold text-black">Channels</h2>
                 </div>
                 <span className="text-xs text-neutral-500">
@@ -704,9 +698,9 @@ export default function AgencyChatPage() {
             {/* Channel header */}
             <div className="px-4 sm:px-6 py-4 border-b border-neutral-200 flex items-center gap-3">
               {activeChannel === 'general' ? (
-                <ChatBubbleLeftRightIcon className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#8a7200] flex-shrink-0" />
               ) : (
-                <HashtagIcon className="w-5 h-5 text-yellow-500 flex-shrink-0" />
+                <HashtagIcon className="w-5 h-5 text-[#8a7200] flex-shrink-0" />
               )}
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-semibold text-black truncate">
@@ -759,7 +753,7 @@ export default function AgencyChatPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search messages, names, or agencies..."
                     autoFocus
-                    className="w-full pl-9 pr-8 py-2 text-sm bg-white border border-neutral-400 rounded-md text-black placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black"
+                    className="w-full pl-9 pr-8 py-2 text-sm bg-white border border-neutral-400 rounded-md text-black placeholder:text-neutral-500 focus:border-black"
                   />
                   {searchQuery && (
                     <button
@@ -940,7 +934,7 @@ export default function AgencyChatPage() {
               {/* Reply preview */}
               {replyTarget && (
                 <div className="mb-2 flex items-start gap-2 px-3 py-2 bg-neutral-100 rounded-r-lg">
-                  <ArrowUturnLeftIcon className="w-3.5 h-3.5 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <ArrowUturnLeftIcon className="w-3.5 h-3.5 text-[#8a7200] mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-semibold text-red-600">
                       {replyTarget.senderName}
@@ -981,7 +975,7 @@ export default function AgencyChatPage() {
                   <select
                     value={senderAgencyCode}
                     onChange={(e) => setSenderAgencyCode(e.target.value)}
-                    className="px-3 py-1.5 text-sm bg-white border border-neutral-400 rounded-md text-black focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black appearance-none cursor-pointer"
+                    className="px-3 py-1.5 text-sm bg-white border border-neutral-400 rounded-md text-black focus:border-black appearance-none cursor-pointer"
                   >
                     {AGENCY_CODES.map((code) => (
                       <option key={code} value={code}>
@@ -1018,7 +1012,7 @@ export default function AgencyChatPage() {
                       key={att.assetId}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-neutral-400 text-xs text-neutral-700"
                     >
-                      <DocumentIcon className="w-3.5 h-3.5 flex-shrink-0 text-yellow-500" />
+                      <DocumentIcon className="w-3.5 h-3.5 flex-shrink-0 text-[#8a7200]" />
                       <span className="truncate max-w-[140px]">{att.name}</span>
                       <button
                         type="button"
@@ -1034,7 +1028,7 @@ export default function AgencyChatPage() {
 
               {/* Uploading indicator */}
               {uploading && (
-                <div className="flex items-center gap-2 mb-2 text-xs text-yellow-500 animate-pulse">
+                <div className="flex items-center gap-2 mb-2 text-xs text-[#8a7200] animate-pulse">
                   <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -1067,7 +1061,7 @@ export default function AgencyChatPage() {
                   }}
                   placeholder={`Message #${activeChannel === 'general' ? 'general' : activeChannel}...`}
                   rows={1}
-                  className="flex-1 px-4 py-2.5 text-sm bg-white border border-neutral-400 rounded-md text-black placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus-visible:ring-red-600 focus:border-black resize-none overflow-hidden"
+                  className="flex-1 px-4 py-2.5 text-sm bg-white border border-neutral-400 rounded-md text-black placeholder:text-neutral-500 focus:border-black resize-none overflow-hidden"
                   style={{ maxHeight: '120px' }}
                 />
                 <button

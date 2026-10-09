@@ -56,16 +56,15 @@ export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail
     }
   };
 
-  const inputClass =
-    'w-full rounded-md border border-neutral-400 bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
-  const labelClass = 'mb-2 block text-sm font-bold text-black';
+  const inputClass = 'gov-input';
+  const labelClass = 'gov-label';
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-6">
       {result && (
         <div
           role={result.success ? 'status' : 'alert'}
-          className={`border-l-4 bg-neutral-50 p-4 text-sm ${result.success ? 'border-black text-black' : 'border-red-600 text-red-700'}`}
+          className={result.success ? 'gov-panel text-[15px]' : 'gov-inset gov-inset--red text-[15px] font-semibold'}
         >
           {result.message}
         </div>
@@ -115,7 +114,7 @@ export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail
       <button
         type="submit"
         disabled={isSubmitting}
-        className="rounded-md bg-black px-8 py-3 text-sm font-bold text-yellow-400 transition-colors hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="gov-btn"
       >
         {isSubmitting ? 'Submitting…' : 'Submit service request'}
       </button>

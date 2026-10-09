@@ -16,10 +16,10 @@ export default function ProjectCard({ project, isSelected = false, onClick }: Pr
 
   const getStatusBadge = (status: ProjectStatus) => {
     const badges = {
-      active: 'bg-yellow-50 text-red-600 border-yellow-400',
-      under_construction: 'bg-red-50 text-red-400 border-red-500/40',
-      planned: 'bg-yellow-300/20 text-red-600 border-yellow-400',
-      completed: 'bg-neutral-500/20 text-neutral-700 border-neutral-400/40'
+      active: 'gov-tag',
+      under_construction: 'gov-tag gov-tag--red',
+      planned: 'gov-tag gov-tag--gold',
+      completed: 'gov-tag gov-tag--grey'
     };
     const labels = {
       active: 'Active',
@@ -44,10 +44,10 @@ export default function ProjectCard({ project, isSelected = false, onClick }: Pr
       <div className="mb-2">
         <h4 className="font-semibold text-black text-sm line-clamp-2 mb-1">{project.company}</h4>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="px-2 py-0.5 bg-yellow-50 text-red-600 text-xs font-medium rounded">
+          <span className="gov-tag gov-tag--gold">
             {project.sector}
           </span>
-          <span className={`px-2 py-0.5 text-xs font-medium rounded border ${badge.className}`}>
+          <span className={badge.className}>
             {badge.label}
           </span>
         </div>
@@ -58,11 +58,11 @@ export default function ProjectCard({ project, isSelected = false, onClick }: Pr
         </p>
         <p>
           <span className="text-neutral-600">Investment:</span>{' '}
-          <span className="font-semibold text-red-600">{formatCurrency(project.investmentValue)}</span>
+          <span className="font-semibold text-black">{formatCurrency(project.investmentValue)}</span>
         </p>
         <p>
           <span className="text-neutral-600">Jobs:</span>{' '}
-          <span className="font-semibold text-red-400">{project.plannedEmployment.toLocaleString()}</span>
+          <span className="font-semibold text-black">{project.plannedEmployment.toLocaleString()}</span>
         </p>
       </div>
     </div>

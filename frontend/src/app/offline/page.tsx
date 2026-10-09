@@ -2,23 +2,20 @@
 
 export default function OfflinePage() {
   return (
- <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="max-w-md w-full text-center px-4">
-        <div className="mb-8">
-          <h1 className="text-6xl font-bold text-yellow-600 mb-4">Offline</h1>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            No Internet Connection
-          </h2>
-          <p className="text-gray-600">
-            You appear to be offline. Please check your internet connection and try again.
-          </p>
+    <div className="bg-white">
+      <div className="gov-container py-16 lg:py-24">
+        <div className="flex max-w-3xl gap-6">
+          <span className="gov-flagbar hidden sm:block" aria-hidden="true" />
+          <div>
+            <p className="gov-caption">No connection</p>
+            <h1 className="gov-title-xl mt-2">You are offline</h1>
+            <p className="gov-lead mt-6">Check your internet or mobile data connection, then try again.</p>
+            <p className="gov-body mt-3 text-[17px]">
+              Pages you have already visited may still open. Forms cannot be sent until you are back online.
+            </p>
+            <button type="button" onClick={() => window.location.reload()} className="gov-btn mt-8">Try again</button>
+          </div>
         </div>
-        <button
-          onClick={() => window.location.reload()}
-          className="bg-yellow-600 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors"
-        >
-          Try Again
-        </button>
       </div>
     </div>
   );

@@ -7,12 +7,12 @@ import { getInvestmentById, getInvestmentIds } from '@/lib/investments';
 import { breadcrumbLd, buildMetadata } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 import InvestmentDetailClient from './InvestmentDetailClient';
+import PageHeader from '@/components/ui/PageHeader';
 
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+const linkClass = 'gov-link';
 
-const sectionClass = 'border-t border-neutral-200 pt-6';
-const sectionHeadingClass = 'text-lg font-bold text-black sm:text-xl';
+const sectionClass = 'border-t-4 border-black pt-5';
+const sectionHeadingClass = 'gov-title-m';
 
 export async function generateStaticParams() {
   return getInvestmentIds();
@@ -38,9 +38,9 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
 
   if (!opportunity) {
     return (
- <div className="min-h-screen bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight">Investment opportunity not found</h1>
+ <div className="bg-white">
+        <div className="gov-container py-24">
+          <h1 className="gov-title-xl">Investment opportunity not found</h1>
           <p className="mt-4 text-neutral-700">The investment opportunity you&apos;re looking for doesn&apos;t exist.</p>
           <Link href="/investments" className={`${linkClass} mt-6 inline-block`}>
             Back to opportunities
@@ -56,7 +56,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
     : 'Not provided for this listing';
 
   return (
- <div className="min-h-screen bg-white text-black">
+ <div className="bg-white">
       <JsonLd
         data={breadcrumbLd([
           { name: 'Home', path: '/' },
@@ -64,59 +64,45 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
           { name: opportunity.title, path: `/investments/${id}/` },
         ])}
       />
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/investments" className="text-red-600 hover:underline underline-offset-4">Investments</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">{opportunity.title}</li>
-          </ol>
-        </nav>
-      </div>
-
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8 sm:pt-14">
-        {/* Title block */}
-        <header className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-start">
-          <div>
-            <p className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider">
-              <span className="text-red-600">{opportunity.category}</span>
-              <span className="text-neutral-500">· {opportunity.priority} priority</span>
-            </p>
-            <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{opportunity.title}</h1>
-            <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">{opportunity.description}</p>
+      <PageHeader
+        crumbs={[{ label: 'Investment projects', href: '/investments' }, { label: opportunity.title }]}
+        caption={<>{opportunity.category} · {opportunity.priority} priority</>}
+        title={opportunity.title}
+        lead={opportunity.description}
+        aside={
+          <div className="flex items-center gap-4 border-t-4 border-black bg-white p-5">
+            <span className="grid h-16 w-16 shrink-0 place-items-center border border-[#dcd8cf] bg-white p-2">
+              <Image src={opportunity.logoPath} alt="" width={56} height={56} className="object-contain" />
+            </span>
+            <span>
+              <span className="block text-xs font-bold uppercase tracking-[0.12em] text-[#5c5850]">Lead agency</span>
+              <span className="mt-1 block font-bold leading-snug">{opportunity.agency}</span>
+            </span>
           </div>
-          <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-md border border-neutral-200 bg-white p-2">
-            <Image src={opportunity.logoPath} alt={`${opportunity.agency} logo`} width={56} height={56} className="object-contain" />
-          </div>
-        </header>
+        }
+      />
 
+      <div className="gov-container pb-16 pt-10">
         {/* Key metrics row */}
-        <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-5 bg-neutral-50 py-5 pl-5 pr-4 md:grid-cols-4">
-          <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Investment range</dt>
-            <dd className="font-data mt-1 text-sm font-bold text-black">{opportunity.investmentRange}</dd>
+        <dl className="grid grid-cols-2 border-t-2 border-black md:grid-cols-4">
+          <div className="border-b border-[#dcd8cf] py-4 pr-4 md:border-b-0">
+            <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Investment range</dt>
+            <dd className="mt-1 font-display text-2xl font-semibold leading-tight text-black">{opportunity.investmentRange}</dd>
           </div>
-          <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Expected ROI</dt>
-            <dd className="font-data mt-1 text-sm font-bold text-black">{opportunity.roi}</dd>
+          <div className="border-b border-[#dcd8cf] py-4 pr-4 md:border-b-0">
+            <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Expected ROI</dt>
+            <dd className="mt-1 font-display text-2xl font-semibold leading-tight text-black">{opportunity.roi}</dd>
           </div>
-          <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Timeline</dt>
-            <dd className="font-data mt-1 text-sm font-bold text-black">{opportunity.timeline}</dd>
+          <div className="border-b border-[#dcd8cf] py-4 pr-4 md:border-b-0">
+            <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Timeline</dt>
+            <dd className="mt-1 font-display text-2xl font-semibold leading-tight text-black">{opportunity.timeline}</dd>
           </div>
-          <div>
-            <dt className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Market size</dt>
-            <dd className="mt-1 text-sm font-bold text-black">{opportunity.marketSize}</dd>
+          <div className="border-b border-[#dcd8cf] py-4 pr-4 md:border-b-0">
+            <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Market size</dt>
+            <dd className="mt-1 font-display text-2xl font-semibold leading-tight text-black">{opportunity.marketSize}</dd>
           </div>
         </dl>
-        <section aria-label="Project listing source and currency" className="mt-4 grid gap-3 border border-neutral-200 bg-white px-4 py-4 text-sm sm:grid-cols-2">
+        <section aria-label="Project listing source and currency" className="gov-inset gov-inset--black mt-6 grid gap-3 text-sm sm:grid-cols-2">
           <div>
             <p className="text-xs font-bold uppercase tracking-wider text-neutral-500">Source / lead agency</p>
             <p className="mt-1 font-semibold text-neutral-900">{opportunity.agency}</p>
@@ -147,20 +133,20 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
               <h2 className={sectionHeadingClass}>Key investment metrics</h2>
               <dl className="mt-5 grid grid-cols-1 gap-x-10 gap-y-5 md:grid-cols-2">
                 <div>
-                  <dt className="text-sm font-medium text-neutral-600">Market growth rate</dt>
-                  <dd className="mt-1 text-lg font-semibold text-black">{opportunity.keyMetrics.marketGrowth}</dd>
+                  <dt className="text-sm font-bold text-[#5c5850]">Market growth rate</dt>
+                  <dd className="mt-1 text-xl font-bold text-black">{opportunity.keyMetrics.marketGrowth}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-neutral-600">Current export value</dt>
-                  <dd className="mt-1 text-lg font-semibold text-black">{opportunity.keyMetrics.exportValue}</dd>
+                  <dt className="text-sm font-bold text-[#5c5850]">Current export value</dt>
+                  <dd className="mt-1 text-xl font-bold text-black">{opportunity.keyMetrics.exportValue}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-neutral-600">Employment potential</dt>
-                  <dd className="mt-1 text-lg font-semibold text-black">{opportunity.keyMetrics.employmentPotential}</dd>
+                  <dt className="text-sm font-bold text-[#5c5850]">Employment potential</dt>
+                  <dd className="mt-1 text-xl font-bold text-black">{opportunity.keyMetrics.employmentPotential}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm font-medium text-neutral-600">Payback period</dt>
-                  <dd className="mt-1 text-lg font-semibold text-black">{opportunity.keyMetrics.paybackPeriod}</dd>
+                  <dt className="text-sm font-bold text-[#5c5850]">Payback period</dt>
+                  <dd className="mt-1 text-xl font-bold text-black">{opportunity.keyMetrics.paybackPeriod}</dd>
                 </div>
               </dl>
             </section>
@@ -170,7 +156,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
               <ul className="mt-5 grid grid-cols-1 gap-x-10 gap-y-3 md:grid-cols-2">
                 {opportunity.incentives.map((incentive, index) => (
                   <li key={index} className="flex items-start gap-3 text-neutral-800">
-                    <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 bg-yellow-400" />
+                    <span aria-hidden="true" className="mt-1.5 h-3 w-3 shrink-0 bg-[#ffd700] ring-1 ring-black" />
                     <span className="font-medium">{incentive}</span>
                   </li>
                 ))}
@@ -182,7 +168,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
               <ul className="mt-5 space-y-3">
                 {opportunity.requiredLicenses.map((license, index) => (
                   <li key={index} className="flex items-start gap-3 text-neutral-800">
-                    <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 bg-red-600" />
+                    <span aria-hidden="true" className="mt-1.5 h-3 w-3 shrink-0 bg-[#ce1126]" />
                     <span className="font-medium">{license}</span>
                   </li>
                 ))}
@@ -194,7 +180,7 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
           <aside className="space-y-10">
             <section>
               <h3 className="text-lg font-bold text-black">Key risk</h3>
-              <p className="mt-3 border-l-4 border-red-600 pl-4 text-sm leading-6 text-neutral-800">{opportunity.keyRisks}</p>
+              <p className="gov-inset gov-inset--red mt-3 text-[15px] leading-6">{opportunity.keyRisks}</p>
             </section>
 
             <section className={sectionClass}>
@@ -252,8 +238,8 @@ export default async function InvestmentDetailPage({ params }: { params: Promise
           </aside>
         </div>
 
-        <div className="mt-14 border-t border-neutral-200 pt-6">
-          <Link href="/investments" className={linkClass}>Back to all opportunities</Link>
+        <div className="mt-14 border-t border-[#dcd8cf] pt-6">
+          <Link href="/investments" className={linkClass}>← Back to all investment projects</Link>
         </div>
       </div>
     </div>

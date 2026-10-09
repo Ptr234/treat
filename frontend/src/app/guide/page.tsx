@@ -1,8 +1,8 @@
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
+import SectionHeading from '@/components/ui/SectionHeading';
 import { buildMetadata } from '@/lib/seo';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Reveal } from '@/components/ui/Reveal';
 import {
   UserPlusIcon,
   BuildingLibraryIcon,
@@ -28,15 +28,12 @@ export const metadata: Metadata = buildMetadata({
   path: '/guide/',
 });
 
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
-
 const STEPS = [
   {
     icon: UserPlusIcon,
     title: 'Create your account',
     body: 'Sign in with Google or an email and password. An account lets you track every inquiry, resume applications across devices, and manage your investor profile in one place.',
-    action: { label: 'Get started', href: '/' },
+    action: { label: 'Go to your account', href: '/account' },
     note: 'You can browse most of the portal without an account — but signing in unlocks tracking and saved progress.',
   },
   {
@@ -103,130 +100,90 @@ const TIPS = [
 
 export default function GuidePage() {
   return (
- <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">User guide</li>
-          </ol>
-        </nav>
-      </div>
-
-      {/* Hero */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">User guide</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">How to use the OneStop Centre</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Everything you need — from your first visit to a fully facilitated investment — in eight simple steps.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-          <Link href="/" className={linkClass}>Go to the homepage</Link>
-          <Link href="/chatbot" className={linkClass}>Ask the AI assistant</Link>
-        </div>
-      </section>
-      </PageBand>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'User guide' }]}
+        caption="Guidance"
+        title="How to use the OneStop Centre"
+        lead="Everything you need — from your first visit to a fully facilitated investment — in eight steps."
+        actions={
+          <>
+            <Link href="/investments/onboarding" className="gov-btn gov-btn--start">Start your investment journey</Link>
+            <Link href="/chatbot" className="gov-link">Ask the investment assistant</Link>
+          </>
+        }
+      />
 
       {/* Journey */}
-      <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-16 sm:px-6 lg:px-8">
-        <Reveal className="mb-10">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Your journey</p>
-          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">From first visit to facilitated investment</h2>
-        </Reveal>
-
-        <ol className="divide-y divide-neutral-200 border-y border-neutral-200">
-          {STEPS.map((step, i) => (
-            <Reveal key={step.title} delay={i * 0.04}>
-              <li className="grid gap-4 py-8 md:gap-8">
-                <div className="min-w-0">
-                  <h3 className="flex items-center gap-2.5 text-lg font-bold sm:text-xl">
-                    <step.icon className="h-5 w-5 shrink-0 text-red-600" aria-hidden="true" />
+      <section className="gov-section" aria-labelledby="journey-heading">
+        <div className="gov-container grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
+          <div>
+            <SectionHeading id="journey-heading" kicker="Step by step" title="From first visit to facilitated investment" />
+            <ol className="gov-steps max-w-3xl">
+              {STEPS.map((step) => (
+                <li key={step.title} className="!pb-10">
+                  <h3 className="flex items-center gap-2.5 text-xl font-bold">
                     {step.title}
+                    <step.icon className="h-5 w-5 shrink-0 text-[#ce1126]" aria-hidden="true" />
                   </h3>
-                  <p className="mt-2 leading-7 text-neutral-700">{step.body}</p>
-                  {step.note && <p className="mt-2 text-sm italic text-neutral-600">{step.note}</p>}
-                  <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                    <Link href={step.action.href} className={linkClass}>{step.action.label}</Link>
-                    {step.secondary && (
-                      <Link href={step.secondary.href} className="font-medium text-neutral-700 underline underline-offset-4 hover:text-red-600">
-                        {step.secondary.label}
-                      </Link>
-                    )}
+                  <p className="gov-body mt-2 text-[17px]">{step.body}</p>
+                  {step.note && <p className="gov-inset mt-4 text-[15px]">{step.note}</p>}
+                  <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px]">
+                    <Link href={step.action.href} className="gov-arrow-link">{step.action.label}</Link>
+                    {step.secondary && <Link href={step.secondary.href} className="gov-link font-normal">{step.secondary.label}</Link>}
                   </div>
-                </div>
-              </li>
-            </Reveal>
-          ))}
-        </ol>
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <aside className="lg:sticky lg:top-6 lg:self-start">
+            <div className="gov-related">
+              <h2>Good to know</h2>
+              <ul className="!gap-5">
+                {TIPS.map((tip) => (
+                  <li key={tip.title} className="flex gap-3">
+                    <tip.icon className="mt-0.5 h-5 w-5 shrink-0 text-black" aria-hidden="true" />
+                    <span>
+                      <span className="block font-bold">{tip.title}</span>
+                      <span className="text-[15px] text-[#3b3934]">{tip.body}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
+        </div>
       </section>
 
       {/* Business tools */}
-      <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-16 sm:px-6 lg:px-8">
-        <Reveal className="mb-10">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Plan with confidence</p>
-          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Free business tools</h2>
-        </Reveal>
-        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-          {TOOLS.map((tool, i) => (
-            <Reveal key={tool.title} delay={i * 0.05} className="h-full">
-              <div className="h-full border-t border-neutral-200 pt-5">
-                <tool.icon className="h-6 w-6 text-red-600" aria-hidden="true" />
-                <h3 className="mt-4 text-lg font-bold">
-                  <Link href={tool.href} className={linkClass}>{tool.title}</Link>
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-neutral-700">{tool.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* Good to know */}
-      <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-16 sm:px-6 lg:px-8">
-        <Reveal className="mb-10">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Good to know</p>
-          <h2 className="mt-2 text-2xl font-bold sm:text-3xl">Little things that make it easier</h2>
-        </Reveal>
-        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-          {TIPS.map((tip, i) => (
-            <Reveal key={tip.title} delay={i * 0.05} className="h-full">
-              <div className="h-full pl-5">
-                <tip.icon className="h-5 w-5 text-black" aria-hidden="true" />
-                <h3 className="mt-3 font-bold">{tip.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-neutral-700">{tip.body}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className=" bg-neutral-50">
-        <Reveal className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold sm:text-3xl">Ready to begin?</h2>
-          <p className="mt-3 max-w-2xl text-neutral-700">
-            Start on the homepage, or ask the assistant anything — we&apos;ll guide you the rest of the way.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/investments/onboarding"
-              className="inline-flex items-center justify-center rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-            >
-              Start your investment journey
-            </Link>
-            <Link
-              href="/support"
-              className="inline-flex items-center justify-center rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-            >
-              Contact support
-            </Link>
+      <section className="gov-section gov-section--paper" aria-labelledby="guide-tools-heading">
+        <div className="gov-container">
+          <SectionHeading id="guide-tools-heading" kicker="Plan with confidence" title="Free business tools" link={{ label: 'All tools', href: '/tools' }} />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {TOOLS.map((tool) => (
+              <article key={tool.title} className="gov-card gov-card--link">
+                <tool.icon className="h-7 w-7 text-[#ce1126]" aria-hidden="true" />
+                <h3 className="gov-card__title mt-4"><Link href={tool.href}>{tool.title}</Link></h3>
+                <p className="mt-2 text-[15px] text-[#3b3934]">{tool.body}</p>
+              </article>
+            ))}
           </div>
-        </Reveal>
+        </div>
+      </section>
+
+      {/* Final call to action */}
+      <section className="gov-section gov-section--dark" aria-labelledby="begin-heading">
+        <div className="gov-container grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="max-w-2xl">
+            <h2 id="begin-heading" className="gov-title-l text-white">Ready to begin?</h2>
+            <p className="mt-3 text-[17px] text-white/80">Start your investor profile, or contact the OneStop Centre and we will guide you the rest of the way.</p>
+          </div>
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <Link href="/investments/onboarding" className="gov-btn gov-btn--gold">Start your investment journey</Link>
+            <Link href="/support" className="gov-btn gov-btn--outline-inverse">Contact support</Link>
+          </div>
+        </div>
       </section>
     </div>
   );

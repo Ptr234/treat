@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import { PrinterIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { apiFetch } from '@/lib/api-client';
@@ -55,16 +56,16 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
 
   if (loading || authLoading) {
  return <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+      <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
     </div>;
   }
 
   if (error || !cert) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="text-center">
-          <p className="text-neutral-700 mb-4">{error}</p>
-          <Link href={`/business/registration/${referenceNumber}/`} className="text-red-600 underline text-sm">
+        <div className="gov-inset gov-inset--red max-w-md">
+          <p className="mb-3 font-semibold text-black">{error}</p>
+          <Link href={`/business/registration/${referenceNumber}/`} className="gov-link text-sm">
             Back to registration status
           </Link>
         </div>
@@ -73,30 +74,33 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
   }
 
   return (
- <div className="min-h-screen bg-white py-8 px-4 print:bg-white print:py-0">
+ <div className="min-h-screen bg-[#f5f3ee] py-8 px-4 print:bg-white print:py-0">
       <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-6 print:hidden">
-          <Link href={`/business/registration/${referenceNumber}/${emailParam ? `?email=${encodeURIComponent(emailParam)}` : ''}`} className="inline-flex items-center gap-1 text-sm text-neutral-700 hover:text-black">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 print:hidden">
+          <Link href={`/business/registration/${referenceNumber}/${emailParam ? `?email=${encodeURIComponent(emailParam)}` : ''}`} className="gov-link inline-flex items-center gap-1 text-sm">
             <ArrowLeftIcon className="w-4 h-4" /> Back to registration status
           </Link>
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-black text-yellow-400 text-sm font-medium rounded-md hover:bg-neutral-800"
+            className="gov-btn gov-btn--sm"
           >
             <PrinterIcon className="w-4 h-4" /> Print / Save as PDF
           </button>
         </div>
 
         {/* The certificate itself */}
-        <div className="bg-white border-8 border-double border-yellow-600 p-10 print:border-4">
-          <div className="text-center border-b border-neutral-200 pb-6 mb-6">
-            <p className="text-xs tracking-[0.3em] text-red-700 font-bold uppercase">Republic of Uganda</p>
-            <h1 className="text-2xl font-black text-black mt-2">Uganda Registration Services Bureau</h1>
-            <p className="text-sm text-neutral-700 mt-1">Certificate of Business Registration</p>
+        <div className="bg-white shadow-[0_2px_24px_rgb(0_0_0/0.08)] print:shadow-none">
+          <div className="gov-stripe gov-stripe--thick" aria-hidden="true" />
+          <div className="m-3 border-[6px] border-double border-black p-8 sm:p-12">
+          <div className="text-center border-b-2 border-[#ffd700] pb-6 mb-8">
+            <Image src="/images/uganda-flag.png" alt="" width={60} height={40} className="mx-auto mb-4 h-10 w-[60px] object-cover ring-1 ring-black/20" />
+            <p className="text-xs tracking-[0.3em] text-[#9a0d1c] font-bold uppercase">The Republic of Uganda</p>
+            <h1 className="font-display text-3xl font-semibold text-black mt-2">Uganda Registration Services Bureau</h1>
+            <p className="mt-2 text-sm font-bold uppercase tracking-[0.18em] text-[#3b3934]">Certificate of Business Registration</p>
           </div>
 
           <p className="text-center text-neutral-800 mb-6">This is to certify that</p>
-          <h2 className="text-3xl font-bold text-center text-black mb-2">{cert.businessName}</h2>
+          <h2 className="font-display text-4xl font-semibold text-center text-black mb-2">{cert.businessName}</h2>
           <p className="text-center text-neutral-700 mb-8">
             {cert.businessStructure} · {cert.businessType} · {cert.location}
           </p>
@@ -108,15 +112,15 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
 
           <div className="grid grid-cols-2 gap-6 mb-8 text-sm">
             <div>
-              <p className="text-neutral-600">Registration Reference</p>
-              <p className="font-bold text-black">{cert.referenceNumber}</p>
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Registration Reference</p>
+              <p className="font-mono font-bold text-black">{cert.referenceNumber}</p>
             </div>
             <div>
-              <p className="text-neutral-600">Certificate Number</p>
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Certificate Number</p>
               <p className="font-bold text-black">{cert.certificateNumber}</p>
             </div>
             <div>
-              <p className="text-neutral-600">Date Issued</p>
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Date Issued</p>
               <p className="font-bold text-black">{new Date(cert.issuedAt).toLocaleDateString('en-UG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
           </div>
@@ -131,6 +135,8 @@ export default function CertificateClient({ referenceNumber }: { referenceNumber
           <div className="mt-10 pt-6 border-t border-neutral-200 text-center text-xs text-neutral-500">
             Issued via the Uganda OneStop Centre Digital Tool. Verify at oscdigitaltool.com/business/registration/{cert.referenceNumber}
           </div>
+          </div>
+          <div className="gov-stripe gov-stripe--thick" aria-hidden="true" />
         </div>
       </div>
     </div>

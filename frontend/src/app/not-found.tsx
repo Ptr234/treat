@@ -2,38 +2,33 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
- <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="max-w-md w-full text-center px-4">
-        <div className="mb-8">
-          <h1 className="text-9xl font-bold text-yellow-600">404</h1>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Page Not Found
-          </h2>
-          <p className="text-gray-600 mb-8">
-            Sorry, we couldn&apos;t find the page you&apos;re looking for. It might have been moved,
-            deleted, or you entered the wrong URL.
-          </p>
+    <div className="bg-white">
+      <div className="gov-container grid gap-12 py-16 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-24">
+        <div className="flex gap-6">
+          <span className="gov-flagbar hidden sm:block" aria-hidden="true" />
+          <div className="max-w-2xl">
+            <p className="gov-caption">Error 404</p>
+            <h1 className="gov-title-xl mt-2">Page not found</h1>
+            <p className="gov-lead mt-6">If you typed the web address, check it is correct.</p>
+            <p className="gov-body mt-3 text-[17px]">If you pasted the web address, check you copied the entire address.</p>
+            <p className="gov-body mt-3 text-[17px]">
+              The page may have moved. You can{' '}
+              <Link href="/search" className="gov-link">search this website</Link> or{' '}
+              <Link href="/support" className="gov-link">contact the OneStop Centre</Link> if you need help.
+            </p>
+            <Link href="/" className="gov-btn mt-8">Go to the homepage</Link>
+          </div>
         </div>
-
-        <div className="space-y-4">
-          <Link
-            href="/"
-            className="inline-block w-full bg-yellow-600 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors"
-          >
-            Go Home
-          </Link>
-
-          <Link
-            href="/services"
-            className="inline-block w-full bg-white text-gray-900 border border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-          >
-            Browse Services
-          </Link>
-        </div>
-
-        <div className="mt-8 text-sm text-gray-500">
-          <p>Need help? <Link href="/support" className="text-yellow-600 hover:text-yellow-700">Contact Support</Link></p>
-        </div>
+        <aside className="gov-related">
+          <h2>Popular pages</h2>
+          <ul className="text-[15px]">
+            <li><Link href="/services" className="gov-link">Government services</Link></li>
+            <li><Link href="/business/registration" className="gov-link">Register a business</Link></li>
+            <li><Link href="/investments" className="gov-link">Investment projects</Link></li>
+            <li><Link href="/agencies" className="gov-link">Government agencies</Link></li>
+            <li><Link href="/track" className="gov-link">Track an application</Link></li>
+          </ul>
+        </aside>
       </div>
     </div>
   );

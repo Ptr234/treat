@@ -90,7 +90,7 @@ export function CalendarExport({ event }: CalendarExportProps) {
     <div className="flex flex-col items-start gap-3">
       <button
         onClick={handleGoogleCalendar}
-        className="inline-flex items-center gap-2 pb-0.5 text-sm font-bold text-black transition-colors hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+        className="gov-link inline-flex items-center gap-2 text-[15px]"
       >
         <CalendarIcon className="w-4 h-4" />
         Add to Google Calendar
@@ -98,7 +98,7 @@ export function CalendarExport({ event }: CalendarExportProps) {
 
       <button
         onClick={handleICalDownload}
-        className="inline-flex items-center gap-2 pb-0.5 text-sm font-bold text-black transition-colors hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+        className="gov-link inline-flex items-center gap-2 text-[15px]"
       >
         <ArrowDownTrayIcon className="w-4 h-4" />
         Download .ics
@@ -106,7 +106,7 @@ export function CalendarExport({ event }: CalendarExportProps) {
 
       <button
         onClick={handleOutlookCalendar}
-        className="inline-flex items-center gap-2 pb-0.5 text-sm font-bold text-black transition-colors hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+        className="gov-link inline-flex items-center gap-2 text-[15px]"
       >
         <CalendarIcon className="w-4 h-4" />
         Add to Outlook

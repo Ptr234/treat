@@ -48,56 +48,56 @@ export default function UserAuthForm({ onSuccess }: UserAuthFormProps) {
     <form onSubmit={handleSubmit} className="space-y-3">
       {mode === 'signup' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+          <label className="gov-label">Full name</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
             autoComplete="name"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+            className="gov-input"
             placeholder="Jane Investor"
           />
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <label className="gov-label">Email</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+          className="gov-input"
           placeholder="you@example.com"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <label className="gov-label">Password</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+          className="gov-input"
           placeholder={mode === 'signup' ? 'At least 8 chars, 1 uppercase, 1 digit' : '••••••••'}
         />
       </div>
 
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="gov-inset gov-inset--red text-sm font-semibold">{error}</p>}
 
       <button
         type="submit"
         disabled={busy}
-        className="w-full px-4 py-2.5 bg-black text-white font-semibold rounded-lg hover:bg-neutral-800 disabled:opacity-60 transition-colors"
+        className="gov-btn w-full"
       >
         {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
       </button>
 
-      <p className="text-sm text-center text-gray-600">
+      <p className="text-sm text-[#3b3934]">
         {mode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
         <button
           type="button"
@@ -105,7 +105,7 @@ export default function UserAuthForm({ onSuccess }: UserAuthFormProps) {
             setMode(mode === 'signup' ? 'login' : 'signup');
             setError('');
           }}
-          className="font-semibold text-yellow-700 hover:text-yellow-800"
+          className="gov-link"
         >
           {mode === 'signup' ? 'Sign in' : 'Create one'}
         </button>

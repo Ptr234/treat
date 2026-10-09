@@ -1,165 +1,146 @@
-'use client';
-
-import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import {
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowTopRightOnSquareIcon, ClockIcon, EnvelopeIcon, MapPinIcon, PhoneIcon } from '@heroicons/react/24/outline';
 
 const FOOTER_SECTIONS = [
   {
-    title: 'Explore',
-    links: [
-      { label: 'Projects Map', href: '/projects' },
-      { label: 'Investment Incentives', href: '/incentives' },
-      { label: 'Investment Process', href: '/investments/process' },
-      { label: 'Events Calendar', href: '/events' },
-      { label: 'Agency directory', href: '/agencies' },
-    ],
-  },
-  {
     title: 'Services',
     links: [
-      { label: 'Business Registration', href: '/business/registration' },
-      { label: 'Track an Application', href: '/track' },
-      { label: 'Investor Aftercare', href: '/support' },
+      { label: 'Business registration', href: '/business/registration' },
+      { label: 'Licences and permits', href: '/services' },
+      { label: 'Track an application', href: '/track' },
+      { label: 'Government agencies', href: '/agencies' },
+      { label: 'Investor aftercare', href: '/support' },
     ],
   },
   {
-    title: 'Resources',
+    title: 'Invest',
     links: [
-      { label: 'User Guide', href: '/guide' },
-      { label: 'Downloads', href: '/downloads' },
-      { label: 'AI Assistant', href: '/chatbot' },
+      { label: 'Investment projects', href: '/investments' },
+      { label: 'Licensed projects map', href: '/projects' },
+      { label: 'Investment process', href: '/investments/process' },
+      { label: 'Tax incentives', href: '/incentives' },
+      { label: 'Investment statistics', href: '/analytics' },
+    ],
+  },
+  {
+    title: 'Guidance',
+    links: [
+      { label: 'User guide', href: '/guide' },
+      { label: 'Forms and downloads', href: '/downloads' },
+      { label: 'Events calendar', href: '/events' },
+      { label: 'Business tools', href: '/tools' },
+      { label: 'Investment assistant', href: '/chatbot' },
     ],
   },
 ];
 
-const CONTACTS = [
-  {
-    icon: EnvelopeIcon,
-    label: 'info@ugandainvest.go.ug',
-    href: 'mailto:info@ugandainvest.go.ug',
-  },
-  {
-    icon: PhoneIcon,
-    label: '+256 414 301 000',
-    href: 'tel:+256414301000',
-  },
-  {
-    icon: MapPinIcon,
-    label: 'Plot 1, Baskerville Ave, Kololo, Kampala',
-    href: undefined,
-  },
+// Official sites of the agencies most investors deal with. URLs match src/data/agencies.ts.
+const GOVERNMENT_LINKS = [
+  { label: 'Uganda Investment Authority', href: 'https://www.ugandainvestment.go.ug' },
+  { label: 'Uganda Registration Services Bureau', href: 'https://ursb.go.ug' },
+  { label: 'Uganda Revenue Authority', href: 'https://ura.go.ug' },
+  { label: 'Directorate of Citizenship and Immigration Control', href: 'https://www.immigration.go.ug' },
+  { label: 'National Environment Management Authority', href: 'https://nema.go.ug' },
 ];
 
 const BOTTOM_LINKS = [
-  { label: 'Contact Us', href: '/support' },
-  { label: 'User Guide', href: '/guide' },
+  { label: 'About this service', href: '/about' },
+  { label: 'Help and contact', href: '/support' },
   { label: 'Search', href: '/search' },
-  { label: 'Admin', href: '/login' },
+  { label: 'Staff sign in', href: '/login' },
 ];
-
-const linkClass =
-  'text-sm text-white/85 hover:text-yellow-300 hover:underline underline-offset-4 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-sm';
-
-const headingClassDark = 'text-xs font-bold uppercase tracking-[0.16em] text-yellow-300';
-const headingClassLight = 'text-xs font-bold uppercase tracking-[0.16em] text-black';
 
 export default function Footer() {
   return (
-    <footer id="site-footer">
-      {/* Brand and link columns stay on the dark gradient */}
-      <div className="relative isolate overflow-hidden bg-gradient-to-br from-black via-black to-red-950 text-white">
-        <div aria-hidden="true" data-decorative="true" className="pointer-events-none absolute -left-24 bottom-0 hidden h-80 w-80 translate-y-1/3 lg:block">
-          <span className="absolute inset-0 border border-yellow-400/40" />
-          <span className="absolute inset-12 border border-white/20" />
-          <span className="absolute inset-24 border-2 border-red-600/70" />
-        </div>
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-          <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-10">
-            <div className="sm:col-span-2 lg:col-span-1">
-              <Link
-                href="/"
-                className="group inline-flex items-center gap-3 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-              >
-                <Image
-                  src="/images/oneStopCenter-logo.jpeg"
-                  alt="OneStop Centre Uganda logo"
-                  width={44}
-                  height={44}
-                  className="flex-shrink-0 rounded-lg bg-white object-contain"
-                />
-                <span className="leading-tight">
-                  <span className="block text-base font-extrabold tracking-tight text-white transition-colors group-hover:text-yellow-300">
-                    OneStop Centre
-                  </span>
-                  <span className="block text-[11px] font-bold uppercase tracking-[0.18em] text-yellow-400">
-                    Uganda
-                  </span>
-                </span>
-              </Link>
-              <p className="mt-5 max-w-sm text-sm leading-7 text-white/80">
-                Uganda&apos;s OneStop Centre for business registration, investment facilitation, and
-                regulatory compliance, connecting investors with public agencies and services.
-              </p>
-            </div>
+    <footer id="site-footer" className="bg-[#0b0b0b] text-white">
+      <div className="gov-stripe gov-stripe--thick" aria-hidden="true" />
 
-            {FOOTER_SECTIONS.map((section) => (
-              <nav key={section.title} aria-label={`${section.title} links`}>
-                <h2 className={headingClassDark}>{section.title}</h2>
-                <ul className="mt-5 space-y-3">
-                  {section.links.map((link) => (
-                    <li key={link.label}>
-                      <Link href={link.href} className={linkClass}>
-                        {link.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            ))}
-          </div>
+      {/* Contact band */}
+      <div className="border-b border-white/15">
+        <div className="gov-container grid gap-6 py-8 md:grid-cols-[auto_1fr] md:items-center md:gap-10">
+          <p className="font-display text-2xl font-semibold leading-tight text-white sm:text-[28px]">
+            Talk to the<br className="hidden md:block" /> OneStop Centre
+          </p>
+          <ul className="grid gap-x-8 gap-y-4 text-[15px] sm:grid-cols-2 lg:grid-cols-4">
+            <li className="flex gap-3">
+              <PhoneIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#ffd700]" aria-hidden="true" />
+              <span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-white/60">Telephone</span><a href="tel:+256414301000" className="font-semibold text-white underline-offset-4 hover:text-[#ffd700]">+256 414 301 000</a></span>
+            </li>
+            <li className="flex gap-3">
+              <EnvelopeIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#ffd700]" aria-hidden="true" />
+              <span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-white/60">Email</span><a href="mailto:info@ugandainvest.go.ug" className="break-all font-semibold text-white underline-offset-4 hover:text-[#ffd700]">info@ugandainvest.go.ug</a></span>
+            </li>
+            <li className="flex gap-3">
+              <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#ffd700]" aria-hidden="true" />
+              <span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-white/60">Visit</span><span className="font-semibold">Plot 1, Baskerville Avenue, Kololo, Kampala</span></span>
+            </li>
+            <li className="flex gap-3">
+              <ClockIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#ffd700]" aria-hidden="true" />
+              <span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-white/60">Office hours</span><span className="font-semibold">Mon–Fri, 8:00am–5:00pm EAT</span></span>
+            </li>
+          </ul>
         </div>
       </div>
 
-      {/* Contact and bottom bar are white, per request */}
-      <div className="bg-white text-neutral-700">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          <h2 className={headingClassLight}>Contact</h2>
-          <ul className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-3">
-            {CONTACTS.map((c) => (
-              <li key={c.label} className="flex items-center gap-2 text-sm">
-                <c.icon className="h-4 w-4 flex-shrink-0 text-red-600" aria-hidden="true" />
-                {c.href ? (
-                  <a href={c.href} className="text-neutral-700 transition-colors hover:text-red-600">
-                    {c.label}
-                  </a>
-                ) : (
-                  <span className="text-neutral-700">{c.label}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="border-t border-neutral-200">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-4 py-6 sm:px-6 md:flex-row lg:px-8">
-            <p className="text-center text-xs text-neutral-600 sm:text-sm md:text-left">
-              &copy; 2026 Uganda OneStop Centre. All rights reserved.
-            </p>
-            <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-neutral-700 sm:text-sm">
-              {BOTTOM_LINKS.map((link) => (
+      {/* Link columns */}
+      <div className="gov-container grid gap-10 py-12 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1.35fr]">
+        {FOOTER_SECTIONS.map((section) => (
+          <nav key={section.title} aria-labelledby={`footer-${section.title.toLowerCase()}`}>
+            <h2 id={`footer-${section.title.toLowerCase()}`} className="border-b border-white/25 pb-3 text-base font-bold text-white">
+              {section.title}
+            </h2>
+            <ul className="mt-4 space-y-2.5">
+              {section.links.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="transition-colors hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm">
+                  <Link href={link.href} className="text-[15px] text-white/85 underline decoration-white/30 underline-offset-4 hover:text-white hover:decoration-[#ffd700] hover:decoration-2">
                     {link.label}
                   </Link>
                 </li>
               ))}
             </ul>
+          </nav>
+        ))}
+        <nav aria-labelledby="footer-government">
+          <h2 id="footer-government" className="border-b border-white/25 pb-3 text-base font-bold text-white">
+            Government of Uganda
+          </h2>
+          <ul className="mt-4 space-y-2.5">
+            {GOVERNMENT_LINKS.map((link) => (
+              <li key={link.href}>
+                <a href={link.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-start gap-1.5 text-[15px] text-white/85 underline decoration-white/30 underline-offset-4 hover:text-white hover:decoration-[#ffd700] hover:decoration-2">
+                  {link.label}
+                  <ArrowTopRightOnSquareIcon className="mt-1 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  <span className="sr-only">(opens in a new tab)</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+
+      {/* Identity and legal */}
+      <div className="border-t border-white/15">
+        <div className="gov-container flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <Image src="/images/uganda-coat-of-arms.png" alt="Flag of the Republic of Uganda" width={72} height={48} className="h-12 w-[72px] shrink-0 object-cover ring-1 ring-white/30" />
+            <p className="text-sm leading-6 text-white/75">
+              <span className="block font-bold text-white">OneStop Centre Uganda</span>
+              A service of the Uganda Investment Authority.
+              <span className="block italic text-[#ffd700]">For God and My Country</span>
+            </p>
+          </div>
+          <div className="md:text-right">
+            <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm md:justify-end">
+              {BOTTOM_LINKS.map((link) => (
+                <li key={link.label}>
+                  <Link href={link.href} className="text-white underline decoration-white/40 underline-offset-4 hover:decoration-[#ffd700] hover:decoration-2">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-white/60">&copy; 2026 Uganda OneStop Centre. All rights reserved.</p>
           </div>
         </div>
       </div>

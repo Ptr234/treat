@@ -1,9 +1,9 @@
 'use client';
 
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
+import FactRow from '@/components/ui/FactRow';
 import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { EventCard } from '@/components/events/EventCard';
 import { useEvents } from '@/hooks/useEvents';
 import { EventCategory, EventStatus } from '@/types';
@@ -79,141 +79,125 @@ export default function EventsPage() {
     { value: 'completed', label: 'Past events' }
   ];
 
-  const filterButtonClass = (active: boolean) =>
-    `whitespace-nowrap border-b-2 px-1 py-2 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
-      active ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-700 hover:text-red-600'
-    }`;
+  const radioClass = 'h-5 w-5 shrink-0';
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Events</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Events' }]}
+        caption="News and events"
+        title="Events and investment activities"
+        lead="Investment forums, missions, summits and webinars involving Uganda’s business community. Check the event page for updates before making travel plans."
+      >
+        <FactRow
+          facts={[
+            { label: 'Upcoming', value: stats.upcomingCount },
+            { label: 'Past', value: stats.pastCount },
+            { label: 'All events', value: stats.totalCount },
+          ]}
+        />
+      </PageHeader>
 
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Events and investment activities</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Use the events calendar to find investment forums, missions, webinars and other activities involving Uganda’s business community. Search by title, location or organizer, then narrow the list by event category and status. Event listings include dates and participation details when those have been provided by the organizer. Check the event page for updates before making travel plans or sharing registration information.
-        </p>
-        <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Upcoming events</dt>
-            <dd className="font-data mt-1 text-3xl font-bold">{stats.upcomingCount}</dd>
-          </div>
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Total events</dt>
-            <dd className="font-data mt-1 text-3xl font-bold">{stats.totalCount}</dd>
-          </div>
-          <div className="border-l-4 border-red-600 pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Past events</dt>
-            <dd className="font-data mt-1 text-3xl font-bold">{stats.pastCount}</dd>
-          </div>
-        </dl>
-      </section>
-      </PageBand>
-
-      {/* Filters */}
-      <section className="sticky top-0 z-40 mt-10 border-y border-neutral-200 bg-white" aria-label="Filter events">
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <div className="relative">
-            <label htmlFor="event-search" className="sr-only">Search events</label>
-            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
+      <div className="gov-container grid gap-10 py-12 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-14">
+        {/* Filters */}
+        <aside aria-label="Filter events" className="lg:sticky lg:top-6 lg:self-start">
+          <div className="bg-[#f5f3ee] p-5">
+            <h2 className="text-lg font-bold">Filter events</h2>
+            <label htmlFor="event-search" className="gov-label mt-5">Search</label>
             <input
               id="event-search"
-              type="text"
-              placeholder="Search events by title, location, or organizer…"
+              type="search"
+              placeholder="Title, place or organiser"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-md border border-neutral-400 bg-white py-2.5 pl-10 pr-4 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1"
+              className="gov-input"
             />
-          </div>
 
-          <div role="group" aria-label="Category" className="mt-4 flex gap-4 overflow-x-auto">
-            {categories.map(category => (
+            <fieldset className="mt-6">
+              <legend className="gov-label">Type of event</legend>
+              <div className="mt-2 space-y-2.5">
+                {categories.map((category) => (
+                  <label key={category.value} className="flex items-center gap-3 text-[15px] font-normal">
+                    <input type="radio" name="event-category" className={radioClass} checked={selectedCategory === category.value} onChange={() => setSelectedCategory(category.value)} />
+                    {category.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            <fieldset className="mt-6">
+              <legend className="gov-label">Status</legend>
+              <div className="mt-2 space-y-2.5">
+                {statuses.map((status) => (
+                  <label key={status.value} className="flex items-center gap-3 text-[15px] font-normal">
+                    <input type="radio" name="event-status" className={radioClass} checked={selectedStatus === status.value} onChange={() => setSelectedStatus(status.value)} />
+                    {status.label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {(selectedCategory !== 'all' || selectedStatus !== 'all' || searchQuery) && (
               <button
-                key={category.value}
                 type="button"
-                aria-pressed={selectedCategory === category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={filterButtonClass(selectedCategory === category.value)}
+                onClick={() => { setSelectedCategory('all'); setSelectedStatus('all'); setSearchQuery(''); }}
+                className="gov-btn gov-btn--secondary gov-btn--sm mt-6 w-full"
               >
-                {category.label}
+                Clear filters
               </button>
-            ))}
+            )}
           </div>
+        </aside>
 
-          <div role="group" aria-label="Status" className="mt-1 flex gap-4 overflow-x-auto">
-            {statuses.map(status => (
-              <button
-                key={status.value}
-                type="button"
-                aria-pressed={selectedStatus === status.value}
-                onClick={() => setSelectedStatus(status.value)}
-                className={filterButtonClass(selectedStatus === status.value)}
-              >
-                {status.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
+        <div>
+          <section aria-labelledby="upcoming-heading">
+            <h2 id="upcoming-heading" className="gov-title-l border-b-2 border-black pb-3">
+              Upcoming events <span className="font-normal text-[#5c5850]">({upcomingEvents.length})</span>
+            </h2>
 
-      {/* Upcoming events */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8" aria-labelledby="upcoming-heading">
-        <h2 id="upcoming-heading" className="mb-8 border-b border-neutral-200 pb-3 text-2xl font-bold">Upcoming events</h2>
+            {loading ? (
+              <p role="status" className="flex items-center gap-3 py-10 text-[#3b3934]">
+                <span className="h-6 w-6 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" aria-hidden="true" />
+                Loading events…
+              </p>
+            ) : upcomingEvents.length > 0 ? (
+              <div>
+                {upcomingEvents.map((event, index) => (
+                  <EventCard key={event.id} event={event} index={index} />
+                ))}
+              </div>
+            ) : (
+              <div className="gov-inset mt-6">
+                <h3 className="text-lg font-bold">No upcoming events match your filters</h3>
+                <p className="mt-1 text-[15px] text-[#3b3934]">Clear the filters or check back soon for new events.</p>
+              </div>
+            )}
+          </section>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="mb-4 h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-black" role="status" aria-label="Loading events" />
-            <p className="font-medium text-neutral-700">Loading events…</p>
-          </div>
-        ) : upcomingEvents.length > 0 ? (
-          <div className="grid grid-cols-1 gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-            {upcomingEvents.map((event, index) => (
-              <EventCard key={event.id} event={event} index={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="border-l-4 border-red-600 bg-neutral-50 p-6">
-            <h3 className="text-lg font-bold">No upcoming events found</h3>
-            <p className="mt-2 text-sm text-neutral-700">Try adjusting your filters or check back soon for new events.</p>
-          </div>
-        )}
-      </section>
-
-      {/* Past events */}
-      {pastEvents.length > 0 && (
-        <section className="mx-auto max-w-6xl border-t border-neutral-200 px-4 py-14 sm:px-6 lg:px-8" aria-label="Past events">
-          <button
-            type="button"
-            onClick={() => setShowPastEvents(!showPastEvents)}
-            aria-expanded={showPastEvents}
-            className="flex items-center gap-2 text-2xl font-bold transition-colors hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
-          >
-            Past events ({pastEvents.length})
-            <ChevronDownIcon className={`h-6 w-6 transition-transform duration-300 ${showPastEvents ? 'rotate-180' : ''}`} aria-hidden="true" />
-          </button>
-
-          {showPastEvents && (
-            <div className="mt-8 grid grid-cols-1 gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
-              {pastEvents.map((event, index) => (
-                <EventCard key={event.id} event={event} index={index} />
-              ))}
-            </div>
+          {pastEvents.length > 0 && (
+            <section className="mt-14" aria-labelledby="past-heading">
+              <h2 id="past-heading">
+                <button
+                  type="button"
+                  onClick={() => setShowPastEvents(!showPastEvents)}
+                  aria-expanded={showPastEvents}
+                  className="flex w-full items-center justify-between border-b-2 border-black pb-3 text-left text-[clamp(1.625rem,3vw,2.25rem)] font-bold hover:text-[#9a0d1c]"
+                >
+                  <span>Past events <span className="font-normal text-[#5c5850]">({pastEvents.length})</span></span>
+                  <ChevronDownIcon className={`h-7 w-7 transition-transform ${showPastEvents ? 'rotate-180' : ''}`} aria-hidden="true" />
+                </button>
+              </h2>
+              {showPastEvents && (
+                <div>
+                  {pastEvents.map((event, index) => (
+                    <EventCard key={event.id} event={event} index={index} />
+                  ))}
+                </div>
+              )}
+            </section>
           )}
-        </section>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

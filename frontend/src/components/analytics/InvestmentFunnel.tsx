@@ -28,7 +28,7 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
       <text
         x={x + width + 10}
         y={y + 15}
-        fill="#374151"
+        fill="#262522"
         fontSize={14}
         fontWeight="600"
       >
@@ -113,7 +113,7 @@ export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
       </div>
 
       {/* Overall Conversion Summary */}
-      <div className="mt-6 p-4 bg-yellow-50 border-t border-neutral-200 pt-5">
+      <div className="gov-inset mt-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-neutral-800">Overall Conversion Rate</p>

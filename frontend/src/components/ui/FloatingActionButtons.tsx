@@ -50,7 +50,7 @@ export default function FloatingActionButtons() {
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ delay: index * 0.1 }}
                 onClick={action.action}
-                className="flex items-center bg-white px-3 py-2 min-h-[44px] text-black transition-colors hover:bg-neutral-50 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 text-sm"
+                className="flex items-center bg-white px-3 py-2 min-h-[44px] text-black transition-colors hover:bg-neutral-50 hover:text-red-600 text-sm"
               >
                 <span className="mr-2 text-base">{action.icon}</span>
                 <span className="font-medium whitespace-nowrap">

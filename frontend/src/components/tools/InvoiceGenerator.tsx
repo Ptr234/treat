@@ -510,24 +510,24 @@ export default function InvoiceGenerator() {
             {/* Invoice Info */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-2">
+                <label className="gov-label">
                   Invoice Number
                 </label>
                 <input
                   type="text"
                   value={invoiceData.invoiceNumber}
                   onChange={(e) => handleInputChange('invoiceNumber', e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                  className="gov-input"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-2">
+                <label className="gov-label">
                   Agency
                 </label>
                 <select
                   value={invoiceData.selectedAgency}
                   onChange={(e) => handleInputChange('selectedAgency', e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="gov-input"
                 >
                   {agencyOptions.map((agency) => (
                     <option key={agency.key} value={agency.key}>
@@ -540,25 +540,25 @@ export default function InvoiceGenerator() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-2">
+                <label className="gov-label">
                   Invoice Date
                 </label>
                 <input
                   type="date"
                   value={invoiceData.invoiceDate}
                   onChange={(e) => handleInputChange('invoiceDate', e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="gov-input"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-2">
+                <label className="gov-label">
                   Due Date
                 </label>
                 <input
                   type="date"
                   value={invoiceData.dueDate}
                   onChange={(e) => handleInputChange('dueDate', e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  className="gov-input"
                 />
               </div>
             </div>
@@ -568,14 +568,14 @@ export default function InvoiceGenerator() {
               <h4 className="text-lg font-semibold text-neutral-800 mb-4">Client Information</h4>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">
+                  <label className="gov-label">
                     Client Name
                   </label>
                   <input
                     type="text"
                     value={invoiceData.clientName}
                     onChange={(e) => handleInputChange('clientName', e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                    className="gov-input"
                     placeholder="Enter client name"
                   />
                   {errors.clientName && (
@@ -585,14 +585,14 @@ export default function InvoiceGenerator() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Email
                     </label>
                     <input
                       type="email"
                       value={invoiceData.clientEmail}
                       onChange={(e) => handleInputChange('clientEmail', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                      className="gov-input"
                       placeholder="client@example.com"
                     />
                     {errors.clientEmail && (
@@ -600,41 +600,41 @@ export default function InvoiceGenerator() {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-2">
+                    <label className="gov-label">
                       Phone
                     </label>
                     <input
                       type="text"
                       value={invoiceData.clientPhone}
                       onChange={(e) => handleInputChange('clientPhone', e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                      className="gov-input"
                       placeholder="+256 XXX XXX XXX"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">
+                  <label className="gov-label">
                     Address
                   </label>
                   <textarea
                     value={invoiceData.clientAddress}
                     onChange={(e) => handleInputChange('clientAddress', e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                    className="gov-input"
                     rows={3}
                     placeholder="Client address"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-2">
+                  <label className="gov-label">
                     TIN (Optional)
                   </label>
                   <input
                     type="text"
                     value={invoiceData.clientTin}
                     onChange={(e) => handleInputChange('clientTin', e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                    className="gov-input"
                     placeholder="Tax Identification Number"
                   />
                 </div>
@@ -661,52 +661,52 @@ export default function InvoiceGenerator() {
 
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-sm font-medium text-neutral-800 mb-1">
+                        <label className="gov-label">
                           Description
                         </label>
                         <input
                           type="text"
                           value={item.description}
                           onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                          className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                          className="gov-input"
                           placeholder="Service description"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                          <label className="block text-sm font-medium text-neutral-800 mb-1">
+                          <label className="gov-label">
                             Quantity
                           </label>
                           <input
                             type="number"
                             value={item.quantity}
                             onChange={(e) => handleItemChange(index, 'quantity', parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            className="gov-input"
                             min="0"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-neutral-800 mb-1">
+                          <label className="gov-label">
                             Unit Price
                           </label>
                           <input
                             type="number"
                             value={item.unitPrice}
                             onChange={(e) => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            className="gov-input"
                             min="0"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-neutral-800 mb-1">
+                          <label className="gov-label">
                             Tax %
                           </label>
                           <input
                             type="number"
                             value={item.taxRate}
                             onChange={(e) => handleItemChange(index, 'taxRate', parseFloat(e.target.value) || 0)}
-                            className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                            className="gov-input"
                             min="0"
                             max="100"
                           />
@@ -734,26 +734,26 @@ export default function InvoiceGenerator() {
             {/* Notes and Terms */}
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-2">
+                <label className="gov-label">
                   Notes
                 </label>
                 <textarea
                   value={invoiceData.notes}
                   onChange={(e) => handleInputChange('notes', e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                  className="gov-input"
                   rows={3}
                   placeholder="Additional notes"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-800 mb-2">
+                <label className="gov-label">
                   Terms & Conditions
                 </label>
                 <textarea
                   value={invoiceData.terms}
                   onChange={(e) => handleInputChange('terms', e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-neutral-400 text-neutral-800 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 placeholder:text-neutral-600"
+                  className="gov-input"
                   rows={3}
                   placeholder="Payment terms and conditions"
                 />
@@ -763,7 +763,7 @@ export default function InvoiceGenerator() {
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => setShowPreview(!showPreview)}
-                className="flex-1 bg-yellow-600 text-black py-3 px-6 rounded-lg font-semibold hover:bg-yellow-500 hover:shadow-lg hover:shadow-yellow-500/20 active:scale-95 transition-all duration-200"
+                className="gov-btn gov-btn--gold flex-1"
               >
                 {showPreview ? 'Edit Invoice' : 'Preview Invoice'}
               </button>

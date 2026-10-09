@@ -44,14 +44,14 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onRem
   const getIcon = () => {
     switch (notification.type) {
       case 'success':
-        return <CheckCircleIcon className="w-6 h-6 text-yellow-600" />;
+        return <CheckCircleIcon className="w-6 h-6 text-[#8a7200]" />;
       case 'error':
         return <XCircleIcon className="w-6 h-6 text-red-600" />;
       case 'warning':
-        return <ExclamationTriangleIcon className="w-6 h-6 text-yellow-600" />;
+        return <ExclamationTriangleIcon className="w-6 h-6 text-[#8a7200]" />;
       case 'info':
       default:
-        return <InformationCircleIcon className="w-6 h-6 text-blue-600" />;
+        return <InformationCircleIcon className="w-6 h-6 text-black" />;
     }
   };
 
@@ -65,7 +65,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onRem
         return 'border-yellow-200 bg-yellow-50';
       case 'info':
       default:
-        return 'border-blue-200 bg-blue-50';
+        return 'border-[#dcd8cf] bg-[#f5f3ee]';
     }
   };
 
@@ -79,7 +79,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onRem
         return 'bg-yellow-500';
       case 'info':
       default:
-        return 'bg-blue-500';
+        return 'bg-black';
     }
   };
 
@@ -127,7 +127,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onRem
           <div className="ml-4 flex-shrink-0 flex">
             <button
               onClick={() => onRemove(notification.id)}
-              className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none"
+              className="inline-flex text-gray-400 hover:text-gray-600"
             >
               <XMarkIcon className="w-5 h-5" />
             </button>

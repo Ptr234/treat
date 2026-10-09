@@ -220,7 +220,7 @@ export default function ServiceWizard({ isOpen, onClose }: ServiceWizardProps) {
                   <button
                     key={option.id}
                     onClick={() => handleAnswer(currentStepData?.id || '', option.id)}
-                    className="p-4 border-2 border-neutral-200 rounded-md hover:border-black hover:bg-yellow-50 transition-all duration-200 text-left group focus:ring-2 focus-visible:ring-red-600 focus:outline-none"
+                    className="p-4 border-2 border-neutral-200 rounded-md hover:border-black hover:bg-yellow-50 transition-all duration-200 text-left group"
                   >
                     <div className="flex items-start space-x-3">
                       <span className="text-2xl">{option.icon}</span>

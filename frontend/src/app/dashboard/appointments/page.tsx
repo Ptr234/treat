@@ -75,7 +75,7 @@ export default function AppointmentsPage() {
               <select
                 value={agencyFilter}
                 onChange={(e) => setAgencyFilter(e.target.value)}
-                className="bg-neutral-100 border border-neutral-200 text-black text-sm rounded-md px-3 py-2 focus:ring-2 focus-visible:ring-red-600"
+                className="gov-input"
               >
                 <option value="">All Agencies</option>
                 {agencies.map(a => <option key={a} value={a}>{a}</option>)}
@@ -86,7 +86,7 @@ export default function AppointmentsPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+            <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
           </div>
         ) : appointments.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">No appointments found.</div>

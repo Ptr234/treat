@@ -144,7 +144,7 @@ export default function GeographicHeatMap({ data }: GeographicHeatMapProps) {
                         <div className="flex-1 flex items-center gap-3">
                           <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden max-w-[200px]">
                             <div
-                              className="h-full bg-yellow-500 rounded-full transition-all"
+                              className="h-full bg-black rounded-full transition-all"
                               style={{ width: `${(country.inquiries / maxInquiries) * 100}%` }}
                             />
                           </div>

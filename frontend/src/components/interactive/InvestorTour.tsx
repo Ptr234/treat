@@ -304,15 +304,15 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                       <h4 className="font-semibold text-black mb-2">Next Steps:</h4>
                       <ul className="space-y-1 text-sm text-neutral-800">
                         <li className="flex items-center space-x-2">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
                           <span>Explore investment opportunities</span>
                         </li>
                         <li className="flex items-center space-x-2">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
                           <span>Schedule consultation</span>
                         </li>
                         <li className="flex items-center space-x-2">
-                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                          <div className="w-1.5 h-1.5 bg-black rounded-full"></div>
                           <span>Submit application</span>
                         </li>
                       </ul>
@@ -330,13 +330,13 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={startInvestment}
-                className="px-8 py-3 bg-yellow-400 text-black rounded-md font-semibold hover:bg-yellow-300 transition-colors"
+                className="gov-btn gov-btn--gold"
               >
                 Start Investing Now
               </button>
               <button
                 onClick={scheduleConsultation}
-                className="px-8 py-3 bg-blue-600 text-black rounded-md font-semibold hover:bg-blue-700 transition-colors"
+                className="px-8 py-3 bg-black text-white rounded-md font-semibold hover:bg-[#262522] transition-colors"
               >
                 Schedule Consultation
               </button>
@@ -371,7 +371,7 @@ export default function InvestorTour({ isOpen, onClose }: InvestorTourProps) {
                 ) : (
                   <button
                     onClick={nextStep}
-                    className="flex items-center space-x-2 px-6 py-3 bg-black text-yellow-400 rounded-md hover:bg-neutral-100 transition-all"
+                    className="gov-btn"
                   >
                     <span>
                       {currentStep === investmentSteps.length - 1 ? 'Complete Tour' : 'Continue'}

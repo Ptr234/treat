@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Squares2X2Icon,
@@ -106,18 +107,16 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
   return (
     <div className="flex h-full flex-col bg-black text-neutral-300">
       {/* Brand */}
-      <div className="h-1 bg-yellow-400" />
+      <div className="gov-stripe" aria-hidden="true" />
       <Link
         href="/dashboard"
         onClick={onNavigate}
         className="flex items-center gap-3 px-5 py-5 border-b border-neutral-800"
       >
-        <div className="w-9 h-9 flex items-center justify-center flex-shrink-0 bg-yellow-400">
-          <Squares2X2Icon className="w-5 h-5 text-black" />
-        </div>
+        <Image src="/images/uganda-flag.png" alt="" width={36} height={24} className="h-6 w-9 shrink-0 object-cover" />
         <div className="min-w-0">
-          <p className="text-sm font-bold text-white leading-tight truncate">OneStop Centre</p>
-          <p className="text-[11px] text-neutral-400 leading-tight">Admin Console</p>
+          <p className="font-display text-lg font-semibold leading-tight text-white truncate">OneStop Centre</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffd700] leading-tight">Staff console</p>
         </div>
       </Link>
 
@@ -125,7 +124,7 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {groups.map((group) => (
           <div key={group.heading}>
-            <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-neutral-500">
+            <p className="px-3 mb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-neutral-400">
               {group.heading}
             </p>
             <ul className="space-y-0.5">
@@ -139,8 +138,8 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
                       aria-current={active ? 'page' : undefined}
                       className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors ${
                         active
-                          ? 'bg-yellow-400 text-black'
-                          : 'text-neutral-300 hover:text-yellow-400 hover:bg-white/5'
+                          ? 'border-l-4 border-[#ffd700] bg-white/10 font-bold text-white'
+                          : 'border-l-4 border-transparent text-neutral-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
@@ -154,7 +153,7 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
         ))}
       </nav>
 
-      <div className="h-0.5 bg-yellow-400" />
+      <p className="border-t border-white/10 px-5 py-4 text-[11px] text-neutral-400">Republic of Uganda · Uganda Investment Authority</p>
     </div>
   );
 }

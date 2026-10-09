@@ -90,7 +90,7 @@ export default function LeafletMap({ projects, selectedProject, onSelectProject,
                 <div className="space-y-1">
                   <p><span className="text-gray-500">Sector:</span> <span className="font-medium">{project.sector}</span></p>
                   <p><span className="text-gray-500">Location:</span> {project.district}, {project.region}</p>
-                  <p><span className="text-gray-500">Investment:</span> <span className="font-bold text-amber-600">{formatCurrency(project.investmentValue)}</span></p>
+                  <p><span className="text-gray-500">Investment:</span> <span className="font-bold text-black">{formatCurrency(project.investmentValue)}</span></p>
                   <p><span className="text-gray-500">Employment:</span> <span className="font-bold text-red-600">{project.plannedEmployment.toLocaleString()} jobs</span></p>
                   {project.industrialPark && (
                     <p><span className="text-gray-500">Park:</span> {project.industrialPark}</p>

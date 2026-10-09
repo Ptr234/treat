@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import PageHeader from '@/components/ui/PageHeader';
 import { motion } from 'framer-motion';
 import {
   ChartBarIcon,
@@ -154,96 +155,65 @@ export default function AnalyticsPage() {
   };
 
   return (
- <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white text-black"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <div className="flex flex-wrap items-center gap-3 mb-3">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Analytics & Intelligence</h1>
-                {activeTab === 'inquiries' && (
-                  <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                    Sample Data
-                  </span>
-                )}
-              </div>
-              <p className="text-black text-lg max-w-2xl">
-                Comprehensive insights into investment inquiries, licensed projects, and performance benchmarks
-              </p>
-              {activeTab === 'inquiries' && (
-                <p className="text-black/80 text-sm max-w-2xl mt-1">
-                  The figures below are illustrative sample data, not live platform metrics.
-                </p>
-              )}
-              {/* Tab Navigation */}
-              <div className="flex gap-2 mt-4 overflow-x-auto">
-                <button
-                  onClick={() => setActiveTab('inquiries')}
-                  className={`px-3 sm:px-5 py-2 min-h-[44px] rounded-md text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap ${
-                    activeTab === 'inquiries'
-                      ? 'bg-white text-red-600'
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  <ChartBarIcon className="w-4 h-4" />
-                  Inquiry Analytics
-                </button>
-                <button
-                  onClick={() => setActiveTab('projects')}
-                  className={`px-3 sm:px-5 py-2 min-h-[44px] rounded-md text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap ${
-                    activeTab === 'projects'
-                      ? 'bg-white text-red-600'
-                      : 'bg-white/20 text-white hover:bg-white/30'
-                  }`}
-                >
-                  <TableCellsIcon className="w-4 h-4" />
-                  Project Analysis
-                </button>
-              </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Investment statistics' }]}
+        caption="Invest"
+        title="Investment statistics"
+        lead="Insights into investment enquiries, licensed projects and performance benchmarks."
+        actions={
+          <>
+            <div className="relative">
+              <label htmlFor="analytics-range" className="sr-only">Date range</label>
+              <CalendarIcon className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#ce1126]" aria-hidden="true" />
+              <select id="analytics-range" value={selectedRange} onChange={(e) => setSelectedRange(e.target.value)} className="gov-input !w-auto !pl-10 pr-8">
+                {dateRanges.map((range) => (
+                  <option key={range.value} value={range.value}>{range.label}</option>
+                ))}
+              </select>
             </div>
+            <button type="button" onClick={() => handleExport('csv')} className="gov-btn">
+              <DocumentArrowDownIcon className="h-5 w-5" aria-hidden="true" />
+              Export CSV
+            </button>
+            <button type="button" onClick={() => window.print()} className="gov-btn gov-btn--secondary">
+              Print or save as PDF
+            </button>
+          </>
+        }
+      />
 
-            {/* Date Range & Export Controls */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative">
-                <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-red-600" />
-                <select
-                  value={selectedRange}
-                  onChange={(e) => setSelectedRange(e.target.value)}
-                  className="pl-10 pr-4 py-2.5 bg-white text-black rounded-md border border-yellow-400 focus:outline-none focus:ring-2 focus-visible:ring-red-600 font-medium appearance-none cursor-pointer"
-                >
-                  {dateRanges.map(range => (
-                    <option key={range.value} value={range.value}>
-                      {range.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      {/* Tabs */}
+      <div className="border-b-2 border-black bg-white">
+        <div role="tablist" aria-label="Statistics" className="gov-container flex overflow-x-auto">
+          {([
+            { id: 'inquiries', label: 'Enquiry analytics', Icon: ChartBarIcon },
+            { id: 'projects', label: 'Project analysis', Icon: TableCellsIcon },
+          ] as const).map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === id}
+              onClick={() => setActiveTab(id)}
+              className={`flex min-h-[3.25rem] items-center gap-2 whitespace-nowrap border-b-4 px-5 text-[15px] font-bold transition-colors ${
+                activeTab === id ? 'border-[#ffd700] bg-black text-white' : 'border-transparent text-[#3b3934] hover:bg-[#f5f3ee] hover:text-black'
+              }`}
+            >
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2.5 bg-white text-red-600 rounded-md font-medium hover:bg-yellow-50 transition-colors flex items-center gap-2 justify-center"
-              >
-                <DocumentArrowDownIcon className="w-5 h-5" />
-                Print / PDF
-              </button>
-
-              <button
-                onClick={() => handleExport('csv')}
-                className="px-4 py-2.5 bg-black text-yellow-400 rounded-md font-medium hover:bg-white transition-colors flex items-center gap-2 justify-center border border-yellow-400"
-              >
-                <DocumentArrowDownIcon className="w-5 h-5" />
-                Export CSV
-              </button>
-            </div>
+      {activeTab === 'inquiries' && (
+        <div className="gov-container pt-8">
+          <div className="gov-warning max-w-3xl text-[15px]">
+            <p>The enquiry figures below are illustrative sample data, not live platform metrics.</p>
           </div>
         </div>
-      </motion.div>
+      )}
 
       {/* Export Notification */}
       {showNotification && (
@@ -251,14 +221,15 @@ export default function AnalyticsPage() {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
-          className="fixed top-4 right-4 z-50 bg-yellow-400 text-black px-6 py-3 rounded-md flex items-center gap-3"
+          role="status"
+          className="fixed right-4 top-4 z-50 flex items-center gap-3 border-l-[6px] border-[#ffd700] bg-black px-6 py-3 text-white"
         >
-          <DocumentArrowDownIcon className="w-5 h-5" />
-          <span className="font-medium">Export complete! Check your downloads.</span>
+          <DocumentArrowDownIcon className="h-5 w-5" aria-hidden="true" />
+          <span className="font-semibold">Export complete. Check your downloads.</span>
         </motion.div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="gov-container py-8">
         {activeTab === 'inquiries' ? (
           <>
             {/* Summary Cards */}
@@ -546,8 +517,8 @@ export default function AnalyticsPage() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-semibold text-black">{b.sector}</span>
                         <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                          b.status === 'Ready for investment' ? 'bg-green-100 text-green-800' :
-                          b.status === 'Feasibility complete' ? 'bg-blue-100 text-blue-800' :
+                          b.status === 'Ready for investment' ? 'bg-black text-white' :
+                          b.status === 'Feasibility complete' ? 'bg-[#ffd700] text-black' :
                           'bg-neutral-100 text-neutral-800'
                         }`}>
                           {b.status}
@@ -585,8 +556,8 @@ export default function AnalyticsPage() {
                           <td className="py-3 text-right font-semibold text-red-600">${b.totalValue}M</td>
                           <td className="py-3 pl-4">
                             <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                              b.status === 'Ready for investment' ? 'bg-green-100 text-green-800' :
-                              b.status === 'Feasibility complete' ? 'bg-blue-100 text-blue-800' :
+                              b.status === 'Ready for investment' ? 'bg-black text-white' :
+                              b.status === 'Feasibility complete' ? 'bg-[#ffd700] text-black' :
                               'bg-neutral-100 text-neutral-800'
                             }`}>
                               {b.status}

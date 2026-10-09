@@ -195,11 +195,11 @@ export default function NavigationGuide() {
   const getStepIcon = (iconType: string) => {
     const iconProps = { className: "w-5 h-5" };
     switch (iconType) {
-      case 'investment': return <ArrowRightIcon {...iconProps} className="w-5 h-5 text-yellow-500" />;
-      case 'services': return <CheckCircleIcon {...iconProps} className="w-5 h-5 text-blue-500" />;
-      case 'agencies': return <InformationCircleIcon {...iconProps} className="w-5 h-5 text-purple-500" />;
-      case 'filter': return <LightBulbIcon {...iconProps} className="w-5 h-5 text-yellow-500" />;
-      case 'calculator': return <ArrowRightIcon {...iconProps} className="w-5 h-5 text-orange-500" />;
+      case 'investment': return <ArrowRightIcon {...iconProps} className="w-5 h-5 text-[#8a7200]" />;
+      case 'services': return <CheckCircleIcon {...iconProps} className="w-5 h-5 text-black" />;
+      case 'agencies': return <InformationCircleIcon {...iconProps} className="w-5 h-5 text-black" />;
+      case 'filter': return <LightBulbIcon {...iconProps} className="w-5 h-5 text-[#8a7200]" />;
+      case 'calculator': return <ArrowRightIcon {...iconProps} className="w-5 h-5 text-[#ce1126]" />;
       default: return <ChevronRightIcon {...iconProps} className="w-5 h-5 text-neutral-500" />;
     }
   };
@@ -228,7 +228,7 @@ export default function NavigationGuide() {
               <LightBulbIcon className="w-5 h-5 mr-2 text-red-600" />
               <h3 className="font-bold text-lg">{currentGuide.title}</h3>
             </div>
-            <p className="text-blue-100 text-sm">{currentGuide.description}</p>
+            <p className="text-white/80 text-sm">{currentGuide.description}</p>
           </div>
 
           {/* Content */}
@@ -249,7 +249,7 @@ export default function NavigationGuide() {
                   {step.action && (
                     <button
                       onClick={step.action}
-                      className="mt-2 text-xs bg-blue-600 text-black px-3 py-1 rounded-md hover:bg-blue-700 transition-colors"
+                      className="mt-2 text-xs bg-black text-white px-3 py-1 rounded-md hover:bg-[#262522] transition-colors"
                     >
                       {step.actionText}
                     </button>

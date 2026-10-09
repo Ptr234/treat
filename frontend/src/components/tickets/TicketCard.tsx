@@ -11,19 +11,19 @@ interface TicketCardProps {
 }
 
 const statusColors: Record<TicketStatus, string> = {
-  NEW: 'bg-blue-100 text-blue-800 border-blue-200',
-  ASSIGNED: 'bg-purple-100 text-purple-800 border-purple-200',
-  IN_PROGRESS: 'bg-yellow-100 text-neutral-800 border-yellow-200',
-  PENDING_EXTERNAL: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  RESOLVED: 'bg-yellow-200 text-neutral-900 border-yellow-300',
-  CLOSED: 'bg-gray-100 text-gray-800 border-gray-200'
+  NEW: 'gov-tag gov-tag--red',
+  ASSIGNED: 'gov-tag gov-tag--outline',
+  IN_PROGRESS: 'gov-tag gov-tag--gold',
+  PENDING_EXTERNAL: 'gov-tag gov-tag--grey',
+  RESOLVED: 'gov-tag',
+  CLOSED: 'gov-tag gov-tag--grey'
 };
 
 const priorityColors: Record<TicketPriority, string> = {
-  low: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  medium: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  high: 'bg-orange-50 text-orange-700 border-orange-200',
-  critical: 'bg-red-50 text-red-700 border-red-200'
+  low: 'gov-tag gov-tag--grey',
+  medium: 'gov-tag gov-tag--outline',
+  high: 'gov-tag gov-tag--gold',
+  critical: 'gov-tag gov-tag--red'
 };
 
 const categoryLabels: Record<string, string> = {
@@ -50,28 +50,28 @@ export default function TicketCard({ ticket }: TicketCardProps) {
   return (
     <Link
       href={`/tickets/${ticket.id}/`}
-      className="group block border-t border-neutral-200 py-6 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+      className="group block h-full border border-[#dcd8cf] border-t-4 border-t-black bg-white p-5 no-underline hover:border-t-[#ce1126]"
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-data text-sm font-semibold text-black">{ticketNumber}</span>
-        <span className={`px-2 py-0.5 text-xs font-medium rounded border ${statusColors[ticket.status]}`}>
-          {ticket.status.replace('_', ' ')}
+        <span className={statusColors[ticket.status]}>
+          {ticket.status.replace(/_/g, ' ')}
         </span>
-        <span className={`px-2 py-0.5 text-xs font-medium rounded border ${priorityColors[ticket.priority]}`}>
+        <span className={priorityColors[ticket.priority]}>
           {ticket.priority.toUpperCase()}
         </span>
         {ticket.isEscalated && (
-          <span className="rounded border border-red-200 bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+          <span className="gov-tag gov-tag--red">
             ESCALATED
           </span>
         )}
         {ticket.assigneeAgency && (
-          <span className="rounded border border-neutral-300 px-2 py-0.5 text-xs font-medium text-neutral-800">
+          <span className="gov-tag gov-tag--outline">
             {ticket.assigneeAgency}
           </span>
         )}
       </div>
-      <h3 className="mt-3 line-clamp-2 font-display text-xl font-semibold leading-snug text-black group-hover:text-red-600">
+      <h3 className="mt-3 line-clamp-2 text-lg font-bold leading-snug text-black underline decoration-1 underline-offset-4 group-hover:text-[#9a0d1c] group-hover:decoration-[3px]">
         {ticket.title}
       </h3>
       <p className="mt-1 text-sm text-neutral-700">{categoryLabels[ticket.category]}</p>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowRightIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import PageHeader from '@/components/ui/PageHeader';
 
 export default function TrackApplicationPage() {
   const router = useRouter();
@@ -23,46 +23,53 @@ export default function TrackApplicationPage() {
   };
 
   return (
-    <div className="min-h-[65vh] bg-neutral-50 text-neutral-950">
-      <nav aria-label="Breadcrumb" className="border-b border-neutral-200 bg-white">
-        <ol className="mx-auto flex max-w-6xl gap-2 px-4 py-4 text-sm sm:px-6 lg:px-8">
-          <li><Link href="/" className="font-semibold text-red-700 underline underline-offset-2">Home</Link></li>
-          <li aria-hidden="true" className="text-neutral-400">/</li>
-          <li aria-current="page" className="font-semibold">Track an application</li>
-        </ol>
-      </nav>
-      <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-        <div className="max-w-2xl pl-6 sm:pl-9">
-          <p className="text-xs font-bold uppercase tracking-[.16em] text-red-700">Application services</p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Track your business registration</h1>
-          <p className="mt-4 leading-7 text-neutral-700">Enter the reference number from your registration confirmation. You may be asked to verify the email address used when you applied.</p>
-          <form onSubmit={submit} className="mt-8">
-            <label htmlFor="application-reference" className="block text-sm font-semibold">Application reference number</label>
-            <div className="mt-2 flex flex-col gap-3 sm:flex-row">
-              <input
-                id="application-reference"
-                value={reference}
-                onChange={(event) => setReference(event.target.value)}
-                autoComplete="off"
-                className="min-h-12 min-w-0 flex-1 rounded-md border border-neutral-400 px-4 text-base focus:border-red-700 focus:outline-none focus:ring-2 focus:ring-red-700"
-                aria-invalid={Boolean(error)}
-                aria-describedby={error ? 'reference-error' : 'reference-help'}
-                placeholder="For example, the reference in your email"
-              />
-              <button type="submit" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-md bg-[#10283f] px-5 font-bold text-white hover:bg-[#1b3d5c] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2">
-                <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
-                Find application
-                <ArrowRightIcon className="h-4 w-4" aria-hidden="true" />
-              </button>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Track an application' }]}
+        caption="Application services"
+        title="Track your business registration"
+        lead="Enter the reference number from your registration confirmation. You may be asked to verify the email address you used when you applied."
+      />
+
+      <div className="gov-container grid gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-16">
+        <form onSubmit={submit} noValidate className="max-w-xl">
+          {error && (
+            <div role="alert" className="mb-8 border-4 border-[#ce1126] p-5">
+              <h2 className="text-lg font-bold">There is a problem</h2>
+              <a href="#application-reference" className="mt-2 inline-block font-bold text-[#9a0d1c] underline underline-offset-4">{error}</a>
             </div>
-            {error ? <p id="reference-error" role="alert" className="mt-2 text-sm font-semibold text-red-700">{error}</p> : <p id="reference-help" className="mt-2 text-xs text-neutral-600">The reference is on the confirmation shown after submission or sent to your email.</p>}
-          </form>
-          <div className="mt-8 border-t border-neutral-200 pt-5 text-sm">
-            <p className="font-semibold">Need to submit a new application?</p>
-            <Link href="/business/registration" className="mt-2 inline-block font-semibold text-red-700 underline decoration-2 underline-offset-4">Start business registration</Link>
+          )}
+          <div className={error ? 'border-l-4 border-[#ce1126] pl-4' : ''}>
+            <label htmlFor="application-reference" className="gov-label text-lg">Application reference number</label>
+            <p id="reference-help" className="gov-hint mb-2">It is on the confirmation shown after you applied, and in your email.</p>
+            {error && <p id="reference-error" className="mb-2 text-sm font-bold text-[#9a0d1c]">{error}</p>}
+            <input
+              id="application-reference"
+              value={reference}
+              onChange={(event) => setReference(event.target.value)}
+              autoComplete="off"
+              spellCheck={false}
+              className={`gov-input max-w-sm font-mono text-lg uppercase tracking-wider ${error ? '!border-[#ce1126]' : ''}`}
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'reference-error reference-help' : 'reference-help'}
+            />
           </div>
-        </div>
-      </main>
+          <button type="submit" className="gov-btn mt-8">Find application</button>
+        </form>
+
+        <aside className="space-y-8">
+          <div className="gov-related">
+            <h2>Not applied yet?</h2>
+            <p className="text-[15px] text-[#3b3934]">Reserve a name and register your company with URSB.</p>
+            <Link href="/business/registration" className="gov-link mt-2 inline-block">Start business registration</Link>
+          </div>
+          <div className="gov-related !border-black">
+            <h2>Tracking a support ticket?</h2>
+            <p className="text-[15px] text-[#3b3934]">Use the private link in your ticket confirmation email to see replies and progress.</p>
+            <Link href="/tickets/create/" className="gov-link mt-2 inline-block">Submit a new support ticket</Link>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

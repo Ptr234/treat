@@ -13,7 +13,7 @@ interface SLAIndicatorProps {
 export default function SLAIndicator({ deadline, status }: SLAIndicatorProps) {
   if (status === 'RESOLVED' || status === 'CLOSED') {
     return (
-      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-full text-sm font-medium border border-yellow-200">
+      <div className="inline-flex items-center gap-1.5 text-sm font-bold text-black">
         <CheckCircleIcon className="w-4 h-4" />
         <span>Completed</span>
       </div>
@@ -31,7 +31,7 @@ export default function SLAIndicator({ deadline, status }: SLAIndicatorProps) {
     const overdueDays = Math.floor(Math.abs(diffMs) / (1000 * 60 * 60 * 24));
     const overdueHours = Math.floor((Math.abs(diffMs) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-    let overdueText = 'SLA Breached - ';
+    let overdueText = 'SLA breached: ';
     if (overdueDays > 0) {
       overdueText += `${overdueDays}d ${overdueHours}h overdue`;
     } else {
@@ -39,7 +39,7 @@ export default function SLAIndicator({ deadline, status }: SLAIndicatorProps) {
     }
 
     return (
-      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-700 rounded-full text-sm font-medium border border-red-200">
+      <div className="inline-flex items-center gap-1.5 bg-[#ce1126] px-2.5 py-1 text-sm font-bold text-white">
         <ExclamationTriangleIcon className="w-4 h-4" />
         <span>{overdueText}</span>
       </div>
@@ -55,20 +55,20 @@ export default function SLAIndicator({ deadline, status }: SLAIndicatorProps) {
     const days = Math.floor(diffHours / 24);
     const hours = diffHours % 24;
     timeText = `${days}d ${hours}h remaining`;
-    colorClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    colorClass = 'text-[#3b3934]';
   } else if (diffHours > 4) {
     timeText = `${diffHours}h ${diffMinutes}m remaining`;
-    colorClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    colorClass = 'text-[#3b3934]';
   } else if (diffHours > 1) {
     timeText = `${diffHours}h ${diffMinutes}m remaining`;
-    colorClass = 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    colorClass = 'text-[#3b3934]';
   } else {
     timeText = `${totalHours > 0 ? totalHours + 'h' : diffMinutes + 'm'} remaining`;
-    colorClass = 'bg-orange-50 text-orange-700 border-orange-200';
+    colorClass = 'border-l-4 border-[#ce1126] pl-2 font-bold text-[#9a0d1c]';
   }
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border ${colorClass}`}>
+    <div className={`inline-flex items-center gap-1.5 text-sm font-semibold ${colorClass}`}>
       <ClockIcon className="w-4 h-4" />
       <span>{timeText}</span>
     </div>

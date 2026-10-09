@@ -14,7 +14,7 @@ interface FormFieldProps {
 export default function FormField({ label, required, wide, children }: FormFieldProps) {
   return (
     <div className={wide ? 'md:col-span-2' : undefined}>
-      <label className="block text-sm text-neutral-700 mb-1">
+      <label className="gov-label">
         {label}
         {required && ' *'}
       </label>

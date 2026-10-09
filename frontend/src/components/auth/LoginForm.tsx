@@ -112,7 +112,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   if (showReset) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900">
+        <h3 className="text-xl font-bold text-black">
           {resetStep === 'email' ? 'Reset Password' : 'Enter Reset Token'}
         </h3>
 
@@ -127,14 +127,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               onChange={(e) => setResetEmail(e.target.value)}
               required
               placeholder="admin@uia.go.ug"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="gov-input"
             />
             {resetError && <p className="text-red-600 text-sm">{resetError}</p>}
-            {resetMessage && <p className="text-green-600 text-sm">{resetMessage}</p>}
+            {resetMessage && <p className="text-black text-sm">{resetMessage}</p>}
             <button
               type="submit"
               disabled={resetLoading}
-              className="w-full py-2 px-4 bg-yellow-600 text-black font-semibold rounded-md hover:bg-yellow-500 disabled:opacity-50"
+              className="gov-btn gov-btn--gold gov-btn--sm w-full"
             >
               {resetLoading ? 'Sending...' : 'Send Reset Link'}
             </button>
@@ -150,7 +150,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               onChange={(e) => setResetToken(e.target.value)}
               required
               placeholder="Paste reset token from email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="gov-input"
             />
             <input
               type="password"
@@ -158,14 +158,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
               onChange={(e) => setResetPassword(e.target.value)}
               required
               placeholder="New password (min 8 chars)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="gov-input"
             />
             {resetError && <p className="text-red-600 text-sm">{resetError}</p>}
-            {resetMessage && <p className="text-green-600 text-sm">{resetMessage}</p>}
+            {resetMessage && <p className="text-black text-sm">{resetMessage}</p>}
             <button
               type="submit"
               disabled={resetLoading}
-              className="w-full py-2 px-4 bg-yellow-600 text-black font-semibold rounded-md hover:bg-yellow-500 disabled:opacity-50"
+              className="gov-btn gov-btn--gold gov-btn--sm w-full"
             >
               {resetLoading ? 'Resetting...' : 'Reset Password'}
             </button>
@@ -174,7 +174,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
         <button
           onClick={() => { setShowReset(false); setResetStep('email'); setResetError(''); setResetMessage(''); }}
-          className="text-sm text-red-700 hover:text-red-800"
+          className="gov-link text-sm"
         >
           &larr; Back to sign in
         </button>
@@ -186,13 +186,13 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
     return (
       <form onSubmit={handleMfaSubmit} className="space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Two-factor authentication</h3>
+          <h3 className="text-xl font-bold text-black">Two-factor authentication</h3>
           <p className="text-sm text-gray-600 mt-1">
             Enter the 6-digit code from your authenticator app to finish signing in.
           </p>
         </div>
         <div>
-          <label htmlFor="mfaCode" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="mfaCode" className="gov-label">
             Authentication code
           </label>
           <input
@@ -207,22 +207,22 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             autoFocus
             value={mfaCode}
             onChange={(e) => { setMfaCode(e.target.value.replace(/\D/g, '')); setFormError(''); }}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm tracking-[0.5em] text-center text-lg focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 text-black placeholder-gray-400"
+            className="gov-input mt-1 tracking-[0.5em] text-center text-lg"
             placeholder="000000"
           />
         </div>
-        {formError && <div className="text-red-600 text-sm">{formError}</div>}
+        {formError && <div role="alert" className="gov-inset gov-inset--red text-sm font-semibold">{formError}</div>}
         <button
           type="submit"
           disabled={mfaSubmitting || mfaCode.length !== 6}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+          className="gov-btn gov-btn--sm w-full"
         >
           {mfaSubmitting ? 'Verifying...' : 'Verify & Sign In'}
         </button>
         <button
           type="button"
           onClick={() => { setMfaRequired(false); setMfaCode(''); setFormError(''); }}
-          className="text-sm text-red-700 hover:text-red-800"
+          className="gov-link text-sm"
         >
           &larr; Back to sign in
         </button>
@@ -233,20 +233,20 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+        <label htmlFor="email" className="gov-label">Email</label>
         <input
           type="email" name="email" id="email" required
           value={formData.email} onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 text-black placeholder-gray-400"
+          className="gov-input mt-1"
         />
       </div>
       <div>
         <div className="flex items-center justify-between">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+          <label htmlFor="password" className="gov-label">Password</label>
           <button
             type="button"
             onClick={() => setShowReset(true)}
-            className="text-xs text-red-700 hover:text-red-800 font-medium"
+            className="gov-link text-sm font-normal"
           >
             Forgot password?
           </button>
@@ -254,13 +254,13 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <input
           type="password" name="password" id="password" required
           value={formData.password} onChange={handleChange}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 text-black placeholder-gray-400"
+          className="gov-input mt-1"
         />
       </div>
-      {formError && <div className="text-red-600 text-sm">{formError}</div>}
+      {formError && <div role="alert" className="gov-inset gov-inset--red text-sm font-semibold">{formError}</div>}
       <button
         type="submit" disabled={isLoading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+        className="gov-btn gov-btn--sm w-full"
       >
         {isLoading ? 'Signing in...' : 'Sign In'}
       </button>

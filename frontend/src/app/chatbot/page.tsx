@@ -17,6 +17,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import ChatMessage from '@/components/chatbot/ChatMessage';
 import LanguageSelector from '@/components/chatbot/LanguageSelector';
@@ -254,7 +255,7 @@ function ChatbotPageInner() {
       {/* Mobile Menu Toggle */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-yellow-500 text-black p-2.5 rounded-lg shadow-lg hover:bg-yellow-400 transition-colors"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-black text-white p-2.5 shadow-lg hover:bg-[#262522] transition-colors"
         aria-label="Toggle menu"
       >
         {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -281,12 +282,19 @@ function ChatbotPageInner() {
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="fixed lg:relative inset-y-0 left-0 z-40 w-[280px] bg-white border-r border-neutral-200 flex flex-col"
             >
-              <div className="h-1 bg-gradient-to-r from-red-600 via-yellow-500 to-red-600" />
+              <div className="gov-stripe" aria-hidden="true" />
+              <Link href="/" className="flex items-center gap-3 border-b border-neutral-200 px-4 py-4 no-underline hover:bg-[#f5f3ee]">
+                <Image src="/images/uganda-flag.png" alt="" width={36} height={24} className="h-6 w-9 shrink-0 object-cover ring-1 ring-black/15" />
+                <span className="leading-tight">
+                  <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[#9a0d1c]">Republic of Uganda</span>
+                  <span className="block font-display text-lg font-semibold text-black">OneStop Centre</span>
+                </span>
+              </Link>
 
               <div className="p-4 flex items-center justify-between">
                 <button
                   onClick={handleNewChat}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black rounded-lg transition-colors text-sm font-semibold flex-1 mr-2"
+                  className="gov-btn gov-btn--sm flex-1 mr-2"
                 >
                   <Plus className="w-4 h-4" />
                   New chat
@@ -294,7 +302,7 @@ function ChatbotPageInner() {
                 {isLargeScreen && (
                   <button
                     onClick={() => setIsSidebarOpen(false)}
-                    className="p-2 text-neutral-600 hover:text-yellow-500 rounded-lg hover:bg-white transition-colors"
+                    className="p-2 text-neutral-600 hover:text-black hover:bg-[#f5f3ee] transition-colors"
                     aria-label="Close sidebar"
                   >
                     <PanelLeftClose className="w-5 h-5" />
@@ -303,7 +311,7 @@ function ChatbotPageInner() {
               </div>
 
               <div className="flex-1 overflow-y-auto px-3 pb-3">
-                <p className="text-[11px] font-semibold text-yellow-500/70 uppercase tracking-widest px-2 mb-2">
+                <p className="text-[11px] font-semibold text-[#5c5850] uppercase tracking-widest px-2 mb-2">
                   Quick Topics
                 </p>
                 <div className="space-y-0.5">
@@ -311,7 +319,7 @@ function ChatbotPageInner() {
                     <button
                       key={label}
                       onClick={() => handleSendMessage(label)}
-                      className="w-full text-left px-3 py-2.5 text-sm text-neutral-700 hover:text-yellow-500 hover:bg-white rounded-lg transition-colors truncate"
+                      className="w-full text-left px-3 py-2.5 text-sm text-neutral-700 hover:text-black hover:bg-[#f5f3ee] hover:underline transition-colors truncate"
                     >
                       {label}
                     </button>
@@ -332,21 +340,21 @@ function ChatbotPageInner() {
                 </div>
                 <button
                   onClick={handleEscalate}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-950/50 rounded-lg transition-colors font-medium"
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-[#9a0d1c] hover:bg-[#fdf1f2] hover:underline transition-colors font-medium"
                 >
                   <AlertCircle className="w-4 h-4" />
                   Escalate to Officer
                 </button>
                 <Link
                   href="/"
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-neutral-600 hover:text-neutral-700 hover:bg-white rounded-lg transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-neutral-600 hover:text-black hover:bg-[#f5f3ee] hover:underline transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Back to Home
                 </Link>
               </div>
 
-              <div className="h-0.5 bg-gradient-to-r from-transparent via-red-600 to-transparent" />
+              <p className="px-4 pb-4 text-[11px] text-neutral-600">Uganda Investment Authority</p>
             </motion.aside>
           </>
         )}
@@ -357,7 +365,7 @@ function ChatbotPageInner() {
         {!showSidebar && isLargeScreen && (
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="absolute top-4 left-4 z-10 p-2 text-neutral-600 hover:text-yellow-500 rounded-lg hover:bg-white transition-colors"
+            className="absolute top-4 left-4 z-10 p-2 text-neutral-600 hover:text-black hover:bg-[#f5f3ee] transition-colors"
             aria-label="Open sidebar"
           >
             <PanelLeft className="w-5 h-5" />
@@ -377,14 +385,14 @@ function ChatbotPageInner() {
                 className="flex flex-col items-center text-center max-w-2xl w-full"
               >
                 <div className="relative mb-8">
-                                    <div className="relative w-20 h-20 bg-yellow-400 flex items-center justify-center">
-                    <Sparkles className="w-10 h-10 text-black" />
+                                    <div className="relative w-20 h-20 bg-black flex items-center justify-center shadow-[inset_0_-6px_0_#ffd700]">
+                    <Sparkles className="w-10 h-10 text-[#ffd700]" />
                   </div>
                 </div>
 
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+                <h1 className="gov-title-xl mb-3">
                   <span className="text-black">How can I help you </span>
-                  <span className="text-red-600">
+                  <span className="text-[#9a0d1c]">
                     invest in Uganda?
                   </span>
                 </h1>
@@ -397,14 +405,14 @@ function ChatbotPageInner() {
                     <motion.button
                       key={label}
                       onClick={() => handleSendMessage(label)}
-                      className="text-left border-t-2 border-neutral-200 py-4 pr-4 transition-colors hover:border-black group relative"
+                      className="text-left border-t-4 border-neutral-200 bg-white py-4 pr-4 transition-colors hover:border-[#ce1126] group relative"
                       whileHover={{ y: -2, scale: 1.01 }}
                       whileTap={{ scale: 0.98 }}
                     >
                                             <div className="relative">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-base">{icon}</span>
-                          <p className="text-sm font-medium text-neutral-700 group-hover:text-yellow-400 transition-colors">
+                          <p className="text-sm font-medium text-neutral-700 group-hover:text-black group-hover:underline transition-colors">
                             {label}
                           </p>
                         </div>
@@ -428,7 +436,7 @@ function ChatbotPageInner() {
         {/* Input Area */}
         <div className="flex-shrink-0 pb-4 pt-2 px-4 md:px-6">
           <div className="max-w-3xl mx-auto">
-            <div className="relative flex items-end border-b border-neutral-200 focus-within:border-red-600 transition-colors">
+            <div className="relative flex items-end border-2 border-[#262522] bg-white px-2 focus-within:border-black transition-colors">
               <textarea
                 ref={textareaRef}
                 value={inputValue}
@@ -436,7 +444,7 @@ function ChatbotPageInner() {
                 onKeyDown={handleKeyDown}
                 placeholder="Message UIA Assistant..."
                 maxLength={2000}
-                className="flex-1 resize-none bg-transparent px-1 py-3.5 pr-24 text-sm text-black placeholder:text-neutral-500 focus:outline-none max-h-[200px]"
+                className="flex-1 resize-none bg-transparent px-1 py-3.5 pr-24 text-sm text-black placeholder:text-neutral-500 max-h-[200px]"
                 rows={1}
                 disabled={isTyping}
               />
@@ -458,7 +466,7 @@ function ChatbotPageInner() {
                 <button
                   onClick={() => handleSendMessage()}
                   disabled={!inputValue.trim() || isTyping}
-                  className="p-2 bg-black text-yellow-400 hover:bg-neutral-800 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                  className="p-2 bg-black text-white hover:bg-[#262522] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   aria-label="Send message"
                 >
                   <Send className="w-4 h-4" />
@@ -479,7 +487,7 @@ function ChatbotPageInner() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-white z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
             onClick={() => setShowEscalationForm(false)}
           >
             <motion.div
@@ -502,21 +510,21 @@ function ChatbotPageInner() {
                   placeholder="Your full name *"
                   value={escalationData.name}
                   onChange={(e) => setEscalationData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-neutral-400 bg-white text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                  className="gov-input"
                 />
                 <input
                   type="email"
                   placeholder="Email address *"
                   value={escalationData.email}
                   onChange={(e) => setEscalationData(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-neutral-400 bg-white text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                  className="gov-input"
                 />
                 <input
                   type="tel"
                   placeholder="Phone number (optional)"
                   value={escalationData.phone}
                   onChange={(e) => setEscalationData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full px-3 py-2.5 border border-neutral-400 bg-white text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                  className="gov-input"
                 />
                 <textarea
                   placeholder="Briefly describe your issue or question *"
@@ -524,25 +532,25 @@ function ChatbotPageInner() {
                   onChange={(e) => setEscalationData(prev => ({ ...prev, issue: e.target.value }))}
                   rows={3}
                   maxLength={2000}
-                  className="w-full px-3 py-2.5 border border-neutral-400 bg-white text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 resize-none"
+                  className="gov-input resize-none"
                 />
               </div>
               {escalationError && (
-                <p role="alert" className="mt-3 border-l-4 border-red-600 bg-red-50 px-3 py-2 text-sm text-red-800">
+                <p role="alert" className="gov-inset gov-inset--red mt-3 text-sm font-semibold">
                   {escalationError}
                 </p>
               )}
               <div className="flex gap-3 mt-5">
                 <button
                   onClick={() => setShowEscalationForm(false)}
-                  className="flex-1 border-2 border-black px-4 py-2.5 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 transition-colors"
+                  className="gov-btn gov-btn--outline flex-1"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleEscalationSubmitReal}
                   disabled={!escalationData.name || !escalationData.email || !escalationData.issue || isEscalating}
-                  className="flex-1 bg-black px-4 py-2.5 text-sm font-bold text-yellow-400 hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  className="gov-btn flex-1"
                 >
                   {isEscalating ? (
                     <>

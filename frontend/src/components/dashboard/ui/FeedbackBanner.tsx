@@ -9,11 +9,8 @@ interface FeedbackBannerProps {
 export default function FeedbackBanner({ type, message }: FeedbackBannerProps) {
   return (
     <div
-      className={`mb-6 p-4 rounded-md border text-sm ${
-        type === 'success'
-          ? 'bg-green-50 border-green-600 text-green-800'
-          : 'bg-red-50 border-red-600 text-red-800'
-      }`}
+      role={type === 'error' ? 'alert' : 'status'}
+      className={`mb-6 text-[15px] font-semibold ${type === 'success' ? 'gov-inset' : 'gov-inset gov-inset--red'}`}
     >
       {message}
     </div>

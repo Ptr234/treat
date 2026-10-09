@@ -1,8 +1,7 @@
 'use client';
 
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
 import { useState } from 'react';
-import Link from 'next/link';
 
 interface LineItem {
   description: string;
@@ -10,10 +9,9 @@ interface LineItem {
   rate: number;
 }
 
-const inputClass =
-  'w-full rounded-md border border-neutral-400 bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
-const labelClass = 'mb-2 block text-sm font-bold text-black';
-const smallLabelClass = 'mb-1 block text-xs font-bold text-black';
+const inputClass = 'gov-input';
+const labelClass = 'gov-label';
+const smallLabelClass = 'mb-1 block text-sm font-bold text-black';
 const sectionHeadingClass = 'text-lg font-bold text-black';
 
 export default function InvoiceGeneratorPage() {
@@ -85,39 +83,19 @@ export default function InvoiceGeneratorPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/tools" className="text-red-600 hover:underline underline-offset-4">Business tools</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Invoice generator</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Business tools', href: '/tools' }, { label: 'Invoice generator' }]}
+        caption="Business tools"
+        title="Invoice generator"
+        lead="Create a clear invoice for your sales and services, with totals calculated for you. Print it or save it for your records."
+      />
 
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Professional invoice generator</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Generate professional, tax-compliant invoices for your business transactions with our easy-to-use invoice generator.
-        </p>
-      </section>
-      </PageBand>
-
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="gov-container py-12 lg:py-16">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
           {/* Invoice form */}
           <section aria-labelledby="invoice-form-heading">
-            <h2 id="invoice-form-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Invoice details</h2>
+            <h2 id="invoice-form-heading" className="gov-title-l border-b-2 border-black pb-3">Invoice details</h2>
 
             <div className="mt-8 space-y-10">
               {/* Business information */}
@@ -180,7 +158,7 @@ export default function InvoiceGeneratorPage() {
                   <button
                     type="button"
                     onClick={addLineItem}
-                    className=" px-1 text-sm font-bold text-black hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                    className=" px-1 text-sm font-bold text-black hover:border-red-600 hover:text-red-600"
                   >
                     + Add item
                   </button>
@@ -205,7 +183,7 @@ export default function InvoiceGeneratorPage() {
                           <button
                             type="button"
                             onClick={() => removeLineItem(index)}
-                            className="p-2 text-sm font-semibold text-red-600 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+                            className="p-2 text-sm font-semibold text-red-600 hover:text-black"
                           >
                             Remove
                           </button>
@@ -220,14 +198,14 @@ export default function InvoiceGeneratorPage() {
                 <button
                   type="button"
                   onClick={handleGenerateInvoice}
-                  className="flex-1 rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                  className="gov-btn flex-1"
                 >
                   Generate invoice
                 </button>
                 <button
                   type="button"
                   onClick={handleSaveDraft}
-                  className="flex-1 rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                  className="gov-btn gov-btn--outline flex-1"
                 >
                   Save draft
                 </button>
@@ -237,7 +215,7 @@ export default function InvoiceGeneratorPage() {
 
           {/* Preview */}
           <section aria-labelledby="invoice-preview-heading">
-            <h2 id="invoice-preview-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Invoice preview</h2>
+            <h2 id="invoice-preview-heading" className="gov-title-l border-b-2 border-black pb-3">Invoice preview</h2>
 
             {!showPreview ? (
               <div className="mt-8 py-8 pl-6">

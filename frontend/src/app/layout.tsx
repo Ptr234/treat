@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { Public_Sans, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL, SOCIAL_IMAGE, organizationLd, websiteLd } from "@/lib/seo";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Providers } from "./providers";
 import LayoutShell from "@/components/layout/LayoutShell";
+
+// Self-hosted at build time: no request to Google from the visitor's browser.
+const publicSans = Public_Sans({ subsets: ["latin"], variable: "--font-public", display: "swap" });
+const sourceSerif = Source_Serif_4({ subsets: ["latin"], variable: "--font-serif", display: "swap", weight: ["600", "700"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -51,22 +56,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-UG" className={`${publicSans.variable} ${sourceSerif.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <meta name="theme-color" content="#111111" />
+        <meta name="theme-color" content="#0b0b0b" />
         <JsonLd data={[organizationLd, websiteLd]} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
-        <meta name="msapplication-TileColor" content="#111111" />
+        <meta name="msapplication-TileColor" content="#0b0b0b" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body
-        className="antialiased bg-white text-gray-900 selection:bg-primary-100"
+        className="antialiased bg-white text-[#0b0b0b]"
         suppressHydrationWarning
       >
         <GoogleAnalytics />

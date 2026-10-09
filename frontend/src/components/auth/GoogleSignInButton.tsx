@@ -215,20 +215,20 @@ export default function GoogleSignInButton({
           autoFocus
           value={mfaCode}
           onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm tracking-[0.5em] text-center text-lg focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 text-black placeholder-gray-400"
+          className="gov-input tracking-[0.5em] text-center text-lg"
           placeholder="000000"
         />
         <button
           type="submit"
           disabled={mfaSubmitting || mfaCode.length !== 6}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 disabled:opacity-50"
+          className="gov-btn gov-btn--sm w-full"
         >
           {mfaSubmitting ? 'Verifying...' : 'Verify & Sign In'}
         </button>
         <button
           type="button"
           onClick={() => { setPendingCredential(null); setMfaCode(''); }}
-          className="text-sm text-red-700 hover:text-red-800"
+          className="gov-link text-sm"
         >
           &larr; Back to sign in
         </button>
@@ -242,7 +242,7 @@ export default function GoogleSignInButton({
         <button
           type="button"
           disabled
-          className="w-full flex items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-400 shadow-sm cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 border-2 border-[#dcd8cf] bg-white px-4 py-2.5 text-sm font-medium text-gray-400 shadow-sm cursor-not-allowed"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -269,7 +269,7 @@ export default function GoogleSignInButton({
       />
       {!scriptLoaded && clientId && (
         <div className="flex items-center justify-center py-2.5">
-          <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-[#dcd8cf] border-t-black rounded-full animate-spin" />
         </div>
       )}
     </div>

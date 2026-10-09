@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import PageHeader from '@/components/ui/PageHeader';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api-client';
@@ -171,11 +172,11 @@ export default function ProfilePage() {
   // "sign in" screen to a user who is actually authenticated.
   if (authLoading) {
     return (
- <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-neutral-700 font-medium">Loading your profile…</p>
-        </div>
+      <div className="gov-container py-24">
+        <p role="status" className="flex items-center gap-3 text-[#3b3934]">
+          <span className="h-6 w-6 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" aria-hidden="true" />
+          Loading your profile…
+        </p>
       </div>
     );
   }
@@ -183,21 +184,13 @@ export default function ProfilePage() {
   // Any signed-in account (admins and regular users) can view their profile.
   if (!isAuthenticated) {
     return (
- <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="max-w-md w-full text-center pt-8">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
-            <LockClosedIcon className="w-8 h-8 text-red-600" />
-          </div>
-          <h1 className="text-2xl font-bold text-black mb-3">Profile</h1>
-          <p className="text-neutral-700 mb-6">Sign in to view your profile.</p>
-          <Link
-            href="/"
-            className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-800 transition-colors"
-          >
-            Return Home
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        crumbs={[{ label: 'Your profile' }]}
+        caption="Your account"
+        title="Your profile"
+        lead="Sign in to view and update your profile."
+        actions={<Link href="/" className="gov-btn">Return to the homepage</Link>}
+      />
     );
   }
 
@@ -291,14 +284,20 @@ export default function ProfilePage() {
     .slice(0, 2);
 
   return (
- <div className="min-h-screen bg-white py-8">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Your profile' }]}
+        caption="Your account"
+        title="Your profile"
+        lead="Your personal details, password and sign-in security."
+      />
+      <div className="gov-container max-w-3xl py-12">
         {mfaSetupRequired && (
-          <div className="mb-6 pl-4 py-2 flex items-start gap-3">
-            <DevicePhoneMobileIcon className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+          <div role="alert" className="gov-inset gov-inset--red mb-8 flex items-start gap-3">
+            <DevicePhoneMobileIcon className="w-6 h-6 text-[#ce1126] flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div>
-              <p className="font-semibold text-yellow-900">Set up two-factor authentication to continue</p>
-              <p className="text-sm text-yellow-800 mt-1">
+              <p className="font-semibold text-black">Set up two-factor authentication to continue</p>
+              <p className="text-sm text-[#3b3934] mt-1">
                 Back-office accounts now require MFA. Scan the QR code below with an authenticator app and enter
                 a code to unlock the dashboard and staff tools again.
               </p>
@@ -307,16 +306,16 @@ export default function ProfilePage() {
         )}
 
         {/* Header */}
-        <div className="border-t border-neutral-200 pt-6 mb-6">
+        <div className="mb-10 border-t-4 border-black">
           <div className="flex items-center gap-5">
-            <div className="flex h-16 w-16 items-center justify-center flex-shrink-0">
-              <span className="text-2xl font-bold text-red-600">{initials}</span>
+            <div className="flex h-16 w-16 items-center justify-center flex-shrink-0 rounded-full bg-black">
+              <span className="font-display text-2xl font-semibold text-[#ffd700]">{initials}</span>
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold text-black truncate">{user?.name}</h1>
               <p className="text-neutral-600">{user?.email}</p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                <span className="gov-tag gov-tag--gold inline-flex items-center gap-1">
                   <ShieldCheckIcon className="w-3.5 h-3.5" />
                   Administrator
                 </span>
@@ -326,30 +325,30 @@ export default function ProfilePage() {
         </div>
 
         {/* Personal Information */}
-        <div className="border-t border-neutral-200 pt-6 mb-6">
-          <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+        <div className="mb-10 border-t-4 border-black">
+          <div className="flex items-center justify-between border-b border-[#dcd8cf] py-4">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-black">
               <UserCircleIcon className="w-5 h-5 text-neutral-600" />
               Personal Information
             </h2>
             {!isEditing && (
               <button
                 onClick={handleStartEdit}
-                className="text-sm font-medium text-red-600 hover:text-yellow-800"
+                className="gov-link text-[15px]"
               >
                 Edit
               </button>
             )}
           </div>
-          <div className="p-6 space-y-4">
+          <div className="space-y-4 py-6">
             {profileSuccess && (
-              <div className="flex items-center gap-2 py-2 border-l border-neutral-200 pl-4 text-sm">
+              <div role="status" className="gov-inset flex items-center gap-2 text-sm font-semibold">
                 <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {profileSuccess}
               </div>
             )}
             {profileError && (
-              <div className="flex items-center gap-2 py-2 border-l-4 border-red-600 pl-4 text-sm text-red-700">
+              <div role="alert" className="gov-inset gov-inset--red flex items-center gap-2 text-sm font-semibold">
                 <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {profileError}
               </div>
@@ -362,7 +361,7 @@ export default function ProfilePage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
+                  className="gov-input"
                   autoFocus
                 />
               ) : (
@@ -386,7 +385,7 @@ export default function ProfilePage() {
                 <button
                   onClick={handleSaveName}
                   disabled={saving}
-                  className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                  className="gov-btn gov-btn--sm"
                 >
                   {saving ? 'Saving...' : 'Save'}
                 </button>
@@ -403,9 +402,9 @@ export default function ProfilePage() {
         </div>
 
         {/* Security */}
-        <div className="border-t border-neutral-200 pt-6 mb-6">
-          <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-            <h2 className="text-lg font-bold text-black flex items-center gap-2">
+        <div className="mb-10 border-t-4 border-black">
+          <div className="flex items-center justify-between border-b border-[#dcd8cf] py-4">
+            <h2 className="flex items-center gap-2 text-xl font-bold text-black">
               <LockClosedIcon className="w-5 h-5 text-neutral-600" />
               Security
             </h2>
@@ -416,15 +415,15 @@ export default function ProfilePage() {
                   setPasswordError('');
                   setPasswordSuccess('');
                 }}
-                className="text-sm font-medium text-red-600 hover:text-yellow-800"
+                className="gov-link text-[15px]"
               >
                 Change Password
               </button>
             )}
           </div>
-          <div className="p-6">
+          <div className="py-6">
             {passwordSuccess && (
-              <div className="flex items-center gap-2 py-2 mb-4 border-l border-neutral-200 pl-4 text-sm">
+              <div role="status" className="gov-inset mb-4 flex items-center gap-2 text-sm font-semibold">
                 <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                 {passwordSuccess}
               </div>
@@ -433,13 +432,13 @@ export default function ProfilePage() {
             {showPasswordForm ? (
               <form onSubmit={handleChangePassword} className="space-y-4">
                 {passwordError && (
-                  <div className="flex items-center gap-2 py-2 border-l-4 border-red-600 pl-4 text-sm text-red-700">
+                  <div role="alert" className="gov-inset gov-inset--red flex items-center gap-2 text-sm font-semibold">
                     <ExclamationCircleIcon className="w-4 h-4 flex-shrink-0" />
                     {passwordError}
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-1">
+                  <label className="gov-label">
                     Current Password
                   </label>
                   <input
@@ -447,11 +446,11 @@ export default function ProfilePage() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
-                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
+                    className="gov-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-1">
+                  <label className="gov-label">
                     New Password
                   </label>
                   <input
@@ -460,12 +459,12 @@ export default function ProfilePage() {
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
+                    className="gov-input"
                   />
                   <p className="text-xs text-neutral-500 mt-1">Minimum 8 characters</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-neutral-800 mb-1">
+                  <label className="gov-label">
                     Confirm New Password
                   </label>
                   <input
@@ -474,14 +473,14 @@ export default function ProfilePage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
+                    className="gov-input"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     type="submit"
                     disabled={passwordSaving}
-                    className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                    className="gov-btn gov-btn--sm"
                   >
                     {passwordSaving ? 'Updating...' : 'Update Password'}
                   </button>
@@ -509,7 +508,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-neutral-800 text-sm">Session</span>
-                  <span className="text-green-600 text-sm font-medium">Active (24h token)</span>
+                  <span className="text-black text-sm font-medium">Active (24h token)</span>
                 </div>
               </div>
             )}
@@ -518,25 +517,23 @@ export default function ProfilePage() {
 
         {/* Two-factor authentication (back-office roles only) */}
         {canUseMfa && (
-          <div className="border-t border-neutral-200 pt-6 mb-6">
-            <div className="px-6 py-4 border-b border-neutral-200 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-black flex items-center gap-2">
+          <div className="mb-10 border-t-4 border-black">
+            <div className="flex items-center justify-between border-b border-[#dcd8cf] py-4">
+              <h2 className="flex items-center gap-2 text-xl font-bold text-black">
                 <DevicePhoneMobileIcon className="w-5 h-5 text-neutral-600" />
                 Two-Factor Authentication
               </h2>
               {mfaStatusLoaded && (
                 <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                    mfaEnabled ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-700'
-                  }`}
+                  className={`gov-tag ${mfaEnabled ? '' : 'gov-tag--red'}`}
                 >
                   {mfaEnabled ? 'Enabled' : 'Disabled'}
                 </span>
               )}
             </div>
-            <div className="p-6">
+            <div className="py-6">
               {mfaSuccess && (
-                <div className="flex items-center gap-2 py-2 mb-4 border-l border-neutral-200 pl-4 text-sm">
+                <div role="status" className="gov-inset mb-4 flex items-center gap-2 text-sm font-semibold">
                   <CheckCircleIcon className="w-4 h-4 flex-shrink-0" />
                   {mfaSuccess}
                 </div>
@@ -557,17 +554,17 @@ export default function ProfilePage() {
                       Confirm your password and a current authentication code to turn off two-factor authentication.
                     </p>
                     <div>
-                      <label className="block text-sm font-medium text-neutral-800 mb-1">Current Password</label>
+                      <label className="gov-label">Current Password</label>
                       <input
                         type="password"
                         value={disablePassword}
                         onChange={(e) => setDisablePassword(e.target.value)}
                         required
-                        className="w-full px-3 py-2 border border-neutral-400 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
+                        className="gov-input"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-neutral-800 mb-1">Authentication Code</label>
+                      <label className="gov-label">Authentication Code</label>
                       <input
                         type="text"
                         inputMode="numeric"
@@ -575,7 +572,7 @@ export default function ProfilePage() {
                         value={disableCode}
                         onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, ''))}
                         required
-                        className="w-40 px-3 py-2 border border-neutral-400 rounded-md tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
+                        className="gov-input w-40 tracking-[0.4em] text-center"
                         placeholder="000000"
                       />
                     </div>
@@ -603,8 +600,8 @@ export default function ProfilePage() {
                       <div className="flex items-start gap-3 border-l-4 border-yellow-500 pl-4 py-2 bg-yellow-50">
                         <DevicePhoneMobileIcon className="w-5 h-5 text-yellow-700 flex-shrink-0 mt-0.5" />
                         <div className="flex-1">
-                          <p className="text-sm font-semibold text-yellow-900">Sign out and sign back in to finish</p>
-                          <p className="text-sm text-yellow-800 mt-1">
+                          <p className="text-sm font-semibold text-black">Sign out and sign back in to finish</p>
+                          <p className="text-sm text-[#3b3934] mt-1">
                             Your current session was issued before 2FA was enabled, so the dashboard and staff
                             tools will keep asking for setup until you start a new session. Sign out now and log
                             back in — you&apos;ll be prompted for your authenticator code.
@@ -612,7 +609,7 @@ export default function ProfilePage() {
                           <button
                             onClick={handleSignOutToApply}
                             disabled={signingOut}
-                            className="mt-3 px-4 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                            className="gov-btn gov-btn--sm mt-3"
                           >
                             {signingOut ? 'Signing out…' : 'Sign out now'}
                           </button>
@@ -649,7 +646,7 @@ export default function ProfilePage() {
                     </button>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-neutral-800 mb-1">
+                    <label className="gov-label">
                       Enter the 6-digit code to confirm
                     </label>
                     <input
@@ -659,7 +656,7 @@ export default function ProfilePage() {
                       autoFocus
                       value={mfaCode}
                       onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                      className="w-40 px-3 py-2 border border-neutral-400 rounded-md tracking-[0.4em] text-center focus:outline-none focus:ring-2 focus-visible:ring-red-600 focus:border-yellow-500"
+                      className="gov-input w-40 tracking-[0.4em] text-center"
                       placeholder="000000"
                     />
                   </div>
@@ -667,7 +664,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={mfaBusy || mfaCode.length !== 6}
-                      className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                      className="gov-btn gov-btn--sm"
                     >
                       {mfaBusy ? 'Verifying…' : 'Verify & Enable'}
                     </button>
@@ -689,7 +686,7 @@ export default function ProfilePage() {
                   <button
                     onClick={handleStartEnroll}
                     disabled={mfaBusy}
-                    className="px-5 py-2 bg-black text-yellow-400 text-sm font-semibold rounded-md hover:bg-neutral-800 disabled:opacity-50 transition-colors"
+                    className="gov-btn gov-btn--sm"
                   >
                     {mfaBusy ? 'Starting…' : 'Enable two-factor authentication'}
                   </button>
@@ -700,30 +697,30 @@ export default function ProfilePage() {
         )}
 
         {/* Quick links */}
-        <div className="border-t border-neutral-200 pt-6">
-          <h2 className="text-lg font-bold text-black mb-4">Quick Links</h2>
+        <div className="border-t-4 border-black pt-4">
+          <h2 className="mb-4 text-xl font-bold text-black">Quick links</h2>
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/dashboard"
-              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
+              className="border-l-4 border-black bg-[#f5f3ee] px-4 py-3 text-[15px] font-bold text-black underline-offset-4 hover:bg-[#ebe8e1] hover:underline"
             >
               Dashboard
             </Link>
             <Link
               href="/agency-chat"
-              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
+              className="border-l-4 border-black bg-[#f5f3ee] px-4 py-3 text-[15px] font-bold text-black underline-offset-4 hover:bg-[#ebe8e1] hover:underline"
             >
               Agency Chat
             </Link>
             <Link
               href="/tickets"
-              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
+              className="border-l-4 border-black bg-[#f5f3ee] px-4 py-3 text-[15px] font-bold text-black underline-offset-4 hover:bg-[#ebe8e1] hover:underline"
             >
               Tickets
             </Link>
             <Link
               href="/projects"
-              className="px-4 py-3 bg-neutral-50 rounded-md text-sm font-medium text-neutral-800 hover:bg-neutral-100 transition-colors text-center"
+              className="border-l-4 border-black bg-[#f5f3ee] px-4 py-3 text-[15px] font-bold text-black underline-offset-4 hover:bg-[#ebe8e1] hover:underline"
             >
               Projects
             </Link>

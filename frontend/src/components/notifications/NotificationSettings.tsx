@@ -96,8 +96,8 @@ export default function NotificationSettings() {
                 </div>
                 <button
                   onClick={() => updatePreference('email', !preferences.email)}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    preferences.email ? 'bg-blue-600' : 'bg-gray-200'
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out     ${
+                    preferences.email ? 'bg-black' : 'bg-gray-200'
                   }`}
                 >
                   <span
@@ -115,8 +115,8 @@ export default function NotificationSettings() {
                 </div>
                 <button
                   onClick={() => updatePreference('push', !preferences.push)}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    preferences.push ? 'bg-blue-600' : 'bg-gray-200'
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out     ${
+                    preferences.push ? 'bg-black' : 'bg-gray-200'
                   }`}
                 >
                   <span
@@ -134,8 +134,8 @@ export default function NotificationSettings() {
                 </div>
                 <button
                   onClick={() => updatePreference('sms', !preferences.sms)}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    preferences.sms ? 'bg-blue-600' : 'bg-gray-200'
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out     ${
+                    preferences.sms ? 'bg-black' : 'bg-gray-200'
                   }`}
                 >
                   <span
@@ -164,8 +164,8 @@ export default function NotificationSettings() {
                   </div>
                   <button
                     onClick={() => updateCategory(category as keyof NotificationPreferences['categories'], !enabled)}
-                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                      enabled ? 'bg-blue-600' : 'bg-gray-200'
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out     ${
+                      enabled ? 'bg-black' : 'bg-gray-200'
                     }`}
                   >
                     <span
@@ -185,7 +185,7 @@ export default function NotificationSettings() {
             <select
               value={preferences.frequency}
               onChange={(e) => updatePreference('frequency', e.target.value as NotificationPreferences['frequency'])}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+              className="gov-input"
             >
               <option value="immediate">Immediate</option>
               <option value="daily">Daily Digest</option>
@@ -205,8 +205,8 @@ export default function NotificationSettings() {
                 </div>
                 <button
                   onClick={() => updateQuietHours('enabled', !preferences.quietHours.enabled)}
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                    preferences.quietHours.enabled ? 'bg-blue-600' : 'bg-gray-200'
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out     ${
+                    preferences.quietHours.enabled ? 'bg-black' : 'bg-gray-200'
                   }`}
                 >
                   <span
@@ -220,25 +220,25 @@ export default function NotificationSettings() {
               {preferences.quietHours.enabled && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="gov-label">
                       Start Time
                     </label>
                     <input
                       type="time"
                       value={preferences.quietHours.start}
                       onChange={(e) => updateQuietHours('start', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                      className="gov-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="gov-label">
                       End Time
                     </label>
                     <input
                       type="time"
                       value={preferences.quietHours.end}
                       onChange={(e) => updateQuietHours('end', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                      className="gov-input"
                     />
                   </div>
                 </div>
@@ -252,7 +252,7 @@ export default function NotificationSettings() {
           <div className="flex justify-end">
             <motion.button
               onClick={saveSettings}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 bg-black text-white rounded-lg font-semibold hover:bg-[#262522] transition-colors"
               whileHover={{ scale: saved ? 1.05 : 1 }}
             >
               {saved ? '✓ Saved!' : 'Save Settings'}

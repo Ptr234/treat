@@ -1,6 +1,6 @@
 'use client';
 
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { client } from '@/lib/sanity-client';
@@ -35,9 +35,6 @@ const CATEGORIES: CategoryConfig[] = [
     description: 'Comprehensive guides and helpful resources',
   },
 ];
-
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -98,131 +95,108 @@ export default function DownloadsPage() {
   const visibleCategories = grouped.filter((g) => g.resources.length > 0);
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Downloads</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Forms and downloads' }]}
+        caption="Guidance"
+        title="Forms and downloads"
+        lead="Application forms and guidance for business registration, investment and related public services. Agencies revise their documents, so confirm you have the current version before filing."
+      />
 
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Downloads and resources</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Browse downloadable forms and guidance for business registration, investment and related public services. Each available resource includes its file type and any published description, so you can check that it is relevant before opening it. Documents may be revised by their issuing agencies; confirm that you have the current version before filing an application. If the resource you need is not listed, contact the responsible agency or the support team for direction.
-        </p>
-      </section>
-      </PageBand>
-
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        {/* Loading */}
-        {loading && (
-          <div className="flex justify-center py-20">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-200 border-t-black" role="status" aria-label="Loading resources" />
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!loading && visibleCategories.length === 0 && (
-          <div className=" py-6 pl-6">
-            <h2 className="text-xl font-bold">No downloadable resources are published yet</h2>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-neutral-700">
-              The resource library is currently empty. For a form or document needed for a specific application, check the responsible agency’s website or contact its office to confirm the current version. You can also use the service directory to find agency contact details and browse the online user guide for help navigating the OneStop Centre.
+      <div className="gov-container grid gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-16">
+        <div>
+          {loading && (
+            <p role="status" className="flex items-center gap-3 py-10 text-[#3b3934]">
+              <span className="h-6 w-6 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" aria-hidden="true" />
+              Loading documents…
             </p>
-            <div className="mt-4 flex flex-wrap gap-5 text-sm">
-              <Link href="/agencies" className="font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600">Find an agency</Link>
-              <Link href="/guide" className="font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600">Open the user guide</Link>
+          )}
+
+          {!loading && visibleCategories.length === 0 && (
+            <div className="gov-inset">
+              <h2 className="text-xl font-bold">No documents are published yet</h2>
+              <p className="mt-2 text-[15px] leading-6 text-[#3b3934]">
+                For a form needed for a specific application, check the responsible agency’s website or contact its office to confirm the current version.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-6 text-[15px]">
+                <Link href="/agencies" className="gov-link">Find an agency</Link>
+                <Link href="/guide" className="gov-link">Read the user guide</Link>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Categories */}
-        {!loading && visibleCategories.length > 0 && (
-          <div className="space-y-14">
-            {visibleCategories.map((category) => (
-              <section key={category.key} aria-labelledby={`downloads-${category.key}`}>
-                <div className="flex flex-col gap-2 border-b border-neutral-200 pb-3 sm:flex-row sm:items-baseline sm:justify-between">
-                  <div>
-                    <h2 id={`downloads-${category.key}`} className="text-xl font-bold sm:text-2xl">{category.title}</h2>
-                    <p className="mt-1 text-sm text-neutral-700">{category.description}</p>
+          {!loading && visibleCategories.length > 0 && (
+            <div className="space-y-14">
+              {visibleCategories.map((category) => (
+                <section key={category.key} aria-labelledby={`downloads-${category.key}`}>
+                  <div className="flex flex-col gap-1 border-b-2 border-black pb-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <h2 id={`downloads-${category.key}`} className="gov-title-m">{category.title}</h2>
+                      <p className="mt-1 text-[15px] text-[#3b3934]">{category.description}</p>
+                    </div>
+                    <p className="text-sm font-semibold text-[#5c5850]">
+                      {category.resources.length} document{category.resources.length !== 1 ? 's' : ''}
+                    </p>
                   </div>
-                  <p className="text-sm text-neutral-600">
-                    {category.resources.length} file{category.resources.length !== 1 ? 's' : ''}
-                  </p>
-                </div>
 
-                <ul className="divide-y divide-neutral-200">
-                  {category.resources.map((resource) => (
-                    <li key={resource._id} className="flex flex-col gap-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-base font-bold leading-snug">{resource.title}</h3>
-                        {resource.description && (
-                          <p className="mt-1 text-sm leading-6 text-neutral-700">{resource.description}</p>
-                        )}
-                        <p className="mt-2 flex flex-wrap items-center gap-x-3 text-xs text-neutral-600">
-                          <span className="font-bold uppercase tracking-wider text-red-600">{resource.fileType}</span>
-                          {resource.file?.asset?.size && <span>{formatFileSize(resource.file.asset.size)}</span>}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDownload(resource)}
-                        className="inline-flex flex-shrink-0 items-center justify-center rounded-md bg-black px-4 py-2 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-                      >
-                        Download<span className="sr-only"> {resource.title}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
+                  <ul>
+                    {category.resources.map((resource) => (
+                      <li key={resource._id} className="flex gap-5 border-b border-[#dcd8cf] py-6">
+                        <span
+                          aria-hidden="true"
+                          className="relative grid h-[5.5rem] w-[4.25rem] shrink-0 place-items-end border-2 border-[#b9b4a9] bg-white pb-2 shadow-[3px_3px_0_#dcd8cf]"
+                        >
+                          <span className="absolute inset-x-2.5 top-3 space-y-1.5">
+                            <span className="block h-[3px] bg-[#dcd8cf]" />
+                            <span className="block h-[3px] bg-[#dcd8cf]" />
+                            <span className="block h-[3px] w-2/3 bg-[#dcd8cf]" />
+                          </span>
+                          <span className="mx-auto bg-[#ce1126] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">{resource.fileType}</span>
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg font-bold leading-snug">
+                            <button type="button" onClick={() => handleDownload(resource)} className="text-left text-black underline decoration-1 underline-offset-4 hover:text-[#9a0d1c] hover:decoration-[3px]">
+                              {resource.title}
+                            </button>
+                          </h3>
+                          <p className="mt-1 text-sm text-[#5c5850]">
+                            <span className="uppercase">{resource.fileType}</span>
+                            {resource.file?.asset?.size ? `, ${formatFileSize(resource.file.asset.size)}` : ''}
+                          </p>
+                          {resource.description && <p className="mt-2 text-[15px] leading-6 text-[#3b3934]">{resource.description}</p>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          )}
+
+          <div className="gov-warning mt-12 max-w-3xl text-[15px]">
+            <p>
+              Always use the latest version of a form. Requirements change with regulations — when in doubt, confirm with the issuing agency before you submit.
+            </p>
           </div>
-        )}
+        </div>
 
-        {/* Help */}
-        <section className="mt-16 pt-8" aria-labelledby="downloads-help-heading">
-          <h2 id="downloads-help-heading" className="text-2xl font-bold">Need help with documents?</h2>
-          <p className="mt-3 max-w-2xl leading-7 text-neutral-700">
-            Our support team can help you understand which documents you need and guide you through the completion process.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-            <Link href="/support" className={linkClass}>Contact support</Link>
-            <Link href="/tools/document-checklist" className={linkClass}>View checklist</Link>
+        <aside className="lg:sticky lg:top-6 lg:self-start">
+          <div className="gov-related">
+            <h2>Need help with documents?</h2>
+            <p className="text-[15px] text-[#3b3934]">The support team can tell you which documents you need and how to complete them.</p>
+            <ul className="mt-4">
+              <li><Link href="/tools/document-checklist" className="gov-link">Document checklist</Link></li>
+              <li><Link href="/support" className="gov-link">Contact support</Link></li>
+              <li><Link href="/services" className="gov-link">Government services</Link></li>
+            </ul>
           </div>
-        </section>
-
-        {/* Notice */}
-        <section className="mt-12 border-l-4 border-red-600 pl-6" aria-labelledby="downloads-notice-heading">
-          <h2 id="downloads-notice-heading" className="text-lg font-bold">Important notice</h2>
-          <p className="mt-2 max-w-3xl text-sm leading-7 text-neutral-700">
-            Always ensure you&apos;re using the latest version of forms and documents. Requirements may change based on current regulations.
-            When in doubt, contact the relevant government agency or our support team for verification.
-          </p>
-        </section>
+        </aside>
       </div>
 
-      {/* Toast */}
       {toast.show && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="fixed bottom-6 right-6 z-50 flex max-w-md items-start gap-3 bg-black px-5 py-4 text-white shadow-2xl"
-        >
+        <div role="status" aria-live="polite" className="fixed bottom-6 right-6 z-50 flex max-w-md items-start gap-3 border-l-[6px] border-[#ffd700] bg-black px-5 py-4 text-white shadow-2xl">
           <p className="flex-1 text-sm leading-relaxed">{toast.message}</p>
-          <button
-            type="button"
-            onClick={() => setToast({ show: false, message: '' })}
-            aria-label="Dismiss notification"
-            className="flex-shrink-0 text-white hover:text-yellow-400"
-          >
+          <button type="button" onClick={() => setToast({ show: false, message: '' })} aria-label="Dismiss notification" className="shrink-0 text-white hover:text-[#ffd700]">
             <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>

@@ -333,7 +333,7 @@ export default function DashboardPage() {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black mx-auto mb-4" />
           <p className="text-neutral-700 font-medium">Verifying access…</p>
         </div>
       </div>
@@ -353,7 +353,7 @@ export default function DashboardPage() {
           </p>
           <Link
             href="/"
-            className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-sm hover:bg-neutral-800 transition-colors"
+            className="gov-btn w-full"
           >
             Return Home
           </Link>
@@ -366,7 +366,7 @@ export default function DashboardPage() {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black mx-auto mb-4" />
           <p className="text-neutral-700 font-medium">Loading dashboard data...</p>
         </div>
       </div>
@@ -378,7 +378,7 @@ export default function DashboardPage() {
  <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-neutral-700 font-medium">No dashboard data available yet.</p>
-          <button onClick={refresh} className="mt-4 px-4 py-2 bg-black text-yellow-400 hover:bg-neutral-800 transition-colors">Refresh</button>
+          <button onClick={refresh} className="gov-btn gov-btn--sm mt-4">Refresh</button>
         </div>
       </div>
     );
@@ -501,19 +501,19 @@ export default function DashboardPage() {
   ];
 
   return (
- <div className="min-h-screen bg-white py-8">
+ <div className="min-h-screen bg-[#f5f3ee] py-8">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* ── Page Header ────────────────────────────────────────── */}
-        <div className="mb-8 border-b border-neutral-200 pb-6">
+        <div className="mb-8 border-b-2 border-black pb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-700">Executive overview</p>
-              <h1 className="mt-1 font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-black">Director General Dashboard</h1>
+              <p className="gov-kicker">Executive overview</p>
+              <h1 className="mt-2 font-display text-3xl font-semibold text-black lg:text-4xl">Director General dashboard</h1>
               <p className="mt-2 text-base sm:text-lg text-neutral-600">Real-time operational overview and executive controls</p>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               {error && (
-                <span className="px-3 py-1 text-xs font-semibold bg-red-100 text-red-700 border border-red-200">API Error</span>
+                <span className="gov-tag gov-tag--red">API error</span>
               )}
 
               {unacknowledgedCount > 0 && (
@@ -533,7 +533,7 @@ export default function DashboardPage() {
                   <button
                     key={opt.value}
                     onClick={() => setRefreshInterval(opt.value)}
-                    className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${refreshInterval === opt.value ? 'bg-yellow-400 text-black' : 'bg-white text-neutral-700 hover:bg-neutral-50'}`}
+                    className={`px-2.5 py-1.5 text-xs font-medium transition-colors ${refreshInterval === opt.value ? 'bg-black text-white' : 'bg-white text-neutral-700 hover:bg-neutral-50'}`}
                   >
                     {opt.label}
                   </button>
@@ -649,7 +649,7 @@ export default function DashboardPage() {
                     <p className="text-sm text-black font-medium truncate">{t.title}</p>
                     <p className="text-xs text-neutral-600 mt-1">{t.contactName} &bull; Agency: {t.agency} &bull; Escalated {formatTimestamp(t.escalatedAt)}</p>
                   </div>
-                  <Link href={`/tickets/${t.referenceNumber}`} className="ml-4 px-3 py-2 bg-black text-yellow-400 text-sm font-semibold hover:bg-neutral-800 transition-colors flex-shrink-0">
+                  <Link href={`/tickets/${t.referenceNumber}`} className="gov-btn gov-btn--sm ml-4 flex-shrink-0">
                     Assign
                   </Link>
                 </div>
@@ -954,7 +954,7 @@ export default function DashboardPage() {
                       value={reviewDate}
                       min={new Date().toISOString().split('T')[0]}
                       onChange={(e) => setReviewDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
+                      className="gov-input"
                     />
                   </div>
                   <div>
@@ -963,7 +963,7 @@ export default function DashboardPage() {
                       type="time"
                       value={reviewTime}
                       onChange={(e) => setReviewTime(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
+                      className="gov-input"
                     />
                   </div>
                 </div>
@@ -973,7 +973,7 @@ export default function DashboardPage() {
                   value={actionInput}
                   onChange={(e) => setActionInput(e.target.value)}
                   placeholder="UIA-2026-0001"
-                  className="w-full px-4 py-3 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
+                  className="gov-input"
                 />
               ) : (
                 <textarea
@@ -981,7 +981,7 @@ export default function DashboardPage() {
                   onChange={(e) => setActionInput(e.target.value)}
                   rows={4}
                   placeholder={actionModal === 'message' ? 'Type your message...' : 'Review topic and notes...'}
-                  className="w-full px-4 py-3 border border-neutral-400 focus:ring-2 focus-visible:ring-red-700 focus:border-transparent"
+                  className="gov-input"
                 />
               )}
               <div className="flex flex-col-reverse sm:flex-row gap-3 mt-4">
@@ -994,7 +994,7 @@ export default function DashboardPage() {
                 <button
                   onClick={actionModal === 'flag' ? handleFlagCase : actionModal === 'message' ? handleSendMessage : handleScheduleReview}
                   disabled={!actionInput.trim() || actionLoading || (actionModal === 'review' && !reviewDate)}
-                  className="flex-1 px-4 py-2.5 bg-black text-yellow-400 hover:bg-neutral-800 disabled:bg-neutral-300 disabled:text-neutral-500 disabled:cursor-not-allowed font-medium transition-colors"
+                  className="gov-btn flex-1"
                 >
                   {actionLoading ? 'Processing...' : actionModal === 'flag' ? 'Flag Case' : actionModal === 'message' ? 'Send Message' : 'Schedule'}
                 </button>

@@ -153,8 +153,8 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
     }
   };
 
-  const inputClass = "w-full px-3 py-2 min-h-[44px] bg-neutral-100 border border-neutral-200 text-white placeholder:text-neutral-500 rounded-md focus:outline-none focus:ring-2 focus-visible:ring-red-600 [&>option]:bg-neutral-100 [&>option]:text-white";
-  const labelClass = "block text-sm font-medium text-neutral-700 mb-1";
+  const inputClass = "gov-input";
+  const labelClass = "gov-label";
 
   const renderStep = () => {
     switch (currentStep) {
@@ -294,7 +294,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
             </div>
 
             <div className="space-y-4">
-              <h4 className="font-medium text-yellow-500">First Choice</h4>
+              <h4 className="font-medium text-[#8a7200]">First Choice</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Preferred Date *</label>
@@ -370,23 +370,23 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
 
             <div className="p-4 space-y-3 border-t border-neutral-200 pt-5">
               <div className="flex items-center space-x-2">
-                <UserIcon className="w-5 h-5 text-yellow-500" />
+                <UserIcon className="w-5 h-5 text-[#8a7200]" />
                 <span className="font-medium text-black">{appointmentData.name}</span>
                 <span className="text-neutral-700">({appointmentData.email})</span>
               </div>
 
               <div className="flex items-center space-x-2">
-                <BuildingOfficeIcon className="w-5 h-5 text-yellow-500" />
+                <BuildingOfficeIcon className="w-5 h-5 text-[#8a7200]" />
                 <span className="text-neutral-700">{appointmentData.serviceType}</span>
               </div>
 
               <div className="flex items-center space-x-2">
-                <CalendarIcon className="w-5 h-5 text-yellow-500" />
+                <CalendarIcon className="w-5 h-5 text-[#8a7200]" />
                 <span className="text-neutral-700">{appointmentData.preferredDate} at {appointmentData.preferredTime}</span>
               </div>
 
               <div className="flex items-center space-x-2">
-                <ClockIcon className="w-5 h-5 text-yellow-500" />
+                <ClockIcon className="w-5 h-5 text-[#8a7200]" />
                 <span className="text-neutral-700">{appointmentData.duration} minutes ({appointmentData.meetingType})</span>
               </div>
             </div>
@@ -496,7 +496,7 @@ export default function AppointmentModal({ agency, isOpen, onClose }: Appointmen
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="min-h-[44px] flex items-center space-x-2 px-6 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-400 transition-colors disabled:opacity-50 font-bold"
+                className="gov-btn gov-btn--gold gov-btn--sm"
               >
                 {isSubmitting ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-black border-t-transparent"></div>

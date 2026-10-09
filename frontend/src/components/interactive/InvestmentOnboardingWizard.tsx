@@ -152,10 +152,10 @@ export default function InvestmentOnboardingWizard() {
       case 1:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Investment Profile</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Investment Profile</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="gov-label mb-3">
                 Investor Type
               </label>
               <div className="grid grid-cols-1 gap-3">
@@ -168,7 +168,7 @@ export default function InvestmentOnboardingWizard() {
                     key={option.value}
                     className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.investorType === option.value
-                        ? 'border-red-600 bg-neutral-50'
+                        ? 'border-black bg-[#fffbea]'
                         : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('investorType', option.value)}
@@ -180,11 +180,11 @@ export default function InvestmentOnboardingWizard() {
                         value={option.value}
                         checked={investmentData.investorType === option.value}
                         onChange={() => {}}
-                        className="mr-3"
+                        className="mr-3 h-5 w-5"
                       />
                       <div>
-                        <div className="font-medium text-gray-900">{option.label}</div>
-                        <div className="text-sm text-gray-500">{option.description}</div>
+                        <div className="font-bold text-black">{option.label}</div>
+                        <div className="text-sm text-[#5c5850]">{option.description}</div>
                       </div>
                     </div>
                   </div>
@@ -193,7 +193,7 @@ export default function InvestmentOnboardingWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="gov-label mb-3">
                 Investment Experience
               </label>
               <div className="grid grid-cols-1 gap-3">
@@ -206,7 +206,7 @@ export default function InvestmentOnboardingWizard() {
                     key={option.value}
                     className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.experience === option.value
-                        ? 'border-red-600 bg-neutral-50'
+                        ? 'border-black bg-[#fffbea]'
                         : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('experience', option.value)}
@@ -218,11 +218,11 @@ export default function InvestmentOnboardingWizard() {
                         value={option.value}
                         checked={investmentData.experience === option.value}
                         onChange={() => {}}
-                        className="mr-3"
+                        className="mr-3 h-5 w-5"
                       />
                       <div>
-                        <div className="font-medium text-gray-900">{option.label}</div>
-                        <div className="text-sm text-gray-500">{option.description}</div>
+                        <div className="font-bold text-black">{option.label}</div>
+                        <div className="text-sm text-[#5c5850]">{option.description}</div>
                       </div>
                     </div>
                   </div>
@@ -231,7 +231,7 @@ export default function InvestmentOnboardingWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="gov-label mb-3">
                 Investment Goal
               </label>
               <div className="grid grid-cols-1 gap-3">
@@ -245,7 +245,7 @@ export default function InvestmentOnboardingWizard() {
                     key={option.value}
                     className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.investmentGoal === option.value
-                        ? 'border-red-600 bg-neutral-50'
+                        ? 'border-black bg-[#fffbea]'
                         : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('investmentGoal', option.value)}
@@ -257,11 +257,11 @@ export default function InvestmentOnboardingWizard() {
                         value={option.value}
                         checked={investmentData.investmentGoal === option.value}
                         onChange={() => {}}
-                        className="mr-3"
+                        className="mr-3 h-5 w-5"
                       />
                       <div>
-                        <div className="font-medium text-gray-900">{option.label}</div>
-                        <div className="text-sm text-gray-500">{option.description}</div>
+                        <div className="font-bold text-black">{option.label}</div>
+                        <div className="text-sm text-[#5c5850]">{option.description}</div>
                       </div>
                     </div>
                   </div>
@@ -274,16 +274,16 @@ export default function InvestmentOnboardingWizard() {
       case 2:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Investment Capacity</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Investment Capacity</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="gov-label">
                 Investment Amount (USD)
               </label>
               <select
                 value={investmentData.investmentAmount}
                 onChange={(e) => updateData('investmentAmount', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                className="gov-input"
               >
                 <option value="">Select investment range</option>
                 <option value="10000-50000">$10,000 - $50,000</option>
@@ -295,13 +295,13 @@ export default function InvestmentOnboardingWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="gov-label">
                 Time Horizon
               </label>
               <select
                 value={investmentData.timeHorizon}
                 onChange={(e) => updateData('timeHorizon', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                className="gov-input"
               >
                 <option value="">Select time horizon</option>
                 <option value="short-term">Short-term (1-3 years)</option>
@@ -311,13 +311,13 @@ export default function InvestmentOnboardingWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="gov-label">
                 Risk Tolerance
               </label>
               <select
                 value={investmentData.riskTolerance}
                 onChange={(e) => updateData('riskTolerance', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                className="gov-input"
               >
                 <option value="">Select risk tolerance</option>
                 <option value="conservative">Conservative (Low risk, stable returns)</option>
@@ -331,10 +331,10 @@ export default function InvestmentOnboardingWizard() {
       case 3:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Sector Interest</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Sector Interest</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="gov-label mb-3">
                 Primary Sector
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -350,7 +350,7 @@ export default function InvestmentOnboardingWizard() {
                     key={option.value}
                     className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.primarySector === option.value
-                        ? 'border-red-600 bg-neutral-50'
+                        ? 'border-black bg-[#fffbea]'
                         : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateData('primarySector', option.value)}
@@ -358,7 +358,7 @@ export default function InvestmentOnboardingWizard() {
                     <div className="flex items-center">
                       <span className="text-2xl mr-3">{option.icon}</span>
                       <div>
-                        <div className="font-medium text-gray-900">{option.label}</div>
+                        <div className="font-bold text-black">{option.label}</div>
                       </div>
                     </div>
                   </div>
@@ -367,13 +367,13 @@ export default function InvestmentOnboardingWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="gov-label">
                 Specific Interests (Optional)
               </label>
               <textarea
                 value={investmentData.specificInterests}
                 onChange={(e) => updateData('specificInterests', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                className="gov-input"
                 rows={4}
                 placeholder="Describe your specific investment interests..."
               />
@@ -384,83 +384,83 @@ export default function InvestmentOnboardingWizard() {
       case 4:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Contact Information</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Contact Information</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="gov-label">
                   Full Name *
                 </label>
                 <input
                   type="text"
                   value={investmentData.name}
                   onChange={(e) => updateData('name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                  className="gov-input"
                   placeholder="Enter your full name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="gov-label">
                   Email *
                 </label>
                 <input
                   type="email"
                   value={investmentData.email}
                   onChange={(e) => updateData('email', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                  className="gov-input"
                   placeholder="Enter your email"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="gov-label">
                   Phone *
                 </label>
                 <input
                   type="tel"
                   value={investmentData.phone}
                   onChange={(e) => updateData('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                  className="gov-input"
                   placeholder="Enter your phone number"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="gov-label">
                   Nationality *
                 </label>
                 <input
                   type="text"
                   value={investmentData.nationality}
                   onChange={(e) => updateData('nationality', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                  className="gov-input"
                   placeholder="Enter your nationality"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="gov-label">
                   Company Name (Optional)
                 </label>
                 <input
                   type="text"
                   value={investmentData.companyName}
                   onChange={(e) => updateData('companyName', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                  className="gov-input"
                   placeholder="Enter company name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="gov-label">
                   Position (Optional)
                 </label>
                 <input
                   type="text"
                   value={investmentData.position}
                   onChange={(e) => updateData('position', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                  className="gov-input"
                   placeholder="Enter your position"
                 />
               </div>
@@ -471,16 +471,16 @@ export default function InvestmentOnboardingWizard() {
       case 5:
         return (
           <div className="space-y-6">
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">Investment Readiness</h3>
+            <h3 className="gov-title-m border-b-2 border-black pb-3">Investment Readiness</h3>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="gov-label">
                 Capital Source
               </label>
               <select
                 value={investmentData.capitalSource}
                 onChange={(e) => updateData('capitalSource', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                className="gov-input"
               >
                 <option value="">Select capital source</option>
                 <option value="savings">Personal Savings</option>
@@ -491,13 +491,13 @@ export default function InvestmentOnboardingWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="gov-label">
                 Investment Timeframe
               </label>
               <select
                 value={investmentData.timeframe}
                 onChange={(e) => updateData('timeframe', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 text-black min-h-[44px]"
+                className="gov-input"
               >
                 <option value="">Select timeframe</option>
                 <option value="immediate">Immediate (Ready now)</option>
@@ -508,7 +508,7 @@ export default function InvestmentOnboardingWizard() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="gov-label mb-3">
                 Support Needed (Select all that apply)
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -522,7 +522,7 @@ export default function InvestmentOnboardingWizard() {
                     key={option.value}
                     className={`border-l-4 py-3 pl-4 pr-2 cursor-pointer transition-colors ${
                       investmentData.supportNeeded.includes(option.value)
-                        ? 'border-red-600 bg-neutral-50'
+                        ? 'border-black bg-[#fffbea]'
                         : 'border-neutral-300 hover:border-black'
                     }`}
                     onClick={() => updateArrayField('supportNeeded', option.value)}
@@ -532,9 +532,9 @@ export default function InvestmentOnboardingWizard() {
                         type="checkbox"
                         checked={investmentData.supportNeeded.includes(option.value)}
                         onChange={() => {}}
-                        className="mr-3"
+                        className="mr-3 h-5 w-5"
                       />
-                      <div className="font-medium text-gray-900">{option.label}</div>
+                      <div className="font-bold text-black">{option.label}</div>
                     </div>
                   </div>
                 ))}
@@ -569,14 +569,14 @@ export default function InvestmentOnboardingWizard() {
           </div>
         </div>
         <div className="mt-2">
-          <div className="bg-gray-200 rounded-full h-2">
+          <div className="h-2 bg-[#dcd8cf]">
             <div
-              className="bg-yellow-600 h-2 rounded-full transition-all duration-300"
+              className="h-2 bg-black transition-all duration-300"
               style={{ width: `${(currentStep / totalSteps) * 100}%` }}
             />
           </div>
         </div>
-        <p className="text-sm text-gray-500 mt-2">
+        <p className="mt-3 text-base font-bold text-[#5c5850]">
           Step {currentStep} of {totalSteps}
         </p>
       </div>
@@ -604,7 +604,7 @@ export default function InvestmentOnboardingWizard() {
         <button
           onClick={prevStep}
           disabled={currentStep === 1}
-          className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+          className="gov-btn gov-btn--secondary"
         >
           Previous
         </button>
@@ -613,7 +613,7 @@ export default function InvestmentOnboardingWizard() {
           <button
             onClick={nextStep}
             disabled={!validateCurrentStep()}
-            className="px-6 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            className="gov-btn"
           >
             Next
           </button>
@@ -621,7 +621,7 @@ export default function InvestmentOnboardingWizard() {
           <button
             onClick={submitApplication}
             disabled={!validateCurrentStep() || isSubmitting}
-            className="px-6 py-2 bg-yellow-600 text-black rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            className="gov-btn"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Application'}
           </button>
@@ -630,25 +630,19 @@ export default function InvestmentOnboardingWizard() {
 
       {/* Success result */}
       {submitResult && (
-        <div className="mt-6 border-t border-neutral-200 pt-6 text-center">
-          <div className="text-green-800 font-bold text-lg mb-2">
-            {submitResult.existing ? 'Profile Found' : 'Profile Created Successfully'}
-          </div>
+        <div role="status" className="gov-panel mt-8 text-center">
+          <h3 className="font-display text-3xl font-semibold text-white">
+            {submitResult.existing ? 'Profile found' : 'Profile created'}
+          </h3>
           {submitResult.referenceNumber ? (
             <>
-              <p className="text-green-700 mb-2">
-                Your investor reference number is:
-              </p>
-              <p className="text-2xl font-mono font-bold text-green-900 mb-4">
-                {submitResult.referenceNumber}
-              </p>
+              <p className="mt-4 text-white/85">Your investor reference number is</p>
+              <p className="mt-1 font-mono text-3xl font-bold text-[#ffd700]">{submitResult.referenceNumber}</p>
             </>
           ) : (
-            <p className="text-green-700 mb-4">
-              We&apos;ve emailed your reference number to the address on file.
-            </p>
+            <p className="mt-4 text-white/85">We&apos;ve emailed your reference number to the address on file.</p>
           )}
-          <p className="text-sm text-green-600">
+          <p className="mt-4 text-sm text-white/75">
             Our investment team will contact you within 24 hours. Check your email for confirmation.
           </p>
         </div>

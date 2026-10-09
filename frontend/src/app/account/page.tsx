@@ -4,12 +4,12 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiFetch } from '@/lib/api-client';
+import PageHeader from '@/components/ui/PageHeader';
 import {
   TicketIcon,
   ChatBubbleLeftRightIcon,
   CalendarDaysIcon,
   BriefcaseIcon,
-  LockClosedIcon,
   ArrowPathIcon,
   ArrowTopRightOnSquareIcon,
 } from '@heroicons/react/24/outline';
@@ -74,17 +74,17 @@ function StatusBadge({ status }: { status: string }) {
   // Bad outcomes are tested first: "inactive" contains "active".
   const cls =
     s.includes('inactive') || s.includes('cancelled') || s.includes('rejected')
-      ? 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-200'
+      ? 'gov-tag--red'
       : s.includes('resolved') || s.includes('closed') || s.includes('active') || s.includes('confirmed')
-      ? 'bg-black text-yellow-400'
+      ? ''
       : s.includes('progress') || s.includes('assigned') || s.includes('contacted') || s.includes('scheduled')
-      ? 'bg-yellow-100 text-black ring-1 ring-inset ring-yellow-300'
+      ? 'gov-tag--gold'
       : s.includes('pending') || s.includes('new') || s.includes('requested')
-      ? 'bg-neutral-100 text-neutral-700 ring-1 ring-inset ring-neutral-300'
-      : 'bg-neutral-50 text-neutral-500';
+      ? 'gov-tag--outline'
+      : 'gov-tag--grey';
   // Humanize PascalCase / SNAKE_CASE
   const label = status.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ');
-  return <span className={`inline-block px-2.5 py-0.5 text-xs font-semibold ${cls}`}>{label}</span>;
+  return <span className={`gov-tag ${cls}`}>{label}</span>;
 }
 
 function fmtDate(iso?: string) {
@@ -118,25 +118,22 @@ export default function AccountPage() {
 
   if (authLoading) {
     return (
- <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-neutral-200 border-t-black rounded-full animate-spin" />
+      <div className="gov-container py-24">
+        <span role="status" aria-label="Loading" className="block h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
- <div className="min-h-screen bg-white flex items-center justify-center py-12 px-4">
-        <div className="max-w-md w-full text-center pt-8">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
-            <LockClosedIcon className="w-8 h-8 text-black" />
-          </div>
-          <h1 className="text-2xl font-bold text-black mb-3">My Submissions</h1>
-          <p className="text-neutral-700 mb-6">Sign in to track your inquiries, appointments, and investor application.</p>
-          <Link href="/" className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold hover:bg-neutral-800 transition-colors">
-            Return Home
-          </Link>
-        </div>
+      <div className="bg-white">
+        <PageHeader
+          crumbs={[{ label: 'Your submissions' }]}
+          caption="Your account"
+          title="Your submissions"
+          lead="Sign in to track your enquiries, appointments and investor application."
+          actions={<Link href="/" className="gov-btn">Return to the homepage</Link>}
+        />
       </div>
     );
   }
@@ -149,43 +146,38 @@ export default function AccountPage() {
   const totalCount = tickets.length + inquiries.length + appointments.length + chatEnquiries.length + (investor ? 1 : 0);
 
   return (
- <div className="min-h-screen bg-white py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-black">My Submissions</h1>
-            <p className="text-neutral-700 mt-1">
-              Welcome back, <span className="font-semibold">{user?.name}</span> — track everything you&apos;ve submitted to the OneStop Centre.
-            </p>
-          </div>
-          <button
-            onClick={load}
-            className="inline-flex items-center gap-2 pb-0.5 text-sm font-bold text-black hover:text-red-600 self-start"
-          >
-            <ArrowPathIcon className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Your submissions' }]}
+        caption="Your account"
+        title="Your submissions"
+        lead={<p>Welcome back, <strong className="text-black">{user?.name}</strong>. Track everything you&apos;ve submitted to the OneStop Centre.</p>}
+        actions={
+          <button type="button" onClick={load} className="gov-btn gov-btn--secondary">
+            <ArrowPathIcon className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} aria-hidden="true" />
             Refresh
           </button>
-        </div>
-
+        }
+      />
+      <div className="gov-container max-w-5xl py-12">
         {loading && (
-          <div className="text-center py-16 text-neutral-600">
-            <div className="w-10 h-10 border-4 border-neutral-200 border-t-black rounded-full animate-spin mx-auto mb-3" />
+          <div role="status" className="flex items-center gap-3 py-16 text-[#3b3934]">
+            <span className="h-6 w-6 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" aria-hidden="true" />
             Loading your submissions…
           </div>
         )}
 
         {!loading && error && (
-          <div className="border-l-4 border-red-600 pl-4 py-2 mb-6 text-red-700">{error}</div>
+          <div role="alert" className="gov-inset gov-inset--red mb-6 font-semibold">{error}</div>
         )}
 
         {!loading && !error && totalCount === 0 && (
-          <div className=" pt-10 text-center">
+          <div className="gov-inset py-8">
             <p className="text-black font-bold mb-2">You haven&apos;t submitted anything yet.</p>
             <p className="text-neutral-600 mb-6">Start an inquiry, book an appointment, or register as an investor.</p>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Link href="/tickets/create" className="px-5 py-2.5 bg-black text-yellow-400 font-semibold hover:bg-neutral-800">New Inquiry</Link>
-              <Link href="/investments/onboarding" className="px-5 py-2.5 bg-yellow-400 text-black font-semibold hover:bg-yellow-300">Become an Investor</Link>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/tickets/create" className="gov-btn">Submit an enquiry</Link>
+              <Link href="/investments/onboarding" className="gov-btn gov-btn--secondary">Register as an investor</Link>
             </div>
           </div>
         )}
@@ -194,10 +186,10 @@ export default function AccountPage() {
           <div className="space-y-8">
             {/* Investor application */}
             {investor && (
-              <section className="border-t border-neutral-200 pt-5">
+              <section className="border-t-4 border-black pt-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <BriefcaseIcon className="w-5 h-5 text-red-600" />
-                  <h2 className="text-lg font-bold text-black">Investor Application</h2>
+                  <BriefcaseIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" />
+                  <h2 className="text-xl font-bold text-black">Investor Application</h2>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div>
@@ -222,10 +214,10 @@ export default function AccountPage() {
 
             {/* Tickets */}
             {tickets.length > 0 && (
-              <section className="border-t border-neutral-200 pt-5">
-                <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
-                  <TicketIcon className="w-5 h-5 text-red-600" />
-                  <h2 className="text-lg font-bold text-black">Inquiries &amp; Tickets</h2>
+              <section className="border-t-4 border-black pt-4">
+                <div className="flex items-center gap-2 border-b border-[#dcd8cf] pb-3">
+                  <TicketIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" />
+                  <h2 className="text-xl font-bold text-black">Inquiries &amp; Tickets</h2>
                   <span className="text-sm text-neutral-600">({tickets.length})</span>
                 </div>
                 <ul className="divide-y divide-neutral-200">
@@ -242,7 +234,7 @@ export default function AccountPage() {
                       <Link
                         // Signed in under the filing email, the session is the proof of ownership.
                         href={`/tickets/${encodeURIComponent(t.referenceNumber)}`}
-                        className="inline-flex items-center gap-1 text-sm font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
+                        className="gov-link inline-flex items-center gap-1 text-sm"
                       >
                         Track <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                       </Link>
@@ -254,10 +246,10 @@ export default function AccountPage() {
 
             {/* Inquiries (agency contact) */}
             {inquiries.length > 0 && (
-              <section className="border-t border-neutral-200 pt-5">
-                <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
-                  <ChatBubbleLeftRightIcon className="w-5 h-5 text-red-600" />
-                  <h2 className="text-lg font-bold text-black">Agency Inquiries</h2>
+              <section className="border-t-4 border-black pt-4">
+                <div className="flex items-center gap-2 border-b border-[#dcd8cf] pb-3">
+                  <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" />
+                  <h2 className="text-xl font-bold text-black">Agency Inquiries</h2>
                   <span className="text-sm text-neutral-600">({inquiries.length})</span>
                 </div>
                 <ul className="divide-y divide-neutral-200">
@@ -276,10 +268,10 @@ export default function AccountPage() {
 
             {/* Appointments */}
             {appointments.length > 0 && (
-              <section className="border-t border-neutral-200 pt-5">
-                <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
-                  <CalendarDaysIcon className="w-5 h-5 text-red-600" />
-                  <h2 className="text-lg font-bold text-black">Appointments</h2>
+              <section className="border-t-4 border-black pt-4">
+                <div className="flex items-center gap-2 border-b border-[#dcd8cf] pb-3">
+                  <CalendarDaysIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" />
+                  <h2 className="text-xl font-bold text-black">Appointments</h2>
                   <span className="text-sm text-neutral-600">({appointments.length})</span>
                 </div>
                 <ul className="divide-y divide-neutral-200">
@@ -298,10 +290,10 @@ export default function AccountPage() {
 
             {/* AI assistant conversations */}
             {chatEnquiries.length > 0 && (
-              <section className="border-t border-neutral-200 pt-5">
-                <div className="flex items-center gap-2 pb-3 border-b border-neutral-200">
-                  <ChatBubbleLeftRightIcon className="w-5 h-5 text-red-600" />
-                  <h2 className="text-lg font-bold text-black">AI Assistant Conversations</h2>
+              <section className="border-t-4 border-black pt-4">
+                <div className="flex items-center gap-2 border-b border-[#dcd8cf] pb-3">
+                  <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" />
+                  <h2 className="text-xl font-bold text-black">AI Assistant Conversations</h2>
                   <span className="text-sm text-neutral-600">({chatEnquiries.length})</span>
                 </div>
                 <ul className="divide-y divide-neutral-200">
@@ -316,7 +308,7 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => document.dispatchEvent(new CustomEvent('openChatWidget'))}
-                        className="inline-flex items-center gap-1 text-sm font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
+                        className="gov-link inline-flex items-center gap-1 text-sm"
                       >
                         Continue in chat <ArrowTopRightOnSquareIcon className="w-4 h-4" />
                       </button>

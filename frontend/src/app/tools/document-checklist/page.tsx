@@ -1,6 +1,6 @@
 'use client';
 
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -163,36 +163,15 @@ export default function DocumentChecklistPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/tools" className="text-red-600 hover:underline underline-offset-4">Business tools</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Document checklist</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Business tools', href: '/tools' }, { label: 'Document checklist' }]}
+        caption="Business tools"
+        title="Document checklist"
+        lead="The documents you need for business registration and licensing in Uganda. Tick them off as you gather them, before you start your application."
+      />
 
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Document checklist</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Comprehensive checklist for business registration and licensing documents required in Uganda.
-          Make sure you have all necessary documents before starting your application.
-        </p>
-      </section>
-      </PageBand>
-
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="gov-container py-12 lg:py-16">
         {/* Overall progress */}
         <section aria-labelledby="overall-progress-heading" className="border-y border-neutral-200 py-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
@@ -215,7 +194,7 @@ export default function DocumentChecklistPage() {
             <button
               type="button"
               onClick={resetAll}
-              className="text-sm font-bold text-red-600 underline decoration-red-600 underline-offset-4 hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+              className="text-sm font-bold text-red-600 underline decoration-red-600 underline-offset-4 hover:text-black"
             >
               Reset all
             </button>
@@ -297,14 +276,14 @@ export default function DocumentChecklistPage() {
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/business/registration"
-              className="inline-flex items-center justify-center rounded-md bg-black px-6 py-3 text-sm font-bold text-yellow-400 hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="gov-btn"
             >
               Start registration
             </Link>
             <button
               type="button"
               onClick={downloadChecklist}
-              className="inline-flex items-center justify-center rounded-md border-2 border-black px-6 py-3 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              className="gov-btn gov-btn--outline"
             >
               Download checklist
             </button>

@@ -60,7 +60,7 @@ export default function AuditPage() {
   if (authLoading) {
     return (
  <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+        <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
       </div>
     );
   }
@@ -74,7 +74,7 @@ export default function AuditPage() {
           </div>
           <h1 className="text-2xl font-bold text-black mb-3">Audit Trail</h1>
           <p className="text-neutral-700 mb-6">This page requires administrator access.</p>
-          <Link href="/" className="inline-block w-full px-6 py-3 bg-black text-yellow-400 font-semibold rounded-md hover:bg-neutral-100">Return Home</Link>
+          <Link href="/" className="gov-btn w-full">Return Home</Link>
         </div>
       </div>
     );
@@ -100,14 +100,14 @@ export default function AuditPage() {
             onChange={(e) => setActor(e.target.value)}
             placeholder="Filter by actor email…"
             aria-label="Filter by actor email"
-            className="flex-1 px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+            className="gov-input flex-1"
           />
           <input
             value={action}
             onChange={(e) => setAction(e.target.value)}
             placeholder="Filter by action (e.g. tickets, login)…"
             aria-label="Filter by action"
-            className="flex-1 px-3 py-2 border border-neutral-300 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
+            className="gov-input flex-1"
           />
         </div>
 

@@ -1,4 +1,4 @@
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -17,8 +17,7 @@ export async function generateStaticParams() {
   }));
 }
 
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+const linkClass = 'gov-link';
 
 const SECTION_LINKS = [
   { href: '#services', label: 'Services' },
@@ -61,7 +60,7 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
   };
   const agencyCrumbs = breadcrumbLd([
     { name: 'Home', path: '/' },
-    { name: 'Agency hub', path: '/agencies/' },
+    { name: 'Government agencies', path: '/agencies/' },
     { name: agency.acronym, path: `/agencies/${agency.id}/` },
   ]);
 
@@ -70,163 +69,124 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="bg-white">
       <JsonLd data={[agencyLd, agencyCrumbs]} />
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/agencies/" className="text-red-600 hover:underline underline-offset-4">Agency hub</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">{agency.acronym}</li>
-          </ol>
-        </nav>
-      </div>
+      <PageHeader
+        crumbs={[{ label: 'Government agencies', href: '/agencies/' }, { label: agency.acronym }]}
+        caption={<>{agency.acronym} · <span className="capitalize">{agency.category.replace(/_/g, ' ')}</span></>}
+        title={agency.name}
+        lead={agency.description}
+        actions={
+          <>
+            <a href="#request" className="gov-btn gov-btn--start">Request a service</a>
+            <a href={`mailto:${agency.contact.email}`} className={linkClass}>Email the agency</a>
+          </>
+        }
+        aside={
+          agency.logo ? (
+            <div className="hidden h-48 items-center justify-center border border-[#dcd8cf] border-t-4 border-t-black bg-white p-6 lg:flex">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={agency.logo} alt={`${agency.name} logo`} className="max-h-full max-w-full object-contain" />
+            </div>
+          ) : undefined
+        }
+      />
 
-      {/* Header */}
-      <PageBand>
-        <section className="mx-auto grid max-w-6xl gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_auto] lg:items-start lg:px-8">
+      <div className="gov-container grid gap-12 py-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:py-16">
         <div>
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold uppercase tracking-wider">
-            <span className="text-red-600">{agency.acronym}</span>
-            <span className="capitalize text-neutral-600">{agency.category.replace(/_/g, ' ')}</span>
-          </p>
-          <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">{agency.name}</h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">{agency.description}</p>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm">
-            <a href="#request" className="inline-flex items-center justify-center rounded-md bg-yellow-400 px-5 py-2.5 font-bold text-black hover:bg-yellow-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
-              Request a service
-            </a>
-            <a href={`mailto:${agency.contact.email}`} className={`${linkClass} self-center`}>Email the agency</a>
-          </div>
-        </div>
-        {agency.logo && (
-          <div className="flex h-36 w-36 items-center justify-center overflow-hidden border border-neutral-200 bg-white p-4 sm:h-48 sm:w-48 sm:p-6 lg:h-56 lg:w-56">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={agency.logo} alt={`${agency.name} logo`} className="max-h-full max-w-full object-contain" />
-          </div>
-        )}
-      </section>
-      </PageBand>
-
-      {/* Quick facts */}
-      <section aria-label="Quick facts" className="mx-auto mt-12 max-w-6xl px-4 sm:px-6 lg:px-8">
-        <dl className="grid grid-cols-2 gap-6 border-y border-neutral-200 py-6 md:grid-cols-4">
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Services</dt>
-            <dd className="mt-1 text-2xl font-bold">{agency.services.length}</dd>
-          </div>
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Operating hours</dt>
-            <dd className="mt-1 text-sm font-bold leading-6">{agency.operatingHours}</dd>
-          </div>
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Appointments</dt>
-            <dd className="mt-1 text-sm font-bold leading-6">{agency.hasAppointmentBooking ? 'Bookable online' : 'Contact to arrange'}</dd>
-          </div>
-          <div className="border-l-4 border-red-600 pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Service area</dt>
-            <dd className="mt-1 text-sm font-bold leading-6 capitalize">{agency.category.replace(/_/g, ' ')}</dd>
-          </div>
-        </dl>
-        <nav aria-label="On this page" className="mt-4">
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            {SECTION_LINKS.map((item) => (
-              <li key={item.href}>
-                <a href={item.href} className="font-semibold text-neutral-700 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded-sm">
-                  {item.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </section>
-
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
-        {/* Services */}
-        <section id="services" aria-labelledby="services-heading" className="scroll-mt-24">
-          <h2 id="services-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Services offered</h2>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-neutral-700">
-            Requirements, fees and processing times depend on the service. Contact the agency to confirm the current details before applying.
-          </p>
-          <ol className="mt-4 divide-y divide-neutral-200">
-            {agency.services.map((service, index) => (
-              <li key={index} className="grid gap-2 py-5 sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-6">
-                <p className="font-bold leading-snug">{service}</p>
-                <p className="text-sm text-neutral-700 sm:text-right">
-                  <span className="font-semibold text-black">Current details:</span> Confirm with agency
-                </p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* Contact */}
-        <section id="contact" aria-labelledby="contact-heading" className="mt-16 scroll-mt-24">
-          <h2 id="contact-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Contact information</h2>
-          <p className="mt-4 text-sm text-neutral-600">Contact information is listed for convenience. Confirm details on the agency&apos;s website before visiting.</p>
-          <dl className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-2">
-            <div className=" pl-4">
-              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Email</dt>
-              <dd className="mt-1"><a href={`mailto:${agency.contact.email}`} className={linkClass}>{agency.contact.email}</a></dd>
-            </div>
-            <div className=" pl-4">
-              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Phone</dt>
-              <dd className="mt-1"><a href={`tel:${agency.contact.phone}`} className={linkClass}>{agency.contact.phone}</a></dd>
-            </div>
-            {agency.contact.website && (
-              <div className=" pl-4">
-                <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Website</dt>
-                <dd className="mt-1">
-                  <a href={agency.contact.website} target="_blank" rel="noopener noreferrer" className={`${linkClass} break-all`}>{agency.contact.website}</a>
-                </dd>
-              </div>
-            )}
-            <div className="border-l-4 border-red-600 pl-4">
-              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Address</dt>
-              <dd className="mt-1 text-neutral-800">{agency.contact.address}</dd>
-            </div>
-            <div className="border-l-4 border-red-600 pl-4">
-              <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Operating hours</dt>
-              <dd className="mt-1 text-neutral-800">{agency.operatingHours}</dd>
-            </div>
-          </dl>
-        </section>
-
-        {/* Related agencies */}
-        {relatedAgencies.length > 0 && (
-          <section aria-labelledby="related-heading" className="mt-16">
-            <h2 id="related-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Related agencies</h2>
-            <ul className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 md:grid-cols-3">
-              {relatedAgencies.map((related) => (
-                <li key={related.id} className=" pt-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-red-600">{related.acronym}</p>
-                  <h3 className="mt-1 font-bold leading-snug">
-                    <Link href={`/agencies/${related.id}/`} className={linkClass}>{related.name}</Link>
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-neutral-700">{related.description}</p>
+          <nav aria-labelledby="contents-heading" className="mb-12">
+            <h2 id="contents-heading" className="text-base font-bold">Contents</h2>
+            <ul className="mt-2 space-y-1.5 text-[15px]">
+              {SECTION_LINKS.map((item) => (
+                <li key={item.href} className="flex gap-2">
+                  <span aria-hidden="true" className="text-[#5c5850]">—</span>
+                  <a href={item.href} className={`${linkClass} font-normal`}>{item.label}</a>
                 </li>
               ))}
             </ul>
-          </section>
-        )}
+          </nav>
 
-        {/* Request a service */}
-        <section id="request" aria-labelledby="request-heading" className="mt-16 scroll-mt-24 pt-10">
-          <h2 id="request-heading" className="text-xl font-bold sm:text-2xl">Request a service</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-700">
-            Send a request to {agency.name}. Keep the reference number provided for follow-up; the agency will confirm the next steps and processing time.
-          </p>
-          <div className="mt-8">
-            <ServiceRequestForm agencyName={agency.name} agencyCode={agency.acronym} agencyEmail={agency.contact.email} services={agency.services} />
+          {/* Services */}
+          <section id="services" aria-labelledby="services-heading" className="scroll-mt-6">
+            <h2 id="services-heading" className="gov-title-l border-b-2 border-black pb-3">Services offered</h2>
+            <p className="gov-inset mt-5 text-[15px]">
+              Requirements, fees and processing times depend on the service. Contact the agency to confirm current details before applying.
+            </p>
+            <ol className="mt-4">
+              {agency.services.map((service, index) => (
+                <li key={index} className="flex gap-4 border-b border-[#dcd8cf] py-4">
+                  <span className="font-data w-7 shrink-0 font-bold text-[#9a0d1c]">{String(index + 1).padStart(2, '0')}</span>
+                  <p className="font-bold leading-snug">{service}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Related agencies */}
+          {relatedAgencies.length > 0 && (
+            <section aria-labelledby="related-heading" className="mt-16">
+              <h2 id="related-heading" className="gov-title-l border-b-2 border-black pb-3">Related agencies</h2>
+              <ul className="mt-6 grid gap-6 md:grid-cols-3">
+                {relatedAgencies.map((related) => (
+                  <li key={related.id} className="gov-card gov-card--link">
+                    <span className="gov-tag w-fit">{related.acronym}</span>
+                    <h3 className="gov-card__title mt-3 text-base">
+                      <Link href={`/agencies/${related.id}/`}>{related.name}</Link>
+                    </h3>
+                    <p className="mt-2 line-clamp-3 text-sm leading-6 text-[#3b3934]">{related.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {/* Request a service */}
+          <section id="request" aria-labelledby="request-heading" className="mt-16 scroll-mt-6 bg-[#f5f3ee] p-6 sm:p-8">
+            <h2 id="request-heading" className="gov-title-l">Request a service</h2>
+            <p className="gov-body mt-3 max-w-2xl">
+              Send a request to {agency.name}. Keep the reference number for follow-up; the agency will confirm the next steps and processing time.
+            </p>
+            <div className="mt-8">
+              <ServiceRequestForm agencyName={agency.name} agencyCode={agency.acronym} agencyEmail={agency.contact.email} services={agency.services} />
+            </div>
+          </section>
+        </div>
+
+        {/* Contact */}
+        <aside id="contact" aria-labelledby="contact-heading" className="scroll-mt-6 lg:sticky lg:top-6 lg:self-start">
+          <div className="border-t-4 border-black bg-[#f5f3ee] p-5">
+            <h2 id="contact-heading" className="text-lg font-bold">Contact {agency.acronym}</h2>
+            <dl className="mt-4 space-y-4 text-[15px]">
+              <div>
+                <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Telephone</dt>
+                <dd className="mt-1"><a href={`tel:${agency.contact.phone}`} className={linkClass}>{agency.contact.phone}</a></dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Email</dt>
+                <dd className="mt-1"><a href={`mailto:${agency.contact.email}`} className={`${linkClass} break-all`}>{agency.contact.email}</a></dd>
+              </div>
+              {agency.contact.website && (
+                <div>
+                  <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Website</dt>
+                  <dd className="mt-1"><a href={agency.contact.website} target="_blank" rel="noopener noreferrer" className={`${linkClass} break-all`}>{agency.contact.website.replace(/^https?:\/\//, '')}</a></dd>
+                </div>
+              )}
+              <div>
+                <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Address</dt>
+                <dd className="mt-1 text-[#262522]">{agency.contact.address}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Opening hours</dt>
+                <dd className="mt-1 text-[#262522]">{agency.operatingHours}</dd>
+              </div>
+              <div>
+                <dt className="text-xs font-bold uppercase tracking-[0.1em] text-[#5c5850]">Appointments</dt>
+                <dd className="mt-1 text-[#262522]">{agency.hasAppointmentBooking ? 'Bookable online' : 'Contact to arrange'}</dd>
+              </div>
+            </dl>
+            <p className="gov-hint mt-5 border-t border-[#dcd8cf] pt-4">Confirm details on the agency&apos;s website before visiting.</p>
           </div>
-        </section>
+        </aside>
       </div>
     </div>
   );

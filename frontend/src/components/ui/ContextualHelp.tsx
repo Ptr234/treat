@@ -190,12 +190,12 @@ export default function ContextualHelp() {
   const getContentIcon = (type: HelpContentItem['type']) => {
     const iconProps = { className: "w-4 h-4 flex-shrink-0 mt-0.5" };
     switch (type) {
-      case 'tip': return <LightBulbIcon {...iconProps} className="w-4 h-4 text-yellow-500 mt-0.5" />;
-      case 'info': return <InformationCircleIcon {...iconProps} className="w-4 h-4 text-blue-500 mt-0.5" />;
-      case 'action': return <ArrowRightIcon {...iconProps} className="w-4 h-4 text-yellow-500 mt-0.5" />;
-      case 'suggestion': return <ChatBubbleLeftRightIcon {...iconProps} className="w-4 h-4 text-purple-500 mt-0.5" />;
-      case 'step': return <div className="w-4 h-4 bg-blue-500 text-black rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0">✓</div>;
-      case 'intro': return <InformationCircleIcon {...iconProps} className="w-4 h-4 text-yellow-500 mt-0.5" />;
+      case 'tip': return <LightBulbIcon {...iconProps} className="w-4 h-4 text-[#8a7200] mt-0.5" />;
+      case 'info': return <InformationCircleIcon {...iconProps} className="w-4 h-4 text-black mt-0.5" />;
+      case 'action': return <ArrowRightIcon {...iconProps} className="w-4 h-4 text-[#8a7200] mt-0.5" />;
+      case 'suggestion': return <ChatBubbleLeftRightIcon {...iconProps} className="w-4 h-4 text-black mt-0.5" />;
+      case 'step': return <div className="w-4 h-4 bg-black text-white rounded-full flex items-center justify-center text-xs font-bold mt-0.5 flex-shrink-0">✓</div>;
+      case 'intro': return <InformationCircleIcon {...iconProps} className="w-4 h-4 text-[#8a7200] mt-0.5" />;
       default: return <QuestionMarkCircleIcon {...iconProps} className="w-4 h-4 text-neutral-600 mt-0.5" />;
     }
   };
@@ -229,10 +229,10 @@ export default function ContextualHelp() {
             </button>
             
             <div className="flex items-center mb-2">
-              <QuestionMarkCircleIcon className="w-5 h-5 mr-2 text-blue-200" />
+              <QuestionMarkCircleIcon className="w-5 h-5 mr-2 text-white/80" />
               <h3 className="font-bold text-lg">{helpContent.title}</h3>
             </div>
-            <p className="text-blue-100 text-sm">Helpful tips for your current task</p>
+            <p className="text-white/80 text-sm">Helpful tips for your current task</p>
           </div>
 
           {/* Content */}
@@ -262,7 +262,7 @@ export default function ContextualHelp() {
                 // Navigate to support or open chat
                 router.push('/support');
               }}
-              className="text-xs bg-indigo-600 text-black px-3 py-1.5 rounded-md hover:bg-indigo-700 transition-colors"
+              className="text-xs bg-black text-white px-3 py-1.5 rounded-md hover:bg-[#262522] transition-colors"
             >
               Contact Support
             </button>

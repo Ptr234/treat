@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
-  ArrowLeftIcon,
   BuildingOfficeIcon,
   CalendarIcon,
   CreditCardIcon,
@@ -13,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { apiFetch } from '@/lib/api-client';
 import { useAuth } from '@/contexts/AuthContext';
+import PageHeader from '@/components/ui/PageHeader';
 
 interface OwnerInfo {
   name: string;
@@ -160,21 +160,24 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
 
   if (authLoading || loading) {
     return (
- <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin" />
+      <div className="gov-container py-24">
+        <span role="status" aria-label="Loading" className="block h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
       </div>
     );
   }
 
   if (needsVerification) {
     return (
- <div className="min-h-screen bg-white flex items-center justify-center px-4">
-        <div className="max-w-md w-full pt-6">
-          <EnvelopeIcon className="w-10 h-10 text-red-600 mb-3" />
-          <h1 className="text-lg font-bold text-black mb-2">Verify your email to track this registration</h1>
-          <p className="text-sm text-neutral-700 mb-4">
-            Enter the email address you used when filing {referenceNumber}.
-          </p>
+      <div className="bg-white">
+        <PageHeader
+          crumbs={[{ label: 'Track an application', href: '/track' }, { label: referenceNumber }]}
+          caption="Business registration"
+          title="Confirm your email address"
+          lead={<p>Enter the email address you used when filing <span className="font-mono font-bold text-black">{referenceNumber}</span>.</p>}
+        />
+        <div className="gov-container max-w-xl py-12">
+          <EnvelopeIcon className="mb-4 h-9 w-9 text-[#ce1126]" aria-hidden="true" />
+          <label htmlFor="verify-email" className="gov-label">Email address</label>
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -183,18 +186,20 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
             className="space-y-3"
           >
             <input
+              id="verify-email"
               type="email"
+              autoComplete="email"
               required
               value={verifyEmail}
               onChange={(e) => setVerifyEmail(e.target.value)}
               placeholder="your.email@example.com"
-              className="w-full px-3 py-2 border border-neutral-400 rounded-md text-black focus:outline-none focus:ring-2 focus-visible:ring-red-600"
+              className="gov-input"
             />
-            <button type="submit" className="w-full py-2 bg-yellow-400 text-black font-semibold rounded-md hover:bg-yellow-500">
-              Track Registration
+            <button type="submit" className="gov-btn">
+              Continue
             </button>
           </form>
-          {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
+          {error && <p role="alert" className="gov-inset gov-inset--red mt-4 text-sm font-semibold">{error}</p>}
         </div>
       </div>
     );
@@ -202,8 +207,14 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
 
   if (error || !registration) {
     return (
- <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-neutral-700">{error ?? 'Registration not found'}</p>
+      <div className="bg-white">
+        <PageHeader
+          crumbs={[{ label: 'Track an application', href: '/track' }, { label: 'Not found' }]}
+          caption="Business registration"
+          title="We could not find that registration"
+          lead={error ?? 'Check the reference number and try again.'}
+          actions={<Link href="/track" className="gov-btn">Try another reference</Link>}
+        />
       </div>
     );
   }
@@ -213,27 +224,21 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
   const currentStageIndex = STAGES.indexOf(r.status);
 
   return (
- <div className="min-h-screen bg-white py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        <Link href="/business/registration/" className="inline-flex items-center gap-1 text-sm text-neutral-700 hover:text-black mb-4">
-          <ArrowLeftIcon className="w-4 h-4" /> Back to Registration
-        </Link>
-
-        <div className="border-t border-neutral-200 pt-6 mb-6">
-          <div className="flex items-start justify-between flex-wrap gap-3">
-            <div>
-              <p className="text-sm text-neutral-600">{r.referenceNumber}</p>
-              <h1 className="text-2xl font-bold text-black">{r.businessName}</h1>
-              <p className="text-sm text-neutral-700 mt-1">{r.businessType} · {r.businessStructure} · {r.sector}</p>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium border ${
-              isRejectedTrack ? 'bg-red-50 text-red-700 border-red-200' :
-              r.status === 'CertificateIssued' ? 'bg-green-50 text-green-700 border-green-200' :
-              'bg-yellow-50 text-red-600 border-yellow-200'
-            }`}>
-              {STAGE_LABELS[r.status] ?? r.status}
-            </span>
-          </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Track an application', href: '/track' }, { label: r.referenceNumber }]}
+        caption={<span className="font-mono tracking-wider">{r.referenceNumber}</span>}
+        title={r.businessName}
+        lead={<p>{r.businessType} · {r.businessStructure} · {r.sector}</p>}
+        actions={
+          <span className={`gov-tag !px-3 !py-1.5 !text-sm ${isRejectedTrack ? 'gov-tag--red' : r.status === 'CertificateIssued' ? '' : 'gov-tag--gold'}`}>
+            {STAGE_LABELS[r.status] ?? r.status}
+          </span>
+        }
+      />
+      <div className="gov-container max-w-4xl py-12">
+        <div className="mb-10 border-t-4 border-black pt-5">
+          <h2 className="text-xl font-bold">Progress</h2>
 
           {/* Stage timeline */}
           {!isRejectedTrack && (
@@ -242,15 +247,15 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
                 {STAGES.map((stage, i) => (
                   <React.Fragment key={stage}>
                     <div className="flex flex-col items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                        i <= currentStageIndex ? 'bg-yellow-400 text-black' : 'bg-gray-200 text-neutral-600'
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
+                        i <= currentStageIndex ? 'bg-black text-[#ffd700]' : 'border-2 border-[#b9b4a9] bg-white text-[#5c5850]'
                       }`}>
                         {i + 1}
                       </div>
                       <p className="text-xs text-neutral-700 mt-1 text-center w-20">{STAGE_LABELS[stage]}</p>
                     </div>
                     {i < STAGES.length - 1 && (
-                      <div className={`flex-1 h-0.5 ${i < currentStageIndex ? 'bg-yellow-400' : 'bg-gray-200'}`} />
+                      <div className={`flex-1 h-1 ${i < currentStageIndex ? 'bg-black' : 'bg-[#dcd8cf]'}`} />
                     )}
                   </React.Fragment>
                 ))}
@@ -259,23 +264,23 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           )}
 
           {isRejectedTrack && r.rejectionReason && (
-            <div className="mt-4 border-l-4 border-red-600 pl-4 py-2 text-red-700">
-              <p className="text-sm text-red-800"><strong>Reason:</strong> {r.rejectionReason}</p>
+            <div role="alert" className="gov-inset gov-inset--red mt-4">
+              <p className="text-[15px] text-black"><strong>Reason:</strong> {r.rejectionReason}</p>
             </div>
           )}
 
           {r.status === 'CertificateIssued' && r.certificateNumber && (
-            <div className="mt-4 border-l border-neutral-200 pl-4 py-2 flex items-center justify-between flex-wrap gap-3">
+            <div className="gov-panel mt-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <DocumentCheckIcon className="w-6 h-6 text-green-700" />
+                <DocumentCheckIcon className="w-8 h-8 text-[#ffd700]" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-medium text-green-800">Certificate {r.certificateNumber}</p>
-                  <p className="text-xs text-green-600">Issued {r.certificateIssuedAt ? new Date(r.certificateIssuedAt).toLocaleDateString() : ''}</p>
+                  <p className="font-bold text-white">Certificate {r.certificateNumber}</p>
+                  <p className="text-sm text-white/80">Issued {r.certificateIssuedAt ? new Date(r.certificateIssuedAt).toLocaleDateString() : ''}</p>
                 </div>
               </div>
               <Link
                 href={`/business/registration/${r.referenceNumber}/certificate/${emailParam ? `?email=${encodeURIComponent(emailParam)}` : ''}`}
-                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700"
+                className="gov-btn gov-btn--gold gov-btn--sm"
               >
                 View Certificate
               </Link>
@@ -284,12 +289,12 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
         </div>
 
         {!isRejectedTrack && payment && (
-          <div className="border-t border-neutral-200 pt-6 mb-6">
-            <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-              <CreditCardIcon className="w-5 h-5 text-neutral-600" /> Registration Fee
+          <div className="mb-10 border-t-4 border-black pt-5">
+            <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-black">
+              <CreditCardIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" /> Registration Fee
             </h2>
             {payment.status === 'successful' ? (
-              <div className="flex items-center gap-2 text-green-700">
+              <div className="flex items-center gap-2 text-black">
                 <DocumentCheckIcon className="w-5 h-5" />
                 <p className="text-sm font-medium">
                   Paid — UGX {payment.amount.toLocaleString()}
@@ -302,16 +307,16 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
                   <p className="text-sm text-neutral-600 mb-3">Confirming your payment with the provider — this can take a moment…</p>
                 )}
                 {payment.status === 'failed' && (
-                  <p className="text-sm text-red-600 mb-3">Your last payment attempt didn&apos;t go through. Please try again.</p>
+                  <p className="gov-inset gov-inset--red mb-3 text-sm font-semibold">Your last payment attempt didn&apos;t go through. Please try again.</p>
                 )}
                 <p className="text-sm text-neutral-700 mb-3">
                   UGX {payment.amount.toLocaleString()} is due before a certificate can be issued.
                 </p>
-                {payError && <p className="text-sm text-red-600 mb-3">{payError}</p>}
+                {payError && <p className="gov-inset gov-inset--red mb-3 text-sm font-semibold">{payError}</p>}
                 <button
                   onClick={payNow}
                   disabled={payBusy}
-                  className="px-4 py-2 bg-black text-yellow-400 text-sm font-medium rounded-md hover:bg-neutral-800 disabled:opacity-50"
+                  className="gov-btn gov-btn--sm"
                 >
                   {payBusy ? 'Redirecting to payment…' : `Pay Registration Fee (UGX ${payment.amount.toLocaleString()})`}
                 </button>
@@ -320,15 +325,15 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           </div>
         )}
 
-        <div className="border-t border-neutral-200 pt-6 mb-6">
-          <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-            <BuildingOfficeIcon className="w-5 h-5 text-neutral-600" /> Business Details
+        <div className="mb-10 border-t-4 border-black pt-5">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-black">
+            <BuildingOfficeIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" /> Business Details
           </h2>
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div><dt className="text-neutral-600">Location</dt><dd className="text-black font-medium">{r.location}</dd></div>
-            <div><dt className="text-neutral-600">Sector</dt><dd className="text-black font-medium">{r.sector}</dd></div>
-            {r.initialCapital && <div><dt className="text-neutral-600">Initial Capital</dt><dd className="text-black font-medium">{r.initialCapital}</dd></div>}
-            {r.projectedTurnover && <div><dt className="text-neutral-600">Projected Turnover</dt><dd className="text-black font-medium">{r.projectedTurnover}</dd></div>}
+            <div><dt className="font-bold text-[#5c5850]">Location</dt><dd className="text-black font-medium">{r.location}</dd></div>
+            <div><dt className="font-bold text-[#5c5850]">Sector</dt><dd className="text-black font-medium">{r.sector}</dd></div>
+            {r.initialCapital && <div><dt className="font-bold text-[#5c5850]">Initial Capital</dt><dd className="text-black font-medium">{r.initialCapital}</dd></div>}
+            {r.projectedTurnover && <div><dt className="font-bold text-[#5c5850]">Projected Turnover</dt><dd className="text-black font-medium">{r.projectedTurnover}</dd></div>}
           </dl>
           {r.businessDescription && (
             <p className="text-sm text-neutral-700 mt-4 border-t border-neutral-200 pt-4">{r.businessDescription}</p>
@@ -345,16 +350,16 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
           </div>
         </div>
 
-        <div className="border-t border-neutral-200 pt-6">
-          <h2 className="text-lg font-bold text-black mb-4 flex items-center gap-2">
-            <CalendarIcon className="w-5 h-5 text-neutral-600" /> Timeline
+        <div className="border-t-4 border-black pt-5">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-black">
+            <CalendarIcon className="w-5 h-5 text-[#ce1126]" aria-hidden="true" /> Timeline
           </h2>
           <dl className="text-sm space-y-2">
-            <div className="flex justify-between"><dt className="text-neutral-600">Submitted</dt><dd className="text-black">{new Date(r.createdAt).toLocaleString()}</dd></div>
+            <div className="flex justify-between"><dt className="font-bold text-[#5c5850]">Submitted</dt><dd className="text-black">{new Date(r.createdAt).toLocaleString()}</dd></div>
             {r.nameDecisionAt && (
-              <div className="flex justify-between"><dt className="text-neutral-600">Name Decision</dt><dd className="text-black">{new Date(r.nameDecisionAt).toLocaleString()}</dd></div>
+              <div className="flex justify-between"><dt className="font-bold text-[#5c5850]">Name Decision</dt><dd className="text-black">{new Date(r.nameDecisionAt).toLocaleString()}</dd></div>
             )}
-            <div className="flex justify-between"><dt className="text-neutral-600">Processing Time</dt><dd className="text-black">{r.processingHours < 24 ? `${r.processingHours}h` : `${(r.processingHours / 24).toFixed(1)}d`}</dd></div>
+            <div className="flex justify-between"><dt className="font-bold text-[#5c5850]">Processing Time</dt><dd className="text-black">{r.processingHours < 24 ? `${r.processingHours}h` : `${(r.processingHours / 24).toFixed(1)}d`}</dd></div>
           </dl>
         </div>
       </div>

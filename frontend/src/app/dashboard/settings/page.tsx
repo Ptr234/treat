@@ -95,7 +95,7 @@ export default function SettingsPage() {
 
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+            <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
           </div>
         ) : (
           <div className="space-y-8">
@@ -174,7 +174,7 @@ export default function SettingsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-8 py-3 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="gov-btn gov-btn--gold"
               >
                 {saving ? (
                   <>

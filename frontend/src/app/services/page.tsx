@@ -1,4 +1,4 @@
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
 import Link from 'next/link';
 
 // Organized services by logical categories
@@ -103,115 +103,105 @@ const serviceCategories = [
   }
 ];
 
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
-
 export default function ServicesPage() {
   return (
- <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Services</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Services' }]}
+        caption="Services"
+        title="Government services for your business"
+        lead={
+          <p>
+            Find the approval or service that matches your next step, see which agency is responsible, and follow the link to its guidance.
+            Requirements can change, so confirm the latest checklist and charges with the agency before you pay.
+          </p>
+        }
+        actions={
+          <>
+            <Link href="/business/registration" className="gov-btn gov-btn--start">Start business registration</Link>
+            <Link href="/agencies" className="gov-link">Contact an agency</Link>
+          </>
+        }
+      />
 
-      {/* Title and intro */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight text-black sm:text-4xl">
-          Government services for your business
-        </h1>
-        <p className="mt-5 max-w-4xl text-base leading-7 text-neutral-600 sm:text-lg">
-          Starting or expanding a business can involve several public agencies, each responsible for a different approval or service. Use this directory to identify the service that matches your next step, check which agency is responsible, and follow the link to its guidance or application process. Service pages include the available audience, fee and timing information where published. Requirements can change, so confirm the latest checklist and charges with the responsible agency before submitting documents or payment.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-          <Link href="/business/registration" className={linkClass}>Start business registration</Link>
-          <Link href="/agencies" className={linkClass}>Contact agencies</Link>
-        </div>
-      </section>
-      </PageBand>
+      <div className="gov-container grid gap-12 py-12 lg:grid-cols-[14rem_minmax(0,1fr)] lg:py-16">
+        {/* Contents */}
+        <aside className="lg:sticky lg:top-6 lg:self-start">
+          <nav aria-labelledby="contents-heading" className="gov-related !border-black">
+            <h2 id="contents-heading">Contents</h2>
+            <ul>
+              {serviceCategories.map((category) => (
+                <li key={category.key} className="flex gap-2 text-[15px]">
+                  <span aria-hidden="true" className="text-[#5c5850]">—</span>
+                  <a href={`#${category.key}`} className="gov-link font-normal">{category.title}</a>
+                </li>
+              ))}
+              <li className="flex gap-2 text-[15px]">
+                <span aria-hidden="true" className="text-[#5c5850]">—</span>
+                <a href="#assistance-heading" className="gov-link font-normal">Get help</a>
+              </li>
+            </ul>
+          </nav>
+        </aside>
 
-      {/* Service detail blocks */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8" aria-labelledby="services-heading">
-        <h2 id="services-heading" className="sr-only">Essential business services</h2>
+        <div>
+          <h2 className="sr-only">Essential business services</h2>
+          <div className="space-y-16">
+            {serviceCategories.map((category) => (
+              <section key={category.key} id={category.key} aria-labelledby={`${category.key}-heading`} className="scroll-mt-6">
+                <h2 id={`${category.key}-heading`} className="gov-title-l border-b-2 border-black pb-3">{category.title}</h2>
+                <div className="mt-8 grid gap-6 xl:grid-cols-2">
+                  {category.services.map((service) => (
+                    <article key={service.id} className="gov-card">
+                      <p><span className="gov-tag">{service.agency}</span></p>
+                      <h3 className="gov-card__title mt-4">
+                        <Link href={service.href}>{service.title}</Link>
+                      </h3>
+                      <p className="mt-2 text-[15px] text-[#3b3934]"><strong className="text-black">Who it is for:</strong> {service.audience}</p>
+                      <p className="mt-3 text-[15px] leading-6 text-[#3b3934]">{service.description}</p>
+                      <dl className="gov-summary mt-5 text-[15px]">
+                        <div><dt>Processing time</dt><dd>{service.timeline}</dd></div>
+                        <div><dt>Fees</dt><dd>{service.cost}</dd></div>
+                      </dl>
+                      <div className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-[15px]">
+                        <Link href={service.href} className="gov-arrow-link">Next step</Link>
+                        <Link href="/tools/document-checklist" className="gov-link">Document checklist</Link>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
 
-        <div className="space-y-14">
-          {serviceCategories.map((category) => (
-            <div key={category.key}>
-              <h3 className="mb-8 border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">
-                <span className="mr-3 inline-block h-4 w-4 bg-red-600 align-middle" aria-hidden="true" />
-                {category.title}
-              </h3>
-
-              <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
-                {category.services.map((service) => (
-                    <article key={service.id} className="border border-neutral-200 bg-white p-5 sm:p-6">
-                    <p className="text-xs font-bold uppercase tracking-[.14em] text-red-700">{category.title}</p>
-                    <h4 className="mt-2 text-lg font-bold leading-snug sm:text-xl">
-                      <Link
-                        href={service.href}
-                        className="text-black hover:text-red-600 underline decoration-2 underline-offset-4 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
-                      >
-                        {service.title}
-                      </Link>
-                    </h4>
-                    <p className="mt-3 text-sm leading-6 text-neutral-700"><span className="font-semibold text-neutral-900">Who it is for:</span> {service.audience}</p>
-                    <p className="mt-3 text-sm leading-7 text-neutral-700">{service.description}</p>
-                    <dl className="mt-5 grid grid-cols-[6.5rem_1fr] gap-x-3 gap-y-3 border-y border-neutral-200 py-4 text-sm">
-                      <dt className="font-semibold text-neutral-900">Responsible</dt>
-                      <dd className="text-neutral-700">{service.agency}</dd>
-                      <dt className="font-semibold text-neutral-900">Processing time</dt>
-                      <dd className="text-neutral-700">{service.timeline}</dd>
-                      <dt className="font-semibold text-neutral-900">Fees</dt>
-                      <dd className="text-neutral-700">{service.cost}</dd>
-                    </dl>
-                    <p className="mt-4 text-xs leading-5 text-neutral-600">Before applying, confirm the current document checklist, fees and processing time with the responsible agency.</p>
-                    <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                      <Link href="/tools/document-checklist" className={linkClass}>Document checklist</Link>
-                      <Link href={service.href} className={linkClass}>Next step</Link>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Assistance */}
-      <section className="border-t border-neutral-200 bg-white" aria-labelledby="assistance-heading">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-          <h2 id="assistance-heading" className="text-2xl font-bold sm:text-3xl">Need assistance?</h2>
-          <p className="mt-3 max-w-3xl text-neutral-700">
-            Our team is here to help guide you through every step of the process.
+          <p className="gov-inset mt-12 text-[15px]">
+            Before applying, confirm the current document checklist, fees and processing time with the responsible agency.
           </p>
 
-          <div className="mt-10 grid gap-10 md:grid-cols-3">
-            <div>
-              <h3 className="text-lg font-bold">Phone support</h3>
-              <p className="mt-2 text-sm leading-7 text-neutral-700">Get assistance from the OneStop Centre team.</p>
-              <a href="tel:+256414301000" className={`${linkClass} mt-3 inline-block`}>+256 414 301 000</a>
+          {/* Assistance */}
+          <section className="mt-16 border-t-4 border-[#ce1126] pt-8" aria-labelledby="assistance-heading">
+            <h2 id="assistance-heading" className="gov-title-l scroll-mt-6">Need assistance?</h2>
+            <p className="gov-body mt-3">The OneStop Centre team can guide you through each step.</p>
+            <div className="mt-8 grid gap-8 md:grid-cols-3">
+              <div>
+                <h3 className="text-lg font-bold">Phone</h3>
+                <p className="mt-1 text-[15px] text-[#3b3934]">Speak to the OneStop Centre team.</p>
+                <a href="tel:+256414301000" className="gov-link mt-2 inline-block">+256 414 301 000</a>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Forms and guidance</h3>
+                <p className="mt-1 text-[15px] text-[#3b3934]">Download application forms and guides.</p>
+                <Link href="/downloads" className="gov-link mt-2 inline-block">View downloads</Link>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold">Visit an office</h3>
+                <p className="mt-1 text-[15px] text-[#3b3934]">Addresses and hours for partner agencies.</p>
+                <Link href="/agencies" className="gov-link mt-2 inline-block">Find locations</Link>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-bold">Documentation</h3>
-              <p className="mt-2 text-sm leading-7 text-neutral-700">Find available forms, downloads and guidance.</p>
-              <Link href="/downloads" className={`${linkClass} mt-3 inline-block`}>View downloads</Link>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold">Visit offices</h3>
-              <p className="mt-2 text-sm leading-7 text-neutral-700">Find and visit our partner agency offices.</p>
-              <Link href="/agencies" className={`${linkClass} mt-3 inline-block`}>Find locations</Link>
-            </div>
-          </div>
+          </section>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

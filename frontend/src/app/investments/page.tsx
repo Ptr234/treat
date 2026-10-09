@@ -1,17 +1,14 @@
 'use client';
 
-import PageBand from '@/components/ui/PageBand';
 import React, { useState, useMemo } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { Search, X } from 'lucide-react';
+import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import staticData from '@/data/investment-opportunities.json';
 import type { InvestmentOpportunity } from '@/types';
+import PageHeader from '@/components/ui/PageHeader';
+import FactRow from '@/components/ui/FactRow';
 
 const opportunitiesData = staticData as unknown as InvestmentOpportunity[];
-
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
 
 const InvestmentOpportunities = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,163 +41,135 @@ const InvestmentOpportunities = () => {
     setSelectedCategory('');
   };
 
+  const countFor = (category: string) => opportunities.filter((o) => o.category === category).length;
+
   return (
- <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Investments</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Investment projects' }]}
+        caption="Invest"
+        title="Investment projects in Uganda"
+        lead="Search published projects by sector, investment range or lead agency. Open a listing for its requirements and contact details."
+        actions={
+          <>
+            <Link href="/investments/onboarding" className="gov-btn gov-btn--start">Register your interest</Link>
+            <Link href="/investments/process" className="gov-link">How the investment process works</Link>
+          </>
+        }
+      >
+        <FactRow
+          facts={[
+            { label: 'Projects listed', value: opportunities.length },
+            { label: 'Sectors', value: categories.length },
+            { label: 'Lead agencies', value: new Set(opportunities.map((project) => project.agency).filter(Boolean)).size },
+          ]}
+        />
+      </PageHeader>
 
-      {/* Title and intro */}
-      <PageBand>
-        <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[1fr_.6fr] lg:px-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Invest in Uganda</h1>
-          <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-600 sm:text-lg">
-            Browse {opportunities.length} published opportunities across {categories.length} sectors, from agriculture and tourism to energy, infrastructure and technology. Compare indicative investment ranges, expected timelines and reported returns, then open a project to review its description and lead agency. Use search and sector filters to narrow the list to the areas that fit your plans. Figures are provided for early research and should be confirmed with the responsible agency before you make an investment decision.
-          </p>
-        </div>
-        <div className="relative hidden h-44 lg:block">
-          <Image src="/images/lake-bunyonyi-uganda.jpg" alt="Lake Bunyonyi in Uganda" fill className="object-cover" priority />
-        </div>
-      </section>
-      </PageBand>
-
-      {/* Search & filter */}
-      <section className="mx-auto mt-10 max-w-6xl border-y border-neutral-200 px-4 py-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center gap-3 sm:flex-row">
-          <div className="relative w-full flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
-            <label htmlFor="investment-search" className="sr-only">Search investment opportunities</label>
+      <div className="gov-container grid gap-10 py-12 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-14">
+        {/* Filters */}
+        <aside aria-label="Filter investment projects" className="lg:sticky lg:top-6 lg:self-start">
+          <div className="bg-[#f5f3ee] p-5">
+            <h2 className="text-lg font-bold">Filter projects</h2>
+            <label htmlFor="investment-search" className="gov-label mt-5">Search</label>
             <input
               id="investment-search"
-              type="text"
+              type="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by sector, agency, or keyword..."
-              className="w-full rounded-md border-2 border-black bg-white py-2.5 pl-10 pr-10 text-sm text-black placeholder-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+              placeholder="Name, sector or agency"
+              className="gov-input"
             />
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                aria-label="Clear search"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-red-600"
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
+            <fieldset className="mt-6">
+              <legend className="gov-label">Sector</legend>
+              <div className="mt-2 space-y-2.5">
+                <label className="flex items-center gap-3 text-[15px] font-normal">
+                  <input type="radio" name="sector" className="h-5 w-5 shrink-0" checked={selectedCategory === ''} onChange={() => setSelectedCategory('')} />
+                  <span className="flex-1">All sectors</span>
+                  <span className="font-data text-sm text-[#5c5850]">{opportunities.length}</span>
+                </label>
+                {categories.map((category) => (
+                  <label key={category} className="flex items-center gap-3 text-[15px] font-normal">
+                    <input type="radio" name="sector" className="h-5 w-5 shrink-0" checked={selectedCategory === category} onChange={() => setSelectedCategory(category)} />
+                    <span className="flex-1">{category}</span>
+                    <span className="font-data text-sm text-[#5c5850]">{countFor(category)}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            {(searchTerm || selectedCategory) && (
+              <button type="button" onClick={clearFilters} className="gov-btn gov-btn--secondary gov-btn--sm mt-6 w-full">Clear filters</button>
             )}
           </div>
-          <div className="flex w-full gap-2 overflow-x-auto pb-1 sm:w-auto sm:pb-0">
-            <button
-              type="button"
-              onClick={() => setSelectedCategory('')}
-              aria-pressed={selectedCategory === ''}
-              className={`whitespace-nowrap border-b-2 px-2 py-2 text-xs font-bold transition-colors ${
-                selectedCategory === '' ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-700 hover:text-red-600'
-              }`}
-            >
-              All
-            </button>
-            {categories.map(cat => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(selectedCategory === cat ? '' : cat)}
-                aria-pressed={selectedCategory === cat}
-                className={`whitespace-nowrap border-b-2 px-2 py-2 text-xs font-bold transition-colors ${
-                  selectedCategory === cat ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-700 hover:text-red-600'
-                }`}
-              >
-                {String(cat).split('&')[0]?.trim()}
-              </button>
-            ))}
+        </aside>
+
+        {/* Results */}
+        <section aria-labelledby="results-heading">
+          <div className="flex flex-col gap-2 border-b-2 border-black pb-3 sm:flex-row sm:items-end sm:justify-between">
+            <h2 id="results-heading" aria-live="polite" className="gov-title-l">
+              {filteredOpportunities.length} {filteredOpportunities.length === 1 ? 'project' : 'projects'}
+            </h2>
+            <p className="gov-hint max-w-sm sm:text-right">Figures are published estimates. Confirm details with the lead agency.</p>
           </div>
-        </div>
-        {(searchTerm || selectedCategory) && (
-          <div className="mt-3 flex items-center gap-3 text-sm">
-            <span className="text-neutral-600">{filteredOpportunities.length} results</span>
-            <button type="button" onClick={clearFilters} className={`${linkClass} text-sm`}>Clear</button>
-          </div>
-        )}
-      </section>
 
-      {/* Opportunities */}
-      <section className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
-        {filteredOpportunities.length === 0 ? (
-          <div className="border-l-4 border-red-600 bg-neutral-50 p-6">
-            <h3 className="text-lg font-bold">No opportunities found</h3>
-            <p className="mt-2 text-sm text-neutral-700">Try adjusting your search or filter.</p>
-            <button type="button" onClick={clearFilters} className={`${linkClass} mt-4 inline-block text-sm`}>
-              Clear filters
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
-            {filteredOpportunities.map((opp) => (
-              <article key={opp.id} className="border-t border-neutral-200 pt-6">
-                <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wider">
-                  <span className="text-red-600">{opp.category?.split('&')[0]?.trim()}</span>
-                  <span className="text-neutral-700">· {opp.priority} priority</span>
-                </div>
+          {filteredOpportunities.length === 0 ? (
+            <div className="gov-inset mt-6">
+              <h3 className="text-lg font-bold">No projects match your search</h3>
+              <p className="mt-1 text-[15px] text-[#3b3934]">Try a project name, sector or agency, or clear the filters to see every listing.</p>
+              <button type="button" onClick={clearFilters} className="gov-link mt-3">Clear filters</button>
+            </div>
+          ) : (
+            <ul>
+              {filteredOpportunities.map((opp) => (
+                <li key={opp.id} className="border-b border-[#dcd8cf] py-7">
+                  <article>
+                    <p className="flex flex-wrap items-center gap-2">
+                      <span className="gov-tag gov-tag--outline">{opp.category}</span>
+                      {opp.priority === 'High' && <span className="gov-tag gov-tag--gold">High priority</span>}
+                    </p>
+                    <h3 className="mt-3 text-[22px] font-bold leading-snug">
+                      <Link href={`/investments/${opp.id}`} className="text-black underline decoration-1 underline-offset-4 hover:text-[#9a0d1c] hover:decoration-[3px]">
+                        {opp.title}
+                      </Link>
+                    </h3>
+                    <p className="mt-2 line-clamp-3 max-w-3xl text-[15px] leading-6 text-[#3b3934]">{opp.description}</p>
 
-                <h3 className="mt-2 text-lg font-bold leading-snug">
-                  <Link
-                    href={`/investments/${opp.id}`}
-                    className="text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
-                  >
-                    {opp.title}
-                  </Link>
-                </h3>
+                    <dl className="mt-4 grid grid-cols-2 border-l-4 border-black bg-[#f5f3ee] text-sm sm:grid-cols-4">
+                      {[
+                        ['Investment', opp.investmentRange],
+                        ['Estimated ROI', opp.roi],
+                        ['Timeline', opp.timeline],
+                        ['Lead agency', opp.agency?.split('(')[0]?.trim()],
+                      ].map(([label, value]) => (
+                        <div key={label} className="px-4 py-3">
+                          <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[#5c5850]">{label}</dt>
+                          <dd className="mt-1 font-bold text-black">{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
 
-                <p className="mt-3 text-sm leading-7 text-neutral-700">{opp.description}</p>
-
-                <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2.5 bg-neutral-50 py-3 pl-4 pr-3 text-sm sm:grid-cols-4">
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Investment</p>
-                    <p className="mt-0.5 font-semibold text-black">{opp.investmentRange}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">ROI</p>
-                    <p className="mt-0.5 font-semibold text-black">{opp.roi}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Timeline</p>
-                    <p className="mt-0.5 font-semibold text-black">{opp.timeline}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-neutral-600">Agency</p>
-                    <p className="mt-0.5 font-semibold text-black">{opp.agency?.split('(')[0]?.trim()}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                  <Link href={`/investments/${opp.id}`} className={linkClass}>View opportunity</Link>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      document.dispatchEvent(new CustomEvent('openChatWidget', {
-                        detail: { message: `I'm interested in: ${opp.title} (${opp.category}). Investment: ${opp.investmentRange}, ROI: ${opp.roi}. Tell me more.` }
-                      }));
-                    }}
-                    className={linkClass}
-                  >
-                    Ask assistant
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
+                    <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px]">
+                      <Link href={`/investments/${opp.id}`} className="gov-arrow-link">View project details</Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          document.dispatchEvent(new CustomEvent('openChatWidget', {
+                            detail: { message: `I'm interested in: ${opp.title} (${opp.category}). Investment: ${opp.investmentRange}, ROI: ${opp.roi}. Tell me more.` }
+                          }));
+                        }}
+                        className="gov-link inline-flex items-center gap-1.5 font-normal"
+                      >
+                        <ChatBubbleLeftRightIcon className="h-4 w-4" aria-hidden="true" />
+                        Ask the assistant
+                      </button>
+                    </div>
+                  </article>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 };

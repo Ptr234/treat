@@ -11,11 +11,11 @@ export default async function BusinessRegistrationDetailPage({ params }: PagePro
   return (
     <Suspense
       fallback={
- <div className="min-h-screen bg-white flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-gray-600 font-medium">Loading...</p>
-          </div>
+        <div className="gov-container py-24">
+          <p role="status" className="flex items-center gap-3 text-[#3b3934]">
+            <span className="h-6 w-6 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" aria-hidden="true" />
+            Loading registration…
+          </p>
         </div>
       }
     >

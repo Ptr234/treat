@@ -152,7 +152,7 @@ export default function EventManagementPage() {
           actions={
             <button
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+              className="gov-btn gov-btn--gold gov-btn--sm"
             >
               <PlusIcon className="w-5 h-5" />
               New Event
@@ -192,14 +192,14 @@ export default function EventManagementPage() {
               </FormField>
               <div className="flex items-center gap-3 pt-6">
                 <input type="checkbox" id="isPublished" checked={form.isPublished} onChange={e => setForm(p => ({ ...p, isPublished: e.target.checked }))}
-                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-yellow-500 focus-visible:ring-red-600" />
+                  className="w-5 h-5 rounded border-neutral-200 bg-neutral-100 text-[#8a7200]" />
                 <label htmlFor="isPublished" className="text-sm">Publish immediately</label>
               </div>
             </div>
             <div className="flex gap-3 justify-end">
               <button onClick={resetForm} className="px-4 py-2 text-neutral-700 hover:text-red-600 transition-colors">Cancel</button>
               <button onClick={handleSave} disabled={saving || !form.title || !form.date || !form.category}
-                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 disabled:opacity-50 transition-colors">
+                className="gov-btn gov-btn--gold gov-btn--sm">
                 {saving ? 'Saving...' : editingId ? 'Update Event' : 'Create Event'}
               </button>
             </div>
@@ -209,7 +209,7 @@ export default function EventManagementPage() {
         {/* Events List */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+            <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
           </div>
         ) : events.length === 0 ? (
           <div className="text-center py-20 text-neutral-600">

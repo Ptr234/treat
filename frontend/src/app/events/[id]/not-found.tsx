@@ -12,7 +12,7 @@ export default function EventNotFound() {
         </p>
         <Link
           href="/events/"
-          className="mt-8 inline-flex items-center gap-2 pb-0.5 text-sm font-bold text-black hover:border-red-600 hover:text-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
+          className="mt-8 inline-flex items-center gap-2 pb-0.5 text-sm font-bold text-black hover:border-red-600 hover:text-red-600"
         >
           <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
           Browse all events

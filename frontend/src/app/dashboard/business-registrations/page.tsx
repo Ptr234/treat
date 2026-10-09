@@ -135,7 +135,7 @@ export default function BusinessRegistrationsPage() {
           <div className={selected ? 'lg:col-span-2' : 'lg:col-span-3'}>
             {loading ? (
               <div className="flex justify-center py-20">
-                <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
               </div>
             ) : registrations.length === 0 ? (
               <div className="text-center py-20 text-neutral-600">No business registrations yet.</div>
@@ -163,7 +163,7 @@ export default function BusinessRegistrationsPage() {
                           <button
                             disabled={busy}
                             onClick={() => updateStatus(r.referenceNumber, 'name_approved')}
-                            className="px-3 py-1.5 text-xs font-medium rounded-md bg-purple-600/80 hover:bg-purple-600 text-white disabled:opacity-50"
+                            className="px-3 py-1.5 text-xs font-medium rounded-md bg-[#ffd700] hover:bg-[#e6c200] text-black font-bold disabled:opacity-50"
                           >
                             Approve Name
                           </button>
@@ -172,7 +172,7 @@ export default function BusinessRegistrationsPage() {
                           <button
                             disabled={busy}
                             onClick={() => updateStatus(r.referenceNumber, 'certificate_issued')}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-green-600/80 hover:bg-green-600 text-white disabled:opacity-50"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md bg-black hover:bg-[#262522] text-white disabled:opacity-50"
                           >
                             <DocumentCheckIcon className="w-3.5 h-3.5" /> Issue Certificate
                           </button>
@@ -200,7 +200,7 @@ export default function BusinessRegistrationsPage() {
                           value={rejectReasonDraft}
                           onChange={(e) => setRejectReasonDraft(e.target.value)}
                           placeholder="Reason for rejection (required)"
-                          className="flex-1 text-sm text-black px-3 py-1.5 border-t border-neutral-200 pt-5"
+                          className="gov-input flex-1"
                         />
                         <button
                           disabled={busy || !rejectReasonDraft.trim()}
@@ -267,7 +267,7 @@ export default function BusinessRegistrationsPage() {
                 )}
                 <Link
                   href={`/business/registration/${selected.referenceNumber}/`}
-                  className="block text-center mt-2 text-xs text-yellow-500 hover:text-red-600 underline"
+                  className="gov-link mt-2 block text-center text-xs"
                 >
                   Open applicant tracking view
                 </Link>

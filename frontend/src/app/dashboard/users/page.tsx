@@ -108,7 +108,7 @@ export default function UserManagementPage() {
           actions={
             <button
               onClick={() => setShowCreate(!showCreate)}
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 transition-colors"
+              className="gov-btn gov-btn--gold gov-btn--sm"
             >
               <UserPlusIcon className="w-5 h-5" />
               Add User
@@ -155,7 +155,7 @@ export default function UserManagementPage() {
             <div className="flex gap-3 justify-end">
               <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-neutral-700 hover:text-red-600 transition-colors">Cancel</button>
               <button onClick={handleCreate} disabled={saving || !createForm.name || !createForm.email || !createForm.password || (needsAgencyCode && !createForm.agencyCode.trim())}
-                className="px-6 py-2 bg-yellow-500 text-black font-bold rounded-md hover:bg-yellow-400 disabled:opacity-50 transition-colors">
+                className="gov-btn gov-btn--gold gov-btn--sm">
                 {saving ? 'Creating...' : 'Create User'}
               </button>
             </div>
@@ -165,7 +165,7 @@ export default function UserManagementPage() {
         {/* Users List */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+            <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-[#dcd8cf] border-t-black" />
           </div>
         ) : (
           <div className="space-y-3">
@@ -192,7 +192,7 @@ export default function UserManagementPage() {
                   {u.id !== user?.id && (
                     <>
                       <button onClick={() => handleToggleActive(u)} title={u.isActive ? 'Deactivate' : 'Activate'}
-                        className={`p-2 rounded-md transition-colors ${u.isActive ? 'hover:bg-red-50 text-neutral-600 hover:text-red-700' : 'hover:bg-green-50 text-neutral-600 hover:text-green-700'}`}>
+                        className={`p-2 rounded-md transition-colors ${u.isActive ? 'hover:bg-red-50 text-neutral-600 hover:text-red-700' : 'hover:bg-[#fffbea] text-neutral-600 hover:text-black'}`}>
                         {u.isActive ? <XCircleIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
                       </button>
                       <button onClick={() => handleDelete(u)} title="Delete"

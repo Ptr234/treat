@@ -1,11 +1,12 @@
 'use client';
 
-import PageBand from '@/components/ui/PageBand';
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, X, ArrowRight, Clock, MapPin, Phone, Mail } from 'lucide-react';
+import { Search, X, Clock, MapPin, Phone, Mail } from 'lucide-react';
 import { ugandaAgencies, type AgencyContact } from '@/data/agencies';
+import PageHeader from '@/components/ui/PageHeader';
+import FactRow from '@/components/ui/FactRow';
 
 /* ────────────────────────────────────────────────────────
    Category headings. One accent system for the whole page:
@@ -72,12 +73,21 @@ function getHeading(category: string) {
 }
 
 const FEATURED_IDS = ['uia', 'ursb', 'ura'];
+const CATEGORY_IMAGES: Partial<Record<string, string>> = {
+  investment: '/images/uganda-kampala-city-view.webp',
+  taxation: '/images/uganda-kampala-city-view.webp',
+  environment: '/images/lake-bunyonyi-uganda.jpg',
+  standards: '/images/uganda-tea-plantation.webp',
+  infrastructure: '/images/uganda-kampala-city-view.webp',
+  lands: '/images/lake-bunyonyi-uganda.jpg',
+  tourism: '/images/lake-bunyonyi-uganda.jpg',
+  conservation: '/images/lake-bunyonyi-uganda.jpg',
+};
 
-const linkClass =
-  'font-semibold text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm';
+const linkClass = 'gov-link';
 
 /* ────────────────────────────────────────────────────────
-   Agency detail block — used everywhere on the page
+   Agency record — used everywhere on the page
    ──────────────────────────────────────────────────────── */
 
 function AgencyDetail({ agency }: { agency: AgencyContact }) {
@@ -88,99 +98,90 @@ function AgencyDetail({ agency }: { agency: AgencyContact }) {
   };
 
   return (
-    <article className="border-t border-neutral-200 pt-6">
+    <article className="gov-card h-full">
       <div className="flex items-start gap-4">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden border border-neutral-200 bg-white p-2">
+        <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden border border-[#dcd8cf] bg-white p-2">
           {agency.logo ? (
-            <Image src={agency.logo} alt={agency.acronym} width={36} height={36} className="object-contain" />
+            <Image src={agency.logo} alt="" width={44} height={44} className="object-contain" />
           ) : (
-            <span className="text-lg font-black text-black">{agency.acronym[0]}</span>
+            <span className="font-display text-2xl font-semibold text-black">{agency.acronym[0]}</span>
           )}
         </div>
         <div className="min-w-0">
-          <p className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wider">
-            <span className="text-red-600">{agency.acronym}</span>
-          </p>
-          <h3 className="mt-1 text-lg font-bold leading-snug">
-            <Link
-              href={`/agencies/${agency.id}`}
-              className="text-black underline decoration-2 underline-offset-4 hover:text-red-600 hover:decoration-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 rounded-sm"
-            >
-              {agency.name}
-            </Link>
+          <span className="gov-tag">{agency.acronym}</span>
+          <h3 className="gov-card__title mt-2">
+            <Link href={`/agencies/${agency.id}`}>{agency.name}</Link>
           </h3>
         </div>
       </div>
 
-      <p className="mt-4 text-sm leading-7 text-neutral-700">{agency.description}</p>
+      <p className="mt-4 line-clamp-3 text-[15px] leading-6 text-[#3b3934]">{agency.description}</p>
 
       {agency.services.length > 0 && (
         <div className="mt-4">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-black">Services</h4>
-          <ul className="mt-2 space-y-1.5 text-sm text-neutral-700">
-            {agency.services.map((service) => (
-              <li key={service} className="flex items-start gap-2">
-                <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 bg-yellow-400" />
+          <h4 className="text-sm font-bold">Services include</h4>
+          <ul className="mt-2 space-y-1.5 text-[15px] text-[#3b3934]">
+            {agency.services.slice(0, 3).map((service) => (
+              <li key={service} className="flex items-start gap-2.5">
+                <span aria-hidden="true" className="mt-2 h-2 w-2 shrink-0 bg-[#ffd700] ring-1 ring-black" />
                 <span>{service}</span>
               </li>
             ))}
           </ul>
+          {agency.services.length > 3 && <p className="mt-2 text-sm font-semibold text-[#5c5850]">and {agency.services.length - 3} more</p>}
         </div>
       )}
 
-      <div className="mt-5 grid grid-cols-1 gap-x-6 gap-y-2.5 bg-neutral-50 py-3 pl-4 pr-3 text-sm sm:grid-cols-2">
+      <dl className="mt-5 grid gap-x-6 gap-y-2 border-t border-[#dcd8cf] pt-4 text-sm sm:grid-cols-2">
         <div className="flex items-start gap-2">
-          <Mail className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" aria-hidden="true" />
-          <span className="min-w-0 truncate text-neutral-700">{agency.contact.email}</span>
+          <dt><Phone className="mt-0.5 h-4 w-4 shrink-0 text-[#ce1126]" aria-label="Phone" /></dt>
+          <dd><a href={`tel:${agency.contact.phone.replace(/[^+\d]/g, '')}`} className="text-black underline underline-offset-4 hover:text-[#9a0d1c]">{agency.contact.phone}</a></dd>
+        </div>
+        <div className="flex min-w-0 items-start gap-2">
+          <dt><Mail className="mt-0.5 h-4 w-4 shrink-0 text-[#ce1126]" aria-label="Email" /></dt>
+          <dd className="min-w-0"><a href={`mailto:${agency.contact.email}`} className="block truncate text-black underline underline-offset-4 hover:text-[#9a0d1c]">{agency.contact.email}</a></dd>
         </div>
         <div className="flex items-start gap-2">
-          <Phone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" aria-hidden="true" />
-          <span className="text-neutral-700">{agency.contact.phone}</span>
+          <dt><Clock className="mt-0.5 h-4 w-4 shrink-0 text-[#ce1126]" aria-label="Opening hours" /></dt>
+          <dd className="text-[#3b3934]">{agency.operatingHours}</dd>
         </div>
         <div className="flex items-start gap-2">
-          <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" aria-hidden="true" />
-          <span className="text-neutral-700">{agency.operatingHours}</span>
+          <dt><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#ce1126]" aria-label="Address" /></dt>
+          <dd className="text-[#3b3934]">{agency.contact.address}</dd>
         </div>
-        <div className="flex items-start gap-2">
-          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-red-600" aria-hidden="true" />
-          <span className="text-neutral-700">{agency.contact.address}</span>
-        </div>
-      </div>
+      </dl>
 
-      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <Link href={`/agencies/${agency.id}`} className={`${linkClass} inline-flex items-center gap-1`}>
-          View details <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
-        <button type="button" onClick={openAssistant} className={linkClass}>
-          Ask assistant
-        </button>
+      <div className="mt-auto flex flex-wrap gap-x-6 gap-y-2 pt-5 text-[15px]">
+        <Link href={`/agencies/${agency.id}`} className="gov-arrow-link">View agency</Link>
+        {agency.contact.website && <a href={agency.contact.website} target="_blank" rel="noreferrer" className={linkClass}>Official website</a>}
+        <button type="button" onClick={openAssistant} className={`${linkClass} font-normal`}>Ask the assistant</button>
       </div>
     </article>
   );
 }
 
 /* ────────────────────────────────────────────────────────
-   Section wrapper — heading with a red marker, then detail
-   blocks in two columns
+   Section wrapper — service-area heading, then records
    ──────────────────────────────────────────────────────── */
 
-function Section({ heading, subtitle, count, agencies }: { heading: string; subtitle?: string; count?: number; agencies: AgencyContact[] }) {
+function Section({ id, heading, subtitle, count, agencies, image }: { id: string; heading: string; subtitle?: string; count?: number; agencies: AgencyContact[]; image?: string }) {
   return (
-    <section className="mb-14">
-      <div className="mb-8 border-b border-neutral-200 pb-3">
-        <h2 className="text-xl font-bold sm:text-2xl">
-          <span className="mr-3 inline-block h-4 w-4 bg-red-600 align-middle" aria-hidden="true" />
-          {heading}
-        </h2>
-        {(subtitle || count !== undefined) && (
-          <p className="mt-2 text-sm text-neutral-600">
-            {subtitle}
-            {subtitle && count !== undefined && ' · '}
-            {count !== undefined && `${count} ${count === 1 ? 'agency' : 'agencies'}`}
-          </p>
+    <section id={id} aria-labelledby={`${id}-heading`} className="mb-16 scroll-mt-6">
+      <div className="mb-8 grid gap-5 border-b-2 border-black pb-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+        <div>
+          <h2 id={`${id}-heading`} className="gov-title-l">
+            {heading}
+            {count !== undefined && <span className="ml-3 align-middle font-sans text-base font-semibold text-[#5c5850]">{count} {count === 1 ? 'agency' : 'agencies'}</span>}
+          </h2>
+          {subtitle && <p className="gov-body mt-2 max-w-3xl text-[15px]">{subtitle}</p>}
+        </div>
+        {image && (
+          <div className="relative hidden h-20 w-32 overflow-hidden border-l-[6px] border-[#ffd700] sm:block" data-decorative="true">
+            <Image src={image} alt="" fill sizes="128px" className="object-cover" />
+          </div>
         )}
       </div>
-      <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {agencies.map((a) => (
           <AgencyDetail key={a.id} agency={a} />
         ))}
@@ -238,159 +239,121 @@ export default function GovernmentAgencies() {
   const withAppointments = ugandaAgencies.filter(a => a.hasAppointmentBooking).length;
   const withWebsite = ugandaAgencies.filter(a => Boolean(a.contact.website)).length;
 
+  const sections = Array.from(grouped.entries())
+    .map(([category, agencies]) => ({ category, agencies: agencies.filter(a => !FEATURED_IDS.includes(a.id)) }))
+    .filter((s) => s.agencies.length > 0);
+
   return (
- <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">OSC Hub</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Government agencies' }]}
+        caption="Services"
+        title="Find the right government agency"
+        lead="Search services, compare agencies and get the contact details you need for your next step in Uganda."
+      >
+        <FactRow
+          facts={[
+            { label: 'Agencies', value: ugandaAgencies.length },
+            { label: 'Service areas', value: categoryCount },
+            { label: 'Book appointments online', value: withAppointments },
+            { label: 'Official websites listed', value: withWebsite },
+          ]}
+        />
+      </PageHeader>
 
-      {/* Hero: title, intro and overview */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] lg:items-end lg:gap-16">
+      {/* Search and filters */}
+      <div className="border-b border-[#dcd8cf] bg-white">
+        <div className="gov-container grid gap-4 py-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)] lg:items-end">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Agency directory</p>
-            <h1 className="mt-4 font-display text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-              OneStop Centre Agency Hub
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-700 sm:text-lg">
-              Find public agencies involved in business registration, investment facilitation, licensing and compliance. Search by agency name, acronym or service, or filter the directory by service area to locate the right starting point. Agency profiles bring together available contact details, office information and services in one place. Check directly with the agency before visiting, as office hours, appointment availability and requirements may change.
-            </p>
-          </div>
-          <dl aria-label="Directory overview" className="divide-y divide-neutral-200 border-t border-neutral-200">
-            {[
-              { label: 'Total agencies', value: ugandaAgencies.length },
-              { label: 'Categories', value: categoryCount },
-              { label: 'With appointments', value: withAppointments },
-              { label: 'Official websites listed', value: withWebsite },
-            ].map((stat) => (
-              <div key={stat.label} className="flex items-baseline justify-between gap-6 py-4">
-                <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">{stat.label}</dt>
-                <dd className="font-display text-3xl font-semibold leading-none text-white">{stat.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        {/* Toolbar: search and filters on one row */}
-        <div className="mt-12 grid gap-6 border-y border-neutral-200 py-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_minmax(0,1fr)] lg:items-end">
-          <div>
-            <label htmlFor="agency-search" className="text-xs font-bold uppercase tracking-wider text-neutral-700">
-              Search
-            </label>
-            <div className="relative mt-2">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" aria-hidden="true" />
+            <label htmlFor="agency-search" className="gov-label">Search agencies</label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#5c5850]" aria-hidden="true" />
               <input
                 id="agency-search"
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 placeholder="Agency name, acronym or service"
-                className="min-h-12 w-full rounded-md border border-neutral-400 bg-white py-3 pl-12 pr-12 text-sm text-black placeholder-neutral-500 focus:border-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+                className="gov-input !pl-10 !pr-10"
               />
               {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Clear search"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-red-600"
-                >
+                <button type="button" onClick={() => setSearchQuery('')} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5c5850] hover:text-black">
                   <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               )}
             </div>
           </div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700">
-            Service area
-            <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="mt-2 block min-h-12 w-full rounded-md border border-neutral-400 bg-white px-3 text-sm font-normal normal-case tracking-normal text-neutral-900 focus:border-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-            >
+          <div>
+            <label htmlFor="agency-area" className="gov-label">Service area</label>
+            <select id="agency-area" value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)} className="gov-input">
               <option value="">All service areas</option>
               {Array.from(new Set(ugandaAgencies.map((agency) => agency.category))).map((category) => (
                 <option key={category} value={category}>{getHeading(category).heading}</option>
               ))}
             </select>
-          </label>
-          <label className="block text-xs font-bold uppercase tracking-wider text-neutral-700">
-            Location
-            <select
-              value={locationFilter}
-              onChange={(event) => setLocationFilter(event.target.value)}
-              className="mt-2 block min-h-12 w-full rounded-md border border-neutral-400 bg-white px-3 text-sm font-normal normal-case tracking-normal text-neutral-900 focus:border-black focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-            >
+          </div>
+          <div>
+            <label htmlFor="agency-location" className="gov-label">Location</label>
+            <select id="agency-location" value={locationFilter} onChange={(event) => setLocationFilter(event.target.value)} className="gov-input">
               <option value="">All locations</option>
               <option value="kampala">Kampala</option>
               <option value="outside">Outside Kampala</option>
             </select>
-          </label>
+          </div>
         </div>
-      </section>
-      </PageBand>
+      </div>
 
-      <div className="mx-auto max-w-6xl px-4 pb-20 pt-12 sm:px-6 lg:px-8">
+      <div id="agency-directory-results" className="gov-container scroll-mt-6 py-12">
         {filteredAgencies !== null ? (
-          /* Search results */
-          <section>
-            <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 pb-3">
-              <p className="text-sm text-neutral-700">
-                <span className="font-bold text-red-600">{filteredAgencies.length}</span>{' '}
-                {filteredAgencies.length === 1 ? 'agency' : 'agencies'} match your filters
-              </p>
-              <button type="button" onClick={clearFilters} className={`${linkClass} text-sm`}>
-                Clear filters
-              </button>
+          <section aria-labelledby="agency-results-heading">
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-3 border-b-2 border-black pb-3">
+              <h2 id="agency-results-heading" className="gov-title-l" aria-live="polite">
+                {filteredAgencies.length} {filteredAgencies.length === 1 ? 'agency' : 'agencies'} found
+              </h2>
+              <button type="button" onClick={clearFilters} className={linkClass}>Clear filters</button>
             </div>
             {filteredAgencies.length === 0 ? (
-              <div className="border-l-4 border-red-600 bg-neutral-50 p-6">
+              <div className="gov-inset">
                 <h3 className="text-lg font-bold">No agencies match your search</h3>
-                <p className="mt-2 text-sm text-neutral-700">
-                  Try a different keyword, for example &ldquo;tax&rdquo;, &ldquo;registration&rdquo; or &ldquo;investment&rdquo;.
-                </p>
+                <p className="mt-1 text-[15px] text-[#3b3934]">Try a different keyword, for example &ldquo;tax&rdquo;, &ldquo;registration&rdquo; or &ldquo;investment&rdquo;.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-2">
-                {filteredAgencies.map(a => (
-                  <AgencyDetail key={a.id} agency={a} />
-                ))}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {filteredAgencies.map(a => <AgencyDetail key={a.id} agency={a} />)}
               </div>
             )}
           </section>
         ) : (
-          <>
-            {/* Key agencies */}
-            <Section
-              heading="Key agencies"
-              subtitle="Start your investment journey with these essential agencies"
-              agencies={featured}
-            />
-
-            {/* Remaining agencies by category */}
-            {Array.from(grouped.entries()).map(([category, agencies]) => {
-              const remaining = agencies.filter(a => !FEATURED_IDS.includes(a.id));
-              if (remaining.length === 0) return null;
-              const { heading, subtitle } = getHeading(category);
-              return (
-                <Section
-                  key={category}
-                  heading={heading}
-                  subtitle={subtitle}
-                  count={remaining.length}
-                  agencies={remaining}
-                />
-              );
-            })}
-          </>
+          <div className="grid gap-12 lg:grid-cols-[15rem_minmax(0,1fr)]">
+            <nav aria-labelledby="areas-heading" className="lg:sticky lg:top-6 lg:self-start">
+              <div className="gov-related !border-black">
+                <h2 id="areas-heading">Service areas</h2>
+                <ul className="text-[15px]">
+                  <li><a href="#key-agencies" className={`${linkClass} font-normal`}>Key agencies</a></li>
+                  {sections.map(({ category }) => (
+                    <li key={category}><a href={`#area-${category}`} className={`${linkClass} font-normal`}>{getHeading(category).heading}</a></li>
+                  ))}
+                </ul>
+              </div>
+            </nav>
+            <div>
+              <Section id="key-agencies" heading="Key agencies" subtitle="Most investors start with these three agencies." agencies={featured} />
+              {sections.map(({ category, agencies }) => {
+                const { heading, subtitle } = getHeading(category);
+                return (
+                  <Section
+                    key={category}
+                    id={`area-${category}`}
+                    heading={heading}
+                    subtitle={subtitle}
+                    count={agencies.length}
+                    agencies={agencies}
+                    image={CATEGORY_IMAGES[category]}
+                  />
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
     </div>

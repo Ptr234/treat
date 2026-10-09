@@ -30,16 +30,17 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="w-full max-w-md max-h-screen overflow-y-auto bg-white">
-        <div className="p-6">
+      <div className="w-full max-w-md max-h-screen overflow-y-auto bg-white shadow-[0_24px_60px_rgb(0_0_0/0.35)]">
+        <div className="gov-stripe" aria-hidden="true" />
+        <div className="p-6 sm:p-8">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-black">
+            <h2 className="font-display text-3xl font-semibold text-black">
               {isUser ? 'Sign in' : 'Admin sign in'}
             </h2>
             <button
               onClick={onClose}
               aria-label="Close sign in"
-              className="text-neutral-700 hover:text-red-600"
+              className="grid h-10 w-10 place-items-center text-black hover:bg-[#f5f3ee]"
               disabled={isLoading}
             >
               <XMarkIcon className="w-6 h-6" />
@@ -49,7 +50,7 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
           {isUser ? (
             /* ─── User mode: Google Sign-In only ─── */
             <>
-              <div className="flex items-start gap-3 mb-6 border-l border-neutral-200 pl-4">
+              <div className="gov-inset mb-6 flex items-start gap-3">
                 <UserCircleIcon className="mt-0.5 w-5 h-5 text-black flex-shrink-0" />
                 <p className="text-sm text-neutral-800">
                   Sign in to access the AI Investment Assistant and personalised services.
@@ -63,15 +64,15 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
               />
 
               {googleError && (
-                <div className="mt-2 font-semibold text-red-600 text-sm text-center">
+                <div className="gov-inset gov-inset--red mt-3 text-sm font-semibold">
                   {googleError}
                 </div>
               )}
 
               <div className="flex items-center my-5">
-                <div className="flex-1 border-t border-neutral-300" />
+                <div className="flex-1 border-t border-[#b9b4a9]" />
                 <span className="px-3 text-sm text-neutral-600">or</span>
-                <div className="flex-1 border-t border-neutral-300" />
+                <div className="flex-1 border-t border-[#b9b4a9]" />
               </div>
 
               <UserAuthForm onSuccess={onClose} />
@@ -79,7 +80,7 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
           ) : (
             /* ─── Admin mode: Google + Email/Password ─── */
             <>
-              <div className="flex items-start gap-3 mb-6 border-l-4 border-red-600 pl-4">
+              <div className="gov-inset gov-inset--red mb-6 flex items-start gap-3">
                 <ShieldCheckIcon className="mt-0.5 w-5 h-5 text-red-600 flex-shrink-0" />
                 <p className="text-sm text-neutral-800">
                   Authorized UIA administrators only.
@@ -93,15 +94,15 @@ export default function AuthModal({ isOpen, onClose, mode = 'admin' }: AuthModal
               />
 
               {googleError && (
-                <div className="mt-2 font-semibold text-red-600 text-sm text-center">
+                <div className="gov-inset gov-inset--red mt-3 text-sm font-semibold">
                   {googleError}
                 </div>
               )}
 
               <div className="flex items-center my-5">
-                <div className="flex-1 border-t border-neutral-300" />
+                <div className="flex-1 border-t border-[#b9b4a9]" />
                 <span className="px-3 text-sm text-neutral-600">or</span>
-                <div className="flex-1 border-t border-neutral-300" />
+                <div className="flex-1 border-t border-[#b9b4a9]" />
               </div>
 
               <LoginForm onSuccess={onClose} />

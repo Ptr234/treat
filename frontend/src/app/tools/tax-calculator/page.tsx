@@ -1,8 +1,8 @@
 'use client';
 
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
+import FactRow from '@/components/ui/FactRow';
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import {
   CalculatorIcon,
   DocumentTextIcon,
@@ -151,9 +151,8 @@ export default function TaxCalculatorPage() {
     return `UGX ${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   };
 
-  const inputClass =
-    'w-full rounded-md border border-neutral-400 bg-white px-3 py-2.5 text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-1';
-  const labelClass = 'mb-2 block text-sm font-bold text-black';
+  const inputClass = 'gov-input';
+  const labelClass = 'gov-label';
 
   const CALCULATOR_OPTIONS = [
     { type: 'individual', icon: UserIcon, label: 'Individual tax' },
@@ -164,52 +163,26 @@ export default function TaxCalculatorPage() {
   const resultRow = 'flex items-baseline justify-between gap-4 py-3';
 
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/tools" className="text-red-600 hover:underline underline-offset-4">Business tools</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Tax calculator</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Business tools', href: '/tools' }, { label: 'Tax calculator' }]}
+        caption="Business tools"
+        title="Uganda tax calculator"
+        lead="Estimate individual income tax, corporation tax and VAT using URA rates. Results are estimates — confirm your final figures with URA or a tax adviser."
+      >
+        <FactRow
+          facts={[
+            { label: 'Individual income tax', value: '0–40%' },
+            { label: 'Corporation tax', value: '20–30%' },
+            { label: 'VAT standard rate', value: '18%' },
+          ]}
+        />
+      </PageHeader>
 
-      {/* Title and rates */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Uganda tax calculator 2026</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Calculate your tax obligations using official URA rates. Individual income tax, corporate tax, and VAT calculations.
-        </p>
-        <dl className="mt-10 grid grid-cols-1 gap-6 border-y border-neutral-200 py-6 sm:grid-cols-3">
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Individual tax</dt>
-            <dd className="mt-1 text-xl font-bold">0–40%</dd>
-          </div>
-          <div className=" pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">Corporate tax</dt>
-            <dd className="mt-1 text-xl font-bold">20–30%</dd>
-          </div>
-          <div className="border-l-4 border-red-600 pl-4">
-            <dt className="text-xs font-bold uppercase tracking-wider text-neutral-600">VAT rate</dt>
-            <dd className="mt-1 text-xl font-bold">18%</dd>
-          </div>
-        </dl>
-      </section>
-      </PageBand>
-
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-12 px-4 py-12 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <div className="gov-container grid grid-cols-1 gap-12 py-12 lg:grid-cols-3 lg:py-16">
         {/* Inputs */}
         <section className="lg:col-span-2" aria-labelledby="tax-inputs-heading">
-          <h2 id="tax-inputs-heading" className="border-b border-neutral-200 pb-3 text-xl font-bold sm:text-2xl">Tax calculator</h2>
+          <h2 id="tax-inputs-heading" className="gov-title-l border-b-2 border-black pb-3">Tax calculator</h2>
 
           {/* Calculator type */}
           <div role="group" aria-label="Calculator type" className="mt-6 grid grid-cols-3 gap-2">
@@ -221,7 +194,7 @@ export default function TaxCalculatorPage() {
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => setCalculatorType(option.type)}
-                  className={`flex flex-col items-center gap-2 border-b-4 px-3 py-4 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
+                  className={`flex flex-col items-center gap-2 border-b-4 px-3 py-4 text-sm font-bold transition-colors    ${
                     isActive ? 'border-red-600 text-red-600' : 'border-transparent text-neutral-700 hover:text-red-600'
                   }`}
                 >
@@ -242,7 +215,7 @@ export default function TaxCalculatorPage() {
                   type="button"
                   aria-pressed={currency === curr}
                   onClick={() => setCurrency(curr)}
-                  className={`min-w-[5rem] border-2 px-4 py-2 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 ${
+                  className={`min-w-[5rem] border-2 px-4 py-2 text-sm font-bold transition-colors    ${
                     currency === curr ? 'border-black bg-black text-yellow-400' : 'border-black bg-white text-black hover:bg-neutral-100'
                   }`}
                 >
@@ -352,7 +325,7 @@ export default function TaxCalculatorPage() {
         <aside className="space-y-12" aria-label="Results and information">
           {calculation && (
             <section aria-labelledby="tax-results-heading">
-              <h2 id="tax-results-heading" className="flex items-center gap-2 border-b border-neutral-200 pb-3 text-lg font-bold">
+              <h2 id="tax-results-heading" className="flex items-center gap-2 border-b-2 border-black pb-3 text-lg font-bold">
                 <CalculatorIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
                 Tax calculation results
               </h2>
@@ -392,7 +365,7 @@ export default function TaxCalculatorPage() {
           )}
 
           <section aria-labelledby="tax-info-heading">
-            <h2 id="tax-info-heading" className="flex items-center gap-2 border-b border-neutral-200 pb-3 text-lg font-bold">
+            <h2 id="tax-info-heading" className="flex items-center gap-2 border-b-2 border-black pb-3 text-lg font-bold">
               <InformationCircleIcon className="h-5 w-5 text-red-600" aria-hidden="true" />
               Tax information
             </h2>

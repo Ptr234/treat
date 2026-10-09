@@ -1,7 +1,7 @@
-import PageBand from '@/components/ui/PageBand';
+import PageHeader from '@/components/ui/PageHeader';
+import { LockClosedIcon, ShieldCheckIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
-import Link from 'next/link';
 import InvestmentOnboardingWizard from '../../../components/interactive/InvestmentOnboardingWizard';
 
 export const metadata: Metadata = buildMetadata({
@@ -27,14 +27,17 @@ const BENEFITS = [
 
 const TRUST = [
   {
+    icon: LockClosedIcon,
     title: 'Encrypted data',
     body: 'All information is encrypted and stored securely.',
   },
   {
+    icon: ShieldCheckIcon,
     title: 'Government verified',
     body: 'Official OneStop Centre Uganda platform.',
   },
   {
+    icon: EyeSlashIcon,
     title: 'Confidential process',
     body: 'Your investment details remain confidential.',
   },
@@ -42,66 +45,42 @@ const TRUST = [
 
 export default function InvestmentOnboardingPage() {
   return (
-    <div className="min-h-screen bg-white text-black">
-      {/* Breadcrumb band */}
-      <div className="border-b border-neutral-200 bg-white">
-        <nav aria-label="Breadcrumb" className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
-          <ol className="flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="text-red-600 hover:underline underline-offset-4">Home</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li>
-              <Link href="/investments" className="text-red-600 hover:underline underline-offset-4">Investments</Link>
-            </li>
-            <li aria-hidden="true" className="text-neutral-400">&rsaquo;</li>
-            <li className="font-semibold text-black" aria-current="page">Onboarding</li>
-          </ol>
-        </nav>
-      </div>
+    <div className="bg-white">
+      <PageHeader
+        crumbs={[{ label: 'Investments', href: '/investments' }, { label: 'Investor onboarding' }]}
+        caption="Invest"
+        title="Investor onboarding"
+        lead="Complete your investment profile to get matched with opportunities and connected to the agencies that can guide your application."
+        aside={
+          <ul className="border-t-4 border-black bg-white p-5">
+            {BENEFITS.map((benefit) => (
+              <li key={benefit.title} className="border-b border-[#dcd8cf] py-3 last:border-0">
+                <p className="font-bold">{benefit.title}</p>
+                <p className="mt-1 text-sm leading-6 text-[#3b3934]">{benefit.body}</p>
+              </li>
+            ))}
+          </ul>
+        }
+      />
 
-      {/* Title */}
-      <PageBand>
-        <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 sm:pt-16 lg:px-8">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-red-600">Investor onboarding</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">Investment onboarding</h1>
-        <p className="mt-5 max-w-3xl text-base leading-7 text-neutral-700 sm:text-lg">
-          Complete your investment profile to get personalized recommendations and connect with
-          the right opportunities across Uganda&apos;s growing economy.
-        </p>
-      </section>
-      </PageBand>
-
-      {/* Benefits */}
-      <section className="mx-auto mt-12 max-w-6xl border-y border-neutral-200 px-4 py-10 sm:px-6 lg:px-8" aria-labelledby="benefits-heading">
-        <h2 id="benefits-heading" className="sr-only">Benefits of onboarding</h2>
-        <ul className="grid grid-cols-1 gap-10 md:grid-cols-3">
-          {BENEFITS.map((benefit) => (
-            <li key={benefit.title} className=" pt-5">
-              <h3 className="mt-2 text-lg font-bold">{benefit.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-700">{benefit.body}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Wizard */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8" aria-label="Onboarding form">
+      <section className="gov-container py-12 lg:py-16" aria-label="Onboarding form">
         <InvestmentOnboardingWizard />
       </section>
 
-      {/* Trust */}
-      <section className="border-t border-neutral-200 bg-neutral-50" aria-labelledby="trust-heading">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-          <h2 id="trust-heading" className="text-2xl font-bold sm:text-3xl">Your information is secure</h2>
-          <p className="mt-3 max-w-2xl text-neutral-700">
-            We protect your privacy and ensure secure handling of your investment information.
-          </p>
-          <ul className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-3">
+      <section className="gov-section gov-section--paper" aria-labelledby="trust-heading">
+        <div className="gov-container">
+          <h2 id="trust-heading" className="gov-title-l">How we handle your information</h2>
+          <p className="gov-body mt-3 max-w-2xl">Your investment details are used only to match you with opportunities and route your application.</p>
+          <ul className="mt-8 grid gap-6 md:grid-cols-3">
             {TRUST.map((item) => (
-              <li key={item.title} className="border-l border-neutral-200 pl-5">
-                <h3 className="font-bold">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-neutral-700">{item.body}</p>
+              <li key={item.title} className="flex gap-4">
+                <span className="grid h-11 w-11 shrink-0 place-items-center bg-black text-[#ffd700]">
+                  <item.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span>
+                  <span className="block font-bold">{item.title}</span>
+                  <span className="mt-1 block text-[15px] text-[#3b3934]">{item.body}</span>
+                </span>
               </li>
             ))}
           </ul>

@@ -33,8 +33,8 @@ export default function EmailVerificationForm({
   return (
     <div className="max-w-md mx-auto">
       <div className="text-center mb-6">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-          <EnvelopeIcon className="h-6 w-6 text-blue-600" />
+        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#f5f3ee] mb-4">
+          <EnvelopeIcon className="h-6 w-6 text-black" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900">
           {type === 'registration' ? 'Verify Your Email' : 'Verify Login'}
@@ -42,11 +42,11 @@ export default function EmailVerificationForm({
         <p className="text-gray-600 mt-2">
           We&apos;ve sent a verification link to
         </p>
-        <p className="font-medium text-blue-600">{email}</p>
+        <p className="font-medium text-black">{email}</p>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-sm text-blue-800">
+      <div className="bg-[#f5f3ee] border border-[#dcd8cf] rounded-lg p-4 mb-6">
+        <p className="text-sm text-black">
           Click the verification link in your email to complete
           {type === 'registration' ? ' registration' : ' sign-in'}.
           After verifying, return here and sign in.
@@ -54,7 +54,7 @@ export default function EmailVerificationForm({
       </div>
 
       {resent && (
-        <div className="text-green-600 text-sm text-center bg-green-50 p-3 rounded-md mb-4">
+        <div className="text-black text-sm text-center bg-[#fffbea] p-3 rounded-md mb-4">
           Verification email resent successfully.
         </div>
       )}
@@ -69,7 +69,7 @@ export default function EmailVerificationForm({
               disabled={loading || resent}
               className={`font-medium ${
                 !loading && !resent
-                  ? 'text-blue-600 hover:text-blue-500 cursor-pointer'
+                  ? 'text-black hover:text-[#9a0d1c] cursor-pointer'
                   : 'text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -83,7 +83,7 @@ export default function EmailVerificationForm({
             <button
               type="button"
               onClick={onBack}
-              className="text-sm text-blue-600 hover:text-blue-500"
+              className="text-sm text-black hover:text-[#9a0d1c]"
             >
               &larr; Back to sign in
             </button>
