@@ -27,6 +27,15 @@ public static class AgencyDirectory
         ["UCDA"] = "Uganda Coffee Development Authority",
     };
 
+    /// <summary>Every known agency, for assignment pickers.</summary>
+    public static IEnumerable<(string Code, string Name)> All =>
+        Names.Select(kv => (kv.Key, kv.Value)).OrderBy(a => a.Key);
+
+    public static bool IsKnown(string? code) => !string.IsNullOrWhiteSpace(code) && Names.ContainsKey(code.Trim());
+
+    /// <summary>Canonical (upper-case) form of a code, matching how officer accounts store theirs.</summary>
+    public static string Normalize(string code) => code.Trim().ToUpperInvariant();
+
     /// <summary>Full name for an agency code, or the code itself if unknown.</summary>
     public static string NameFor(string? code) =>
         string.IsNullOrWhiteSpace(code)

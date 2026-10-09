@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MagnifyingGlassIcon, PlusIcon, FunnelIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { TicketStatus, TicketPriority } from '@/types';
-import { useTickets } from '@/hooks/useTickets';
+import { useTickets, type TicketSort } from '@/hooks/useTickets';
 import TicketCard from '@/components/tickets/TicketCard';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,74 +17,33 @@ export default function TicketsPage() {
   // server-side). Regular users get the restricted "submit a ticket" view.
   const isStaff = isAuthenticated && ['admin', 'dg', 'agency_officer'].includes(user?.role ?? '');
   // Only staff may list tickets; fetching as anyone else is a guaranteed 403.
-  const { data: tickets } = useTickets(isStaff && !authLoading);
-
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'ALL'>('ALL');
   const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'ALL'>('ALL');
-  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'priority' | 'sla'>('newest');
+  const [sortBy, setSortBy] = useState<TicketSort>('newest');
+  const [page, setPage] = useState(1);
+  const pageSize = 24;
+
+  // Search runs on the server; wait for a pause in typing before querying.
+  useEffect(() => {
+    const id = setTimeout(() => setSearchQuery(searchInput), 300);
+    return () => clearTimeout(id);
+  }, [searchInput]);
+
+  // Any change of filter starts again from the first page.
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, statusFilter, priorityFilter, sortBy]);
+
+  // Only staff may list tickets; fetching as anyone else is a guaranteed 403.
+  const { data: tickets, loading, error, total, stats, refresh } = useTickets(
+    { page, pageSize, status: statusFilter, priority: priorityFilter, search: searchQuery, sort: sortBy },
+    isStaff && !authLoading,
+  );
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
 
   const statusTabs: Array<TicketStatus | 'ALL'> = ['ALL', 'NEW', 'ASSIGNED', 'IN_PROGRESS', 'PENDING_EXTERNAL', 'RESOLVED', 'CLOSED'];
-
-  const filteredAndSortedTickets = useMemo(() => {
-    const filtered = tickets.filter(ticket => {
-      const matchesSearch =
-        searchQuery === '' ||
-        ticket.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ticket.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesStatus = statusFilter === 'ALL' || ticket.status === statusFilter;
-      const matchesPriority = priorityFilter === 'ALL' || ticket.priority === priorityFilter;
-
-      return matchesSearch && matchesStatus && matchesPriority;
-    });
-
-    // Sort
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'oldest':
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        case 'priority':
-          const priorityOrder: Record<TicketPriority, number> = {
-            critical: 4,
-            high: 3,
-            medium: 2,
-            low: 1
-          };
-          return priorityOrder[b.priority] - priorityOrder[a.priority];
-        case 'sla':
-          return new Date(a.slaDeadline).getTime() - new Date(b.slaDeadline).getTime();
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  }, [tickets, searchQuery, statusFilter, priorityFilter, sortBy]);
-
-  // Calculate stats. "Resolved" counts both RESOLVED and CLOSED so that
-  // open + resolved always equals the total (no ticket falls through a gap).
-  const stats = useMemo(() => {
-    const total = tickets.length;
-    const closedStatuses: TicketStatus[] = ['RESOLVED', 'CLOSED'];
-    const open = tickets.filter(t => !closedStatuses.includes(t.status)).length;
-    const resolved = tickets.filter(t => closedStatuses.includes(t.status)).length;
-
-    // Average resolution time (hours) over tickets that carry a resolution time.
-    const resolutionTimes = tickets
-      .map(t => t.resolutionTime?.match(/(\d+\.?\d*)\s*hours?/)?.[1])
-      .filter((v): v is string => v !== undefined)
-      .map(parseFloat);
-
-    const avgResolutionTime = resolutionTimes.length > 0
-      ? (resolutionTimes.reduce((sum, time) => sum + time, 0) / resolutionTimes.length).toFixed(1)
-      : '0';
-
-    return { total, open, resolved, avgResolutionTime };
-  }, [tickets]);
 
   // While the session check is still in flight we can't yet tell staff from
   // regular users. Show a neutral loading state instead of briefly flashing
@@ -152,19 +111,23 @@ export default function TicketsPage() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <p className="text-3xl font-bold text-black">{stats.total}</p>
+              <p className="text-3xl font-bold text-black">{stats?.total ?? '—'}</p>
               <p className="text-sm text-neutral-700 mt-1">Total Tickets</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-red-600">{stats.open}</p>
-              <p className="text-sm text-neutral-700 mt-1">Open</p>
+              <p className="text-3xl font-bold text-red-600">{stats?.open ?? '—'}</p>
+              <p className="text-sm text-neutral-700 mt-1">
+                Open{stats && stats.slaBreached > 0 ? ` · ${stats.slaBreached} overdue` : ''}
+              </p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-blue-600">{stats.resolved}</p>
+              <p className="text-3xl font-bold text-blue-600">{stats?.resolved ?? '—'}</p>
               <p className="text-sm text-neutral-700 mt-1">Resolved</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-purple-600">{stats.avgResolutionTime}h</p>
+              <p className="text-3xl font-bold text-purple-600">
+                {stats?.avgResolutionHours != null ? `${stats.avgResolutionHours}h` : '—'}
+              </p>
               <p className="text-sm text-neutral-700 mt-1">Avg Resolution</p>
             </div>
           </div>
@@ -177,11 +140,13 @@ export default function TicketsPage() {
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-500" />
+            <label htmlFor="ticket-search" className="sr-only">Search tickets</label>
             <input
-              type="text"
-              placeholder="Search by ticket ID or title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              id="ticket-search"
+              type="search"
+              placeholder="Search by reference, title, or investor name/email..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
             />
           </div>
@@ -216,7 +181,9 @@ export default function TicketsPage() {
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="flex items-center gap-2">
             <FunnelIcon className="w-5 h-5 text-neutral-600" />
+            <label htmlFor="ticket-priority" className="sr-only">Priority</label>
             <select
+              id="ticket-priority"
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value as TicketPriority | 'ALL')}
               className="px-4 py-2 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
@@ -229,9 +196,11 @@ export default function TicketsPage() {
             </select>
           </div>
 
+          <label htmlFor="ticket-sort" className="sr-only">Sort</label>
           <select
+            id="ticket-sort"
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            onChange={(e) => setSortBy(e.target.value as TicketSort)}
             className="px-4 py-2 border border-neutral-400 rounded-md focus:ring-2 focus-visible:ring-red-600 focus:border-transparent"
           >
             <option value="newest">Newest First</option>
@@ -242,12 +211,52 @@ export default function TicketsPage() {
         </div>
 
         {/* Ticket Grid */}
-        {filteredAndSortedTickets.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAndSortedTickets.map((ticket) => (
-              <TicketCard key={ticket.id} ticket={ticket} />
-            ))}
+        {error ? (
+          <div role="alert" className="border-l-4 border-red-600 py-4 pl-4">
+            <p className="font-semibold text-red-700">Tickets could not be loaded.</p>
+            <p className="mt-1 text-sm text-neutral-700">{error}</p>
+            <button
+              onClick={refresh}
+              className="mt-3 border-2 border-black px-4 py-1.5 text-sm font-bold text-black hover:bg-black hover:text-yellow-400"
+            >
+              Try again
+            </button>
           </div>
+        ) : loading && tickets.length === 0 ? (
+          <p className="py-16 text-center text-neutral-700" role="status">Loading tickets…</p>
+        ) : tickets.length > 0 ? (
+          <>
+            <p className="mb-2 text-sm text-neutral-700" aria-live="polite">
+              {total} {total === 1 ? 'ticket' : 'tickets'}
+              {pageCount > 1 ? ` · page ${page} of ${pageCount}` : ''}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {tickets.map((ticket) => (
+                <TicketCard key={ticket.id} ticket={ticket} />
+              ))}
+            </div>
+            {pageCount > 1 && (
+              <nav aria-label="Ticket pages" className="mt-8 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1 || loading}
+                  className="border-2 border-black px-4 py-2 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-neutral-800">
+                  Page {page} of {pageCount}
+                </span>
+                <button
+                  onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                  disabled={page >= pageCount || loading}
+                  className="border-2 border-black px-4 py-2 text-sm font-bold text-black hover:bg-black hover:text-yellow-400 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </nav>
+            )}
+          </>
         ) : (
           <div className="text-center py-16">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">

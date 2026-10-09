@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { SupportTicket } from '@/types';
+import type { SupportTicket, TicketStatus, TicketPriority } from '@/types';
 import { apiFetch } from '@/lib/api-client';
 import { normalizeStatus, normalizePriority, normalizeCategory, hoursBetween } from '@/lib/ticket-format';
 
-interface SanityTicketRow {
-  _id: string;
+/** A row as returned by the ASP.NET ticket list endpoint. */
+interface TicketRow {
   referenceNumber: string;
   title: string;
   category: string;
@@ -15,14 +15,53 @@ interface SanityTicketRow {
   contactName: string;
   contactEmail: string;
   assignee?: string;
+  assignedAgencyCode?: string;
   slaDeadlineAt?: string;
   isEscalated?: boolean;
   createdAt: string;
   resolvedAt?: string;
-  assignedAgency?: { name: string; code: string };
 }
 
-function mapToSupportTicket(t: SanityTicketRow): SupportTicket {
+/** Headline numbers over every ticket the viewer can see (not just the current page). */
+export interface TicketStats {
+  total: number;
+  open: number;
+  resolved: number;
+  escalated: number;
+  slaBreached: number;
+  avgResolutionHours: number | null;
+}
+
+interface TicketListResponse {
+  tickets: TicketRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+  stats?: TicketStats;
+}
+
+export type TicketSort = 'newest' | 'oldest' | 'priority' | 'sla';
+
+export interface TicketQuery {
+  page: number;
+  pageSize: number;
+  status: TicketStatus | 'ALL';
+  priority: TicketPriority | 'ALL';
+  search: string;
+  sort: TicketSort;
+}
+
+// UI status → the value the API filters on.
+const statusParam: Record<TicketStatus, string> = {
+  NEW: 'new',
+  ASSIGNED: 'assigned',
+  IN_PROGRESS: 'in_progress',
+  PENDING_EXTERNAL: 'pending_external',
+  RESOLVED: 'resolved',
+  CLOSED: 'closed',
+};
+
+function mapToSupportTicket(t: TicketRow): SupportTicket {
   const resolutionHours = hoursBetween(t.createdAt, t.resolvedAt);
   return {
     id: t.referenceNumber,
@@ -32,11 +71,11 @@ function mapToSupportTicket(t: SanityTicketRow): SupportTicket {
     status: normalizeStatus(t.status),
     priority: normalizePriority(t.priority),
     assignee: t.assignee,
-    assigneeAgency: t.assignedAgency?.name,
+    assigneeAgency: t.assignedAgencyCode,
+    isEscalated: t.isEscalated,
     createdAt: t.createdAt,
     updatedAt: t.resolvedAt || t.createdAt,
     slaDeadline: t.slaDeadlineAt || '',
-    // Only set once actually resolved; drives the dashboard's average metric.
     resolutionTime: resolutionHours !== null ? `${resolutionHours.toFixed(1)} hours` : undefined,
     history: [],
     attachments: [],
@@ -45,42 +84,55 @@ function mapToSupportTicket(t: SanityTicketRow): SupportTicket {
   };
 }
 
+export function buildTicketListPath(q: TicketQuery): string {
+  const params = new URLSearchParams({ page: String(q.page), pageSize: String(q.pageSize), sort: q.sort });
+  if (q.status !== 'ALL') params.set('status', statusParam[q.status]);
+  if (q.priority !== 'ALL') params.set('priority', q.priority);
+  if (q.search.trim()) params.set('q', q.search.trim());
+  return `/api/tickets?${params.toString()}`;
+}
+
 interface UseTicketsReturn {
   data: SupportTicket[];
   loading: boolean;
   error: string | null;
+  /** Tickets matching the current filters (across all pages). */
   total: number;
+  stats: TicketStats | null;
   refresh: () => void;
 }
 
 /**
- * The staff ticket board. `enabled` gates the request: `/api/tickets` is
- * staff-only, so calling it for an anonymous or regular-user visitor just
- * produces a guaranteed 401/403. Callers pass `enabled: isStaff`.
+ * The staff ticket board. Filtering, search, sorting and paging happen on the
+ * server, so every ticket is reachable however many there are (the board used
+ * to load only the newest 100 and filter those in the browser). `enabled` gates
+ * the request: `/api/tickets` is staff-only, so calling it for anyone else is a
+ * guaranteed 401/403.
  */
-export function useTickets(enabled: boolean = true): UseTicketsReturn {
+export function useTickets(query: TicketQuery, enabled: boolean = true): UseTicketsReturn {
   const [data, setData] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
+  const [stats, setStats] = useState<TicketStats | null>(null);
+  const path = buildTicketListPath(query);
 
   const fetchTickets = useCallback(async () => {
     if (!enabled) {
       setData([]);
       setTotal(0);
+      setStats(null);
       setError(null);
       setLoading(false);
       return;
     }
+    setLoading(true);
     try {
-      const json = await apiFetch<{ tickets: SanityTicketRow[]; total: number }>('/api/tickets?from=0&to=100');
-      if (!json.success) throw new Error(json.error || 'Unknown error');
-
-      // ASP.NET returns { tickets, total }; Next.js returns array directly
-      const raw = json.data;
-      const tickets: SanityTicketRow[] = Array.isArray(raw) ? raw : (raw?.tickets ?? []);
-      setData(tickets.map(mapToSupportTicket));
-      setTotal(raw && 'total' in raw ? raw.total : tickets.length);
+      const json = await apiFetch<TicketListResponse>(path);
+      if (!json.success || !json.data) throw new Error(json.error || 'Failed to load tickets');
+      setData((json.data.tickets ?? []).map(mapToSupportTicket));
+      setTotal(json.data.total ?? 0);
+      setStats(json.data.stats ?? null);
       setError(null);
     } catch (err) {
       console.error('[useTickets] fetch failed:', err);
@@ -90,11 +142,11 @@ export function useTickets(enabled: boolean = true): UseTicketsReturn {
     } finally {
       setLoading(false);
     }
-  }, [enabled]);
+  }, [enabled, path]);
 
   useEffect(() => {
     fetchTickets();
   }, [fetchTickets]);
 
-  return { data, loading, error, total, refresh: fetchTickets };
+  return { data, loading, error, total, stats, refresh: fetchTickets };
 }

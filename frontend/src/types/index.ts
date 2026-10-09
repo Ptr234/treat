@@ -535,6 +535,7 @@ export interface SupportTicket {
   priority: TicketPriority;
   assignee?: string;
   assigneeAgency?: string;
+  isEscalated?: boolean;
   createdAt: string;
   updatedAt: string;
   slaDeadline: string;

@@ -19,44 +19,19 @@ public class DocumentsController : ControllerBase
         _env = env;
     }
 
-    /// <summary>
-    /// The agency an agency_officer is scoped to (null for admin-level staff and
-    /// for non-staff callers). Set <paramref name="misconfigured"/> when an
-    /// officer has no agency configured.
-    /// </summary>
-    private string? AgencyScope(out bool misconfigured)
-    {
-        misconfigured = false;
-        if (!User.IsAgencyOfficer()) return null;
-        var code = User.GetAgencyCode();
-        if (string.IsNullOrEmpty(code)) misconfigured = true;
-        return code;
-    }
-
     /// <summary>List documents attached to a ticket.</summary>
     [HttpGet]
-    public async Task<IActionResult> ListDocuments(string refNumber, [FromQuery] string? email)
+    public async Task<IActionResult> ListDocuments(string refNumber, [FromQuery] string? token)
     {
         var ticket = await _db.Tickets
             .Include(t => t.Documents)
             .FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
 
-        if (ticket is null)
+        var who = TicketRequester.From(User, token);
+        if (who.IsMisconfiguredOfficer(User)) return Forbid();
+        // One 404 for "missing" and "not yours", so references can't be probed.
+        if (ticket is null || !TicketAccess.CanView(ticket, who))
             return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
-
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
-        if (!isStaff)
-        {
-            if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != ticket.ContactEmail)
-                return Problem(detail: "Email does not match ticket", statusCode: 403);
-        }
-        else
-        {
-            var scope = AgencyScope(out var misconfigured);
-            if (misconfigured) return Forbid();
-            if (!string.IsNullOrEmpty(scope) && ticket.AssignedAgencyCode != scope)
-                return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
-        }
 
         var docs = ticket.Documents
             .OrderByDescending(d => d.UploadedAt)
@@ -68,32 +43,20 @@ public class DocumentsController : ControllerBase
     /// <summary>
     /// Download a document's content. Same access rules as listing: staff via
     /// session (agency officers only within their agency), the public via the
-    /// ticket's filing email. Nothing else serves the uploads directory, so this
+    /// ticket's tracking token (or a signed-in owner). Nothing else serves the uploads directory, so this
     /// is the only way stored files leave the server.
     /// </summary>
     [HttpGet("{documentId:guid}/content")]
-    public async Task<IActionResult> DownloadDocument(string refNumber, Guid documentId, [FromQuery] string? email)
+    public async Task<IActionResult> DownloadDocument(string refNumber, Guid documentId, [FromQuery] string? token)
     {
         var doc = await _db.TicketDocuments
             .Include(d => d.Ticket)
             .FirstOrDefaultAsync(d => d.Id == documentId && d.Ticket.ReferenceNumber == refNumber);
 
-        if (doc is null)
+        var who = TicketRequester.From(User, token);
+        if (who.IsMisconfiguredOfficer(User)) return Forbid();
+        if (doc is null || !TicketAccess.CanView(doc.Ticket, who))
             return Problem(detail: "Document not found", statusCode: StatusCodes.Status404NotFound);
-
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
-        if (!isStaff)
-        {
-            if (string.IsNullOrEmpty(email) || email.ToLowerInvariant().Trim() != doc.Ticket.ContactEmail)
-                return Problem(detail: "Email does not match ticket", statusCode: 403);
-        }
-        else
-        {
-            var scope = AgencyScope(out var misconfigured);
-            if (misconfigured) return Forbid();
-            if (!string.IsNullOrEmpty(scope) && doc.Ticket.AssignedAgencyCode != scope)
-                return Problem(detail: "Document not found", statusCode: StatusCodes.Status404NotFound);
-        }
 
         var filePath = Path.Combine(_env.ContentRootPath, doc.StorageUrl.TrimStart('/'));
         if (!System.IO.File.Exists(filePath))

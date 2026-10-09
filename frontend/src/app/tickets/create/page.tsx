@@ -18,6 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { TicketCategory, TicketPriority } from '@/types';
 import { apiFetch, resolveApiUrl } from '@/lib/api-client';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Files are held locally and uploaded only after the ticket exists — the
 // upload endpoint attaches them to the ticket by reference number, gated by
@@ -118,6 +119,12 @@ const categories: CategoryOption[] = [
 
 export default function CreateTicketPage() {
   const router = useRouter();
+  const { user, isAuthenticated } = useAuth();
+  const isStaff = isAuthenticated && ['admin', 'dg', 'agency_officer'].includes(user?.role ?? '');
+  // VIP status is conferred by OneStop Centre staff, not self-selected (the
+  // API rejects it from the public): only staff filing on someone's behalf see it.
+  const visibleCategories = isStaff ? categories : categories.filter((c) => c.value !== 'vip');
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<TicketFormData>({
     category: '',
@@ -229,6 +236,7 @@ export default function CreateTicketPage() {
     if (!validateStep(3) || submitting) return;
 
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const ticketData = {
         title: formData.title,
@@ -240,27 +248,27 @@ export default function CreateTicketPage() {
         contactPhone: formData.contactPhone,
       };
 
-      const result = await apiFetch<{ referenceNumber: string }>('/api/tickets/', {
+      const result = await apiFetch<{ referenceNumber: string; accessToken: string }>('/api/tickets/', {
         method: 'POST',
         body: JSON.stringify(ticketData),
       });
 
-      if (!result.success) {
-        alert(result.error || 'Failed to create ticket. Please try again.');
+      if (!result.success || !result.data?.referenceNumber) {
+        setSubmitError(result.error || 'Your ticket could not be submitted. Please try again.');
         return;
       }
 
-      const refNumber = result.data?.referenceNumber || 'Pending';
+      const { referenceNumber, accessToken } = result.data;
 
       // Attach files now that the ticket exists. The upload is authorized by
-      // the filing email, so it works for anonymous investors too.
-      let attachmentWarning = '';
-      if (formData.attachments.length > 0 && result.data?.referenceNumber) {
+      // the ticket's access token, so it works for anonymous investors too.
+      let uploadFailed = false;
+      if (formData.attachments.length > 0) {
         try {
           const body = new FormData();
           formData.attachments.forEach(({ file }) => body.append('files', file));
-          body.append('ticketRefNumber', result.data.referenceNumber);
-          body.append('contactEmail', formData.contactEmail);
+          body.append('ticketRefNumber', referenceNumber);
+          body.append('accessToken', accessToken);
 
           const uploadRes = await fetch(resolveApiUrl('/api/upload/'), {
             method: 'POST',
@@ -268,21 +276,21 @@ export default function CreateTicketPage() {
             credentials: 'include',
           });
           const uploadJson = await uploadRes.json().catch(() => null);
-          if (!uploadRes.ok || !uploadJson?.success) {
-            attachmentWarning =
-              '\n\nNote: your attachments could not be uploaded. You can add them later from the ticket page.';
-          }
+          if (!uploadRes.ok || !uploadJson?.success) uploadFailed = true;
         } catch {
-          attachmentWarning =
-            '\n\nNote: your attachments could not be uploaded. You can add them later from the ticket page.';
+          uploadFailed = true;
         }
       }
 
-      alert(`Ticket created successfully!\n\nReference: ${refNumber}\n\nYou will receive an email confirmation at ${formData.contactEmail}${attachmentWarning}`);
-      router.push('/tickets/');
+      // Land on the new ticket itself (its private link), rather than the
+      // staff-only board — the filer can follow it, reply and add files there.
+      const params = new URLSearchParams({ created: '1' });
+      if (!isStaff) params.set('token', accessToken);
+      if (uploadFailed) params.set('uploadFailed', '1');
+      router.push(`/tickets/${encodeURIComponent(referenceNumber)}?${params.toString()}`);
     } catch (error) {
       console.error('Failed to create ticket:', error);
-      alert('Failed to create ticket. Please try again.');
+      setSubmitError('Network error — your ticket was not submitted. Please check your connection and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -296,11 +304,11 @@ export default function CreateTicketPage() {
         {/* Header */}
         <div className="mb-8">
           <button
-            onClick={() => router.push('/tickets/')}
+            onClick={() => router.push(isStaff ? '/tickets/' : '/support')}
             className="flex items-center gap-2 text-neutral-700 hover:text-black mb-4"
           >
             <ArrowLeftIcon className="w-4 h-4" />
-            Back to Tickets
+            {isStaff ? 'Back to Tickets' : 'Back to Support'}
           </button>
           <h1 className="text-3xl font-bold text-black">Create New Ticket</h1>
           <p className="text-neutral-700 mt-2">Submit your inquiry or issue</p>
@@ -364,7 +372,7 @@ export default function CreateTicketPage() {
                 <p className="text-neutral-700 mb-6">Choose the type of issue or inquiry</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {categories.map((category) => {
+                  {visibleCategories.map((category) => {
                     const Icon = category.icon;
                     return (
                       <button
@@ -687,6 +695,12 @@ export default function CreateTicketPage() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {submitError && (
+            <p role="alert" className="mt-6 border-l-4 border-red-600 py-2 pl-4 text-sm text-red-700">
+              {submitError}
+            </p>
+          )}
 
           {/* Navigation Buttons */}
           <div className="flex items-center justify-between mt-8 pt-6 border-t border-neutral-200">

@@ -89,7 +89,7 @@ public class UploadController : ControllerBase
     public async Task<IActionResult> Upload(
         [FromForm] List<IFormFile> files,
         [FromForm] string? ticketRefNumber,
-        [FromForm] string? contactEmail)
+        [FromForm] string? accessToken)
     {
         if (files is null || files.Count == 0)
             return Problem(detail: "No files provided", statusCode: StatusCodes.Status400BadRequest);
@@ -103,28 +103,14 @@ public class UploadController : ControllerBase
         var ticket = await _db.Tickets
             .Include(t => t.Documents)
             .FirstOrDefaultAsync(t => t.ReferenceNumber == ticketRefNumber);
-        if (ticket is null)
-            return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
 
         // ── Authorization ────────────────────────────────────────────────
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
-        if (isStaff)
-        {
-            if (User.IsAgencyOfficer())
-            {
-                var scope = User.GetAgencyCode();
-                if (string.IsNullOrEmpty(scope)) return Forbid();
-                if (ticket.AssignedAgencyCode != scope)
-                    return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
-            }
-        }
-        else
-        {
-            // Public caller: must prove ownership with the filing email.
-            if (string.IsNullOrWhiteSpace(contactEmail) ||
-                contactEmail.ToLowerInvariant().Trim() != ticket.ContactEmail)
-                return Problem(detail: "Email does not match ticket", statusCode: 403);
-        }
+        // Staff by session (officers within their agency); the filer by the
+        // ticket's tracking token or a signed-in session under the filing email.
+        var who = TicketRequester.From(User, accessToken);
+        if (who.IsMisconfiguredOfficer(User)) return Forbid();
+        if (ticket is null || !TicketAccess.CanView(ticket, who))
+            return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
 
         if (ticket.Documents.Count + files.Count > MaxDocumentsPerTicket)
             return Problem(detail: $"A ticket can hold at most {MaxDocumentsPerTicket} documents", statusCode: StatusCodes.Status400BadRequest);

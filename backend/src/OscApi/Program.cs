@@ -314,6 +314,14 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
+// SLA business-hours calendar: holidays gazetted each year (Eid al-Fitr,
+// Eid al-Adha) as Sla:ExtraHolidays = ["2027-03-10", ...]. Fixed-date
+// holidays and Easter are built into SlaCalculator.
+OscApi.Common.SlaCalculator.ConfigureExtraHolidays(
+    (builder.Configuration.GetSection("Sla:ExtraHolidays").Get<string[]>() ?? [])
+        .Select(d => DateOnly.TryParse(d, out var date) ? date : (DateOnly?)null)
+        .OfType<DateOnly>());
+
 var app = builder.Build();
 
 // Middleware pipeline

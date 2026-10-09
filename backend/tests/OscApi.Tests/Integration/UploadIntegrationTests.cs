@@ -8,7 +8,7 @@ namespace OscApi.Tests.Integration;
 
 /// <summary>
 /// Upload / document pipeline: files may only be attached to an existing ticket,
-/// authorized by the filing email (public) or a staff session, with the type
+/// authorized by the ticket's access token (public) or a staff session, with the type
 /// allowlist enforced. Downloads go through the access-checked content endpoint.
 /// </summary>
 public class UploadIntegrationTests : IClassFixture<ApiFactory>
@@ -18,7 +18,8 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
 
     private const string FilerEmail = "filer@example.com";
 
-    private async Task<string> CreateTicketAsync(HttpClient client)
+    /// <summary>File a ticket publicly; returns its reference and the filer's access token.</summary>
+    private async Task<(string Ref, string Token)> CreateTicketAsync(HttpClient client)
     {
         var res = await client.PostAsJsonAsync("/api/v1/tickets", new
         {
@@ -26,19 +27,19 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
             priority = "low", contactEmail = FilerEmail, contactName = "Filer",
         });
         Assert.Equal(HttpStatusCode.Created, res.StatusCode);
-        return JsonDocument.Parse(await res.Content.ReadAsStringAsync())
-            .RootElement.GetProperty("data").GetProperty("referenceNumber").GetString()!;
+        var data = JsonDocument.Parse(await res.Content.ReadAsStringAsync()).RootElement.GetProperty("data");
+        return (data.GetProperty("referenceNumber").GetString()!, data.GetProperty("accessToken").GetString()!);
     }
 
     private static MultipartFormDataContent BuildUpload(
-        string? refNumber, string? email, string mime = "application/pdf", string fileName = "doc.pdf")
+        string? refNumber, string? token, string mime = "application/pdf", string fileName = "doc.pdf")
     {
         var content = new MultipartFormDataContent();
         var file = new ByteArrayContent(Encoding.UTF8.GetBytes("%PDF-1.4 test"));
         file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mime);
         content.Add(file, "files", fileName);
         if (refNumber is not null) content.Add(new StringContent(refNumber), "ticketRefNumber");
-        if (email is not null) content.Add(new StringContent(email), "contactEmail");
+        if (token is not null) content.Add(new StringContent(token), "accessToken");
         return content;
     }
 
@@ -46,28 +47,29 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
     public async Task Upload_WithoutTicketRef_IsRejected()
     {
         var client = _factory.CreateClient();
-        var res = await client.PostAsync("/api/v1/upload", BuildUpload(null, FilerEmail));
+        var res = await client.PostAsync("/api/v1/upload", BuildUpload(null, "any-token"));
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
     [Fact]
-    public async Task Upload_WithWrongEmail_IsForbidden()
+    public async Task Upload_WithWrongToken_IsRejected()
     {
         var client = _factory.CreateClient();
-        var refNo = await CreateTicketAsync(client);
+        var (refNo, _) = await CreateTicketAsync(client);
 
-        var res = await client.PostAsync("/api/v1/upload", BuildUpload(refNo, "attacker@example.com"));
-        Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
+        // One 404 for "missing" and "not yours", so references can't be probed.
+        var res = await client.PostAsync("/api/v1/upload", BuildUpload(refNo, "guessed-token"));
+        Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
     }
 
     [Fact]
     public async Task Upload_WithDisallowedType_IsRejected()
     {
         var client = _factory.CreateClient();
-        var refNo = await CreateTicketAsync(client);
+        var (refNo, token) = await CreateTicketAsync(client);
 
         var res = await client.PostAsync("/api/v1/upload",
-            BuildUpload(refNo, FilerEmail, mime: "application/x-msdownload", fileName: "evil.exe"));
+            BuildUpload(refNo, token, mime: "application/x-msdownload", fileName: "evil.exe"));
         Assert.Equal(HttpStatusCode.BadRequest, res.StatusCode);
     }
 
@@ -75,14 +77,14 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
     public async Task Upload_ThenListAndDownload_WorksForOwnerOnly()
     {
         var client = _factory.CreateClient();
-        var refNo = await CreateTicketAsync(client);
+        var (refNo, token) = await CreateTicketAsync(client);
 
         // Owner uploads successfully.
-        var upload = await client.PostAsync("/api/v1/upload", BuildUpload(refNo, FilerEmail));
+        var upload = await client.PostAsync("/api/v1/upload", BuildUpload(refNo, token));
         Assert.Equal(HttpStatusCode.OK, upload.StatusCode);
 
         // Owner can list the document.
-        var list = await client.GetAsync($"/api/v1/tickets/{refNo}/documents?email={FilerEmail}");
+        var list = await client.GetAsync($"/api/v1/tickets/{refNo}/documents?token={token}");
         Assert.Equal(HttpStatusCode.OK, list.StatusCode);
         var docs = JsonDocument.Parse(await list.Content.ReadAsStringAsync())
             .RootElement.GetProperty("data");
@@ -90,13 +92,13 @@ public class UploadIntegrationTests : IClassFixture<ApiFactory>
         Assert.False(string.IsNullOrEmpty(docId));
 
         // A stranger cannot list or download.
-        var strangerList = await client.GetAsync($"/api/v1/tickets/{refNo}/documents?email=other@example.com");
-        Assert.Equal(HttpStatusCode.Forbidden, strangerList.StatusCode);
-        var strangerDl = await client.GetAsync($"/api/v1/tickets/{refNo}/documents/{docId}/content?email=other@example.com");
-        Assert.Equal(HttpStatusCode.Forbidden, strangerDl.StatusCode);
+        var strangerList = await client.GetAsync($"/api/v1/tickets/{refNo}/documents?token=guessed");
+        Assert.Equal(HttpStatusCode.NotFound, strangerList.StatusCode);
+        var strangerDl = await client.GetAsync($"/api/v1/tickets/{refNo}/documents/{docId}/content?token=guessed");
+        Assert.Equal(HttpStatusCode.NotFound, strangerDl.StatusCode);
 
         // The owner downloads the original bytes.
-        var download = await client.GetAsync($"/api/v1/tickets/{refNo}/documents/{docId}/content?email={FilerEmail}");
+        var download = await client.GetAsync($"/api/v1/tickets/{refNo}/documents/{docId}/content?token={token}");
         Assert.Equal(HttpStatusCode.OK, download.StatusCode);
         Assert.Equal("application/pdf", download.Content.Headers.ContentType?.MediaType);
         Assert.Equal("%PDF-1.4 test", await download.Content.ReadAsStringAsync());

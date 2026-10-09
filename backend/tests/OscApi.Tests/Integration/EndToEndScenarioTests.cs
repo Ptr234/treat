@@ -60,9 +60,12 @@ public class EndToEndScenarioTests
             .GetProperty("data")
             .GetProperty("referenceNumber")
             .GetString();
+        // The create response carries the filer's private access token.
+        var accessToken = System.Text.Json.JsonDocument.Parse(responseBody).RootElement
+            .GetProperty("data").GetProperty("accessToken").GetString();
 
-        // Pass email as query parameter for unauthenticated access
-        var getResponse = await client.GetAsync($"/api/v1/tickets/{referenceNumber}?email={request.ContactEmail}");
+        // The filer opens the ticket with their tracking token (no session).
+        var getResponse = await client.GetAsync($"/api/v1/tickets/{referenceNumber}?token={accessToken}");
         Assert.True(getResponse.IsSuccessStatusCode);
 
         // 4. Verify ticket data
@@ -107,9 +110,23 @@ public class EndToEndScenarioTests
         // Authenticate as admin to list tickets
         await LoginAdminWithMfaAsync(client);
 
-        // Retrieve list and verify filtering capability
-        var listResponse = await client.GetAsync("/api/v1/tickets?status=pending");
+        // Filter by a real status: the new ticket is in the "new" bucket...
+        var listResponse = await client.GetAsync("/api/v1/tickets?status=new");
         Assert.True(listResponse.IsSuccessStatusCode);
+        var newTotal = System.Text.Json.JsonDocument.Parse(await listResponse.Content.ReadAsStringAsync())
+            .RootElement.GetProperty("data").GetProperty("total").GetInt32();
+        Assert.True(newTotal >= 1);
+
+        // ...and not in "resolved".
+        var resolved = await client.GetAsync("/api/v1/tickets?status=resolved");
+        var resolvedRefs = System.Text.Json.JsonDocument.Parse(await resolved.Content.ReadAsStringAsync())
+            .RootElement.GetProperty("data").GetProperty("tickets").EnumerateArray()
+            .Select(t => t.GetProperty("status").GetString()).ToList();
+        Assert.All(resolvedRefs, s => Assert.Equal("Resolved", s));
+
+        // An unknown status is a 400, not silently ignored.
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest,
+            (await client.GetAsync("/api/v1/tickets?status=pending")).StatusCode);
     }
 
     [Fact]

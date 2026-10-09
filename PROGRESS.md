@@ -422,3 +422,36 @@ firebase deploy
 - Backend: `dotnet build` 0 warnings / 0 errors; 225/225 tests (new: `FrontendContractIntegrationTests`, `RateLimitPartitionTests`, `EmailServiceTests`).
 - Frontend: `tsc --noEmit` clean, ESLint clean, Jest 115/115 (new support-form payload + status-label tests), production `next build` OK.
 - Not verified live: local Postgres/Docker unavailable (WSL not yet installed — see DEV_SETUP.md). Run `dotnet ef database update` to apply the new migration.
+
+---
+
+## 2026-10-09 — Ticketing Review & Overhaul
+
+**Scope:** End-to-end review of the ticketing system (model, service, controllers, SLA, documents, frontend board/detail/create) and fixes for everything found.
+
+### Bugs fixed
+- **Chatbot escalations alerted nobody** — a ticket filed with `isEscalated: true` got no `EscalatedAt`, no default assignee and no escalation email (and a later "Escalate" was a no-op). Filing as an escalation is now a full escalation.
+- **Oversized input → 500** — staff updates, staff replies and public comments had no validators. New `TicketValidators.cs` mirrors every column limit (400s).
+- **Priority change kept the old SLA deadline** — it is now re-derived from the filing time.
+- **Staff could rate on the investor's behalf** (any value, any status), skewing the satisfaction KPI — now rejected; only the filer rates.
+- **Agency codes not normalised** — a ticket assigned to `uia` was invisible to UIA officers. Codes are upper-cased and checked against `AgencyDirectory`.
+- **Status email** sent raw values ("in_progress") and fired when nothing changed; re-sending "Resolved" reset `ResolvedAt`. Now only on a real change, with a readable label.
+- **Default assignee setting was never applied** — escalation now assigns it when nobody owns the ticket.
+- **No staff UI to manage tickets** — the detail page gains a "Manage ticket" panel (status, priority, agency, assignee).
+
+### Design changes (decisions — revisit if needed)
+- **Priority/VIP:** the public can't set priority (derived from category; raised to high for an escalation) and can't choose VIP (staff only).
+- **Routing:** new tickets land with UIA (`Tickets:DefaultAgencyCode`) for triage.
+- **Notifications:** investors are emailed on every non-internal staff reply; staff (`Resend:AdminEmail`) on investor replies.
+- **Business-hours SLA:** deadlines count Mon–Fri 08:00–17:00 EAT, skipping fixed Ugandan public holidays, Good Friday and Easter Monday; Eid dates go in `Sla:ExtraHolidays`.
+- **Tracking tokens replace email-as-password:** each ticket has a random `AccessToken` (migration `AddTicketAccessToken` backfills existing tickets). Email links carry `?token=`; the filer can also sign in under the filing email; a "send me a new link" form (`POST /tickets/{ref}/access-link`, always 202) replaces the email gate. Missing and not-yours both return 404. **Old `?email=` links stop working** — visitors get the new-link form, pre-filled. Back-office sessions without MFA no longer get staff access on public ticket routes.
+
+### Frontend
+- Create page lands on the new ticket (with its token) instead of the staff-only board; no more `alert()`s; VIP hidden from the public.
+- Staff board: server-side paging, filtering, search and sort (was: newest 100, filtered in the browser), scope-wide stats from the API, agency + escalation shown, load errors visible.
+- Comment / rating / escalation failures are shown instead of swallowed.
+
+### Verification
+- Backend: 255/255 tests (new `TicketLifecycleTests`, `TicketAccessIntegrationTests`, business-hours `SlaCalculatorTests`).
+- Frontend: `tsc` clean, ESLint clean, Jest 117/117, production build OK.
+- Live against Postgres 16 (Docker) with both new migrations applied: 29/29 end-to-end checks (public filing, token access, staff management, SLA re-derivation, rating). The dev admin's MFA was enrolled for the run and disabled afterwards.

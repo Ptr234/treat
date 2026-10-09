@@ -240,7 +240,8 @@ export default function AccountPage() {
                       </div>
                       <StatusBadge status={t.status} />
                       <Link
-                        href={`/tickets/${t.referenceNumber}?email=${encodeURIComponent(user?.email || '')}`}
+                        // Signed in under the filing email, the session is the proof of ownership.
+                        href={`/tickets/${encodeURIComponent(t.referenceNumber)}`}
                         className="inline-flex items-center gap-1 text-sm font-bold text-black underline decoration-2 underline-offset-4 hover:text-red-600"
                       >
                         Track <ArrowTopRightOnSquareIcon className="w-4 h-4" />

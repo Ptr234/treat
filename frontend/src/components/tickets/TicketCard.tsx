@@ -60,6 +60,16 @@ export default function TicketCard({ ticket }: TicketCardProps) {
         <span className={`px-2 py-0.5 text-xs font-medium rounded border ${priorityColors[ticket.priority]}`}>
           {ticket.priority.toUpperCase()}
         </span>
+        {ticket.isEscalated && (
+          <span className="rounded border border-red-200 bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+            ESCALATED
+          </span>
+        )}
+        {ticket.assigneeAgency && (
+          <span className="rounded border border-neutral-300 px-2 py-0.5 text-xs font-medium text-neutral-800">
+            {ticket.assigneeAgency}
+          </span>
+        )}
       </div>
       <h3 className="mt-3 line-clamp-2 font-display text-xl font-semibold leading-snug text-black group-hover:text-red-600">
         {ticket.title}

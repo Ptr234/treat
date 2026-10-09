@@ -51,6 +51,11 @@ public class Ticket : AuditableEntity
     [MaxLength(1000)]
     public string? SatisfactionComment { get; set; }
 
+    /// <summary>Unguessable secret in the filer's tracking link — the public's proof
+    /// of ownership (see <c>Common.TicketAccess</c>). Never returned to staff views.</summary>
+    [Required, MaxLength(64)]
+    public string AccessToken { get; set; } = string.Empty;
+
     public bool IsEscalated { get; set; }
     public DateTimeOffset? EscalatedAt { get; set; }
 

@@ -131,6 +131,34 @@ public static class EmailTemplates
             {Sign()}
             """);
 
+    public static string TicketReply(string name, string refNumber, string title, string reply, string trackUrl) =>
+        Wrap($"The OneStop Centre replied on ticket {refNumber}.", "Support ticket", "You have a new reply", $"""
+            {P($"Dear {name},")}
+            {P($"The OneStop Centre has replied to your ticket <strong>{refNumber}</strong> ({Enc(title)}):")}
+            {InfoBox(Gold, SurfaceMuted, $"""<p style="margin:0;color:{Ink};font-size:15px;line-height:1.6;white-space:pre-line;">{Enc(reply)}</p>""")}
+            {P("Open your ticket to read the full conversation or reply.")}
+            {Button(trackUrl, "View and reply", Black, Gold)}
+            {Sign()}
+            """);
+
+    public static string TicketAccessLink(string name, string refNumber, string title, string trackUrl) =>
+        Wrap($"Your private link to ticket {refNumber}.", "Support ticket", "Your ticket link", $"""
+            {P($"Dear {name},")}
+            {P($"Here is your private link to ticket <strong>{refNumber}</strong> ({Enc(title)}). Anyone with this link can view the ticket, so please don't share it.")}
+            {Button(trackUrl, "Open your ticket", Black, Gold)}
+            {Muted("If you didn't ask for this link, no action is needed.")}
+            {Sign()}
+            """);
+
+    public static string TicketCommentNotification(string refNumber, string title, string contactName, string comment, string ticketUrl) =>
+        Wrap($"{contactName} replied on ticket {refNumber}.", "Investor reply", "An investor replied", $"""
+            {P($"<strong>{Enc(contactName)}</strong> replied on ticket <strong>{refNumber}</strong> ({Enc(title)}):")}
+            {InfoBox(Gold, SurfaceMuted, $"""<p style="margin:0;color:{Ink};font-size:15px;line-height:1.6;white-space:pre-line;">{Enc(comment)}</p>""")}
+            {Button(ticketUrl, "Open ticket", Black, Gold)}
+            """);
+
+    private static string Enc(string text) => System.Net.WebUtility.HtmlEncode(text);
+
     public static string EscalationNotification(string refNumber, string title, string contactName, string dashboardUrl, string? customMessage = null) =>
         Wrap($"Ticket {refNumber} was escalated by the investor.", "Escalation alert", "A ticket needs attention", $"""
             {P("An investor has escalated the ticket below. Escalations should be reviewed the same working day.")}
@@ -140,7 +168,7 @@ public static class EmailTemplates
                 <p style="margin:4px 0 0;color:{InkMuted};">Investor: {contactName}</p>
                 """)}
             {(string.IsNullOrEmpty(customMessage) ? "" : P($"<em>\"{customMessage}\"</em>"))}
-            {Button(dashboardUrl, "Review in dashboard", Red, "#ffffff")}
+            {Button(dashboardUrl, "Open ticket", Red, "#ffffff")}
             """);
 
     // ---- Business registration (URSB) ----------------------------------------------

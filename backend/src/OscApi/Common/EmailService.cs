@@ -6,8 +6,11 @@ namespace OscApi.Common;
 
 public interface IEmailService
 {
-    Task SendTicketConfirmationAsync(string toEmail, string contactName, string referenceNumber, string title);
-    Task SendTicketStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string newStatus);
+    Task SendTicketConfirmationAsync(string toEmail, string contactName, string referenceNumber, string title, string accessToken);
+    Task SendTicketStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string newStatus, string accessToken);
+    Task SendTicketReplyAsync(string toEmail, string contactName, string referenceNumber, string title, string reply, string accessToken);
+    Task SendTicketAccessLinkAsync(string toEmail, string contactName, string referenceNumber, string title, string accessToken);
+    Task SendTicketCommentNotificationAsync(string referenceNumber, string title, string contactName, string comment, string[]? additionalRecipients = null);
     Task SendEscalationNotificationAsync(string referenceNumber, string title, string contactName, string[]? additionalRecipients = null, string? customMessage = null);
     Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber);
     Task SendInvestorReferenceReminderAsync(string toEmail, string name, string referenceNumber);
@@ -39,27 +42,67 @@ public class EmailService : IEmailService
         _siteUrl = config["SiteUrl"] ?? "https://www.oscdigitaltool.com";
     }
 
-    public async Task SendTicketConfirmationAsync(string toEmail, string contactName, string referenceNumber, string title)
+    // The tracking link carries the ticket's secret access token, never the
+    // email address (which would leak into browser history and server logs and,
+    // with sequential references, was effectively guessable).
+    private string TrackUrl(string referenceNumber, string accessToken) =>
+        $"{_siteUrl}/tickets/{Uri.EscapeDataString(referenceNumber)}?token={Uri.EscapeDataString(accessToken)}";
+
+    private string StaffTicketUrl(string referenceNumber) =>
+        $"{_siteUrl}/tickets/{Uri.EscapeDataString(referenceNumber)}";
+
+    public async Task SendTicketConfirmationAsync(string toEmail, string contactName, string referenceNumber, string title, string accessToken)
     {
-        var trackUrl = $"{_siteUrl}/tickets/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}";
+        var trackUrl = TrackUrl(referenceNumber, accessToken);
         await SendAsync(toEmail, $"Ticket {referenceNumber} Received",
             htmlBody: EmailTemplates.TicketConfirmation(contactName, referenceNumber, title, trackUrl),
             textBody: $"Dear {contactName},\n\nYour inquiry has been received.\nReference: {referenceNumber}\nSubject: {title}\nTrack: {trackUrl}");
     }
 
-    public async Task SendTicketStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string newStatus)
+    public async Task SendTicketStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string newStatus, string accessToken)
     {
-        var trackUrl = $"{_siteUrl}/tickets/{referenceNumber}?email={Uri.EscapeDataString(toEmail)}";
+        var trackUrl = TrackUrl(referenceNumber, accessToken);
         await SendAsync(toEmail, $"Ticket {referenceNumber} — Status Update",
             htmlBody: EmailTemplates.TicketStatusUpdate(contactName, referenceNumber, newStatus, trackUrl),
             textBody: $"Dear {contactName},\n\nTicket {referenceNumber} updated to: {newStatus}\nView: {trackUrl}");
     }
 
+    public async Task SendTicketReplyAsync(string toEmail, string contactName, string referenceNumber, string title, string reply, string accessToken)
+    {
+        var trackUrl = TrackUrl(referenceNumber, accessToken);
+        await SendAsync(toEmail, $"New reply on ticket {referenceNumber}",
+            htmlBody: EmailTemplates.TicketReply(contactName, referenceNumber, title, Preview(reply), trackUrl),
+            textBody: $"Dear {contactName},\n\nThe OneStop Centre replied to your ticket {referenceNumber}:\n\n{Preview(reply)}\n\nView and reply: {trackUrl}");
+    }
+
+    public async Task SendTicketAccessLinkAsync(string toEmail, string contactName, string referenceNumber, string title, string accessToken)
+    {
+        var trackUrl = TrackUrl(referenceNumber, accessToken);
+        await SendAsync(toEmail, $"Your link to ticket {referenceNumber}",
+            htmlBody: EmailTemplates.TicketAccessLink(contactName, referenceNumber, title, trackUrl),
+            textBody: $"Dear {contactName},\n\nHere is your private link to ticket {referenceNumber}:\n{trackUrl}\n\nIf you didn't ask for this, you can ignore this email.");
+    }
+
+    public async Task SendTicketCommentNotificationAsync(
+        string referenceNumber, string title, string contactName, string comment, string[]? additionalRecipients = null)
+    {
+        var ticketUrl = StaffTicketUrl(referenceNumber);
+        var subject = $"Investor replied on ticket {referenceNumber}";
+        var html = EmailTemplates.TicketCommentNotification(referenceNumber, title, contactName, Preview(comment), ticketUrl);
+        var text = $"{contactName} replied on ticket {referenceNumber} ({title}):\n\n{Preview(comment)}\n\nOpen: {ticketUrl}";
+
+        await SendAsync(_adminEmail, subject, htmlBody: html, textBody: text);
+        foreach (var recipient in (additionalRecipients ?? []).Where(e => !string.IsNullOrEmpty(e) && e != _adminEmail).Distinct())
+            await SendAsync(recipient, subject, htmlBody: html, textBody: text);
+    }
+
+    private static string Preview(string text) => text.Length <= 600 ? text : text[..600] + "…";
+
     public async Task SendEscalationNotificationAsync(
         string referenceNumber, string title, string contactName,
         string[]? additionalRecipients = null, string? customMessage = null)
     {
-        var dashboardUrl = $"{_siteUrl}/dashboard";
+        var dashboardUrl = StaffTicketUrl(referenceNumber);
         var subject = $"ESCALATION: Ticket {referenceNumber}";
         var html = EmailTemplates.EscalationNotification(referenceNumber, title, contactName, dashboardUrl, customMessage);
         var text = $"Ticket escalated.\nRef: {referenceNumber}\nSubject: {title}\nInvestor: {contactName}\n{customMessage}\nReview: {dashboardUrl}";

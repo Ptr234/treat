@@ -33,61 +33,46 @@ public class TicketsController : ControllerBase
         return code;
     }
 
-    /// <summary>List tickets. Admin-level staff see all; agency officers see only their agency's.</summary>
+    // A single 404 for "missing" and "not yours": the public side must not be
+    // able to tell which reference numbers exist.
+    private ObjectResult NotFoundOrForbidden() =>
+        Problem(detail: "Ticket not found, or this link is not valid for it", statusCode: StatusCodes.Status404NotFound);
+
+    /// <summary>Staff ticket board. Admin-level staff see all; agency officers see only their agency's.</summary>
     [HttpGet]
     [Authorize(Policy = Roles.StaffPolicy)]
-    public async Task<IActionResult> ListTickets([FromQuery] int? page = null, [FromQuery] int? pageSize = null, [FromQuery] int? from = null, [FromQuery] int? to = null)
+    public async Task<IActionResult> ListTickets([FromQuery] TicketListQuery query)
     {
-        // Support both pagination styles: page/pageSize or from/to
-        int start = 0, end = 50;
-
-        if (page.HasValue || pageSize.HasValue)
-        {
-            var p = page ?? 1;
-            var ps = pageSize ?? 50;
-
-            if (p < 1 || ps < 1 || ps > Pagination.MaxPageSize)
-                return Problem(detail: $"Invalid pagination parameters: page must be >= 1, pageSize must be between 1 and {Pagination.MaxPageSize}", statusCode: StatusCodes.Status400BadRequest);
-
-            start = (p - 1) * ps;
-            end = start + ps;
-        }
-        else if (from.HasValue || to.HasValue)
-        {
-            start = from ?? 0;
-            end = to ?? 50;
-        }
-
         var scope = ResolveAgencyScope(out var misconfigured);
         if (misconfigured) return Forbid();
-        var result = await _tickets.ListAsync(start, end, scope);
-        return Ok(new ApiResponse<object>(true, result));
+        return Ok(new ApiResponse<object>(true, await _tickets.ListAsync(query, scope)));
     }
 
-    /// <summary>Create a new support ticket.</summary>
+    /// <summary>Agencies a ticket can be assigned to.</summary>
+    [HttpGet("agencies")]
+    [Authorize(Policy = Roles.StaffPolicy)]
+    public IActionResult ListAgencies() =>
+        Ok(new ApiResponse<object>(true, AgencyDirectory.All.Select(a => new { code = a.Code, name = a.Name })));
+
+    /// <summary>File a ticket. The response carries the filer's private access token.</summary>
     [HttpPost]
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> CreateTicket([FromBody] CreateTicketRequest request)
     {
-        var result = await _tickets.CreateAsync(request);
+        var who = TicketRequester.From(User, null);
+        var result = await _tickets.CreateAsync(request, who.IsStaff);
         return Created("", new ApiResponse<object>(true, result));
     }
 
-    /// <summary>Get a ticket by reference number.</summary>
+    /// <summary>Get a ticket: staff by session, the filer by tracking token or signed-in account.</summary>
     [HttpGet("{refNumber}")]
     [EnableRateLimiting("public-read")]
-    public async Task<IActionResult> GetTicket(string refNumber, [FromQuery] string? email)
+    public async Task<IActionResult> GetTicket(string refNumber, [FromQuery] string? token)
     {
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
-        var scope = ResolveAgencyScope(out var misconfigured);
-        if (misconfigured) return Forbid();
-
-        var result = await _tickets.GetByRefAsync(refNumber, email, isStaff, scope);
-        if (result is null)
-            return isStaff
-                ? Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound)
-                : Problem(detail: "Email does not match ticket", statusCode: 403);
-        return Ok(new ApiResponse<object>(true, result));
+        var who = TicketRequester.From(User, token);
+        if (who.IsMisconfiguredOfficer(User)) return Forbid();
+        var result = await _tickets.GetAsync(refNumber, who);
+        return result is null ? NotFoundOrForbidden() : Ok(new ApiResponse<object>(true, result));
     }
 
     /// <summary>Update a ticket. Admin-level staff, or an agency officer for their own agency's tickets.</summary>
@@ -103,27 +88,23 @@ public class TicketsController : ControllerBase
         return Ok(new ApiResponse<object>(true, result));
     }
 
-    /// <summary>Get messages for a ticket.</summary>
+    /// <summary>Get messages for a ticket (internal notes are staff-only).</summary>
     [HttpGet("{refNumber}/messages")]
-    public async Task<IActionResult> GetMessages(string refNumber, [FromQuery] string? email)
+    [EnableRateLimiting("public-read")]
+    public async Task<IActionResult> GetMessages(string refNumber, [FromQuery] string? token)
     {
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
-        var scope = ResolveAgencyScope(out var misconfigured);
-        if (misconfigured) return Forbid();
-
-        var result = await _tickets.GetMessagesAsync(refNumber, email, isStaff, scope);
-        if (result is null) return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
-        return Ok(new ApiResponse<object>(true, result));
+        var who = TicketRequester.From(User, token);
+        if (who.IsMisconfiguredOfficer(User)) return Forbid();
+        var result = await _tickets.GetMessagesAsync(refNumber, who);
+        return result is null ? NotFoundOrForbidden() : Ok(new ApiResponse<object>(true, result));
     }
 
-    /// <summary>Post a staff reply (officer). Identity and role come from the session.</summary>
+    /// <summary>Post a staff reply (officer). Identity and role come from the session.
+    /// A non-internal reply is emailed to the investor.</summary>
     [HttpPost("{refNumber}/messages")]
     [Authorize(Policy = Roles.StaffPolicy)]
     public async Task<IActionResult> PostStaffMessage(string refNumber, [FromBody] StaffMessageRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Content))
-            return Problem(detail: "Message content is required", statusCode: StatusCodes.Status400BadRequest);
-
         var scope = ResolveAgencyScope(out var misconfigured);
         if (misconfigured) return Forbid();
 
@@ -136,28 +117,34 @@ public class TicketsController : ControllerBase
         return Created("", new ApiResponse<object>(true, result));
     }
 
-    /// <summary>Post a public reply (investor). Requires the email used to file the ticket.</summary>
+    /// <summary>Post a reply as the ticket's filer (tracking token or signed-in owner).</summary>
     [HttpPost("{refNumber}/comments")]
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> PostPublicComment(string refNumber, [FromBody] PublicCommentRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Content))
-            return Problem(detail: "Comment content is required", statusCode: StatusCodes.Status400BadRequest);
-
-        var result = await _tickets.PostPublicCommentAsync(refNumber, request.Content, request.AuthorName, request.AuthorEmail);
-        // A null result means the ticket is missing or the email doesn't match; a
-        // single 403 avoids leaking which tickets exist.
-        if (result is null) return Problem(detail: "Ticket not found or email does not match", statusCode: 403);
-        return Created("", new ApiResponse<object>(true, result));
+        var result = await _tickets.PostPublicCommentAsync(refNumber, request.Content, TicketRequester.From(User, request.Token));
+        return result is null ? NotFoundOrForbidden() : Created("", new ApiResponse<object>(true, result));
     }
 
-    /// <summary>Public self-service update (escalate / rate), gated by the filer's email.</summary>
+    /// <summary>Public self-service update (escalate / rate) by the ticket's filer.</summary>
     [HttpPatch("{refNumber}/public")]
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> PublicUpdate(string refNumber, [FromBody] PublicTicketUpdateRequest request)
     {
-        var result = await _tickets.PublicUpdateAsync(refNumber, request);
-        if (result is null) return Problem(detail: "Not permitted, or the action is not available for this ticket", statusCode: 403);
-        return Ok(new ApiResponse<object>(true, result));
+        var result = await _tickets.PublicUpdateAsync(refNumber, request, TicketRequester.From(User, request.Token));
+        return result is null ? NotFoundOrForbidden() : Ok(new ApiResponse<object>(true, result));
+    }
+
+    /// <summary>
+    /// Re-send the private tracking link to the filing email. Always 202 — the
+    /// link only goes to the address on file, and the response never says
+    /// whether the reference or email matched.
+    /// </summary>
+    [HttpPost("{refNumber}/access-link")]
+    [EnableRateLimiting("public-form")]
+    public async Task<IActionResult> RequestAccessLink(string refNumber, [FromBody] TicketAccessLinkRequest request)
+    {
+        await _tickets.RequestAccessLinkAsync(refNumber, request.Email);
+        return Accepted(new ApiResponse(true));
     }
 }

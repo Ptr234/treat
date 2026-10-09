@@ -67,9 +67,12 @@ public class TicketWorkflowIntegrationTests
             .GetProperty("data")
             .GetProperty("referenceNumber")
             .GetString();
+        // The create response carries the filer's private access token.
+        var accessToken = System.Text.Json.JsonDocument.Parse(responseBody).RootElement
+            .GetProperty("data").GetProperty("accessToken").GetString();
 
-        // Pass email as query parameter for unauthenticated access
-        var getResponse = await client.GetAsync($"/api/v1/tickets/{referenceNumber}?email={request.ContactEmail}");
+        // The filer opens the ticket with their tracking token (no session).
+        var getResponse = await client.GetAsync($"/api/v1/tickets/{referenceNumber}?token={accessToken}");
         Assert.True(getResponse.IsSuccessStatusCode);
     }
 
