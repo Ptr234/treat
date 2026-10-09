@@ -10,6 +10,7 @@ public interface IEmailService
     Task SendTicketStatusUpdateAsync(string toEmail, string contactName, string referenceNumber, string newStatus);
     Task SendEscalationNotificationAsync(string referenceNumber, string title, string contactName, string[]? additionalRecipients = null, string? customMessage = null);
     Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber);
+    Task SendInvestorReferenceReminderAsync(string toEmail, string name, string referenceNumber);
     Task SendPasswordResetAsync(string toEmail, string name, string resetToken);
     Task SendContactConfirmationAsync(string toEmail, string name, string referenceNumber, string agencyName, string subject);
     Task SendContactNotificationToAgencyAsync(string agencyCode, string agencyName, string referenceNumber, string contactName, string contactEmail, string subject, string message, string? agencyEmail = null);
@@ -107,6 +108,13 @@ public class EmailService : IEmailService
             textBody: $"Dear {name},\n\nWelcome! Your investor profile has been created.\nReference: {referenceNumber}");
     }
 
+    public async Task SendInvestorReferenceReminderAsync(string toEmail, string name, string referenceNumber)
+    {
+        await SendAsync(toEmail, "Your Investor Reference — Uganda Investment Authority",
+            htmlBody: EmailTemplates.InvestorReferenceReminder(name, referenceNumber),
+            textBody: $"Dear {name},\n\nYou already have an investor profile with us, so no new one was created.\nReference: {referenceNumber}");
+    }
+
     public async Task SendPasswordResetAsync(string toEmail, string name, string resetToken)
     {
         var resetUrl = $"{_siteUrl}/auth/reset-password?token={Uri.EscapeDataString(resetToken)}";
@@ -167,11 +175,28 @@ public class EmailService : IEmailService
             await SendAsync(agencyEmail, subjectLine, htmlBody: html, textBody: text);
     }
 
+    private static readonly string[] ReservedTlds = [".invalid", ".local", ".localhost", ".test", ".example"];
+
+    public static bool IsUndeliverable(string address)
+    {
+        var domain = address.Trim().TrimEnd('.').ToLowerInvariant();
+        return ReservedTlds.Any(tld => domain.EndsWith(tld, StringComparison.Ordinal));
+    }
+
     private async Task SendAsync(string to, string subject, string? textBody = null, string? htmlBody = null)
     {
         if (string.IsNullOrEmpty(_apiKey))
         {
             _logger.LogWarning("Resend not configured — email to {To} skipped: {Subject}", to, subject);
+            return;
+        }
+
+        // Reserved TLDs (RFC 2606/6761) can never be delivered — e.g. the
+        // placeholder address anonymous feedback is filed under. Sending would
+        // only bounce and hurt the sending domain's reputation.
+        if (IsUndeliverable(to))
+        {
+            _logger.LogInformation("Email to reserved-domain address {To} skipped: {Subject}", to, subject);
             return;
         }
 

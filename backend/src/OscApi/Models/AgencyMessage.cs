@@ -23,5 +23,9 @@ public class AgencyMessage : Entity
 
     public bool IsInternal { get; set; }
 
+    /// <summary>JSON array of <c>{ url, originalFilename }</c> (see
+    /// <c>Dtos.Messages.MessageAttachment</c>), or null when there are none.</summary>
+    public string? AttachmentsJson { get; set; }
+
     public DateTimeOffset SentAt { get; set; } = DateTimeOffset.UtcNow;
 }

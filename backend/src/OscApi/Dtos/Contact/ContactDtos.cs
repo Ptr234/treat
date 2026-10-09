@@ -6,7 +6,7 @@ public record CreateContactInquiryRequest(
     string? AgencyEmail,
     string Name,
     string Email,
-    string Phone,
+    string? Phone,
     string? Company,
     string ServiceType,
     string Subject,

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using OscApi.Common;
 using OscApi.Data;
@@ -33,6 +34,26 @@ public class MessagesController : ControllerBase
         if (string.IsNullOrEmpty(agencyCode)) return false;
         return await _db.Tickets.AnyAsync(t => t.ReferenceNumber == channel && t.AssignedAgencyCode == agencyCode);
     }
+
+    private static readonly JsonSerializerOptions AttachmentJson = new(JsonSerializerDefaults.Web);
+
+    private static List<MessageAttachment> ReadAttachments(string? json) =>
+        string.IsNullOrEmpty(json)
+            ? []
+            : JsonSerializer.Deserialize<List<MessageAttachment>>(json, AttachmentJson) ?? [];
+
+    private static object ToDto(AgencyMessage m) => new
+    {
+        _id = m.Id.ToString(),
+        m.Channel,
+        m.Content,
+        m.SenderName,
+        m.SenderAgencyCode,
+        m.SenderEmail,
+        m.IsInternal,
+        m.SentAt,
+        attachments = ReadAttachments(m.AttachmentsJson),
+    };
 
     // Bounded default page: a channel's history can grow without limit, so the
     // client pages backwards from the newest message via `before` instead of
@@ -89,23 +110,13 @@ public class MessagesController : ControllerBase
         var page = await query
             .OrderByDescending(m => m.SentAt)
             .Take(MessagesPageSize)
-            .Select(m => new
-            {
-                _id = m.Id.ToString(),
-                m.Channel,
-                m.Content,
-                m.SenderName,
-                m.SenderAgencyCode,
-                m.SenderEmail,
-                m.IsInternal,
-                m.SentAt
-            })
+            .AsNoTracking()
             .ToListAsync();
         page.Reverse();
 
         return Ok(new ApiResponse<object>(true, new
         {
-            messages = page,
+            messages = page.Select(ToDto),
             hasMore = page.Count == MessagesPageSize,
         }));
     }
@@ -130,21 +141,16 @@ public class MessagesController : ControllerBase
             SenderAgencyCode = agencyCode,
             SenderEmail = email,
             IsInternal = request.IsInternal,
+            AttachmentsJson = request.Attachments is { Count: > 0 } attachments
+                ? JsonSerializer.Serialize(
+                    attachments.Select(a => new MessageAttachment(a.Url.Trim(), SanitizeHelper.StripHtml(a.OriginalFilename))),
+                    AttachmentJson)
+                : null,
         };
 
         _db.AgencyMessages.Add(message);
         await _db.SaveChangesAsync();
 
-        return Created("", new ApiResponse<object>(true, new
-        {
-            _id = message.Id.ToString(),
-            message.Channel,
-            message.Content,
-            message.SenderName,
-            message.SenderAgencyCode,
-            message.SenderEmail,
-            message.IsInternal,
-            message.SentAt
-        }));
+        return Created("", new ApiResponse<object>(true, ToDto(message)));
     }
 }

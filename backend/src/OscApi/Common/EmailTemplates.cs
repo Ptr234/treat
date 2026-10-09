@@ -194,6 +194,19 @@ public static class EmailTemplates
             {Sign()}
             """);
 
+    public static string InvestorReferenceReminder(string name, string refNumber) =>
+        Wrap("Your investor reference number.", "Investor profile", "You already have an investor profile", $"""
+            {P($"Dear {name},")}
+            {P("Someone — most likely you — just submitted the investor onboarding form with this email address. You already have an investor profile with us, so no new one was created.")}
+            {InfoBox(Gold, SurfaceMuted, $"""
+                <p style="margin:0;color:{InkMuted};font-size:13px;">Your reference number</p>
+                <p style="margin:4px 0 0;font-size:19px;font-weight:bold;color:{Black};">{refNumber}</p>
+                """)}
+            {P("Our investment team will be in touch. Quote this reference in any enquiry so we can find your profile quickly.")}
+            {Muted("If you didn't submit the form, no action is needed — your profile hasn't changed.")}
+            {Sign()}
+            """);
+
     public static string PasswordReset(string name, string resetUrl) =>
         Wrap("Reset your OneStop Centre password.", "Account security", "Password reset requested", $"""
             {P($"Dear {name},")}

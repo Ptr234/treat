@@ -396,3 +396,29 @@ firebase deploy
 ### Verification
 - Backend: `dotnet build` 0 errors / 0 warnings; 78/78 tests pass (5 new integration tests covering upload authorization, MIME allowlist, owner-only download, invalid-status 400).
 - Frontend: `tsc --noEmit` clean, ESLint clean, Jest 27/27, production `next build` verified.
+
+---
+
+## 2026-10-09 — Backend ↔ Frontend Contract Audit & Fixes
+
+**Scope:** Every frontend API call checked against the ASP.NET route, request DTO/validator and response shape it hits. All paths and methods matched; the defects were in payloads, response handling and rate limiting.
+
+### Broken flows fixed
+- **Support page, Feedback form and Event registration could never submit.** They sent legacy field names (`fullName`, `agency`, `date`, `time`) that fail validation on `/api/v1/contact/*` (and there is no Next.js fallback route). Now send `agencyCode`/`agencyName`/`name`/`serviceType` (+ `purpose`/`preferredDate`/`preferredTime` for events). Inquiry `phone` is now optional server-side (appointments still require it); the agency service-request form no longer submits a fake `+256000000000`.
+- **Rate limiting:** 16 public endpoints shared one 10/min-per-IP bucket — analytics beacons, the as-you-type name check, payment-status polling and staff ticket views all consumed the budget for real submissions. Split into `public-form` (writes, 10/min), `public-read` (lookups, 60/min) and `analytics` (60/min); signed-in staff are partitioned per user (300/min) instead of sharing the office IP.
+- **Chatbot escalation** displayed a fabricated `ESC-…` reference when ticket creation failed. Now keeps the form open with an error and a phone fallback.
+- **Agency-chat attachments** were silently dropped by the API. New `AttachmentsJson` column (migration `AddAgencyMessageAttachments`), returned on GET/POST; URLs restricted to `https://cdn.sanity.io`, max 3.
+- **Investor onboarding** repeat submission returned 409 → "Submission Failed". Now 200 `{ existing: true }` (no reference in the response); the existing reference is emailed to the address on file.
+
+### Smaller fixes
+- Chat-enquiry rows/transcripts now include `_id` (React list keys were `undefined`).
+- Ticket page gained an **Add documents** upload (the create page promised this; it didn't exist).
+- Business-registration detail/payment/certificate: officers of agencies other than URSB no longer get staff access (matches List/Update scoping).
+- Agency-chat status badges show "Pending External" instead of `PendingExternal`; account page no longer styles "Inactive" as a good outcome.
+- Email: sends to reserved TLDs (`.invalid`, `.local`, `.test`, …) are skipped.
+- Removed dead `lib/api.ts`, `useDashboardSWR`, `useTicketsSWR` and the now-unused `swr` dependency.
+
+### Verification
+- Backend: `dotnet build` 0 warnings / 0 errors; 225/225 tests (new: `FrontendContractIntegrationTests`, `RateLimitPartitionTests`, `EmailServiceTests`).
+- Frontend: `tsc --noEmit` clean, ESLint clean, Jest 115/115 (new support-form payload + status-label tests), production `next build` OK.
+- Not verified live: local Postgres/Docker unavailable (WSL not yet installed — see DEV_SETUP.md). Run `dotnet ef database update` to apply the new migration.

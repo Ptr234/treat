@@ -15,7 +15,7 @@ public class BusinessRegistrationService : IBusinessRegistrationService
     private readonly IAuditLogService _audit;
 
     /// <summary>Only URSB handles business registration today.</summary>
-    private const string OwningAgencyCode = "URSB";
+    public const string OwningAgencyCode = "URSB";
 
     public BusinessRegistrationService(OscDbContext db, IEmailService email, IReferenceNumberGenerator refGen, IAuditLogService audit)
     {

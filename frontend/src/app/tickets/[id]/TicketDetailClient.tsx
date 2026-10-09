@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ArrowLeftIcon,
@@ -770,9 +770,18 @@ interface TicketDocument {
   uploadedAt: string;
 }
 
+// Mirrors the backend upload allowlist and limits (UploadController).
+const DOC_ACCEPT = '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp';
+const DOC_MAX_BYTES = 10 * 1024 * 1024;
+const DOC_MAX_PER_UPLOAD = 5;
+
 function TicketDocuments({ ticketId, emailParam, isStaff }: { ticketId: string; emailParam: string | null; isStaff: boolean }) {
   const [docs, setDocs] = useState<TicketDocument[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const canAccess = isStaff || Boolean(emailParam);
 
   const fetchDocs = useCallback(async () => {
     // Staff read via session; the public need their filing email.
@@ -790,12 +799,87 @@ function TicketDocuments({ ticketId, emailParam, isStaff }: { ticketId: string; 
 
   useEffect(() => { fetchDocs(); }, [fetchDocs]);
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = '';
+    if (files.length === 0) return;
+    setUploadMessage(null);
+
+    if (files.length > DOC_MAX_PER_UPLOAD) {
+      setUploadMessage({ type: 'error', text: `Select at most ${DOC_MAX_PER_UPLOAD} files at a time.` });
+      return;
+    }
+    const tooBig = files.find((f) => f.size > DOC_MAX_BYTES);
+    if (tooBig) {
+      setUploadMessage({ type: 'error', text: `${tooBig.name} is larger than 10MB.` });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const body = new FormData();
+      files.forEach((file) => body.append('files', file));
+      body.append('ticketRefNumber', ticketId);
+      // Staff are authorized by their session; the public by the filing email.
+      if (!isStaff && emailParam) body.append('contactEmail', emailParam);
+
+      const res = await fetch(resolveApiUrl('/api/upload/'), { method: 'POST', body, credentials: 'include' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) {
+        setUploadMessage({ type: 'error', text: json?.detail ?? json?.error ?? 'Upload failed. Please try again.' });
+        return;
+      }
+      setUploadMessage({ type: 'success', text: `${files.length} file${files.length === 1 ? '' : 's'} uploaded.` });
+      await fetchDocs();
+    } catch {
+      setUploadMessage({ type: 'error', text: 'Network error — upload failed. Please try again.' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) return null;
-  if (docs.length === 0) return null;
+  if (!canAccess && docs.length === 0) return null;
 
   return (
     <div className="border-t border-neutral-200 pt-6">
-      <h3 className="text-lg font-semibold text-black mb-4">Attached Documents</h3>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-lg font-semibold text-black">Attached Documents</h3>
+        {canAccess && (
+          <>
+            <input
+              ref={fileInputRef}
+              id="ticket-doc-upload"
+              type="file"
+              multiple
+              accept={DOC_ACCEPT}
+              onChange={handleUpload}
+              className="sr-only"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="border-2 border-black px-3 py-1.5 text-xs font-bold text-black hover:bg-black hover:text-yellow-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {uploading ? 'Uploading…' : 'Add documents'}
+            </button>
+          </>
+        )}
+      </div>
+      {uploadMessage && (
+        <p
+          role={uploadMessage.type === 'error' ? 'alert' : 'status'}
+          className={`mb-3 text-sm ${uploadMessage.type === 'error' ? 'text-red-700' : 'text-black'}`}
+        >
+          {uploadMessage.text}
+        </p>
+      )}
+      {docs.length === 0 && (
+        <p className="text-sm text-neutral-600">
+          No documents yet. PDF, Word, Excel or image files, up to 10MB each.
+        </p>
+      )}
       <div className="space-y-2">
         {docs.map((doc) => (
           <div key={doc.id} className="flex items-center justify-between py-3 border-b border-neutral-200">

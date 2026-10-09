@@ -4,6 +4,7 @@ import {
   normalizeCategory,
   normalizeAuthorRole,
   hoursBetween,
+  ticketStatusLabel,
 } from '@/lib/ticket-format';
 
 describe('ticket-format normalizers', () => {
@@ -42,5 +43,16 @@ describe('ticket-format normalizers', () => {
     expect(hoursBetween('2026-07-01T00:00:00Z', undefined)).toBeNull();
     // end before start is treated as no data rather than a negative duration
     expect(hoursBetween('2026-07-01T06:00:00Z', '2026-07-01T00:00:00Z')).toBeNull();
+  });
+});
+
+describe('ticketStatusLabel', () => {
+  it.each([
+    ['PendingExternal', 'Pending External'],
+    ['InProgress', 'In Progress'],
+    ['IN_PROGRESS', 'In Progress'],
+    ['resolved', 'Resolved'],
+  ])('labels %s as %s', (raw, label) => {
+    expect(ticketStatusLabel(raw)).toBe(label);
   });
 });

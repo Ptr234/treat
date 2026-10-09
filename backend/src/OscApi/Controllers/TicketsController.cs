@@ -75,7 +75,7 @@ public class TicketsController : ControllerBase
 
     /// <summary>Get a ticket by reference number.</summary>
     [HttpGet("{refNumber}")]
-    [EnableRateLimiting("public-form")]
+    [EnableRateLimiting("public-read")]
     public async Task<IActionResult> GetTicket(string refNumber, [FromQuery] string? email)
     {
         var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();

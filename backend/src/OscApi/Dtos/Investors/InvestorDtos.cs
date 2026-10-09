@@ -34,6 +34,10 @@ public record UpdateInvestorRequest(
     string? Status
 );
 
+/// <summary>Result of the public onboarding submission. <c>ReferenceNumber</c> is
+/// null when a profile already existed (it is emailed to the address on file).</summary>
+public record CreateInvestorResponse(string? ReferenceNumber, bool Existing);
+
 public record InvestorResponse(
     string ReferenceNumber,
     string Name,

@@ -66,3 +66,16 @@ export function hoursBetween(startIso: string | undefined | null, endIso: string
   if (Number.isNaN(start) || Number.isNaN(end) || end < start) return null;
   return (end - start) / (1000 * 60 * 60);
 }
+
+const STATUS_LABELS: Record<TicketStatus, string> = {
+  NEW: 'New',
+  ASSIGNED: 'Assigned',
+  IN_PROGRESS: 'In Progress',
+  PENDING_EXTERNAL: 'Pending External',
+  RESOLVED: 'Resolved',
+  CLOSED: 'Closed',
+};
+
+/** Human label for a ticket status in any casing ("PendingExternal" → "Pending External"). */
+export const ticketStatusLabel = (raw: string | undefined | null): string =>
+  STATUS_LABELS[normalizeStatus(raw)];

@@ -60,12 +60,21 @@ public class InvestorService : IInvestorService
         );
     }
 
-    public async Task<(InvestorResponse? Result, string? Error)> CreateAsync(CreateInvestorRequest request)
+    public async Task<(InvestorResponse? Result, bool Existing)> CreateAsync(CreateInvestorRequest request)
     {
         var email = request.Email.ToLowerInvariant().Trim();
 
-        if (await _db.InvestorProfiles.AnyAsync(i => i.Email == email))
-            return (null, "An investor profile with this email already exists");
+        var existing = await _db.InvestorProfiles
+            .Where(i => i.Email == email)
+            .Select(i => new { i.Name, i.ReferenceNumber })
+            .FirstOrDefaultAsync();
+        if (existing is not null)
+        {
+            // Re-send the reference to the address on file rather than to the
+            // caller, who may not own it.
+            _ = _email.SendInvestorReferenceReminderAsync(email, existing.Name, existing.ReferenceNumber);
+            return (null, true);
+        }
 
         var profile = new InvestorProfile
         {
@@ -110,7 +119,7 @@ public class InvestorService : IInvestorService
 
         _ = _email.SendInvestorWelcomeAsync(profile.Email, profile.Name, profile.ReferenceNumber);
 
-        return (new InvestorResponse(profile.ReferenceNumber, profile.Name, profile.Email, profile.Status.ToString()), null);
+        return (new InvestorResponse(profile.ReferenceNumber, profile.Name, profile.Email, profile.Status.ToString()), false);
     }
 
     public async Task<InvestorResponse?> UpdateAsync(string refNumber, UpdateInvestorRequest request)

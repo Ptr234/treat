@@ -67,6 +67,8 @@ public class DashboardController : ControllerBase
             .Skip(skip).Take(take)
             .Select(c => new
             {
+                // `_id` matches the key the dashboard (built against Sanity) reads.
+                _id = c.Id.ToString(),
                 c.SessionId, c.UserName, c.UserEmail, c.UserMessage, c.BotResponse,
                 c.Language, c.Sentiment, c.Tier, c.CreatedAt
             })
@@ -129,7 +131,7 @@ public class DashboardController : ControllerBase
         var messages = await _db.ChatEnquiries
             .Where(c => c.SessionId == sessionId)
             .OrderBy(c => c.CreatedAt)
-            .Select(c => new { c.UserMessage, c.BotResponse, c.Language, c.Sentiment, c.Tier, c.CreatedAt })
+            .Select(c => new { _id = c.Id.ToString(), c.UserMessage, c.BotResponse, c.Language, c.Sentiment, c.Tier, c.CreatedAt })
             .ToListAsync();
         return Ok(new ApiResponse<object>(true, messages));
     }

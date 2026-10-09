@@ -249,17 +249,45 @@ builder.Services.AddRateLimiter(options =>
                 SegmentsPerWindow = 4,
             }));
 
-    // Public form submissions: 10 per minute per IP (configurable for tests)
+    // Public endpoints are partitioned per IP — except for signed-in staff, who
+    // are partitioned per user with a larger allowance. Officers in one office
+    // share a NAT'd IP, so keying them by IP throttled them as a group (and
+    // let investor traffic from the same network eat their budget).
+    // Configurable so test hosts (one partition for everything) can raise them.
     var publicFormPermitLimit = builder.Configuration.GetValue("RateLimits:PublicFormPermitLimit", 10);
-    options.AddPolicy("public-form", httpContext =>
-        RateLimitPartition.GetSlidingWindowLimiter(
-            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new SlidingWindowRateLimiterOptions
-            {
-                PermitLimit = publicFormPermitLimit,
-                Window = TimeSpan.FromMinutes(1),
-                SegmentsPerWindow = 4,
-            }));
+    var publicReadPermitLimit = builder.Configuration.GetValue("RateLimits:PublicReadPermitLimit", 60);
+    var analyticsPermitLimit = builder.Configuration.GetValue("RateLimits:AnalyticsPermitLimit", 60);
+    var staffPermitLimit = builder.Configuration.GetValue("RateLimits:StaffPermitLimit", 300);
+
+    RateLimitPartition<string> PerClientSlidingWindow(HttpContext httpContext, string policy, int publicLimit)
+    {
+        var user = httpContext.User;
+        var isStaff = OscApi.Common.Roles.Staff.Any(user.IsInRole);
+        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? user.FindFirst("sub")?.Value;
+        var (key, limit) = isStaff && userId is not null
+            ? ($"{policy}:staff:{userId}", Math.Max(publicLimit, staffPermitLimit))
+            : ($"{policy}:ip:{httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"}", publicLimit);
+        return RateLimitPartition.GetSlidingWindowLimiter(key, _ => new SlidingWindowRateLimiterOptions
+        {
+            PermitLimit = limit,
+            Window = TimeSpan.FromMinutes(1),
+            SegmentsPerWindow = 4,
+        });
+    }
+
+    // Public form submissions (writes): 10 per minute per IP.
+    options.AddPolicy("public-form", ctx => PerClientSlidingWindow(ctx, "public-form", publicFormPermitLimit));
+
+    // Public lookups (ticket / registration / payment / certificate reads, the
+    // as-you-type name check, post-checkout payment polling): 60 per minute per
+    // IP. Previously these shared the 10/min write bucket, so a single applicant
+    // polling payment status could lock themselves out of submitting anything.
+    options.AddPolicy("public-read", ctx => PerClientSlidingWindow(ctx, "public-read", publicReadPermitLimit));
+
+    // Fire-and-forget usage analytics: its own bucket so page interactions
+    // never consume the budget real form submissions depend on.
+    options.AddPolicy("analytics", ctx => PerClientSlidingWindow(ctx, "analytics", analyticsPermitLimit));
 
     // Password reset: 3 per 15 minutes per IP
     options.AddPolicy("password-reset", httpContext =>

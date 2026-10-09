@@ -49,6 +49,9 @@ public class ApiFactory : WebApplicationFactory<Program>
         // Also need to configure public-form rate limit for signup tests
         // Note: This requires updating Program.cs to read from configuration
         Environment.SetEnvironmentVariable("RateLimits__PublicFormPermitLimit", "10000");
+        Environment.SetEnvironmentVariable("RateLimits__PublicReadPermitLimit", "10000");
+        Environment.SetEnvironmentVariable("RateLimits__AnalyticsPermitLimit", "10000");
+        Environment.SetEnvironmentVariable("RateLimits__StaffPermitLimit", "10000");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)

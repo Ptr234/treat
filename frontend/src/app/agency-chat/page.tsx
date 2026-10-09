@@ -17,7 +17,8 @@ import {
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { isStaff } from '@/lib/roles';
-import { apiFetch } from '@/lib/api-client';
+import { apiFetch, resolveApiUrl } from '@/lib/api-client';
+import { ticketStatusLabel } from '@/lib/ticket-format';
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -424,7 +425,13 @@ export default function AgencyChatPage() {
           content: messageContent,
           senderAgencyCode,
           ...(savedAttachments.length > 0
-            ? { attachments: savedAttachments.map((a) => a.fileRef) }
+            ? {
+                // The ASP.NET API stores each file's CDN URL + name; the legacy
+                // Next.js route stores Sanity file references instead.
+                attachments: resolveApiUrl('/api/messages/').startsWith('http')
+                  ? savedAttachments.map((a) => ({ url: a.url, originalFilename: a.name }))
+                  : savedAttachments.map((a) => a.fileRef),
+              }
             : {}),
         }),
       });
@@ -661,7 +668,7 @@ export default function AgencyChatPage() {
                     {ticketInfo && (
                       <div className="mt-1 ml-6 flex items-center gap-1.5">
                         <span className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700">
-                          {ticketInfo.status}
+                          {ticketStatusLabel(ticketInfo.status)}
                         </span>
                         {ticketInfo.agencyCode && (
                           <span

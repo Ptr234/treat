@@ -39,25 +39,26 @@ public class InvestorServiceTests
     public async Task CreateAsync_ReturnsInvestorResponse()
     {
         var svc = CreateService();
-        var (result, error) = await svc.CreateAsync(ValidRequest());
+        var (result, existing) = await svc.CreateAsync(ValidRequest());
 
-        Assert.Null(error);
+        Assert.False(existing);
         Assert.NotNull(result);
         Assert.StartsWith("INV-", result!.ReferenceNumber);
         Assert.Equal("New", result.Status);
     }
 
     [Fact]
-    public async Task CreateAsync_RejectsDuplicateEmail()
+    public async Task CreateAsync_DuplicateEmail_ReportsExistingWithoutCreatingOrLeakingRef()
     {
         var dbName = Guid.NewGuid().ToString();
         var svc = CreateService(dbName);
 
         await svc.CreateAsync(ValidRequest("dup@test.com"));
-        var (result, error) = await svc.CreateAsync(ValidRequest("dup@test.com"));
+        var (result, existing) = await svc.CreateAsync(ValidRequest("DUP@test.com "));
 
+        Assert.True(existing);
         Assert.Null(result);
-        Assert.Contains("already exists", error);
+        Assert.Equal(1, TestDbFactory.Create(dbName).InvestorProfiles.Count());
     }
 
     [Fact]
@@ -187,7 +188,7 @@ public class InvestorServiceTests
             new UpdateBusinessRegistrationRequest(Status: "certificate_issued", null, null), agencyScope: null);
 
         var invSvc = CreateService(dbName);
-        var (created, error) = await invSvc.CreateAsync(new CreateInvestorRequest(
+        var (created, existing) = await invSvc.CreateAsync(new CreateInvestorRequest(
             Name: "Grace Nakato", Email: "grace.nakato@example.com", Phone: "+256772445118",
             Nationality: "Ugandan", CompanyName: "Nakato Agro Processing Ltd", Position: "Director",
             InvestorType: "Individual", Experience: "Intermediate", InvestmentGoal: "Growth",
@@ -195,7 +196,7 @@ public class InvestorServiceTests
             PrimarySector: "Agriculture", SecondarySectors: null, SpecificInterests: null,
             CapitalSource: "Savings", Timeframe: "immediate", SupportNeeded: null));
 
-        Assert.Null(error);
+        Assert.False(existing);
         var detail = await invSvc.GetByRefAsync(created!.ReferenceNumber, "grace.nakato@example.com", isAdmin: false);
         Assert.Equal(registration.ReferenceNumber, detail!.LinkedBusinessRegistrationRef);
     }
@@ -204,9 +205,9 @@ public class InvestorServiceTests
     public async Task CreateAsync_NoLink_WhenNoMatchingUrsbRegistrationExists()
     {
         var svc = CreateService();
-        var (created, error) = await svc.CreateAsync(ValidRequest("unlinked@example.com"));
+        var (created, existing) = await svc.CreateAsync(ValidRequest("unlinked@example.com"));
 
-        Assert.Null(error);
+        Assert.False(existing);
         var detail = await svc.GetByRefAsync(created!.ReferenceNumber, "unlinked@example.com", isAdmin: false);
         Assert.Null(detail!.LinkedBusinessRegistrationRef);
     }

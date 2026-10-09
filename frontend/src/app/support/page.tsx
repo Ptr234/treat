@@ -15,6 +15,16 @@ const inputClass =
 
 const labelClass = 'mb-2 block text-sm font-bold text-black';
 
+// <select> value → the human label sent to the backend as the inquiry's
+// service type and subject.
+const SUPPORT_CATEGORIES: Record<string, string> = {
+  'business-registration': 'Business Registration',
+  'investment-licensing': 'Investment Licensing',
+  'tax-registration': 'Tax Registration',
+  'technical-support': 'Technical Support',
+  'general-inquiry': 'General Inquiry',
+};
+
 export default function SupportPage() {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -65,14 +75,17 @@ export default function SupportPage() {
 
     setIsSubmitting(true);
     try {
+      const category = SUPPORT_CATEGORIES[formData.category] ?? 'General Inquiry';
       const res = await apiFetch('/api/contact/inquiries', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          phone: formData.phone || undefined,
-          agency: 'UIA',
-          subject: formData.category || 'General Inquiry',
+          agencyCode: 'UIA',
+          agencyName: 'Uganda Investment Authority',
+          name: formData.fullName.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim() || null,
+          serviceType: category,
+          subject: category,
           message: formData.message,
           urgency: 'normal',
         }),

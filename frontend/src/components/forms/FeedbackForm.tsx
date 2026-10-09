@@ -108,10 +108,14 @@ export default function FeedbackForm({ onClose, context }: FeedbackFormProps) {
       const res = await apiFetch('/api/contact/inquiries', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: feedbackData.anonymous ? 'Anonymous' : feedbackData.contactInfo.name,
-          email: feedbackData.anonymous ? 'anonymous@feedback.local' : feedbackData.contactInfo.email,
-          phone: feedbackData.contactInfo.phone || undefined,
-          agency: 'UIA',
+          agencyCode: 'UIA',
+          agencyName: 'Uganda Investment Authority',
+          name: feedbackData.anonymous ? 'Anonymous' : feedbackData.contactInfo.name.trim(),
+          // `.invalid` is a reserved, never-deliverable TLD (RFC 2606); the
+          // backend skips confirmation mail to it.
+          email: feedbackData.anonymous ? 'anonymous@feedback.invalid' : feedbackData.contactInfo.email.trim(),
+          phone: feedbackData.anonymous ? null : feedbackData.contactInfo.phone.trim() || null,
+          serviceType: `Feedback: ${feedbackCategories.find((c) => c.value === feedbackData.category)?.label ?? 'General Feedback'}`,
           subject: `[${feedbackData.category}] ${feedbackData.subject}`,
           message: `Rating: ${feedbackData.rating}/5\n\n${feedbackData.message}${context ? `\n\nContext: ${context}` : ''}`,
           urgency: 'normal',

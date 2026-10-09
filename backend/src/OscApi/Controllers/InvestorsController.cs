@@ -45,11 +45,13 @@ public class InvestorsController : ControllerBase
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> CreateInvestor([FromBody] CreateInvestorRequest request)
     {
-        var (result, error) = await _investors.CreateAsync(request);
-        if (error is not null)
-            return Problem(detail: error, statusCode: StatusCodes.Status409Conflict);
+        var (result, existing) = await _investors.CreateAsync(request);
+        // A repeat submission isn't an error for the investor: the onboarding
+        // wizard tells them their existing reference has been emailed to them.
+        if (existing)
+            return Ok(new ApiResponse<CreateInvestorResponse>(true, new CreateInvestorResponse(null, Existing: true)));
         return Created($"/api/v1/investors/{result!.ReferenceNumber}",
-            new ApiResponse<InvestorResponse>(true, result));
+            new ApiResponse<CreateInvestorResponse>(true, new CreateInvestorResponse(result.ReferenceNumber, Existing: false)));
     }
 
     /// <summary>Update an investor profile (admin-level staff only).</summary>

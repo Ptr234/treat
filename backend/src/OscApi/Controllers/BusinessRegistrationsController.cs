@@ -36,9 +36,17 @@ public class BusinessRegistrationsController : ControllerBase
         return code;
     }
 
+    /// <summary>Staff with visibility into the registry: admin-level, or an officer
+    /// of the owning agency (URSB). Officers of other agencies get no staff
+    /// privilege here — the same rule List and Update enforce — so they, like
+    /// the public, must supply the filing email.</summary>
+    private bool CanSeeRegistry() =>
+        User.IsAdminLevel()
+        || (User.IsAgencyOfficer() && User.GetAgencyCode() == BusinessRegistrationService.OwningAgencyCode);
+
     /// <summary>Check whether a proposed business name is available before submitting.</summary>
     [HttpGet("check-name")]
-    [EnableRateLimiting("public-form")]
+    [EnableRateLimiting("public-read")]
     public async Task<IActionResult> CheckName([FromQuery] string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -71,10 +79,10 @@ public class BusinessRegistrationsController : ControllerBase
 
     /// <summary>Get a registration by reference number. Staff, or the public with the filing email.</summary>
     [HttpGet("{refNumber}")]
-    [EnableRateLimiting("public-form")]
+    [EnableRateLimiting("public-read")]
     public async Task<IActionResult> GetByRef(string refNumber, [FromQuery] string? email)
     {
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        var isStaff = CanSeeRegistry();
         var result = await _registrations.GetByRefAsync(refNumber, email, isStaff);
         if (result is null)
             return isStaff
@@ -108,7 +116,7 @@ public class BusinessRegistrationsController : ControllerBase
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> InitiatePayment(string refNumber, [FromQuery] string? email)
     {
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        var isStaff = CanSeeRegistry();
         if (await _registrations.GetByRefAsync(refNumber, email, isStaff) is null)
             return Problem(detail: "Registration not found or email does not match", statusCode: StatusCodes.Status404NotFound);
 
@@ -130,10 +138,10 @@ public class BusinessRegistrationsController : ControllerBase
     /// <summary>Current fee-payment status for a registration, for the applicant's
     /// tracking page to poll after returning from checkout.</summary>
     [HttpGet("{refNumber}/payment")]
-    [EnableRateLimiting("public-form")]
+    [EnableRateLimiting("public-read")]
     public async Task<IActionResult> PaymentStatus(string refNumber, [FromQuery] string? email)
     {
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        var isStaff = CanSeeRegistry();
         if (await _registrations.GetByRefAsync(refNumber, email, isStaff) is null)
             return Problem(detail: "Registration not found or email does not match", statusCode: StatusCodes.Status404NotFound);
 
@@ -144,10 +152,10 @@ public class BusinessRegistrationsController : ControllerBase
 
     /// <summary>Get the issued certificate. Only available once the registration reaches CertificateIssued.</summary>
     [HttpGet("{refNumber}/certificate")]
-    [EnableRateLimiting("public-form")]
+    [EnableRateLimiting("public-read")]
     public async Task<IActionResult> GetCertificate(string refNumber, [FromQuery] string? email)
     {
-        var isStaff = User.IsAdminLevel() || User.IsAgencyOfficer();
+        var isStaff = CanSeeRegistry();
         var result = await _registrations.GetCertificateAsync(refNumber, email, isStaff);
         if (result is null) return Problem(detail: "Certificate not available", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<CertificateResponse>(true, result));

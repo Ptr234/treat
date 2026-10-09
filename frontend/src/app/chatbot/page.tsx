@@ -50,6 +50,7 @@ function ChatbotPageInner() {
   const [isLargeScreen, setIsLargeScreen] = useState(false);
   const [showEscalationForm, setShowEscalationForm] = useState(false);
   const [isEscalating, setIsEscalating] = useState(false);
+  const [escalationError, setEscalationError] = useState<string | null>(null);
   const [escalationData, setEscalationData] = useState({ name: '', email: '', phone: '', issue: '' });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -153,6 +154,7 @@ function ChatbotPageInner() {
   };
 
   const handleEscalate = () => {
+    setEscalationError(null);
     setShowEscalationForm(true);
     setIsSidebarOpen(false);
   };
@@ -160,6 +162,7 @@ function ChatbotPageInner() {
   const handleEscalationSubmitReal = async () => {
     if (!escalationData.name || !escalationData.email || !escalationData.issue) return;
     setIsEscalating(true);
+    setEscalationError(null);
 
     try {
       const result = await apiFetch<{ referenceNumber: string }>('/api/tickets', {
@@ -176,18 +179,15 @@ function ChatbotPageInner() {
         }),
       });
 
-      let refNumber: string;
-      if (result.success && result.data) {
-        refNumber = result.data.referenceNumber;
-      } else {
-        refNumber = `ESC-${Date.now().toString(36).toUpperCase()}`;
+      // Never show a reference number that doesn't exist: if the ticket wasn't
+      // created, keep the form open (with what they typed) and say so.
+      if (!result.success || !result.data?.referenceNumber) {
+        setEscalationError(
+          `${result.error || 'We could not submit your request.'} Please try again, or call us on +256 414 301 000.`,
+        );
+        return;
       }
-
-      // Inject confirmation as assistant message via sendMessage won't work well here
-      // Instead we use a direct approach — but useChatEngine doesn't expose setMessages.
-      // We'll send a real message that triggers the assistant to confirm the escalation.
-      // Actually, the simplest approach: just send the issue as a user message.
-      // Let's not overcomplicate — just show the ref number in a follow-up.
+      const refNumber = result.data.referenceNumber;
 
       // Save escalation user info so future messages are logged with identity
       const escalationUserInfo = {
@@ -220,6 +220,9 @@ function ChatbotPageInner() {
         }),
       }).catch(() => {});
 
+      setShowEscalationForm(false);
+      setEscalationData({ name: '', email: '', phone: '', issue: '' });
+
       await sendMessage(
         `I just submitted an escalation request. My reference number is ${refNumber}. Please confirm.`,
         language,
@@ -227,9 +230,8 @@ function ChatbotPageInner() {
       );
     } catch (error) {
       console.error('Escalation failed:', error);
+      setEscalationError('Network error — your request was not submitted. Please check your connection and try again.');
     } finally {
-      setShowEscalationForm(false);
-      setEscalationData({ name: '', email: '', phone: '', issue: '' });
       setIsEscalating(false);
     }
   };
@@ -525,6 +527,11 @@ function ChatbotPageInner() {
                   className="w-full px-3 py-2.5 border border-neutral-400 bg-white text-sm text-black placeholder:text-neutral-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 resize-none"
                 />
               </div>
+              {escalationError && (
+                <p role="alert" className="mt-3 border-l-4 border-red-600 bg-red-50 px-3 py-2 text-sm text-red-800">
+                  {escalationError}
+                </p>
+              )}
               <div className="flex gap-3 mt-5">
                 <button
                   onClick={() => setShowEscalationForm(false)}

@@ -11,7 +11,8 @@ public class CreateContactInquiryValidator : AbstractValidator<CreateContactInqu
         RuleFor(x => x.AgencyName).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Email).NotEmpty().EmailAddress();
-        RuleFor(x => x.Phone).NotEmpty().MaximumLength(30);
+        // Optional: an inquiry is answered by email. Appointments still require it.
+        RuleFor(x => x.Phone).MaximumLength(30);
         RuleFor(x => x.ServiceType).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Subject).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Message).NotEmpty().MaximumLength(5000);

@@ -30,6 +30,13 @@ const inputClass =
 
 const labelClass = 'mb-1.5 block text-sm font-bold text-black';
 
+/** "2026-11-12" or "2026-11-12T07:00:00Z" → "2026-11-12" (the backend parses a DateOnly). */
+function toIsoDate(value: string): string {
+  if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? value : d.toISOString().slice(0, 10);
+}
+
 export default function EventDetailClient({ event }: EventDetailClientProps) {
   const [registrationStatus, setRegistrationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
@@ -67,16 +74,19 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
       const res = await apiFetch('/api/contact/appointments', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          agency: 'UIA',
-          subject: `Event Registration: ${event.title}`,
-          message: `Organization: ${formData.organization}\nEvent: ${event.title}\nDate: ${event.date}`,
-          date: event.date,
-          time: event.time || '09:00',
+          agencyCode: 'UIA',
+          agencyName: 'Uganda Investment Authority',
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          company: formData.organization.trim() || null,
+          serviceType: 'Event Registration',
+          purpose: `Event registration: ${event.title}\nOrganization: ${formData.organization}\nDate: ${formatDate(event.date)}`,
           duration: 60,
           meetingType: event.isVirtual ? 'virtual' : 'in-person',
+          preferredDate: toIsoDate(event.date),
+          // Sanity doesn't track start times; mock events do ("09:00").
+          preferredTime: /^\d{2}:\d{2}$/.test(event.time) ? event.time : '09:00',
         }),
       });
 

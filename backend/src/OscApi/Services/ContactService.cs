@@ -27,7 +27,7 @@ public class ContactService : IContactService
             AgencyName = SanitizeHelper.StripHtml(request.AgencyName),
             ContactName = SanitizeHelper.StripHtml(request.Name),
             ContactEmail = request.Email.ToLowerInvariant().Trim(),
-            ContactPhone = request.Phone,
+            ContactPhone = request.Phone?.Trim() ?? string.Empty,
             Company = request.Company,
             ServiceType = SanitizeHelper.StripHtml(request.ServiceType),
             Subject = SanitizeHelper.StripHtml(request.Subject),

@@ -20,7 +20,7 @@ public class AnalyticsController : ControllerBase
 
     /// <summary>Log a user interaction event (tool usage, download, search). Events are queued and batched for write.</summary>
     [HttpPost("event")]
-    [EnableRateLimiting("public-form")]
+    [EnableRateLimiting("analytics")]
     public async Task<IActionResult> LogEvent([FromBody] LogEventRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.EventType) || string.IsNullOrWhiteSpace(request.EventName))

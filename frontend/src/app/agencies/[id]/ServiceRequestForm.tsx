@@ -33,7 +33,7 @@ export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail
           serviceType: formData.get('service'),
           subject: `Service Request: ${formData.get('service')}`,
           message: formData.get('message'),
-          phone: formData.get('phone') || '+256000000000',
+          phone: (formData.get('phone') as string | null)?.trim() || null,
           urgency: 'normal',
         }),
       });
