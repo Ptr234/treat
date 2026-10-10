@@ -24,9 +24,15 @@ public class ChatbotController : ControllerBase
     private readonly IGroqClient _groq;
     private readonly IChatbotSessionService _sessions;
     private readonly ILogger<ChatbotController> _logger;
+    private readonly IReadOnlyList<string> _verifiedFacts;
 
-    public ChatbotController(OscDbContext db, IGroqClient groq, IChatbotSessionService sessions, ILogger<ChatbotController> logger)
+    public ChatbotController(OscDbContext db, IGroqClient groq, IChatbotSessionService sessions, ILogger<ChatbotController> logger,
+        IConfiguration config)
     {
+        // Figures confirmed with the agencies (Chatbot:VerifiedFacts in config) —
+        // the only amounts the assistant may quote. Empty by default.
+        _verifiedFacts = config.GetSection("Chatbot:VerifiedFacts").Get<string[]>()?
+            .Where(f => !string.IsNullOrWhiteSpace(f)).Select(f => f.Trim()).ToArray() ?? [];
         _db = db;
         _groq = groq;
         _sessions = sessions;
@@ -40,7 +46,7 @@ public class ChatbotController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.SessionId))
             return Problem(detail: "sessionId is required", statusCode: StatusCodes.Status400BadRequest);
 
-        var systemPrompt = BuildSystemPrompt(request.Language);
+        var systemPrompt = BuildSystemPrompt(request.Language, _verifiedFacts);
         var messages = new List<GroqClient.ChatMessage>
         {
             new("system", systemPrompt)
@@ -171,8 +177,17 @@ public class ChatbotController : ControllerBase
     private static string? Truncate(string? value, int max) =>
         value is null ? null : (value.Length <= max ? value : value[..max]);
 
-    private static string BuildSystemPrompt(string language)
+    public static string BuildSystemPrompt(string language, IReadOnlyList<string>? verifiedFacts = null)
     {
+        // Investors act on what the assistant says, and a model's memory of
+        // legal thresholds is often out of date (it quoted a pre-2019 minimum
+        // capital in testing). Unless a figure is listed as verified, it must
+        // explain the requirement and send the user to the agency for the number.
+        var facts = verifiedFacts is { Count: > 0 }
+            ? "Verified facts (confirmed with the agencies — you may state these exactly as written, and no other figures):\n"
+              + string.Join("\n", verifiedFacts.Select(f => "- " + f))
+            : "Verified facts: none are configured, so do not state any figures of the kinds described here.";
+
         var langInstruction = language switch
         {
             "fr" => "Respond in French.",
@@ -199,6 +214,16 @@ public class ChatbotController : ControllerBase
 
             Always be helpful, professional, and accurate. If unsure, recommend contacting
             the relevant agency directly.
+
+            Figures and legal thresholds: do NOT state specific amounts or numbers from memory —
+            minimum investment or capital requirements, fees and charges, tax rates and
+            percentages, penalties, processing times, deadlines or validity periods. They change,
+            and an outdated figure can seriously mislead an investor. Instead, explain what the
+            requirement is and which agency sets or administers it, and tell the user to confirm
+            the current figure with that agency (the UIA One Stop Centre can be reached on
+            +256 414 301 000). This applies even if the user asks for "just the number".
+
+            {facts}
 
             Formatting: reply in plain text only. Do NOT use any Markdown — no asterisks
             for bold or italics (** or *), no backticks, no headings, and no markdown link
