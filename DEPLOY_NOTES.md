@@ -22,6 +22,9 @@ Two independent deployments: the **frontend** (Cloudflare Workers) deploys itsel
 - **How long:** builds have taken anywhere from under a minute to several minutes in practice.
   Check the Cloudflare dashboard → the `treat` Worker → **Deployments** tab for real status;
   don't assume a push has landed just because it was pushed.
+- **Confirming from a terminal:** poll the live HTML for something the change introduced, e.g.
+  `curl -s https://oscdigitaltool.com/ | grep -c osc-logo` (the 2026-10-10 logo change went live
+  ~5 minutes after the push). A hard refresh (Ctrl+F5) clears a browser's cached copy.
 
 ### Frontend environment variables (Cloudflare dashboard → `treat` Worker → Settings → Variables and Secrets)
 
@@ -67,46 +70,80 @@ now served only by the backend, which requires a signed-in session.
 
 ### Deploying a backend change
 
+Deploy only **committed and pushed** code. Each step below is safe to stop after, except the swap.
+
+**SSH from Windows:** use Windows OpenSSH (PowerShell), with the key `~/.ssh/id_ed25519_osc`.
+Git Bash's bundled `ssh`/`scp` is refused with the same key. When piping a script written on
+Windows to the server, strip CRLF and any byte-order mark, or bash fails with
+`sudo: command not found`:
+`Get-Content -Raw script.sh | ssh -i $K ubuntu@57.129.67.69 "tr -d '\r' | sed '1s/^\xEF\xBB\xBF//' | bash -s"`.
+
 ```bash
-# 1. Publish self-contained from wherever you have the .NET 8 SDK (not the VPS)
-cd backend/src/OscApi
+# 1. Publish self-contained from a CLEAN export of the commit, not the working tree,
+#    so uncommitted local edits can never ship. (.NET 8 SDK needed; the VPS doesn't build.)
+SHA=$(git rev-parse --short HEAD)          # must already be pushed to main
+rm -rf /tmp/osc-export /tmp/osc-publish && mkdir -p /tmp/osc-export
+git archive $SHA backend | tar x -C /tmp/osc-export
+cd /tmp/osc-export/backend/src/OscApi
 dotnet publish OscApi.csproj -r linux-x64 --self-contained true -c Release -o /tmp/osc-publish
 
 # 2. Package and upload
 cd /tmp/osc-publish && tar czf ../osc-publish.tar.gz . && cd ..
-scp osc-publish.tar.gz ubuntu@57.129.67.69:/tmp/osc-publish.tar.gz
+scp -i ~/.ssh/id_ed25519_osc osc-publish.tar.gz ubuntu@57.129.67.69:/tmp/osc-publish.tar.gz
 
-# 3. Stage it on the VPS (safe — doesn't touch the live service yet)
+# 3. Stage it on the VPS and take a pre-deploy DB backup (doesn't touch the live service)
 ssh ubuntu@57.129.67.69 '
   set -e
   sudo rm -rf /var/www/osc/aspnet.new && sudo mkdir -p /var/www/osc/aspnet.new
   sudo tar xzf /tmp/osc-publish.tar.gz -C /var/www/osc/aspnet.new
+  sudo rm -f /var/www/osc/aspnet.new/appsettings.Development.json
   sudo chmod +x /var/www/osc/aspnet.new/OscApi
   rm -f /tmp/osc-publish.tar.gz
   sudo cp /var/www/osc/aspnet/appsettings.Production.json /var/www/osc/aspnet.new/appsettings.Production.json
   sudo chown -R www-data:www-data /var/www/osc/aspnet.new
   sudo chmod 640 /var/www/osc/aspnet.new/appsettings.Production.json
+  # migrations run on startup, so keep a restorable copy of the schema they change
+  TS=$(date +%Y%m%d-%H%M%S)
+  sudo -u postgres pg_dump -Fc osc_db -f /tmp/osc_db-predeploy-$TS.dump
+  sudo mv /tmp/osc_db-predeploy-$TS.dump /var/backups/osc/
+  echo "live service still: $(systemctl is-active osc-api)"
 '
 
-# 4. Swap and restart (the actual cutover — do this deliberately, not as a background step)
+# 4. Swap and restart, rolling back automatically if the new release isn't healthy in 60 s.
+#    This is the actual cutover: run it deliberately, not as a background step.
 ssh ubuntu@57.129.67.69 '
-  set -e
-  TS=$(date +%Y%m%d-%H%M%S)
+  set -u
+  TS=$(date +%Y%m%d-%H%M%S); BAK=/var/www/osc/aspnet.bak-$TS
+  healthy() { for i in $(seq 1 30); do curl -s -m 5 http://127.0.0.1:3003/api/health | grep -q "\"status\":\"ok\"" && return 0; sleep 2; done; return 1; }
   sudo systemctl stop osc-api
-  sudo mv /var/www/osc/aspnet /var/www/osc/aspnet.bak-$TS
+  sudo mv /var/www/osc/aspnet "$BAK"
   sudo mv /var/www/osc/aspnet.new /var/www/osc/aspnet
   sudo ln -sfn /var/www/osc/uploads /var/www/osc/aspnet/uploads
   sudo chown -R www-data:www-data /var/www/osc/aspnet
   sudo systemctl start osc-api
-  sleep 5
-  systemctl is-active osc-api
-  curl -s http://127.0.0.1:3003/api/health; echo
-  sudo journalctl -u osc-api -n 20 --no-pager | grep -iE "error|exception" || echo "clean"
+  if healthy; then
+    echo "NEW RELEASE HEALTHY - rollback copy: $BAK"
+  else
+    echo "NOT HEALTHY - rolling back"
+    sudo journalctl -u osc-api -n 40 --no-pager | grep -iE "error|exception|fail" | tail -15
+    sudo systemctl stop osc-api
+    sudo mv /var/www/osc/aspnet /var/www/osc/aspnet.failed-$TS
+    sudo mv "$BAK" /var/www/osc/aspnet
+    sudo systemctl start osc-api
+    healthy && echo "rolled back, old release healthy" || echo "ROLLBACK ALSO UNHEALTHY"
+  fi
+  sudo -u postgres psql -d osc_db -tAc "select \"MigrationId\" from \"__EFMigrationsHistory\" order by 1 desc limit 3"
+  for s in osc-api wid-api erp-api erp-web nginx; do printf "%-9s %s\n" $s "$(systemctl is-active $s)"; done
 '
 ```
 
 If `EF Core` migrations are pending, they run automatically on startup
-(`RunMigrationsOnStartup: true` in the config) — no separate migration step.
+(`RunMigrationsOnStartup: true` in the config); there is no separate migration step. The
+pre-deploy dump from step 3 (`/var/backups/osc/osc_db-predeploy-<TS>.dump`) is what you restore
+if a migration damages data; rolling back the binary alone does not undo a migration.
+
+The last check lists the other apps on this box (`wid-api`, `erp-api`, `erp-web`) because a deploy
+must not disturb them.
 
 ### Config-only change (no new binary)
 
@@ -164,6 +201,29 @@ List available backups: `ssh ubuntu@57.129.67.69 'ls -d /var/www/osc/aspnet.bak-
   - Verified 2026-10-10: copy downloaded from R2, decrypted byte-identical to the local dump,
     restored into a temporary database with matching row counts.
 
+### The investor assistant (chatbot)
+
+- Served only by the backend (`/api/v1/chatbot`), for **signed-in accounts only**. It calls Groq
+  with `Groq:ApiKey` and `Groq:Model` from the Production config. Production runs
+  `openai/gpt-oss-120b`, not the LLaMA model named in CLAUDE.md.
+- **It must not quote figures from the model's memory.** In a 2026-10-10 production test it stated
+  an outdated minimum investment capital. Its instructions now forbid stating amounts, fees, tax
+  rates, penalties, processing times and deadlines; it names the responsible agency and the UIA
+  One Stop Centre line (+256 414 301 000) instead.
+- **`Chatbot:VerifiedFacts`** (a list of strings, empty by default) holds the only figures it may
+  quote. Add a figure there **only once it has been confirmed with the agency**, as a
+  config-only change (above):
+  ```json
+  "Chatbot": { "VerifiedFacts": [ "Minimum investment for a foreign investor licence: US$… (Investment Code Act 2019)" ] }
+  ```
+- **Checking it end to end** needs a signed-in account: sign up a throwaway address on the
+  reserved `.invalid` domain (e.g. `smoke-123@smoke.invalid`), mark it verified with
+  `UPDATE users SET "EmailVerified" = true WHERE "Email" = '…'`, sign in and chat, then delete its
+  rows from `chat_enquiries`, `email_outbox` and `users`. Never leave test accounts behind.
+- **Checking the Groq key from the server:** call `https://api.groq.com/openai/v1/models` with the
+  key and send a `User-Agent` header, because Cloudflare (in front of Groq) returns 403 to Python's
+  default one.
+
 ### Verifying a deploy
 
 ```bash
@@ -184,10 +244,11 @@ frontend's canonical URLs use the bare apex with no redirect to `www`, so both m
 Set in `/var/www/osc/aspnet/appsettings.Production.json`: `ConnectionStrings:DefaultConnection`,
 `Jwt:Secret` (must match the frontend's `JWT_SECRET` exactly), `Google:ClientId`,
 `Resend:ApiKey`/`FromAddress`/`AdminEmail`, `Groq:ApiKey`/`Model`, `Cors:AllowedOrigins`,
-`SiteUrl`, `Cookie:Domain`, `DataProtection:KeysDirectory`, `Uploads:Directory`. Optional/not yet configured:
+`SiteUrl`, `Cookie:Domain`, `DataProtection:KeysDirectory`, `Uploads:Directory`. Optional:
+`Chatbot:VerifiedFacts` (see "The investor assistant" above). Not yet configured:
 `Recaptcha:SecretKey`, `Sentry:Dsn`, `S3:SignedUrlSecret`, `Flutterwave:*`.
 
-**`Uploads:Directory`** — set it to `/var/www/osc/uploads` (absolute). Ticket documents are then
+**`Uploads:Directory`** is set to `/var/www/osc/uploads` (absolute, live since 2026-10-10). Ticket documents are
 written there directly, so they no longer depend on step 4's `ln -sfn .../uploads` symlink being
 recreated on every deploy (a skipped symlink would have put new uploads inside the release
 directory, where the next deploy or rollback loses them). If the systemd unit uses
