@@ -47,7 +47,7 @@ test.describe('Complete user workflows', () => {
     expect(submissionCount).toBeGreaterThanOrEqual(0);
   });
 
-  test('Password reset flow', async ({ page, context }) => {
+  test('Password reset flow', async ({ page }) => {
     await page.goto(`${baseURL}/auth`);
 
     // Click forgot password
@@ -86,7 +86,7 @@ test.describe('Complete user workflows', () => {
     await expect(page.locator('body')).toContainText(/invalid|failed|incorrect/i);
   });
 
-  test('Session persistence', async ({ page, context }) => {
+  test('Session persistence', async ({ page }) => {
     // Login
     await page.goto(`${baseURL}/auth`);
     await page.fill('input[type="email"]', 'testuser@example.com');

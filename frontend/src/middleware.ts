@@ -19,6 +19,15 @@ const PROTECTED_API_ROUTES = ['/api/dashboard'];
 // Staff-level APIs. /api/messages mirrors the backend's Staff policy, which
 // includes agency officers (scoped to their own agency's channels server-side).
 const STAFF_API_ROUTES = ['/api/messages'];
+// Next.js routes from before the ASP.NET backend took these over. With a
+// backend configured the browser never calls them (apiFetch sends these
+// prefixes to the backend), but they stayed reachable directly, and the
+// create routes wrote anonymous submissions into Sanity with the write token.
+// Kept only for local development without a backend.
+const SUPERSEDED_API_ROUTES = [
+  '/api/auth', '/api/dashboard', '/api/health', '/api/investors',
+  '/api/messages', '/api/tickets', '/api/upload',
+];
 
 function getJwtSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET || '';
@@ -76,6 +85,11 @@ async function needsMfaSetup(request: NextRequest): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (process.env.NEXT_PUBLIC_BACKEND_URL &&
+      SUPERSEDED_API_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
+    return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+  }
+
   // Check protected page routes
   const isProtectedPage = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
   const isStaffPage = STAFF_ROUTES.some((route) => pathname.startsWith(route));
@@ -119,7 +133,12 @@ export const config = {
     '/dashboard/:path*',
     '/agency-chat/:path*',
     '/admin/:path*',
+    '/api/auth/:path*',
     '/api/dashboard/:path*',
+    '/api/health/:path*',
+    '/api/investors/:path*',
     '/api/messages/:path*',
+    '/api/tickets/:path*',
+    '/api/upload/:path*',
   ],
 };
