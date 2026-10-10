@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
@@ -129,7 +129,6 @@ export default function CreateTicketPage() {
   const visibleCategories = isStaff ? categories : categories.filter((c) => c.value !== 'vip');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
-  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, contactEmail: email })));
   const [formData, setFormData] = useState<TicketFormData>({
     category: '',
     title: '',
@@ -140,6 +139,7 @@ export default function CreateTicketPage() {
     contactPhone: '',
     attachments: []
   });
+  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, contactEmail: email })));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [uploadErrors, setUploadErrors] = useState<string[]>([]);
@@ -191,7 +191,9 @@ export default function CreateTicketPage() {
     setErrors({});
   };
 
-  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  // Plain handlers: they only go to a native input and buttons, so memoizing
+  // them bought nothing.
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -227,14 +229,14 @@ export default function CreateTicketPage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-  }, [formData.attachments.length]);
+  };
 
-  const removeFile = useCallback((index: number) => {
+  const removeFile = (index: number) => {
     setFormData(prev => ({
       ...prev,
       attachments: prev.attachments.filter((_, i) => i !== index),
     }));
-  }, []);
+  };
 
   const handleSubmit = async () => {
     if (!validateStep(3) || submitting) return;

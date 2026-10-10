@@ -16,7 +16,6 @@ export default function InvestmentOnboardingWizard() {
   const { addNotification } = useNotification();
   const { loadedDraft, draftLoaded, saveDraft, clearDraft } = useFormDraft<InvestmentDraft>('investor_onboarding');
   const draftApplied = useRef(false);
-  const accountEmail = useAccountEmail((email) => setInvestmentData((prev) => ({ ...prev, email })));
   const [investmentData, setInvestmentData] = useState<InvestmentData>({
     // Step 1: Investment Profile
     investorType: '', 
@@ -46,6 +45,7 @@ export default function InvestmentOnboardingWizard() {
     timeframe: '', 
     supportNeeded: [] 
   });
+  const accountEmail = useAccountEmail((email) => setInvestmentData((prev) => ({ ...prev, email })));
 
   const totalSteps = 5;
 

@@ -7,35 +7,36 @@ interface InvestmentFunnelProps {
   data: FunnelStage[];
 }
 
-export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
-  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: FunnelStage }> }) => {
-    if (active && payload && payload.length) {
-      const stage = payload[0]?.payload as FunnelStage;
-      return (
-        <div className="p-4 border-t border-neutral-200 pt-5">
-          <p className="font-semibold text-black mb-2">{stage.stage}</p>
-          <p className="text-sm text-neutral-700">Count: <span className="font-medium">{stage.count}</span></p>
-          <p className="text-sm text-neutral-700">Conversion: <span className="font-medium">{stage.conversionRate.toFixed(1)}%</span></p>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const CustomLabel = (props: { x: number; y: number; width: number; value: number }) => {
-    const { x, y, width, value } = props;
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: FunnelStage }> }) => {
+  if (active && payload && payload.length) {
+    const stage = payload[0]?.payload as FunnelStage;
     return (
-      <text
-        x={x + width + 10}
-        y={y + 15}
-        fill="#262522"
-        fontSize={14}
-        fontWeight="600"
-      >
-        {value.toLocaleString()}
-      </text>
+      <div className="p-4 border-t border-neutral-200 pt-5">
+        <p className="font-semibold text-black mb-2">{stage.stage}</p>
+        <p className="text-sm text-neutral-700">Count: <span className="font-medium">{stage.count}</span></p>
+        <p className="text-sm text-neutral-700">Conversion: <span className="font-medium">{stage.conversionRate.toFixed(1)}%</span></p>
+      </div>
     );
-  };
+  }
+  return null;
+};
+
+const CustomLabel = (props: { x: number; y: number; width: number; value: number }) => {
+  const { x, y, width, value } = props;
+  return (
+    <text
+      x={x + width + 10}
+      y={y + 15}
+      fill="#262522"
+      fontSize={14}
+      fontWeight="600"
+    >
+      {value.toLocaleString()}
+    </text>
+  );
+};
+
+export default function InvestmentFunnel({ data }: InvestmentFunnelProps) {
 
   return (
     <div className="space-y-6">

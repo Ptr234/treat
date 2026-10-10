@@ -137,6 +137,60 @@ function formatLastUpdated(date: Date | null): string {
 
 // ── Component ────────────────────────────────────────────────────────
 
+// Defined at module level: a component declared inside DashboardPage is a
+// new component type on every render, so React remounted it on each refresh.
+function TrendBadge({ value, suffix = '' }: { value: number | undefined; suffix?: string }) {
+  if (value === undefined || value === 0) return null;
+  const isUp = value > 0;
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isUp ? 'text-black' : 'text-red-700'}`}>
+      {isUp ? <ArrowTrendingUpIcon className="w-3.5 h-3.5" /> : <ArrowTrendingDownIcon className="w-3.5 h-3.5" />}
+      {isUp ? '+' : ''}{value}{suffix}
+    </span>
+  );
+}
+
+function SortIcon({ column, sort, dir }: { column: ScorecardSortKey; sort: ScorecardSortKey; dir: SortDir }) {
+  if (sort !== column) return <ChevronUpDownIcon className="w-3.5 h-3.5 text-neutral-500" />;
+  return dir === 'desc'
+    ? <ChevronDownIcon className="w-3.5 h-3.5 text-red-600" />
+    : <ChevronUpIcon className="w-3.5 h-3.5 text-red-600" />;
+}
+
+function CircularProgress({ value, label, progressDelta }: { value: number; label: string; progressDelta?: number }) {
+  const circumference = 2 * Math.PI * 40;
+  const offset = circumference - (value / 100) * circumference;
+  const strokeColor = value >= 90 ? '#000000' : value >= 70 ? '#FFD700' : '#CE1126';
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative w-20 h-20 sm:w-28 sm:h-28">
+        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 112 112">
+          <circle cx="56" cy="56" r="40" stroke="#e5e7eb" strokeWidth="8" fill="none" />
+          <circle
+            cx="56" cy="56" r="40"
+            stroke={strokeColor}
+            strokeWidth="8" fill="none"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            className="transition-all duration-1000"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-lg sm:text-2xl font-bold text-black">{value}%</span>
+          {progressDelta !== undefined && progressDelta !== 0 && (
+            <span className={`text-[10px] font-semibold ${progressDelta > 0 ? 'text-black' : 'text-red-700'}`}>
+              {progressDelta > 0 ? '+' : ''}{progressDelta}%
+            </span>
+          )}
+        </div>
+      </div>
+      <p className="text-xs sm:text-sm text-neutral-800 font-medium mt-2 text-center">{label}</p>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { isAuthenticated, user, isLoading: authLoading } = useAuth();
   const isAdmin = isAuthenticated && isAdminLevel(user?.role);
@@ -442,58 +496,6 @@ export default function DashboardPage() {
     return 'bg-red-600';
   };
 
-  const TrendBadge = ({ value, suffix = '' }: { value: number | undefined; suffix?: string }) => {
-    if (value === undefined || value === 0) return null;
-    const isUp = value > 0;
-    return (
-      <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${isUp ? 'text-black' : 'text-red-700'}`}>
-        {isUp ? <ArrowTrendingUpIcon className="w-3.5 h-3.5" /> : <ArrowTrendingDownIcon className="w-3.5 h-3.5" />}
-        {isUp ? '+' : ''}{value}{suffix}
-      </span>
-    );
-  };
-
-  const SortIcon = ({ column }: { column: ScorecardSortKey }) => {
-    if (scorecardSort !== column) return <ChevronUpDownIcon className="w-3.5 h-3.5 text-neutral-500" />;
-    return scorecardDir === 'desc'
-      ? <ChevronDownIcon className="w-3.5 h-3.5 text-red-600" />
-      : <ChevronUpIcon className="w-3.5 h-3.5 text-red-600" />;
-  };
-
-  const CircularProgress = ({ value, label, progressDelta }: { value: number; label: string; progressDelta?: number }) => {
-    const circumference = 2 * Math.PI * 40;
-    const offset = circumference - (value / 100) * circumference;
-    const strokeColor = value >= 90 ? '#000000' : value >= 70 ? '#FFD700' : '#CE1126';
-
-    return (
-      <div className="flex flex-col items-center">
-        <div className="relative w-20 h-20 sm:w-28 sm:h-28">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 112 112">
-            <circle cx="56" cy="56" r="40" stroke="#e5e7eb" strokeWidth="8" fill="none" />
-            <circle
-              cx="56" cy="56" r="40"
-              stroke={strokeColor}
-              strokeWidth="8" fill="none"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              strokeLinecap="round"
-              className="transition-all duration-1000"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-lg sm:text-2xl font-bold text-black">{value}%</span>
-            {progressDelta !== undefined && progressDelta !== 0 && (
-              <span className={`text-[10px] font-semibold ${progressDelta > 0 ? 'text-black' : 'text-red-700'}`}>
-                {progressDelta > 0 ? '+' : ''}{progressDelta}%
-              </span>
-            )}
-          </div>
-        </div>
-        <p className="text-xs sm:text-sm text-neutral-800 font-medium mt-2 text-center">{label}</p>
-      </div>
-    );
-  };
-
   const INTERVAL_OPTIONS: { value: RefreshInterval; label: string }[] = [
     { value: 30_000, label: '30s' },
     { value: 60_000, label: '1m' },
@@ -714,28 +716,28 @@ export default function DashboardPage() {
                   <tr className="text-left">
                     <th className="pb-2">
                       <button onClick={() => handleScorecardSort('acronym')} className="font-semibold text-neutral-800 flex items-center gap-1 hover:text-red-600 transition-colors">
-                        Agency <SortIcon column="acronym" />
+                        Agency <SortIcon column="acronym" sort={scorecardSort} dir={scorecardDir} />
                       </button>
                     </th>
                     <th className="pb-2 text-center">
                       <button onClick={() => handleScorecardSort('score')} className="font-semibold text-neutral-800 flex items-center gap-1 mx-auto hover:text-red-600 transition-colors">
-                        Score <SortIcon column="score" />
+                        Score <SortIcon column="score" sort={scorecardSort} dir={scorecardDir} />
                       </button>
                     </th>
                     <th className="pb-2 text-center">
                       <button onClick={() => handleScorecardSort('activeCases')} className="font-semibold text-neutral-800 flex items-center gap-1 mx-auto hover:text-red-600 transition-colors">
-                        Active <SortIcon column="activeCases" />
+                        Active <SortIcon column="activeCases" sort={scorecardSort} dir={scorecardDir} />
                       </button>
                     </th>
                     <th className="pb-2 text-center">
                       <button onClick={() => handleScorecardSort('resolvedToday')} className="font-semibold text-neutral-800 flex items-center gap-1 mx-auto hover:text-red-600 transition-colors">
-                        Today <SortIcon column="resolvedToday" />
+                        Today <SortIcon column="resolvedToday" sort={scorecardSort} dir={scorecardDir} />
                       </button>
                     </th>
                     <th className="pb-2 text-right font-semibold text-neutral-800">Avg Response</th>
                     <th className="pb-2 text-right">
                       <button onClick={() => handleScorecardSort('slaCompliance')} className="font-semibold text-neutral-800 flex items-center gap-1 ml-auto hover:text-red-600 transition-colors">
-                        SLA % <SortIcon column="slaCompliance" />
+                        SLA % <SortIcon column="slaCompliance" sort={scorecardSort} dir={scorecardDir} />
                       </button>
                     </th>
                   </tr>

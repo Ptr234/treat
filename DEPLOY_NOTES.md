@@ -25,6 +25,31 @@ Two independent deployments: the **frontend** (Cloudflare Workers) deploys itsel
 - **Confirming from a terminal:** poll the live HTML for something the change introduced, e.g.
   `curl -s https://oscdigitaltool.com/ | grep -c osc-logo` (the 2026-10-10 logo change went live
   ~5 minutes after the push). A hard refresh (Ctrl+F5) clears a browser's cached copy.
+- **Prerendered pages are served from a cache, not re-rendered.** Almost every page is
+  prerendered at build time. Until 2026-10-10 the Worker had no incremental cache and rendered
+  each page on every request, which exceeded the Workers CPU limit: about half of all page loads
+  failed (Cloudflare error 1102, or a hang). `frontend/open-next.config.ts` now uses OpenNext's
+  static-assets cache with cache interception, and `npm run cf:build` copies the prerendered
+  pages into the Worker's assets (`opennextjs-cloudflare populateCache local`). Check with
+  `curl -sI https://oscdigitaltool.com/about/ | grep -i x-opennext-cache` → `HIT`.
+  This cache is read-only: a page that adds time-based `revalidate` (ISR) needs an R2 or KV
+  incremental cache instead.
+- **Next.js 16 upgrade: tried and rolled back (2026-10-11).** Findings for the next attempt:
+  - Next.js 16.4.0 writes a `preview-props.json` manifest that OpenNext 1.20.10 can't load, so
+    every server-rendered route returned 500. 16.3.8 (the lowest version OpenNext supports)
+    builds and passed every check under local `wrangler dev`.
+  - Deployed, the 16.3.8 build served prerendered pages and API routes fine, but every route
+    the middleware handles (`/dashboard`, `/agency-chat`, the closed `/api/...` routes) and
+    `/studio` failed with error 1102 or hung. Local `wrangler dev` has no CPU limit, so it
+    can't catch this. Reverted (commit `3d19e97`); the Next.js 15 build handles them in ~0.25 s.
+  - Before trying again: check the Workers plan's CPU limit (Workers Paid allows far more than
+    the free plan), and test the *deployed* Worker, e.g. with a preview deployment, on
+    `/dashboard/`, `/studio/` and an `/api/...` route.
+- **Security headers** for the site are set in `frontend/next.config.ts` (the API sets its own).
+- **The Next.js routes the backend replaced** (`/api/auth`, `/api/tickets`, `/api/investors`,
+  `/api/upload`, `/api/messages`, `/api/dashboard`, `/api/health`) return 404 whenever
+  `NEXT_PUBLIC_BACKEND_URL` is set (`frontend/src/middleware.ts`). They're kept only for local
+  development without a backend.
 
 ### Frontend environment variables (Cloudflare dashboard → `treat` Worker → Settings → Variables and Secrets)
 
@@ -223,6 +248,22 @@ List available backups: `ssh ubuntu@57.129.67.69 'ls -d /var/www/osc/aspnet.bak-
 - **Checking the Groq key from the server:** call `https://api.groq.com/openai/v1/models` with the
   key and send a `User-Agent` header, because Cloudflare (in front of Groq) returns 403 to Python's
   default one.
+
+### Tests that need a real PostgreSQL
+
+The suite runs on EF's in-memory database, which has no row locking. The check that concurrent
+SLA workers flag each breach only once (`SlaBreachConcurrencyPostgresTests`) needs a real server
+and passes trivially without one. Run it before changing the SLA monitor, against the local
+Docker container (`osc-postgres`), with a `.runsettings` file that sets the variable (plain
+environment variables and `dotnet test -e` did not reach the test host on Windows):
+
+```xml
+<RunSettings><RunConfiguration><EnvironmentVariables>
+  <OSC_TEST_POSTGRES>Host=localhost;Username=postgres;Password=postgres</OSC_TEST_POSTGRES>
+</EnvironmentVariables></RunConfiguration></RunSettings>
+```
+`dotnet test tests/OscApi.Tests --filter SlaBreachConcurrencyPostgresTests --settings pg.runsettings -v n`
+(the run should take seconds, not "< 1 ms"; it creates and drops its own database).
 
 ### Verifying a deploy
 
