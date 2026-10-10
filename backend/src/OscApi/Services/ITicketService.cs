@@ -16,7 +16,18 @@ public interface ITicketService
     Task<object?> GetAsync(string refNumber, TicketRequester who);
     Task<object?> GetMessagesAsync(string refNumber, TicketRequester who);
 
-    Task<object?> UpdateAsync(string refNumber, UpdateTicketRequest request, string? agencyScope = null);
+    /// <summary>Staff update, enforcing status transitions, valid assignees and
+    /// routing rules; every ownership/lifecycle change is recorded as a
+    /// <c>TicketEvent</c> attributed to <paramref name="actor"/>.</summary>
+    Task<object?> UpdateAsync(string refNumber, UpdateTicketRequest request, string? agencyScope = null, StaffActor? actor = null);
+
+    /// <summary>Active staff accounts a ticket in <paramref name="agencyCode"/> can be assigned to:
+    /// that agency's officers plus admin-level staff.</summary>
+    Task<IReadOnlyList<object>> ListAssignableOfficersAsync(string agencyCode);
+
+    /// <summary>Flag, escalate and alert on every open ticket whose SLA deadline has
+    /// passed and that hasn't been flagged yet. Returns how many were flagged.</summary>
+    Task<int> ProcessSlaBreachesAsync(CancellationToken ct = default);
 
     /// <summary>Post a staff reply. Author identity and the officer role are trusted from the session.</summary>
     Task<object?> PostStaffMessageAsync(string refNumber, string content, string authorName, string? authorEmail, bool isInternal, string? agencyScope = null);

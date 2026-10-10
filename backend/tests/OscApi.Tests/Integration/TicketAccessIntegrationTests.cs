@@ -122,6 +122,44 @@ public class TicketAccessIntegrationTests : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task Assignment_UsesTheStaffList_AndStaffSeeTheHistory()
+    {
+        var (refNo, token) = await FileTicketAsync();
+        var admin = await AdminClient();
+
+        // The picker lists real accounts; the admin is assignable on any agency's ticket.
+        var officers = Data(await (await admin.GetAsync("/api/v1/tickets/officers?agency=UIA")).Content.ReadAsStringAsync());
+        Assert.Contains(officers.EnumerateArray(), o => o.GetProperty("email").GetString() == ApiFactory.AdminEmail.ToLowerInvariant());
+        Assert.Equal(HttpStatusCode.BadRequest, (await admin.GetAsync("/api/v1/tickets/officers?agency=NOPE")).StatusCode);
+
+        // A free-text name is no longer an assignee; a staff email is.
+        Assert.Equal(HttpStatusCode.BadRequest,
+            (await admin.PatchAsJsonAsync($"/api/v1/tickets/{refNo}", new { assignee = "Some Officer" })).StatusCode);
+        Assert.Equal(HttpStatusCode.OK,
+            (await admin.PatchAsJsonAsync($"/api/v1/tickets/{refNo}", new { assignee = ApiFactory.AdminEmail })).StatusCode);
+
+        var staffView = Data(await (await admin.GetAsync($"/api/v1/tickets/{refNo}")).Content.ReadAsStringAsync());
+        Assert.Equal("Assigned", staffView.GetProperty("status").GetString());
+        Assert.True(staffView.GetProperty("history").GetArrayLength() >= 2); // filed + assigned (+ status)
+
+        var publicView = Data(await (await _factory.CreateClient().GetAsync($"/api/v1/tickets/{refNo}?token={token}")).Content.ReadAsStringAsync());
+        Assert.False(publicView.TryGetProperty("history", out _));
+        Assert.False(publicView.TryGetProperty("assigneeEmail", out _));
+    }
+
+    [Fact]
+    public async Task EscalationDefaultAssignee_MustBeAStaffAccount()
+    {
+        var admin = await AdminClient();
+        async Task<HttpStatusCode> Put(string assignee) => (await admin.PutAsJsonAsync("/api/v1/settings/escalation",
+            new { escalationEmails = "", defaultAssignee = assignee, escalationMessage = "Please act" })).StatusCode;
+
+        Assert.Equal(HttpStatusCode.BadRequest, await Put("Senior Investment Officer"));
+        Assert.Equal(HttpStatusCode.OK, await Put(ApiFactory.AdminEmail));
+        Assert.Equal(HttpStatusCode.OK, await Put(""));
+    }
+
+    [Fact]
     public async Task OversizedStaffReply_Is400_Not500()
     {
         var (refNo, _) = await FileTicketAsync();

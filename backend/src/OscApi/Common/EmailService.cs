@@ -12,6 +12,8 @@ public interface IEmailService
     Task SendTicketAccessLinkAsync(string toEmail, string contactName, string referenceNumber, string title, string accessToken);
     Task SendTicketCommentNotificationAsync(string referenceNumber, string title, string contactName, string comment, string[]? additionalRecipients = null);
     Task SendEscalationNotificationAsync(string referenceNumber, string title, string contactName, string[]? additionalRecipients = null, string? customMessage = null);
+    Task SendTicketAssignmentNotificationAsync(string toEmail, string recipientName, string referenceNumber, string title, string reason);
+    Task SendSlaBreachNotificationAsync(string referenceNumber, string title, string owner, DateTimeOffset deadline, string status, string[]? additionalRecipients = null);
     Task SendInvestorWelcomeAsync(string toEmail, string name, string referenceNumber);
     Task SendInvestorReferenceReminderAsync(string toEmail, string name, string referenceNumber);
     Task SendPasswordResetAsync(string toEmail, string name, string resetToken);
@@ -159,6 +161,29 @@ public class EmailService : IEmailService
                 await SendAsync(recipient, subject, htmlBody: html, textBody: text);
             }
         }
+    }
+
+    public async Task SendTicketAssignmentNotificationAsync(string toEmail, string recipientName, string referenceNumber, string title, string reason)
+    {
+        var ticketUrl = StaffTicketUrl(referenceNumber);
+        await SendAsync(toEmail, $"Ticket {referenceNumber} — {reason}",
+            htmlBody: EmailTemplates.TicketAssignment(recipientName, referenceNumber, title, reason, ticketUrl),
+            textBody: $"Dear {recipientName},\n\n{reason}\nRef: {referenceNumber}\nSubject: {title}\nOpen: {ticketUrl}");
+    }
+
+    public async Task SendSlaBreachNotificationAsync(
+        string referenceNumber, string title, string owner, DateTimeOffset deadline, string status, string[]? additionalRecipients = null)
+    {
+        var ticketUrl = StaffTicketUrl(referenceNumber);
+        // Staff work on Kampala time (EAT, UTC+3, no daylight saving).
+        var deadlineText = deadline.ToOffset(TimeSpan.FromHours(3)).ToString("d MMM yyyy, HH:mm") + " EAT";
+        var subject = $"SLA BREACH: Ticket {referenceNumber}";
+        var html = EmailTemplates.SlaBreachNotification(referenceNumber, title, owner, deadlineText, status, ticketUrl);
+        var text = $"Ticket {referenceNumber} missed its SLA deadline ({deadlineText}) and was escalated automatically.\nSubject: {title}\nStatus: {status}\nOwner: {owner}\nOpen: {ticketUrl}";
+
+        await SendAsync(_adminEmail, subject, htmlBody: html, textBody: text);
+        foreach (var recipient in (additionalRecipients ?? []).Where(e => !string.IsNullOrEmpty(e) && e != _adminEmail).Distinct(StringComparer.OrdinalIgnoreCase))
+            await SendAsync(recipient, subject, htmlBody: html, textBody: text);
     }
 
     public async Task SendBusinessRegistrationReceivedAsync(string toEmail, string contactName, string referenceNumber, string businessName)

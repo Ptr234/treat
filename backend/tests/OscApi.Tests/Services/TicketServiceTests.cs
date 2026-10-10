@@ -182,7 +182,7 @@ public class TicketServiceTests
         var ticket = db.Tickets.First();
 
         var result = await svc.UpdateAsync(ticket.ReferenceNumber,
-            new UpdateTicketRequest(Status: "resolved", null, null, null, null, null, null));
+            new UpdateTicketRequest(Status: "resolved", null, null, null, null, null, null, ResolutionNote: "Answered by phone"));
 
         Assert.NotNull(result);
         var status = result.GetType().GetProperty("Status")!.GetValue(result);
@@ -202,7 +202,7 @@ public class TicketServiceTests
         var reference = db.Tickets.First().ReferenceNumber;
 
         await svc.UpdateAsync(reference,
-            new UpdateTicketRequest(Status: "closed", null, null, null, null, null, null));
+            new UpdateTicketRequest(Status: "closed", null, null, null, null, null, null, ResolutionNote: "Answered by phone"));
         var closed = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
         Assert.NotNull(closed.ClosedAt);
 
@@ -229,7 +229,7 @@ public class TicketServiceTests
         var reference = db.Tickets.First().ReferenceNumber;
 
         await svc.UpdateAsync(reference,
-            new UpdateTicketRequest(Status: "resolved", null, null, null, null, null, null));
+            new UpdateTicketRequest(Status: "resolved", null, null, null, null, null, null, ResolutionNote: "Answered by phone"));
         var resolved = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
         Assert.NotNull(resolved.ResolvedAt);
         var resolvedAt = resolved.ResolvedAt;
@@ -259,7 +259,7 @@ public class TicketServiceTests
         // Closed without ever passing through Resolved — should still count as
         // resolved for aggregates rather than looking like an open SLA breach.
         await svc.UpdateAsync(reference,
-            new UpdateTicketRequest(Status: "closed", null, null, null, null, null, null));
+            new UpdateTicketRequest(Status: "closed", null, null, null, null, null, null, ResolutionNote: "Answered by phone"));
         var closed = TestDbFactory.Create(dbName).Tickets.First(t => t.ReferenceNumber == reference);
         Assert.NotNull(closed.ResolvedAt);
         Assert.NotNull(closed.ClosedAt);

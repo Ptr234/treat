@@ -50,11 +50,32 @@ interface TicketData {
   resolvedAt?: string;
   closedAt?: string;
   messages: TicketMessage[];
+  // Staff-only fields (absent for the filer).
+  assigneeEmail?: string;
+  slaBreachedAt?: string;
+  allowedStatuses?: TicketStatus[];
+  routableAgencyCodes?: string[];
+  history?: TicketHistoryEvent[];
+}
+
+interface TicketHistoryEvent {
+  id: string;
+  type: string;
+  fromValue?: string;
+  toValue?: string;
+  actorName: string;
+  occurredAt: string;
 }
 
 interface Agency {
   code: string;
   name: string;
+}
+
+interface Officer {
+  email: string;
+  name: string;
+  agencyCode?: string;
 }
 
 // --- Label & color maps ---
@@ -182,6 +203,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
         priority: normalizePriority(raw.priority),
         category: normalizeCategory(raw.category),
         messages: (raw.messages ?? []).map((m) => ({ ...m, authorRole: normalizeAuthorRole(m.authorRole) })),
+        allowedStatuses: raw.allowedStatuses?.map((st) => normalizeStatus(st)),
       });
       setRating(raw.satisfactionRating || 0);
       setNeedsLink(false);
@@ -509,6 +531,7 @@ export default function TicketDetailClient({ ticketId }: { ticketId: string }) {
           {/* Right Column: Sidebar */}
           <div className="space-y-6">
             {isStaff && <StaffPanel ticket={ticket} onSaved={fetchTicket} />}
+            {isStaff && ticket.history && <TicketHistory events={ticket.history} />}
 
             {/* Ticket Details */}
             <div>
@@ -712,8 +735,10 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
   const [status, setStatus] = useState<TicketStatus>(ticket.status);
   const [priority, setPriority] = useState<TicketPriority>(ticket.priority);
   const [agency, setAgency] = useState(ticket.assignedAgencyCode ?? '');
-  const [assignee, setAssignee] = useState(ticket.assignee ?? '');
+  const [assignee, setAssignee] = useState(ticket.assigneeEmail ?? '');
+  const [resolutionNote, setResolutionNote] = useState('');
   const [agencies, setAgencies] = useState<Agency[]>([]);
+  const [officers, setOfficers] = useState<Officer[]>([]);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ kind: 'error' | 'success'; text: string } | null>(null);
 
@@ -722,7 +747,8 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
     setStatus(ticket.status);
     setPriority(ticket.priority);
     setAgency(ticket.assignedAgencyCode ?? '');
-    setAssignee(ticket.assignee ?? '');
+    setAssignee(ticket.assigneeEmail ?? '');
+    setResolutionNote('');
   }, [ticket]);
 
   useEffect(() => {
@@ -733,16 +759,39 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
       .catch(() => {});
   }, []);
 
+  // Officers belong to an agency: the picker lists whoever can own the ticket
+  // in its current agency.
+  const currentAgency = ticket.assignedAgencyCode ?? '';
+  useEffect(() => {
+    if (!currentAgency) {
+      setOfficers([]);
+      return;
+    }
+    apiFetch<Officer[]>(`/api/tickets/officers?agency=${encodeURIComponent(currentAgency)}`)
+      .then((res) => setOfficers(res.success && Array.isArray(res.data) ? res.data : []))
+      .catch(() => setOfficers([]));
+  }, [currentAgency]);
+
+  // Transferring hands the case to the receiving agency's queue, which picks
+  // its own officer — so the officer picker is locked while a transfer is pending.
+  const agencyChanged = agency !== '' && agency !== currentAgency;
+
   const changes: Record<string, string> = {};
   if (status !== ticket.status) changes.status = statusApiValues[status];
   if (priority !== ticket.priority) changes.priority = priority;
-  if (agency && agency !== (ticket.assignedAgencyCode ?? '')) changes.assignedAgencyCode = agency;
-  if (assignee.trim() !== (ticket.assignee ?? '')) changes.assignee = assignee.trim();
+  if (agencyChanged) changes.assignedAgencyCode = agency;
+  else if (assignee !== (ticket.assigneeEmail ?? '')) changes.assignee = assignee;
+
+  // Same rule the API enforces: a resolution needs a note for the investor.
+  const needsNote =
+    status !== ticket.status && (status === 'RESOLVED' || (status === 'CLOSED' && ticket.status !== 'RESOLVED'));
+  if (needsNote && resolutionNote.trim()) changes.resolutionNote = resolutionNote.trim();
+  const missingNote = needsNote && !resolutionNote.trim();
   const dirty = Object.keys(changes).length > 0;
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!dirty) return;
+    if (!dirty || missingNote) return;
     setSaving(true);
     setNotice(null);
     try {
@@ -766,10 +815,14 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
     }
   };
 
-  const fieldClass =
-    'gov-input';
+  const fieldClass = 'gov-input';
   const labelClass = 'gov-label';
-  const agencyKnown = agencies.some((a) => a.code === agency);
+  const statusOptions: TicketStatus[] = [ticket.status, ...(ticket.allowedStatuses ?? [])];
+  const routable = ticket.routableAgencyCodes ?? agencies.map((a) => a.code);
+  const agencyOptions = agencies.filter((a) => a.code === currentAgency || routable.includes(a.code));
+  const agencyKnown = agencyOptions.some((a) => a.code === agency);
+  const officerKnown = officers.some((o) => o.email === assignee);
+  const isOpen = ticket.status !== 'RESOLVED' && ticket.status !== 'CLOSED';
 
   return (
     <form onSubmit={save} className="border-2 border-black p-4" aria-labelledby="manage-ticket-heading">
@@ -777,15 +830,33 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
         Manage ticket
       </h3>
       {notice && <Notice kind={notice.kind}>{notice.text}</Notice>}
+      {ticket.slaBreachedAt && isOpen && (
+        <Notice kind="error">SLA deadline missed — escalated automatically on {formatDate(ticket.slaBreachedAt)}.</Notice>
+      )}
       <div className="space-y-3">
         <div>
           <label htmlFor="manage-status" className={labelClass}>Status</label>
           <select id="manage-status" value={status} onChange={(e) => setStatus(e.target.value as TicketStatus)} className={fieldClass}>
-            {(Object.keys(statusLabels) as TicketStatus[]).map((s) => (
+            {statusOptions.map((s) => (
               <option key={s} value={s}>{statusLabels[s]}</option>
             ))}
           </select>
         </div>
+        {needsNote && (
+          <div>
+            <label htmlFor="manage-resolution" className={labelClass}>Resolution note (sent to the investor)</label>
+            <textarea
+              id="manage-resolution"
+              value={resolutionNote}
+              onChange={(e) => setResolutionNote(e.target.value)}
+              maxLength={5000}
+              rows={4}
+              required
+              className={fieldClass}
+              placeholder="What was done to resolve this case"
+            />
+          </div>
+        )}
         <div>
           <label htmlFor="manage-priority" className={labelClass}>Priority</label>
           <select id="manage-priority" value={priority} onChange={(e) => setPriority(e.target.value as TicketPriority)} className={fieldClass}>
@@ -798,34 +869,88 @@ function StaffPanel({ ticket, onSaved }: { ticket: TicketData; onSaved: () => vo
         </div>
         <div>
           <label htmlFor="manage-agency" className={labelClass}>Agency</label>
-          <select id="manage-agency" value={agency} onChange={(e) => setAgency(e.target.value)} className={fieldClass}>
+          <select
+            id="manage-agency"
+            value={agency}
+            onChange={(e) => setAgency(e.target.value)}
+            disabled={!isOpen}
+            aria-describedby={agencyChanged ? 'manage-agency-help' : undefined}
+            className={fieldClass}
+          >
             {!agency && <option value="">Unassigned</option>}
             {agency && !agencyKnown && <option value={agency}>{agency}</option>}
-            {agencies.map((a) => (
+            {agencyOptions.map((a) => (
               <option key={a.code} value={a.code}>{a.code} — {a.name}</option>
             ))}
           </select>
+          {agencyChanged && (
+            <p id="manage-agency-help" className="mt-1 text-xs text-neutral-600">
+              The ticket moves to {agency}&apos;s queue and its officers are emailed; they assign an officer.
+            </p>
+          )}
         </div>
         <div>
           <label htmlFor="manage-assignee" className={labelClass}>Assigned officer</label>
-          <input
+          <select
             id="manage-assignee"
-            value={assignee}
+            value={agencyChanged ? '' : assignee}
             onChange={(e) => setAssignee(e.target.value)}
-            maxLength={100}
-            placeholder="Officer name"
+            disabled={agencyChanged || !isOpen}
             className={fieldClass}
-          />
+          >
+            <option value="">Unassigned</option>
+            {assignee && !officerKnown && <option value={assignee}>{ticket.assignee ?? assignee}</option>}
+            {officers.map((o) => (
+              <option key={o.email} value={o.email}>
+                {o.name}{o.agencyCode ? ` (${o.agencyCode})` : ''}
+              </option>
+            ))}
+          </select>
         </div>
-        <button
-          type="submit"
-          disabled={!dirty || saving}
-          className="gov-btn w-full"
-        >
+        <button type="submit" disabled={!dirty || missingNote || saving} className="gov-btn w-full">
           {saving ? 'Saving…' : 'Save changes'}
         </button>
       </div>
     </form>
+  );
+}
+
+const historyLabels: Record<string, string> = {
+  Created: 'Filed',
+  StatusChanged: 'Status',
+  PriorityChanged: 'Priority',
+  AgencyChanged: 'Agency',
+  AssigneeChanged: 'Officer',
+  Escalated: 'Escalated',
+  SlaBreached: 'SLA deadline missed',
+};
+
+function TicketHistory({ events }: { events: TicketHistoryEvent[] }) {
+  if (events.length === 0) return null;
+  return (
+    <section aria-labelledby="ticket-history-heading">
+      <h3 id="ticket-history-heading" className="border-t-4 border-black pt-4 text-lg font-bold mb-4">
+        History
+      </h3>
+      <ol className="space-y-3 text-sm">
+        {events.map((ev) => (
+          <li key={ev.id} className="border-l-2 border-neutral-300 pl-3">
+            <p className="font-medium text-black">
+              {historyLabels[ev.type] ?? ev.type}
+              {(ev.fromValue || ev.toValue) && (
+                <span className="font-normal">
+                  {': '}
+                  {ev.fromValue ?? '—'} → {ev.toValue ?? '—'}
+                </span>
+              )}
+            </p>
+            <p className="text-neutral-700">
+              {ev.actorName} · <time dateTime={ev.occurredAt}>{formatDate(ev.occurredAt)}</time>
+            </p>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 

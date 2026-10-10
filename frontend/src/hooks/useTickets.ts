@@ -30,6 +30,10 @@ export interface TicketStats {
   escalated: number;
   slaBreached: number;
   avgResolutionHours: number | null;
+  /** Filing → first officer assigned (triage delay). */
+  avgTimeToAssignHours: number | null;
+  /** Filing → first public staff reply. */
+  avgFirstResponseHours: number | null;
 }
 
 interface TicketListResponse {

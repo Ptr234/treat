@@ -65,13 +65,13 @@ public class TicketScopingTests
 
         // A UIA officer must not be able to update a URSB ticket.
         var blocked = await svc.UpdateAsync(ursbRef,
-            new UpdateTicketRequest("Assigned", null, null, null, null, null, null),
+            new UpdateTicketRequest("in_progress", null, null, null, null, null, null),
             agencyScope: "UIA");
         Assert.Null(blocked);
 
         // The owning agency can.
         var ok = await svc.UpdateAsync(ursbRef,
-            new UpdateTicketRequest("Assigned", null, null, null, null, null, null),
+            new UpdateTicketRequest("in_progress", null, null, null, null, null, null),
             agencyScope: "URSB");
         Assert.NotNull(ok);
     }
@@ -120,7 +120,7 @@ public class TicketScopingTests
 
         // Once resolved, the owner can rate it.
         await svc.UpdateAsync(reference,
-            new UpdateTicketRequest("resolved", null, null, null, null, null, null));
+            new UpdateTicketRequest("resolved", null, null, null, null, null, null, ResolutionNote: "Done"));
         var ok = await svc.PublicUpdateAsync(reference,
             new PublicTicketUpdateRequest(token, null, SatisfactionRating: 5, "Great"), Public(token));
         Assert.NotNull(ok);

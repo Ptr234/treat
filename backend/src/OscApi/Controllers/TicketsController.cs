@@ -33,6 +33,11 @@ public class TicketsController : ControllerBase
         return code;
     }
 
+    /// <summary>The signed-in staff member, for message authorship and the ticket history.</summary>
+    private StaffActor CurrentActor() => new(
+        User.FindFirst("name")?.Value ?? "UIA Officer",
+        User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value);
+
     // A single 404 for "missing" and "not yours": the public side must not be
     // able to tell which reference numbers exist.
     private ObjectResult NotFoundOrForbidden() =>
@@ -53,6 +58,24 @@ public class TicketsController : ControllerBase
     [Authorize(Policy = Roles.StaffPolicy)]
     public IActionResult ListAgencies() =>
         Ok(new ApiResponse<object>(true, AgencyDirectory.All.Select(a => new { code = a.Code, name = a.Name })));
+
+    /// <summary>
+    /// Active staff a ticket in <paramref name="agency"/> can be assigned to (that
+    /// agency's officers plus admin-level staff). An agency officer only ever
+    /// gets their own agency's list.
+    /// </summary>
+    [HttpGet("officers")]
+    [Authorize(Policy = Roles.StaffPolicy)]
+    public async Task<IActionResult> ListAssignableOfficers([FromQuery] string? agency)
+    {
+        var scope = ResolveAgencyScope(out var misconfigured);
+        if (misconfigured) return Forbid();
+
+        var code = scope ?? agency;
+        if (!AgencyDirectory.IsKnown(code))
+            return Problem(detail: "Unknown agency code", statusCode: StatusCodes.Status400BadRequest);
+        return Ok(new ApiResponse<object>(true, await _tickets.ListAssignableOfficersAsync(AgencyDirectory.Normalize(code!))));
+    }
 
     /// <summary>File a ticket. The response carries the filer's private access token.</summary>
     [HttpPost]
@@ -85,7 +108,7 @@ public class TicketsController : ControllerBase
         var scope = ResolveAgencyScope(out var misconfigured);
         if (misconfigured) return Forbid();
 
-        var result = await _tickets.UpdateAsync(refNumber, request, scope);
+        var result = await _tickets.UpdateAsync(refNumber, request, scope, CurrentActor());
         if (result is null) return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
         return Ok(new ApiResponse<object>(true, result));
     }
@@ -110,11 +133,8 @@ public class TicketsController : ControllerBase
         var scope = ResolveAgencyScope(out var misconfigured);
         if (misconfigured) return Forbid();
 
-        var name = User.FindFirst("name")?.Value ?? "UIA Officer";
-        var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
-            ?? User.FindFirst("email")?.Value;
-
-        var result = await _tickets.PostStaffMessageAsync(refNumber, request.Content, name, email, request.IsInternal, scope);
+        var actor = CurrentActor();
+        var result = await _tickets.PostStaffMessageAsync(refNumber, request.Content, actor.Name, actor.Email, request.IsInternal, scope);
         if (result is null) return Problem(detail: "Ticket not found", statusCode: StatusCodes.Status404NotFound);
         return Created("", new ApiResponse<object>(true, result));
     }

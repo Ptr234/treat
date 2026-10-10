@@ -137,18 +137,21 @@ export default function SettingsPage() {
 
             {/* Default Assignee */}
             <div className="p-6 border-t border-neutral-200 pt-5">
-              <label className="block text-sm font-semibold text-black mb-2">
+              <label htmlFor="default-assignee" className="block text-sm font-semibold text-black mb-2">
                 Default Escalation Officer
               </label>
-              <p className="text-xs text-neutral-700 mb-3">
-                When a ticket is escalated and has no assignee, this person will be automatically assigned.
+              <p id="default-assignee-help" className="text-xs text-neutral-700 mb-3">
+                When a ticket is escalated and has no assignee, this staff member is assigned automatically.
+                Enter the email of an active staff account; leave blank for no default.
               </p>
               <input
-                type="text"
+                id="default-assignee"
+                type="email"
+                aria-describedby="default-assignee-help"
                 value={settings.defaultAssignee}
                 onChange={(e) => setSettings(prev => ({ ...prev, defaultAssignee: e.target.value }))}
                 className={inputClass}
-                placeholder="e.g. Senior Investment Officer"
+                placeholder="e.g. duty.officer@uia.go.ug"
               />
             </div>
 

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using OscApi.Data;
 using OscApi.Dtos.Common;
 using OscApi.Dtos.Settings;
 using OscApi.Services;
@@ -12,10 +14,12 @@ namespace OscApi.Controllers;
 public class SettingsController : ControllerBase
 {
     private readonly ISettingsService _settings;
+    private readonly OscDbContext _db;
 
-    public SettingsController(ISettingsService settings)
+    public SettingsController(ISettingsService settings, OscDbContext db)
     {
         _settings = settings;
+        _db = db;
     }
 
     /// <summary>Get all system settings.</summary>
@@ -66,11 +70,19 @@ public class SettingsController : ControllerBase
             }
         }
 
+        // Escalations assign this person automatically, so it must be a real,
+        // active staff account — not a free-text name nobody is notified as.
+        var defaultAssignee = request.DefaultAssignee?.Trim().ToLowerInvariant() ?? "";
+        if (defaultAssignee.Length > 0
+            && !await _db.AdminUsers.AnyAsync(u => u.Email == defaultAssignee && u.IsActive))
+            return Problem(detail: "The default escalation officer must be the email of an active staff account",
+                statusCode: StatusCodes.Status400BadRequest);
+
         await _settings.SetAsync(SettingsService.EscalationEmailsKey,
             request.EscalationEmails, "Comma-separated escalation notification emails", adminName);
 
         await _settings.SetAsync(SettingsService.EscalationDefaultAssigneeKey,
-            request.DefaultAssignee, "Default officer assigned to escalated tickets", adminName);
+            defaultAssignee, "Default officer (staff email) assigned to escalated tickets", adminName);
 
         await _settings.SetAsync(SettingsService.EscalationMessageKey,
             request.EscalationMessage, "Custom message included in escalation notifications", adminName);

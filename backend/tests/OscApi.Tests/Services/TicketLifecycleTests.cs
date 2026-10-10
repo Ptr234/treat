@@ -24,8 +24,16 @@ public class TicketLifecycleTests
 
     private static Ticket Load(string dbName) => TestDbFactory.Create(dbName).Tickets.Single();
 
-    private static UpdateTicketRequest Update(string? status = null, string? priority = null, string? assignee = null, string? agency = null) =>
-        new(status, priority, assignee, agency, null, null, null);
+    private static UpdateTicketRequest Update(string? status = null, string? priority = null, string? assignee = null, string? agency = null, string? note = null) =>
+        new(status, priority, assignee, agency, null, null, null, note);
+
+    /// <summary>Add an active staff account (escalation defaults and assignees must be real accounts).</summary>
+    private static void SeedStaff(string dbName, string name, string email, string role = Roles.Admin, string? agency = null)
+    {
+        var db = TestDbFactory.Create(dbName);
+        db.AdminUsers.Add(new AdminUser { Name = name, Email = email, Role = role, AgencyCode = agency });
+        db.SaveChanges();
+    }
 
     [Fact]
     public async Task PublicFiling_IgnoresRequestedPriority_AndUsesTheCategoryDefault()
@@ -64,7 +72,8 @@ public class TicketLifecycleTests
     public async Task FilingAsAnEscalation_IsAFullEscalation()
     {
         var (svc, db, settings) = Create();
-        await settings.SetAsync(SettingsService.EscalationDefaultAssigneeKey, "Duty Officer", null, null);
+        SeedStaff(db, "Duty Officer", "duty@uia.go.ug", Roles.AgencyOfficer, "UIA");
+        await settings.SetAsync(SettingsService.EscalationDefaultAssigneeKey, "duty@uia.go.ug", null, null);
 
         await svc.CreateAsync(Request(escalated: true), isStaff: false);
 
@@ -80,7 +89,8 @@ public class TicketLifecycleTests
     public async Task LaterEscalation_AppliesTheDefaultAssignee()
     {
         var (svc, db, settings) = Create();
-        await settings.SetAsync(SettingsService.EscalationDefaultAssigneeKey, "Duty Officer", null, null);
+        SeedStaff(db, "Duty Officer", "duty@uia.go.ug");
+        await settings.SetAsync(SettingsService.EscalationDefaultAssigneeKey, "duty@uia.go.ug", null, null);
         await svc.CreateAsync(Request(), isStaff: false);
         var t = Load(db);
 
@@ -114,7 +124,7 @@ public class TicketLifecycleTests
         await svc.CreateAsync(Request(), isStaff: false);
         var reference = Load(db).ReferenceNumber;
 
-        await svc.UpdateAsync(reference, Update(status: "resolved"));
+        await svc.UpdateAsync(reference, Update(status: "resolved", note: "Licence issued"));
         var firstResolvedAt = Load(db).ResolvedAt;
         await Task.Delay(20);
         await svc.UpdateAsync(reference, Update(status: "resolved"));
@@ -128,7 +138,8 @@ public class TicketLifecycleTests
         var (svc, db, _) = Create();
         await svc.CreateAsync(Request(), isStaff: false);
 
-        await svc.UpdateAsync(Load(db).ReferenceNumber, Update(assignee: "Sarah Namubiru"));
+        SeedStaff(db, "Sarah Namubiru", "sarah@uia.go.ug", Roles.AgencyOfficer, "UIA");
+        await svc.UpdateAsync(Load(db).ReferenceNumber, Update(assignee: "Sarah@UIA.go.ug"));
 
         var t = Load(db);
         Assert.Equal("Sarah Namubiru", t.Assignee);
@@ -143,7 +154,7 @@ public class TicketLifecycleTests
         var t = Load(db);
         var owner = new TicketRequester(false, null, t.AccessToken, null);
 
-        await svc.UpdateAsync(t.ReferenceNumber, Update(status: "resolved"));
+        await svc.UpdateAsync(t.ReferenceNumber, Update(status: "resolved", note: "Licence issued"));
         await Assert.ThrowsAsync<ValidationException>(() => svc.PublicUpdateAsync(t.ReferenceNumber,
             new PublicTicketUpdateRequest(t.AccessToken, true, null, null), owner));
 
@@ -158,7 +169,7 @@ public class TicketLifecycleTests
         await svc.CreateAsync(Request() with { Title = "Land title query" }, isStaff: true);
         var second = await svc.CreateAsync(Request() with { Title = "Power connection" }, isStaff: true);
         var secondRef = second.GetType().GetProperty("ReferenceNumber")!.GetValue(second)!.ToString()!;
-        await svc.UpdateAsync(secondRef, Update(status: "resolved"));
+        await svc.UpdateAsync(secondRef, Update(status: "resolved", note: "Connected by UEDCL"));
 
         var result = await svc.ListAsync(new TicketListQuery(Q: "power"));
         Assert.Equal(1, (int)result.GetType().GetProperty("total")!.GetValue(result)!);

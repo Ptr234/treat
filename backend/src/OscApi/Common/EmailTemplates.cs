@@ -171,6 +171,32 @@ public static class EmailTemplates
             {Button(dashboardUrl, "Open ticket", Red, "#ffffff")}
             """);
 
+    /// <summary>Staff alert: a ticket was routed to the recipient's agency, or assigned to them.</summary>
+    public static string TicketAssignment(string recipientName, string refNumber, string title, string reason, string ticketUrl) =>
+        Wrap($"Ticket {refNumber}: {reason}", "Ticket assignment", "A ticket needs your attention", $"""
+            {P($"Dear {Enc(recipientName)},")}
+            {P(Enc(reason))}
+            {InfoBox(Gold, SurfaceMuted, $"""
+                <p style="margin:0;font-weight:bold;color:{Black};">Reference: {refNumber}</p>
+                <p style="margin:4px 0 0;color:{InkMuted};">Subject: {Enc(title)}</p>
+                """)}
+            {Button(ticketUrl, "Open ticket", Black, Gold)}
+            """);
+
+    /// <summary>Staff alert: the SLA monitor found a ticket past its deadline and escalated it.</summary>
+    public static string SlaBreachNotification(string refNumber, string title, string owner, string deadline, string status, string ticketUrl) =>
+        Wrap($"Ticket {refNumber} missed its SLA deadline.", "SLA breach", "A ticket missed its response deadline", $"""
+            {P("The ticket below passed its SLA deadline without being resolved and has been escalated automatically. Please act on it today.")}
+            {InfoBox(Red, "#fef2f2", $"""
+                <p style="margin:0;font-weight:bold;color:{Black};">Reference: {refNumber}</p>
+                <p style="margin:4px 0 0;color:{InkMuted};">Subject: {Enc(title)}</p>
+                <p style="margin:4px 0 0;color:{InkMuted};">Deadline: {Enc(deadline)}</p>
+                <p style="margin:4px 0 0;color:{InkMuted};">Status: {Enc(status)}</p>
+                <p style="margin:4px 0 0;color:{InkMuted};">Owner: {Enc(owner)}</p>
+                """)}
+            {Button(ticketUrl, "Open ticket", Red, "#ffffff")}
+            """);
+
     // ---- Business registration (URSB) ----------------------------------------------
 
     public static string BusinessRegistrationReceived(string name, string refNumber, string businessName, string trackUrl) =>

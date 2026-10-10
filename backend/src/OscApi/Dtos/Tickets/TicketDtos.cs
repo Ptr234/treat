@@ -20,7 +20,10 @@ public record CreateTicketRequest(
 );
 
 /// <summary>Staff update. Satisfaction fields exist only so a staff attempt to
-/// rate on the investor's behalf is rejected explicitly rather than ignored.</summary>
+/// rate on the investor's behalf is rejected explicitly rather than ignored.
+/// <c>Assignee</c> is the email of an active staff account who can see the
+/// ticket ("" unassigns). <c>ResolutionNote</c> is required when resolving, or
+/// closing a ticket that was never resolved; it is posted to the filer.</summary>
 public record UpdateTicketRequest(
     string? Status,
     string? Priority,
@@ -28,8 +31,15 @@ public record UpdateTicketRequest(
     string? AssignedAgencyCode,
     int? SatisfactionRating,
     string? SatisfactionComment,
-    bool? IsEscalated
+    bool? IsEscalated,
+    string? ResolutionNote = null
 );
+
+/// <summary>Who is making a staff change, from the session — recorded in the ticket history.</summary>
+public record StaffActor(string Name, string? Email)
+{
+    public static readonly StaffActor System = new("System", null);
+}
 
 /// <summary>Public self-service update (escalate / rate), authorized by the tracking token
 /// (or a signed-in session under the filing email).</summary>

@@ -24,7 +24,13 @@ public class UpdateTicketValidator : AbstractValidator<UpdateTicketRequest>
         RuleFor(x => x.Priority)
             .Must(p => p is null || ValidPriorities.Contains(p.ToLowerInvariant()))
             .WithMessage("Invalid priority");
-        RuleFor(x => x.Assignee).MaximumLength(100);
+        // An officer is named by their staff-account email ("" unassigns); the
+        // service checks the account is active and can see the ticket.
+        RuleFor(x => x.Assignee)
+            .MaximumLength(255)
+            .EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Assignee))
+            .WithMessage("Choose the assigned officer from the staff list");
+        RuleFor(x => x.ResolutionNote).MaximumLength(5000);
         RuleFor(x => x.AssignedAgencyCode)
             .Must(c => c is null || AgencyDirectory.IsKnown(c))
             .WithMessage("Unknown agency code");

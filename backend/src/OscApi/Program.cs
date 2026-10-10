@@ -105,6 +105,7 @@ builder.Services.AddSingleton<IEmailService>(sp => new EmailService(
     sp.GetRequiredService<ILogger<EmailService>>(),
     sp.GetRequiredService<OscApi.Common.IEmailOutbox>()));
 builder.Services.AddHostedService<OscApi.Common.EmailOutboxWorker>();
+builder.Services.AddHostedService<OscApi.Services.SlaBreachWorker>();
 builder.Services.AddScoped<IReferenceNumberGenerator, ReferenceNumberGenerator>();
 builder.Services.AddHttpClient<IGroqClient, GroqClient>();
 builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();

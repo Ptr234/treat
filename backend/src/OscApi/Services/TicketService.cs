@@ -97,13 +97,15 @@ public class TicketService : ITicketService
             })
             .SingleOrDefaultAsync(); // one group (or none) by construction
 
-        var resolvedSpans = await scoped
-            .Where(t => t.ResolvedAt != null)
-            .Select(t => new { t.CreatedAt, t.ResolvedAt })
+        // Three spans from filing, so triage delay (time to assign) can be told
+        // apart from agency handling (first response, resolution).
+        var spans = await scoped
+            .Where(t => t.ResolvedAt != null || t.AssignedAt != null || t.FirstResponseAt != null)
+            .Select(t => new { t.CreatedAt, t.ResolvedAt, t.AssignedAt, t.FirstResponseAt })
             .ToListAsync();
-        double? avgResolutionHours = resolvedSpans.Count > 0
-            ? Math.Round(resolvedSpans.Average(x => (x.ResolvedAt!.Value - x.CreatedAt).TotalHours), 1)
-            : null;
+        var avgResolutionHours = AverageHours(spans.Where(x => x.ResolvedAt != null).Select(x => x.ResolvedAt!.Value - x.CreatedAt));
+        var avgTimeToAssignHours = AverageHours(spans.Where(x => x.AssignedAt != null).Select(x => x.AssignedAt!.Value - x.CreatedAt));
+        var avgFirstResponseHours = AverageHours(spans.Where(x => x.FirstResponseAt != null).Select(x => x.FirstResponseAt!.Value - x.CreatedAt));
 
         var total = counts?.Total ?? 0;
         var open = counts?.Open ?? 0;
@@ -115,7 +117,15 @@ public class TicketService : ITicketService
             escalated = counts?.Escalated ?? 0,
             slaBreached = counts?.Breached ?? 0,
             avgResolutionHours,
+            avgTimeToAssignHours,
+            avgFirstResponseHours,
         };
+    }
+
+    private static double? AverageHours(IEnumerable<TimeSpan> values)
+    {
+        var list = values.ToList();
+        return list.Count > 0 ? Math.Round(list.Average(v => v.TotalHours), 1) : null;
     }
 
     // ── Create ──────────────────────────────────────────────────────────────
@@ -165,7 +175,9 @@ public class TicketService : ITicketService
         // Filed as an escalation (the chatbot's "talk to an officer"): mark it the
         // same way a later escalation would, so it gets a timestamp, the default
         // assignee, and — after commit — the escalation notification.
-        var escalated = request.IsEscalated && await EscalateAsync(ticket);
+        AddEvent(ticket, TicketEventType.Created, null, ticket.AssignedAgencyCode,
+            isStaff ? new StaffActor("Staff", null) : InvestorActor(ticket));
+        var escalated = request.IsEscalated && await EscalateAsync(ticket, InvestorActor(ticket));
 
         _db.Tickets.Add(ticket);
         // Assign the reference number and persist with retry, so concurrent
@@ -206,6 +218,22 @@ public class TicketService : ITicketService
             ticket.IsEscalated, ticket.EscalatedAt,
             ticket.CreatedAt, ticket.ResolvedAt, ticket.ClosedAt,
             messages = VisibleMessages(ticket, who.IsStaff),
+            // Staff-only (null, and so omitted from the JSON, for the filer).
+            assigneeEmail = who.IsStaff && ticket.AssigneeUserId is { } uid
+                ? await _db.AdminUsers.Where(u => u.Id == uid).Select(u => u.Email).FirstOrDefaultAsync()
+                : null,
+            slaBreachedAt = who.IsStaff ? ticket.SlaBreachedAt : null,
+            assignedAt = who.IsStaff ? ticket.AssignedAt : null,
+            firstResponseAt = who.IsStaff ? ticket.FirstResponseAt : null,
+            allowedStatuses = who.IsStaff ? Transitions[ticket.Status] : null,
+            routableAgencyCodes = who.IsStaff ? RoutableAgencies(who.AgencyScope) : null,
+            history = who.IsStaff
+                ? await _db.TicketEvents.AsNoTracking()
+                    .Where(e => e.TicketId == ticket.Id)
+                    .OrderBy(e => e.OccurredAt)
+                    .Select(e => new { e.Id, e.Type, e.FromValue, e.ToValue, e.ActorName, e.OccurredAt })
+                    .ToListAsync()
+                : null,
         };
     }
 
@@ -228,8 +256,9 @@ public class TicketService : ITicketService
 
     // ── Staff update ────────────────────────────────────────────────────────
 
-    public async Task<object?> UpdateAsync(string refNumber, UpdateTicketRequest request, string? agencyScope = null)
+    public async Task<object?> UpdateAsync(string refNumber, UpdateTicketRequest request, string? agencyScope = null, StaffActor? actor = null)
     {
+        actor ??= StaffActor.System;
         var ticket = await _db.Tickets.FirstOrDefaultAsync(t => t.ReferenceNumber == refNumber);
         if (ticket is null) return null;
 
@@ -238,58 +267,145 @@ public class TicketService : ITicketService
             return null;
 
         var now = DateTimeOffset.UtcNow;
-        var statusChanged = false;
-
+        var originalStatus = ticket.Status;
+        TicketStatus? requestedStatus = null;
         if (request.Status is not null)
         {
-            if (!TryParseStatus(request.Status, out var status))
+            if (!TryParseStatus(request.Status, out var parsed))
                 throw Invalid("status", $"Invalid status '{request.Status}'");
-            if (status != ticket.Status)
+            if (parsed != originalStatus)
             {
-                ApplyStatus(ticket, status, now);
-                statusChanged = true;
+                if (!Transitions[originalStatus].Contains(parsed))
+                    throw Invalid("status", $"A ticket can't move from {StatusLabel(originalStatus)} to {StatusLabel(parsed)}");
+                requestedStatus = parsed;
             }
         }
 
+        // A resolution is explained to the filer: resolving (or closing a ticket
+        // that was never resolved) needs a note, which is posted to the thread.
+        var needsNote = requestedStatus == TicketStatus.Resolved
+            || (requestedStatus == TicketStatus.Closed && originalStatus != TicketStatus.Resolved);
+        var note = string.IsNullOrWhiteSpace(request.ResolutionNote) ? null : SanitizeHelper.StripHtml(request.ResolutionNote.Trim());
+        if (needsNote && string.IsNullOrWhiteSpace(note))
+            throw Invalid("resolutionNote", "Add a resolution note explaining the outcome to the investor");
+        if (!needsNote && note is not null)
+            throw Invalid("resolutionNote", "A resolution note is only taken when resolving or closing a ticket");
+
+        // ── Routing between agencies ──
+        string? routedTo = null;
+        var unassigned = false; // the officer was removed by this update
+        if (request.AssignedAgencyCode is not null)
+        {
+            var target = AgencyDirectory.Normalize(request.AssignedAgencyCode);
+            if (target != ticket.AssignedAgencyCode)
+            {
+                if (IsFinished(requestedStatus ?? originalStatus))
+                    throw Invalid("assignedAgencyCode", "Reopen the ticket before transferring it to another agency");
+                if (!RoutableAgencies(agencyScope).Contains(target))
+                    throw Invalid("assignedAgencyCode",
+                        $"Only the {_defaultAgencyCode} front desk routes tickets between agencies. If this case isn't yours, send it back to {_defaultAgencyCode}.");
+
+                AddEvent(ticket, TicketEventType.AgencyChanged, ticket.AssignedAgencyCode, target, actor);
+                ticket.AssignedAgencyCode = target;
+                routedTo = target;
+
+                // The receiving agency picks its own officer, unless one is named now.
+                if (request.Assignee is null && ticket.Assignee is not null)
+                {
+                    SetAssignee(ticket, null, actor);
+                    unassigned = true;
+                }
+            }
+        }
+
+        // ── Officer assignment ──
+        AdminUser? newAssignee = null;
+        if (request.Assignee is not null)
+        {
+            if (string.IsNullOrWhiteSpace(request.Assignee))
+            {
+                if (ticket.Assignee is not null)
+                {
+                    SetAssignee(ticket, null, actor);
+                    unassigned = true;
+                }
+            }
+            else
+            {
+                var account = await FindAssignableAsync(request.Assignee, ticket.AssignedAgencyCode)
+                    ?? throw Invalid("assignee",
+                        $"'{request.Assignee}' isn't an active staff account that can handle {ticket.AssignedAgencyCode} tickets");
+                if (account.Id != ticket.AssigneeUserId)
+                {
+                    SetAssignee(ticket, account, actor);
+                    newAssignee = account;
+                    unassigned = false;
+                }
+            }
+        }
+
+        // ── Status ──
+        var statusChanged = false;
+        if (requestedStatus is { } next)
+        {
+            if (next == TicketStatus.Assigned && ticket.AssigneeUserId is null)
+                throw Invalid("status", "Choose an officer before marking the ticket Assigned");
+            SetStatus(ticket, next, now, actor);
+            statusChanged = true;
+        }
+        else if (ticket.AssigneeUserId is not null && ticket.Status == TicketStatus.New)
+        {
+            // Naming an officer on a fresh ticket moves it out of the "New" queue.
+            SetStatus(ticket, TicketStatus.Assigned, now, actor);
+            statusChanged = true;
+        }
+        else if (unassigned
+                 && (ticket.Status == TicketStatus.Assigned || (routedTo is not null && ticket.Status == TicketStatus.InProgress)))
+        {
+            // Unassigned, or handed to another agency's queue: back to triage.
+            SetStatus(ticket, TicketStatus.New, now, actor);
+            statusChanged = true;
+        }
+
+        if (note is not null)
+        {
+            _db.TicketMessages.Add(new TicketMessage
+            {
+                TicketId = ticket.Id,
+                Content = note,
+                AuthorName = SanitizeHelper.StripHtml(actor.Name),
+                AuthorRole = AuthorRole.Officer,
+                AuthorEmail = actor.Email,
+                IsInternal = false,
+            });
+            ticket.FirstResponseAt ??= now;
+        }
+
+        // ── Priority (and with it the SLA) ──
         if (request.Priority is not null)
         {
             if (!Enum.TryParse<TicketPriority>(request.Priority, true, out var priority))
                 throw Invalid("priority", $"Invalid priority '{request.Priority}'");
             if (priority != ticket.Priority)
             {
+                AddEvent(ticket, TicketEventType.PriorityChanged, ticket.Priority.ToString(), priority.ToString(), actor);
                 ticket.Priority = priority;
                 // The SLA is a function of priority: re-derive it from when the
                 // ticket was filed. (If the tighter deadline has already passed,
                 // the ticket is correctly reported as breached.)
                 (ticket.SlaDeadlineHours, ticket.SlaDeadlineAt) =
                     SlaCalculator.Compute(ticket.Category, priority, ticket.CreatedAt);
+                // A relaxed deadline that's back in the future re-arms the SLA monitor.
+                if (ticket.SlaDeadlineAt > now) ticket.SlaBreachedAt = null;
             }
         }
 
-        if (request.Assignee is not null)
-        {
-            ticket.Assignee = string.IsNullOrWhiteSpace(request.Assignee)
-                ? null
-                : SanitizeHelper.StripHtml(request.Assignee.Trim());
-            // Naming an officer on a fresh ticket moves it out of the "New" queue.
-            if (ticket.Assignee is not null && ticket.Status == TicketStatus.New && !statusChanged)
-            {
-                ApplyStatus(ticket, TicketStatus.Assigned, now);
-                statusChanged = true;
-            }
-        }
-
-        // Stored upper-case — the form agency_officer accounts carry — so a ticket
-        // assigned as "uia" is still visible to UIA officers.
-        if (request.AssignedAgencyCode is not null)
-            ticket.AssignedAgencyCode = AgencyDirectory.Normalize(request.AssignedAgencyCode);
-
-        var newlyEscalated = request.IsEscalated == true && await EscalateAsync(ticket);
+        var newlyEscalated = request.IsEscalated == true && await EscalateAsync(ticket, actor);
 
         await _db.SaveChangesAsync();
 
         // Notifications only after the change is committed, so we never email about
-        // an escalation/status that failed to persist.
+        // an escalation/status/transfer that failed to persist.
         if (newlyEscalated)
             await SendEscalationEmailAsync(ticket);
 
@@ -297,11 +413,146 @@ public class TicketService : ITicketService
             await _email.SendTicketStatusUpdateAsync(
                 ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, StatusLabel(ticket.Status), ticket.AccessToken);
 
+        if (routedTo is not null)
+            await NotifyAgencyAsync(ticket, routedTo, actor,
+                $"Ticket {ticket.ReferenceNumber} was transferred to {AgencyDirectory.NameFor(routedTo)} by {actor.Name}. Please assign an officer.");
+
+        if (newAssignee is not null && !string.Equals(newAssignee.Email, actor.Email, StringComparison.OrdinalIgnoreCase))
+            await _email.SendTicketAssignmentNotificationAsync(newAssignee.Email, newAssignee.Name, ticket.ReferenceNumber, ticket.Title,
+                $"{actor.Name} assigned ticket {ticket.ReferenceNumber} to you.");
+
         return new
         {
             ticket.ReferenceNumber, ticket.Status, ticket.Priority, ticket.Assignee, ticket.AssignedAgencyCode,
             ticket.SlaDeadlineHours, ticket.SlaDeadlineAt, ticket.IsEscalated, ticket.ResolvedAt, ticket.ClosedAt,
         };
+    }
+
+    /// <summary>
+    /// Which statuses a ticket may move to from each status. Staff never move a
+    /// ticket back to New by hand (that happens only when it loses its officer),
+    /// work moves forward, and finished tickets can only be closed or reopened.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<TicketStatus, TicketStatus[]> Transitions = new Dictionary<TicketStatus, TicketStatus[]>
+    {
+        [TicketStatus.New] = [TicketStatus.Assigned, TicketStatus.InProgress, TicketStatus.PendingExternal, TicketStatus.Resolved, TicketStatus.Closed],
+        [TicketStatus.Assigned] = [TicketStatus.InProgress, TicketStatus.PendingExternal, TicketStatus.Resolved, TicketStatus.Closed],
+        [TicketStatus.InProgress] = [TicketStatus.PendingExternal, TicketStatus.Resolved, TicketStatus.Closed],
+        [TicketStatus.PendingExternal] = [TicketStatus.InProgress, TicketStatus.Resolved, TicketStatus.Closed],
+        [TicketStatus.Resolved] = [TicketStatus.Closed, TicketStatus.InProgress],
+        [TicketStatus.Closed] = [TicketStatus.InProgress],
+    };
+
+    private static bool IsFinished(TicketStatus status) => status is TicketStatus.Resolved or TicketStatus.Closed;
+
+    /// <summary>
+    /// Agencies a staff member may route a ticket to. Admin-level staff and the
+    /// front desk (the default agency, which triages every new ticket) route
+    /// anywhere; any other agency can only hand a misrouted case back to the
+    /// front desk — never push it sideways to an agency of its choosing.
+    /// </summary>
+    private string[] RoutableAgencies(string? agencyScope) =>
+        string.IsNullOrEmpty(agencyScope) || agencyScope == _defaultAgencyCode
+            ? AgencyDirectory.All.Select(a => a.Code).ToArray()
+            : [_defaultAgencyCode];
+
+    private void SetStatus(Ticket ticket, TicketStatus status, DateTimeOffset now, StaffActor actor)
+    {
+        AddEvent(ticket, TicketEventType.StatusChanged, ticket.Status.ToString(), status.ToString(), actor);
+        ApplyStatus(ticket, status, now);
+    }
+
+    private void SetAssignee(Ticket ticket, AdminUser? account, StaffActor actor)
+    {
+        AddEvent(ticket, TicketEventType.AssigneeChanged, ticket.Assignee, account?.Name, actor);
+        ticket.AssigneeUserId = account?.Id;
+        ticket.Assignee = account?.Name;
+        if (account is not null) ticket.AssignedAt ??= DateTimeOffset.UtcNow;
+    }
+
+    private void AddEvent(Ticket ticket, TicketEventType type, string? from, string? to, StaffActor actor) =>
+        _db.TicketEvents.Add(new TicketEvent
+        {
+            TicketId = ticket.Id,
+            Type = type,
+            FromValue = Clip(from),
+            ToValue = Clip(to),
+            ActorName = Clip(actor.Name) ?? "System",
+            ActorEmail = actor.Email,
+        });
+
+    private static string? Clip(string? s) => s is null || s.Length <= 100 ? s : s[..100];
+
+    private static StaffActor InvestorActor(Ticket ticket) => new($"{ticket.ContactName} (investor)", ticket.ContactEmail);
+
+    /// <summary>The active staff account named by <paramref name="email"/>, if it may own a ticket in <paramref name="agencyCode"/>.</summary>
+    private async Task<AdminUser?> FindAssignableAsync(string email, string? agencyCode)
+    {
+        var normalized = email.Trim().ToLowerInvariant();
+        return await AssignableQuery(agencyCode).FirstOrDefaultAsync(u => u.Email == normalized);
+    }
+
+    /// <summary>Active admin-level staff, plus active officers of <paramref name="agencyCode"/>.</summary>
+    private IQueryable<AdminUser> AssignableQuery(string? agencyCode) =>
+        _db.AdminUsers.Where(u => u.IsActive
+            && (Roles.AdminLevel.Contains(u.Role) || (u.Role == Roles.AgencyOfficer && u.AgencyCode == agencyCode)));
+
+    public async Task<IReadOnlyList<object>> ListAssignableOfficersAsync(string agencyCode) =>
+        await AssignableQuery(agencyCode)
+            .OrderBy(u => u.Role == Roles.AgencyOfficer ? 0 : 1) // the agency's own officers first
+            .ThenBy(u => u.Name)
+            .Select(u => (object)new { u.Email, u.Name, u.AgencyCode })
+            .ToListAsync();
+
+    /// <summary>Email every active officer of <paramref name="agencyCode"/>, except whoever made the change.</summary>
+    private async Task NotifyAgencyAsync(Ticket ticket, string agencyCode, StaffActor actor, string reason)
+    {
+        var officers = await _db.AdminUsers.AsNoTracking()
+            .Where(u => u.IsActive && u.Role == Roles.AgencyOfficer && u.AgencyCode == agencyCode)
+            .Select(u => new { u.Email, u.Name })
+            .ToListAsync();
+        foreach (var officer in officers.Where(o => !string.Equals(o.Email, actor.Email, StringComparison.OrdinalIgnoreCase)))
+            await _email.SendTicketAssignmentNotificationAsync(officer.Email, officer.Name, ticket.ReferenceNumber, ticket.Title, reason);
+    }
+
+    // ── SLA monitor ─────────────────────────────────────────────────────────
+
+    public async Task<int> ProcessSlaBreachesAsync(CancellationToken ct = default)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var overdue = await _db.Tickets
+            .Where(t => t.SlaBreachedAt == null && t.SlaDeadlineAt != null && t.SlaDeadlineAt < now
+                        && t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed)
+            .OrderBy(t => t.SlaDeadlineAt)
+            .Take(100)
+            .ToListAsync(ct);
+        if (overdue.Count == 0) return 0;
+
+        var monitor = StaffActor.System with { Name = "SLA monitor" };
+        foreach (var ticket in overdue)
+        {
+            ticket.SlaBreachedAt = now;
+            AddEvent(ticket, TicketEventType.SlaBreached, null, ticket.SlaDeadlineAt!.Value.ToString("u"), monitor);
+            await EscalateAsync(ticket, monitor);
+        }
+        await _db.SaveChangesAsync(ct);
+
+        // After commit: the escalation list, the owning agency's officers and the assignee.
+        var escalationEmails = await _settings.GetEscalationEmailsAsync();
+        foreach (var ticket in overdue)
+        {
+            var recipients = new List<string>(escalationEmails);
+            recipients.AddRange(await _db.AdminUsers.AsNoTracking()
+                .Where(u => u.IsActive && (u.Id == ticket.AssigneeUserId
+                    || (u.Role == Roles.AgencyOfficer && u.AgencyCode == ticket.AssignedAgencyCode)))
+                .Select(u => u.Email)
+                .ToListAsync(ct));
+            var owner = AgencyDirectory.NameFor(ticket.AssignedAgencyCode)
+                + (ticket.Assignee is null ? " (no officer assigned)" : $" — {ticket.Assignee}");
+            await _email.SendSlaBreachNotificationAsync(ticket.ReferenceNumber, ticket.Title, owner,
+                ticket.SlaDeadlineAt!.Value, StatusLabel(ticket.Status), recipients.ToArray());
+        }
+        return overdue.Count;
     }
 
     /// <summary>
@@ -350,6 +601,7 @@ public class TicketService : ITicketService
         };
 
         _db.TicketMessages.Add(message);
+        if (!isInternal) ticket.FirstResponseAt ??= message.SentAt;
         await _db.SaveChangesAsync();
 
         // A public reply is only useful if the investor learns of it.
@@ -411,7 +663,7 @@ public class TicketService : ITicketService
         {
             if (finished)
                 throw Invalid("isEscalated", "A resolved ticket can't be escalated. Please reply or file a new ticket.");
-            newlyEscalated = await EscalateAsync(ticket);
+            newlyEscalated = await EscalateAsync(ticket, InvestorActor(ticket));
         }
 
         await _db.SaveChangesAsync();
@@ -441,21 +693,29 @@ public class TicketService : ITicketService
     // ── Escalation ──────────────────────────────────────────────────────────
 
     /// <summary>Mark a ticket escalated (idempotent), assigning the configured
-    /// default officer if nobody owns it yet. Returns true if this call was the
-    /// one that escalated it (so the caller can notify after committing).</summary>
-    private async Task<bool> EscalateAsync(Ticket ticket)
+    /// default officer if nobody owns it yet and that account may handle the
+    /// ticket. Returns true if this call was the one that escalated it (so the
+    /// caller can notify after committing).</summary>
+    private async Task<bool> EscalateAsync(Ticket ticket, StaffActor actor)
     {
         if (ticket.IsEscalated) return false;
         ticket.IsEscalated = true;
         ticket.EscalatedAt = DateTimeOffset.UtcNow;
+        AddEvent(ticket, TicketEventType.Escalated, null, null, actor);
 
-        if (string.IsNullOrWhiteSpace(ticket.Assignee))
+        if (ticket.AssigneeUserId is null)
         {
+            // The setting holds a staff email. Only a real, active account that can
+            // see the ticket is assigned; anything else leaves the escalation with
+            // the notification recipients rather than a name nobody answers to.
             var defaultAssignee = await _settings.GetAsync(SettingsService.EscalationDefaultAssigneeKey);
-            if (!string.IsNullOrWhiteSpace(defaultAssignee))
+            var account = string.IsNullOrWhiteSpace(defaultAssignee)
+                ? null
+                : await FindAssignableAsync(defaultAssignee, ticket.AssignedAgencyCode);
+            if (account is not null)
             {
-                ticket.Assignee = defaultAssignee.Trim();
-                if (ticket.Status == TicketStatus.New) ticket.Status = TicketStatus.Assigned;
+                SetAssignee(ticket, account, actor);
+                if (ticket.Status == TicketStatus.New) SetStatus(ticket, TicketStatus.Assigned, DateTimeOffset.UtcNow, actor);
             }
         }
         return true;

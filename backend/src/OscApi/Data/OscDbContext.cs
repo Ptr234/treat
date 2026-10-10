@@ -13,6 +13,7 @@ public class OscDbContext : DbContext
     public DbSet<Ticket> Tickets => Set<Ticket>();
     public DbSet<TicketMessage> TicketMessages => Set<TicketMessage>();
     public DbSet<TicketDocument> TicketDocuments => Set<TicketDocument>();
+    public DbSet<TicketEvent> TicketEvents => Set<TicketEvent>();
     public DbSet<InvestorProfile> InvestorProfiles => Set<InvestorProfile>();
     public DbSet<AgencyMessage> AgencyMessages => Set<AgencyMessage>();
     public DbSet<ChatEnquiry> ChatEnquiries => Set<ChatEnquiry>();
@@ -98,12 +99,33 @@ public class OscDbContext : DbContext
                 .WithOne(d => d.Ticket)
                 .HasForeignKey(d => d.TicketId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(t => t.Events)
+                .WithOne(ev => ev.Ticket)
+                .HasForeignKey(ev => ev.TicketId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // A deleted staff account leaves the ticket unassigned, not dangling.
+            e.HasOne<AdminUser>()
+                .WithMany()
+                .HasForeignKey(t => t.AssigneeUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // The SLA monitor scans open, not-yet-flagged tickets by deadline.
+            e.HasIndex(t => new { t.SlaBreachedAt, t.SlaDeadlineAt });
         });
 
         // TicketMessage
         modelBuilder.Entity<TicketMessage>(e =>
         {
             e.Property(m => m.AuthorRole).HasConversion<string>();
+        });
+
+        // TicketEvent: append-only ownership/lifecycle history.
+        modelBuilder.Entity<TicketEvent>(e =>
+        {
+            e.Property(ev => ev.Type).HasConversion<string>().HasMaxLength(30);
+            e.HasIndex(ev => new { ev.TicketId, ev.OccurredAt });
         });
 
         // InvestorProfile

@@ -103,6 +103,8 @@ export default function TicketsPage() {
             { label: 'Open', value: stats?.open ?? '—', note: stats && stats.slaBreached > 0 ? `${stats.slaBreached} overdue` : undefined },
             { label: 'Resolved', value: stats?.resolved ?? '—' },
             { label: 'Average resolution', value: stats?.avgResolutionHours != null ? `${stats.avgResolutionHours}h` : '—' },
+            { label: 'Average time to assign', value: stats?.avgTimeToAssignHours != null ? `${stats.avgTimeToAssignHours}h` : '—' },
+            { label: 'Average first response', value: stats?.avgFirstResponseHours != null ? `${stats.avgFirstResponseHours}h` : '—' },
           ]}
         />
       </PageHeader>
