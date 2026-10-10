@@ -123,7 +123,7 @@ export default function Footer() {
       <div className="border-t border-white/15">
         <div className="gov-container flex flex-col gap-6 py-8 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <Image src="/images/uganda-coat-of-arms.png" alt="Flag of the Republic of Uganda" width={72} height={48} className="h-12 w-[72px] shrink-0 object-cover ring-1 ring-white/30" />
+            <Image src="/images/osc-logo.png" alt="" width={48} height={48} className="h-12 w-12 shrink-0" />
             <p className="text-sm leading-6 text-white/75">
               <span className="block font-bold text-white">OneStop Centre Uganda</span>
               A service of the Uganda Investment Authority.

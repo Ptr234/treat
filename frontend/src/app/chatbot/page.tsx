@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Menu,
   X,
-  Sparkles,
   ArrowLeft,
   PanelLeftClose,
   PanelLeft,
@@ -318,7 +317,7 @@ function ChatbotPageInner() {
             >
               <div className="gov-stripe" aria-hidden="true" />
               <Link href="/" className="flex items-center gap-3 border-b border-neutral-200 px-4 py-4 no-underline hover:bg-[#f5f3ee]">
-                <Image src="/images/uganda-flag.png" alt="" width={36} height={24} className="h-6 w-9 shrink-0 object-cover ring-1 ring-black/15" />
+                <Image src="/images/osc-logo.png" alt="" width={36} height={36} className="h-9 w-9 shrink-0" />
                 <span className="leading-tight">
                   <span className="block text-[10px] font-bold uppercase tracking-[0.18em] text-[#9a0d1c]">Republic of Uganda</span>
                   <span className="block font-display text-lg font-semibold text-black">OneStop Centre</span>
@@ -419,9 +418,7 @@ function ChatbotPageInner() {
                 className="flex flex-col items-center text-center max-w-2xl w-full"
               >
                 <div className="relative mb-8">
-                                    <div className="relative w-20 h-20 bg-black flex items-center justify-center shadow-[inset_0_-6px_0_#ffd700]">
-                    <Sparkles className="w-10 h-10 text-[#ffd700]" />
-                  </div>
+                                    <Image src="/images/osc-logo.png" alt="" width={80} height={80} className="relative h-20 w-20" />
                 </div>
 
                 <h1 className="gov-title-xl mb-3">

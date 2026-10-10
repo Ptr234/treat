@@ -113,7 +113,7 @@ export default function DashboardSidebar({ role, onNavigate }: DashboardSidebarP
         onClick={onNavigate}
         className="flex items-center gap-3 px-5 py-5 border-b border-neutral-800"
       >
-        <Image src="/images/uganda-flag.png" alt="" width={36} height={24} className="h-6 w-9 shrink-0 object-cover" />
+        <Image src="/images/osc-logo.png" alt="" width={36} height={36} className="h-9 w-9 shrink-0" />
         <div className="min-w-0">
           <p className="font-display text-lg font-semibold leading-tight text-white truncate">OneStop Centre</p>
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#ffd700] leading-tight">Staff console</p>

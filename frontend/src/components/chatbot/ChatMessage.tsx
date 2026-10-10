@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, User } from 'lucide-react';
+import Image from 'next/image';
+import { User } from 'lucide-react';
 import type { ChatMessage as ChatMessageType } from '@/types';
 
 interface ChatMessageProps {
@@ -72,9 +73,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         transition={{ duration: 0.2 }}
         className="flex gap-3 py-4"
       >
-        <div className="flex-shrink-0 w-8 h-8 bg-black flex items-center justify-center">
-          <Sparkles className="w-4 h-4 text-[#ffd700]" />
-        </div>
+        <Image src="/images/osc-logo.png" alt="" width={32} height={32} className="flex-shrink-0 w-8 h-8" />
         <div className="flex items-center gap-1.5 pt-1">
           <motion.span
             className="w-2 h-2 bg-[#ffd700] rounded-full"
@@ -108,13 +107,13 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
           isUser
             ? 'bg-white border border-neutral-200'
-            : 'bg-black'
+            : ''
         }`}
       >
         {isUser ? (
           <User className="w-4 h-4 text-neutral-700" />
         ) : (
-          <Sparkles className="w-4 h-4 text-[#ffd700]" />
+          <Image src="/images/osc-logo.png" alt="" width={32} height={32} className="w-8 h-8" />
         )}
       </div>
 

@@ -113,12 +113,12 @@ function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="group flex min-w-0 items-center gap-3 no-underline sm:gap-4" aria-label="OneStop Centre Uganda — home">
       <Image
-        src="/images/uganda-coat-of-arms.png"
-        alt="Flag of the Republic of Uganda"
-        width={84}
+        src="/images/osc-logo.png"
+        alt=""
+        width={56}
         height={56}
         priority
-        className={`${compact ? 'h-10 w-[60px]' : 'h-12 w-[72px] sm:h-14 sm:w-[84px]'} shrink-0 object-cover ring-1 ring-black/15`}
+        className={`${compact ? 'h-10 w-10' : 'h-12 w-12 sm:h-14 sm:w-14'} shrink-0`}
       />
       <span aria-hidden="true" className="hidden h-12 w-px bg-[#b9b4a9] sm:block" />
       <span className="min-w-0 leading-none">
