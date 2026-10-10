@@ -88,7 +88,7 @@ public class BusinessRegistrationService : IBusinessRegistrationService
         await _db.SaveWithUniqueReferenceAsync(async () =>
             registration.ReferenceNumber = await _refGen.GenerateBusinessRegistrationReferenceAsync());
 
-        _ = _email.SendBusinessRegistrationReceivedAsync(
+        await _email.SendBusinessRegistrationReceivedAsync(
             registration.ContactEmail, registration.ContactName, registration.ReferenceNumber, registration.BusinessName);
 
         return new BusinessRegistrationResponse(
@@ -203,10 +203,10 @@ public class BusinessRegistrationService : IBusinessRegistrationService
         if (statusChanged)
         {
             if (r.Status == BusinessRegistrationStatus.CertificateIssued)
-                _ = _email.SendBusinessRegistrationCertificateIssuedAsync(
+                await _email.SendBusinessRegistrationCertificateIssuedAsync(
                     r.ContactEmail, r.ContactName, r.ReferenceNumber, r.BusinessName, r.CertificateNumber!);
             else
-                _ = _email.SendBusinessRegistrationStatusUpdateAsync(
+                await _email.SendBusinessRegistrationStatusUpdateAsync(
                     r.ContactEmail, r.ContactName, r.ReferenceNumber, r.BusinessName, r.Status.ToString());
 
             // Who made this call is legally material for a government registration

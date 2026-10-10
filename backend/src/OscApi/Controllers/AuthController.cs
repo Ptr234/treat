@@ -612,6 +612,8 @@ public class AuthController : ControllerBase
             admin.UpdatedAt = DateTimeOffset.UtcNow;
             await _db.SaveChangesAsync();
 
+            // Not awaited on purpose (same response time whether or not the account
+            // exists); still durable, the email is queued in the outbox.
             _ = _email.SendPasswordResetAsync(admin.Email, admin.Name, resetToken);
         }
 

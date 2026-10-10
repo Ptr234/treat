@@ -173,7 +173,7 @@ public class TicketService : ITicketService
         await _db.SaveWithUniqueReferenceAsync(async () =>
             ticket.ReferenceNumber = await _refGen.GenerateTicketReferenceAsync());
 
-        _ = _email.SendTicketConfirmationAsync(
+        await _email.SendTicketConfirmationAsync(
             ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, ticket.Title, ticket.AccessToken);
         if (escalated)
             await SendEscalationEmailAsync(ticket);
@@ -294,7 +294,7 @@ public class TicketService : ITicketService
             await SendEscalationEmailAsync(ticket);
 
         if (statusChanged)
-            _ = _email.SendTicketStatusUpdateAsync(
+            await _email.SendTicketStatusUpdateAsync(
                 ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, StatusLabel(ticket.Status), ticket.AccessToken);
 
         return new
@@ -354,7 +354,7 @@ public class TicketService : ITicketService
 
         // A public reply is only useful if the investor learns of it.
         if (!isInternal)
-            _ = _email.SendTicketReplyAsync(
+            await _email.SendTicketReplyAsync(
                 ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, ticket.Title, message.Content, ticket.AccessToken);
 
         return new { message.Id, message.Content, message.AuthorName, message.AuthorRole, message.IsInternal, message.SentAt };
@@ -381,7 +381,7 @@ public class TicketService : ITicketService
         _db.TicketMessages.Add(message);
         await _db.SaveChangesAsync();
 
-        _ = _email.SendTicketCommentNotificationAsync(
+        await _email.SendTicketCommentNotificationAsync(
             ticket.ReferenceNumber, ticket.Title, ticket.ContactName, message.Content);
 
         return new { message.Id, message.Content, message.AuthorName, message.AuthorRole, message.SentAt };
@@ -431,6 +431,9 @@ public class TicketService : ITicketService
         // The link only ever goes to the address on file, and the caller gets the
         // same answer either way — so this can't be used to probe for tickets.
         if (ticket is not null && ticket.ContactEmail == normalized)
+            // Not awaited on purpose: the caller gets the same answer at the same
+            // speed whether or not the reference/email matched (no enumeration).
+            // The send is still durable: it lands in the outbox within milliseconds.
             _ = _email.SendTicketAccessLinkAsync(
                 ticket.ContactEmail, ticket.ContactName, ticket.ReferenceNumber, ticket.Title, ticket.AccessToken);
     }
@@ -465,7 +468,7 @@ public class TicketService : ITicketService
         var escalationEmails = await _settings.GetEscalationEmailsAsync();
         var customMessage = await _settings.GetAsync(SettingsService.EscalationMessageKey);
 
-        _ = _email.SendEscalationNotificationAsync(
+        await _email.SendEscalationNotificationAsync(
             ticket.ReferenceNumber, ticket.Title, ticket.ContactName,
             escalationEmails.Length > 0 ? escalationEmails : null,
             string.IsNullOrEmpty(customMessage) ? null : customMessage);

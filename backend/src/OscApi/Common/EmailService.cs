@@ -25,6 +25,11 @@ public interface IEmailService
     Task SendBusinessRegistrationCertificateIssuedAsync(string toEmail, string contactName, string referenceNumber, string businessName, string certificateNumber);
 }
 
+public enum EmailDeliveryOutcome { Sent, TransientFailure, PermanentFailure, NotConfigured }
+
+/// <summary>The outcome of one delivery attempt to Resend.</summary>
+public sealed record EmailDeliveryResult(EmailDeliveryOutcome Outcome, string? ProviderId = null, string? Error = null, TimeSpan? RetryAfter = null);
+
 public class EmailService : IEmailService
 {
     // One shared client for the process (the service is a singleton). The
@@ -41,6 +46,10 @@ public class EmailService : IEmailService
     private readonly string _siteUrl;
     private readonly ILogger<EmailService> _logger;
 
+    // When set (production DI), emails are written to the durable outbox and
+    // delivered by EmailOutboxWorker; without it (unit tests) they're sent inline.
+    private readonly IEmailOutbox? _outbox;
+
     // Resend rate-limits each team (2 requests/second by default) and answers
     // 429 beyond that. A single contact form fires three sends at once
     // (investor confirmation, admin, agency), so sends are serialised and spaced.
@@ -52,9 +61,15 @@ public class EmailService : IEmailService
     public EmailService(IConfiguration config, ILogger<EmailService> logger)
         : this(config, logger, SharedHttp, TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(1)) { }
 
+    /// <summary>Production: queue every email in the durable outbox.</summary>
+    public EmailService(IConfiguration config, ILogger<EmailService> logger, IEmailOutbox outbox)
+        : this(config, logger, SharedHttp, TimeSpan.FromMilliseconds(600), TimeSpan.FromSeconds(1), outbox) { }
+
     /// <summary>Test seam: inject the HTTP client and timings.</summary>
-    public EmailService(IConfiguration config, ILogger<EmailService> logger, HttpClient http, TimeSpan minInterval, TimeSpan retryBaseDelay)
+    public EmailService(IConfiguration config, ILogger<EmailService> logger, HttpClient http, TimeSpan minInterval, TimeSpan retryBaseDelay,
+        IEmailOutbox? outbox = null)
     {
+        _outbox = outbox;
         _logger = logger;
         _http = http;
         _minInterval = minInterval;
@@ -290,57 +305,60 @@ public class EmailService : IEmailService
         if (!string.IsNullOrEmpty(replyTo) && !IsUndeliverable(replyTo)) payload["reply_to"] = new[] { replyTo };
         var json = JsonSerializer.Serialize(payload);
 
-        // Same key on every retry: if an attempt timed out after Resend had
-        // already accepted it, the retry is deduplicated instead of delivered twice.
-        var idempotencyKey = Guid.NewGuid().ToString("N");
+        if (_outbox is not null)
+        {
+            await _outbox.EnqueueAsync(to, subject, json);
+            return;
+        }
 
+        // No outbox (unit tests): send inline with a few quick retries.
+        var idempotencyKey = Guid.NewGuid().ToString("N");
         for (var attempt = 1; attempt <= MaxAttempts; attempt++)
         {
-            TimeSpan? retryAfter = null;
-            try
+            var result = await DeliverOnceAsync(json, idempotencyKey);
+            if (result.Outcome == EmailDeliveryOutcome.Sent)
             {
-                using var response = await PostThrottledAsync(json, idempotencyKey);
-                if (response.IsSuccessStatusCode)
-                {
-                    var id = await ReadIdAsync(response);
-                    _logger.LogInformation("Email sent to {To}: {Subject} (Resend id {Id})", to, subject, id);
-                    return;
-                }
-
-                var status = (int)response.StatusCode;
-                var body = await response.Content.ReadAsStringAsync();
-                var transient = status == 429 || status >= 500;
-                if (!transient || attempt == MaxAttempts)
-                {
-                    // 401/403 (bad key, unverified sending domain) and 422
-                    // (invalid address) will not succeed on retry.
-                    _logger.LogError("Resend API error sending to {To}: {Status} {Body} (attempt {Attempt}/{Max}): {Subject}",
-                        to, status, body, attempt, MaxAttempts, subject);
-                    return;
-                }
-
-                retryAfter = response.Headers.RetryAfter?.Delta;
-                _logger.LogWarning("Resend returned {Status} for {To}; retrying (attempt {Attempt}/{Max})",
-                    status, to, attempt, MaxAttempts);
-            }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-            {
-                if (attempt == MaxAttempts)
-                {
-                    _logger.LogError(ex, "Failed to send email to {To} after {Max} attempts: {Subject}", to, MaxAttempts, subject);
-                    return;
-                }
-                _logger.LogWarning(ex, "Network error sending email to {To}; retrying (attempt {Attempt}/{Max})",
-                    to, attempt, MaxAttempts);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send email to {To}: {Subject}", to, subject);
+                _logger.LogInformation("Email sent to {To}: {Subject} (Resend id {Id})", to, subject, result.ProviderId);
                 return;
             }
-
+            if (result.Outcome != EmailDeliveryOutcome.TransientFailure || attempt == MaxAttempts)
+            {
+                _logger.LogError("Email to {To} not sent: {Error} (attempt {Attempt}/{Max}): {Subject}",
+                    to, result.Error, attempt, MaxAttempts, subject);
+                return;
+            }
             var backoff = TimeSpan.FromTicks(_retryBaseDelay.Ticks * (1L << (attempt - 1)));
-            await Task.Delay(retryAfter is { } ra && ra > backoff ? ra : backoff);
+            await Task.Delay(result.RetryAfter is { } ra && ra > backoff ? ra : backoff);
+        }
+    }
+
+    /// <summary>
+    /// One attempt to hand a prepared Resend payload over. Throttled (Resend
+    /// allows ~2 requests/s) and idempotent: pass the same key on every retry so
+    /// an attempt that timed out after Resend accepted it isn't delivered twice.
+    /// </summary>
+    public async Task<EmailDeliveryResult> DeliverOnceAsync(string payloadJson, string idempotencyKey)
+    {
+        if (string.IsNullOrEmpty(_apiKey))
+            return new(EmailDeliveryOutcome.NotConfigured, Error: "Resend:ApiKey is not set");
+
+        try
+        {
+            using var response = await PostThrottledAsync(payloadJson, idempotencyKey);
+            if (response.IsSuccessStatusCode)
+                return new(EmailDeliveryOutcome.Sent, ProviderId: await ReadIdAsync(response));
+
+            var status = (int)response.StatusCode;
+            var body = await response.Content.ReadAsStringAsync();
+            // 401/403 (bad key, unverified sending domain) and 422 (invalid
+            // address) won't succeed on retry; 429 and 5xx might.
+            var transient = status == 429 || status >= 500;
+            return new(transient ? EmailDeliveryOutcome.TransientFailure : EmailDeliveryOutcome.PermanentFailure,
+                Error: $"Resend {status}: {body}", RetryAfter: response.Headers.RetryAfter?.Delta);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            return new(EmailDeliveryOutcome.TransientFailure, Error: $"{ex.GetType().Name}: {ex.Message}");
         }
     }
 

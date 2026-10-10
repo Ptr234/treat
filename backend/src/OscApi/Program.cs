@@ -96,7 +96,15 @@ builder.Services.AddSingleton<IJwtService, JwtService>();
 builder.Services.AddSingleton<OscApi.Common.IGoogleTokenValidator, OscApi.Common.GoogleTokenValidator>();
 builder.Services.AddSingleton<IPasswordService, PasswordService>();
 builder.Services.AddSingleton<ITotpService, TotpService>();
-builder.Services.AddSingleton<IEmailService, EmailService>();
+// Email goes through a durable outbox (email_outbox table) delivered by a
+// background worker, so a restart or deploy can't drop a pending email.
+builder.Services.AddSingleton<OscApi.Common.EmailOutboxSignal>();
+builder.Services.AddSingleton<OscApi.Common.IEmailOutbox, OscApi.Common.EmailOutbox>();
+builder.Services.AddSingleton<IEmailService>(sp => new EmailService(
+    sp.GetRequiredService<IConfiguration>(),
+    sp.GetRequiredService<ILogger<EmailService>>(),
+    sp.GetRequiredService<OscApi.Common.IEmailOutbox>()));
+builder.Services.AddHostedService<OscApi.Common.EmailOutboxWorker>();
 builder.Services.AddScoped<IReferenceNumberGenerator, ReferenceNumberGenerator>();
 builder.Services.AddHttpClient<IGroqClient, GroqClient>();
 builder.Services.AddHttpClient<IRecaptchaService, RecaptchaService>();
@@ -104,10 +112,10 @@ builder.Services.AddHttpClient<IFlutterwaveClient, FlutterwaveClient>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 
 // Redis cache (optional — falls back to in-memory if not configured).
-// NOTE: the rate limiter (below) and this cache are per-process. They are only
-// safe on a single backend instance. Before scaling horizontally, configure the
-// "Redis" connection string so limits/cache are shared across instances —
-// otherwise each instance enforces its own limits (N instances ⇒ N× the cap).
+// NOTE: Redis only backs IDistributedCache (e.g. chatbot session history). The
+// rate limiter (ASP.NET's built-in partitions, below) is ALWAYS per-process,
+// with or without Redis — N instances enforce N× each cap. Run a single backend
+// instance; scaling out needs a distributed limiter (e.g. at the proxy/edge).
 var redisConn = builder.Configuration.GetConnectionString("Redis");
 if (!string.IsNullOrEmpty(redisConn))
 {
@@ -117,8 +125,8 @@ else
 {
     builder.Services.AddDistributedMemoryCache();
     Log.Warning(
-        "Redis is not configured: distributed cache and rate limiting are in-memory " +
-        "and per-instance. Do NOT run more than one backend instance in this mode.");
+        "Redis is not configured: the distributed cache (chatbot session history) is " +
+        "in-memory and per-instance. Rate limiting is per-instance regardless of Redis.");
 }
 
 // Data Protection key ring (optional — falls back to an in-memory, per-process
@@ -364,8 +372,6 @@ if (!app.Environment.IsEnvironment("Testing"))
 }
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidationExceptionMiddleware>();
-// Note: User-based rate limiting is available in UserRateLimitingMiddleware.cs
-// Currently using ASP.NET's RateLimiter policies instead (more flexible)
 
 // HSTS only — no UseHttpsRedirection(). Kestrel only ever listens on plain
 // HTTP here (ASPNETCORE_URLS=http://+:8080 in both render.yaml and

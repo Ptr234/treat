@@ -23,6 +23,7 @@ public class OscDbContext : DbContext
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<BusinessRegistration> BusinessRegistrations => Set<BusinessRegistration>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<EmailOutboxMessage> EmailOutbox => Set<EmailOutboxMessage>();
 
     public override int SaveChanges()
     {
@@ -182,6 +183,13 @@ public class OscDbContext : DbContext
             e.HasIndex(r => r.BusinessName);  // For the name-availability check
             e.HasIndex(r => r.AssignedAgencyCode);
             e.Property(r => r.Status).HasConversion<string>();
+        });
+
+        // Email outbox: the worker scans due Pending rows in order.
+        modelBuilder.Entity<EmailOutboxMessage>(e =>
+        {
+            e.Property(m => m.Status).HasConversion<string>().HasMaxLength(20);
+            e.HasIndex(m => new { m.Status, m.NextAttemptAt });
         });
 
         // Payment

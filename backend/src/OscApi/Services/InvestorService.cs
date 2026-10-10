@@ -72,7 +72,7 @@ public class InvestorService : IInvestorService
         {
             // Re-send the reference to the address on file rather than to the
             // caller, who may not own it.
-            _ = _email.SendInvestorReferenceReminderAsync(email, existing.Name, existing.ReferenceNumber);
+            await _email.SendInvestorReferenceReminderAsync(email, existing.Name, existing.ReferenceNumber);
             return (null, true);
         }
 
@@ -117,7 +117,7 @@ public class InvestorService : IInvestorService
         await _db.SaveWithUniqueReferenceAsync(async () =>
             profile.ReferenceNumber = await _refGen.GenerateInvestorReferenceAsync());
 
-        _ = _email.SendInvestorWelcomeAsync(profile.Email, profile.Name, profile.ReferenceNumber);
+        await _email.SendInvestorWelcomeAsync(profile.Email, profile.Name, profile.ReferenceNumber);
 
         return (new InvestorResponse(profile.ReferenceNumber, profile.Name, profile.Email, profile.Status.ToString()), false);
     }

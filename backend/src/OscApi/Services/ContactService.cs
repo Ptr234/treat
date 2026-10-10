@@ -49,7 +49,7 @@ public class ContactService : IContactService
             inquiry.ContactName, inquiry.ContactEmail, inquiry.Subject, inquiry.Message,
             request.AgencyEmail);
 
-        _ = Task.WhenAll(confirmationTask, notificationTask);
+        await Task.WhenAll(confirmationTask, notificationTask);
 
         return new ContactInquiryResponse(
             inquiry.ReferenceNumber, inquiry.AgencyCode, inquiry.ContactName,
@@ -95,7 +95,7 @@ public class ContactService : IContactService
             appointment.DurationMinutes, appointment.MeetingType.ToString(),
             request.AgencyEmail);
 
-        _ = Task.WhenAll(confirmationTask, notificationTask);
+        await Task.WhenAll(confirmationTask, notificationTask);
 
         return new AppointmentResponse(
             appointment.ReferenceNumber, appointment.AgencyCode, appointment.ContactName,
