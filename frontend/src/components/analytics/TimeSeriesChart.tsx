@@ -8,47 +8,6 @@ interface TimeSeriesChartProps {
   data: TimeSeriesPoint[];
 }
 
-const formatMonth = (dateString: string) => {
-  const date = new Date(dateString + '-01');
-  return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-};
-
-const formatCurrency = (value: number) => {
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-  return `$${(value / 1e3).toFixed(0)}K`;
-};
-
-const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ payload: TimeSeriesPoint }>; label?: string }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0]?.payload as TimeSeriesPoint;
-    return (
-      <div className="p-4 border-t border-neutral-200 pt-5">
-        <p className="font-semibold text-black mb-3">{formatMonth(label ?? '')}</p>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-[#8a7200]" />
-            <span className="text-sm text-neutral-700">Inquiries:</span>
-            <span className="text-sm font-medium text-black">{data.inquiries}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-black" />
-            <span className="text-sm text-neutral-700">Conversions:</span>
-            <span className="text-sm font-medium text-black">{data.conversions}</span>
-          </div>
-          <div className="pt-2 border-t border-neutral-200">
-            <span className="text-sm text-neutral-700">Investment Value:</span>
-            <span className="text-sm font-medium text-red-600 ml-2">
-              {formatCurrency(data.investmentValue)}
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
 export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
   const [chartHeight, setChartHeight] = useState(400);
 
@@ -58,6 +17,46 @@ export default function TimeSeriesChart({ data }: TimeSeriesChartProps) {
     window.addEventListener('resize', updateHeight);
     return () => window.removeEventListener('resize', updateHeight);
   }, []);
+  const formatMonth = (dateString: string) => {
+    const date = new Date(dateString + '-01');
+    return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  };
+
+  const formatCurrency = (value: number) => {
+    if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
+    if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+    return `$${(value / 1e3).toFixed(0)}K`;
+  };
+
+  const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ payload: TimeSeriesPoint }>; label?: string }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0]?.payload as TimeSeriesPoint;
+      return (
+        <div className="p-4 border-t border-neutral-200 pt-5">
+          <p className="font-semibold text-black mb-3">{formatMonth(label ?? '')}</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-[#8a7200]" />
+              <span className="text-sm text-neutral-700">Inquiries:</span>
+              <span className="text-sm font-medium text-black">{data.inquiries}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-black" />
+              <span className="text-sm text-neutral-700">Conversions:</span>
+              <span className="text-sm font-medium text-black">{data.conversions}</span>
+            </div>
+            <div className="pt-2 border-t border-neutral-200">
+              <span className="text-sm text-neutral-700">Investment Value:</span>
+              <span className="text-sm font-medium text-red-600 ml-2">
+                {formatCurrency(data.investmentValue)}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="space-y-4">

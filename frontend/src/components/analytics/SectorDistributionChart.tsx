@@ -15,53 +15,52 @@ const VALUE_INK = '#8a7200';
 const AXIS_INK = '#5c5850';
 const GRID_INK = '#e7e3da';
 
-const formatCurrency = (value: number) => {
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-  return `$${(value / 1e3).toFixed(0)}K`;
-};
+export default function SectorDistributionChart({ data }: SectorDistributionChartProps) {
+  const formatCurrency = (value: number) => {
+    if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
+    if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+    return `$${(value / 1e3).toFixed(0)}K`;
+  };
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: SectorAnalyticsData }> }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0]?.payload as SectorAnalyticsData;
-    return (
-      <div className="border border-[#dcd8cf] border-t-4 border-t-black bg-white p-4 shadow-[0_6px_18px_rgb(0_0_0/0.12)]">
-        <p className="font-semibold text-black mb-2">{data.sector}</p>
-        <p className="text-sm text-neutral-700">Count: <span className="font-medium">{data.count}</span></p>
-        <p className="text-sm text-neutral-700">Percentage: <span className="font-medium">{data.percentage.toFixed(1)}%</span></p>
-        <p className="text-sm text-neutral-700">Investment: <span className="font-medium">{formatCurrency(data.investmentValue)}</span></p>
-      </div>
-    );
-  }
-  return null;
-};
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: SectorAnalyticsData }> }) => {
+    if (active && payload && payload.length) {
+      const data = payload[0]?.payload as SectorAnalyticsData;
+      return (
+        <div className="border border-[#dcd8cf] border-t-4 border-t-black bg-white p-4 shadow-[0_6px_18px_rgb(0_0_0/0.12)]">
+          <p className="font-semibold text-black mb-2">{data.sector}</p>
+          <p className="text-sm text-neutral-700">Count: <span className="font-medium">{data.count}</span></p>
+          <p className="text-sm text-neutral-700">Percentage: <span className="font-medium">{data.percentage.toFixed(1)}%</span></p>
+          <p className="text-sm text-neutral-700">Investment: <span className="font-medium">{formatCurrency(data.investmentValue)}</span></p>
+        </div>
+      );
+    }
+    return null;
+  };
 
-const TrendIcon = ({ trend, percentage }: { trend: 'up' | 'down' | 'stable'; percentage: number }) => {
-  if (trend === 'up') {
+  const TrendIcon = ({ trend, percentage }: { trend: 'up' | 'down' | 'stable'; percentage: number }) => {
+    if (trend === 'up') {
+      return (
+        <span className="inline-flex items-center text-black text-xs font-bold">
+          <ArrowTrendingUpIcon className="w-3 h-3 mr-0.5" />
+          {percentage.toFixed(1)}%
+        </span>
+      );
+    }
+    if (trend === 'down') {
+      return (
+        <span className="inline-flex items-center text-[#9a0d1c] text-xs font-bold">
+          <ArrowTrendingDownIcon className="w-3 h-3 mr-0.5" />
+          {Math.abs(percentage).toFixed(1)}%
+        </span>
+      );
+    }
     return (
-      <span className="inline-flex items-center text-black text-xs font-bold">
-        <ArrowTrendingUpIcon className="w-3 h-3 mr-0.5" />
+      <span className="inline-flex items-center text-neutral-600 text-xs font-medium">
+        <MinusIcon className="w-3 h-3 mr-0.5" />
         {percentage.toFixed(1)}%
       </span>
     );
-  }
-  if (trend === 'down') {
-    return (
-      <span className="inline-flex items-center text-[#9a0d1c] text-xs font-bold">
-        <ArrowTrendingDownIcon className="w-3 h-3 mr-0.5" />
-        {Math.abs(percentage).toFixed(1)}%
-      </span>
-    );
-  }
-  return (
-    <span className="inline-flex items-center text-neutral-600 text-xs font-medium">
-      <MinusIcon className="w-3 h-3 mr-0.5" />
-      {percentage.toFixed(1)}%
-    </span>
-  );
-};
-
-export default function SectorDistributionChart({ data }: SectorDistributionChartProps) {
+  };
 
   const byCount = [...data].sort((a, b) => b.count - a.count);
   const byValue = [...data].sort((a, b) => b.investmentValue - a.investmentValue);

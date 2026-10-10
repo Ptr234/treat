@@ -102,14 +102,13 @@ export default function BusinessRegistrationDetailClient({ referenceNumber }: { 
     [referenceNumber, isStaff]
   );
 
-  const contactEmail = registration?.contactEmail;
   const fetchPayment = useCallback(async () => {
-    if (!contactEmail) return;
+    if (!registration?.contactEmail) return;
     const res = await apiFetch<PaymentStatus>(
-      `/api/business-registrations/${referenceNumber}/payment?email=${encodeURIComponent(contactEmail)}`
+      `/api/business-registrations/${referenceNumber}/payment?email=${encodeURIComponent(registration.contactEmail)}`
     );
     if (res.success && res.data) setPayment(res.data);
-  }, [referenceNumber, contactEmail]);
+  }, [referenceNumber, registration?.contactEmail]);
 
   useEffect(() => {
     if (registration) fetchPayment();

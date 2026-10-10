@@ -94,6 +94,7 @@ export function getOrCreateSessionId(): string {
 export interface ChatEngineResult {
   messages: ChatMessage[];
   isTyping: boolean;
+  sessionId: string;
   sendMessage: (content: string, language: ChatLanguage, userInfo?: ChatUserInfo) => Promise<void>;
   clearMessages: () => void;
 }
@@ -214,7 +215,5 @@ export function useChatEngine(): ChatEngineResult {
     sessionIdRef.current = getOrCreateSessionId();
   }, []);
 
-  // The session id lives in a ref (and localStorage); it is not returned,
-  // because reading a ref during render would hand callers a stale value.
-  return { messages, isTyping, sendMessage, clearMessages };
+  return { messages, isTyping, sessionId: sessionIdRef.current, sendMessage, clearMessages };
 }

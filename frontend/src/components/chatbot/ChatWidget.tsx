@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   MessageCircle,
@@ -25,7 +24,6 @@ import { useVoiceInput } from '@/hooks/useVoiceInput';
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const { messages, isTyping, sendMessage } = useChatEngine();
-  const router = useRouter();
   const { user, isAuthenticated } = useAuth();
   const [inputValue, setInputValue] = useState('');
   const [language, setLanguage] = useState<ChatLanguage>('en');
@@ -154,7 +152,7 @@ export default function ChatWidget() {
   };
 
   const handleEscalate = () => {
-    router.push('/chatbot/?escalate=true');
+    window.location.href = '/chatbot?escalate=true';
   };
 
   const handleMicClick = () => {

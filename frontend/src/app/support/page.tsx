@@ -25,6 +25,7 @@ const SUPPORT_CATEGORIES: Record<string, string> = {
 };
 
 export default function SupportPage() {
+  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, email })));
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -33,7 +34,6 @@ export default function SupportPage() {
     message: '',
     agreedToFollowUp: false
   });
-  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, email })));
 
   // "Report a problem" links arrive as /support?page=/some/path#contact-form.
   useEffect(() => {

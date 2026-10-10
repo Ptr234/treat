@@ -97,10 +97,8 @@ export default function GoogleSignInButton({
   // Stable refs for callbacks — prevents re-render loops
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
-  useEffect(() => {
-    onSuccessRef.current = onSuccess;
-    onErrorRef.current = onError;
-  });
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
 
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
