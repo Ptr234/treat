@@ -145,6 +145,22 @@ List available backups: `ssh ubuntu@57.129.67.69 'ls -d /var/www/osc/aspnet.bak-
 - `osc-db-backup.sh` — nightly `pg_dump` of `osc_db` at 02:35, 14-day retention, to
   `/var/backups/osc/` (root-only).
 - `osc-deploy-backup-cleanup.sh` — prunes `aspnet.bak-*` dirs older than 14 days, 02:50 nightly.
+- **Off-site copy** (added 2026-10-10): `osc-offsite-backup.sh` at 03:05 nightly
+  (`/etc/cron.d/osc-offsite-backup`, log `/var/log/osc-offsite-backup.log`) encrypts each new dump
+  with GPG (AES-256) and uploads it to **Cloudflare R2, bucket `osc-backups`, prefix `osc_db/`**;
+  keeps 90 days off-site. Run `sudo osc-offsite-backup.sh --all` to upload every local dump.
+  - R2 credentials: `/root/.config/rclone/rclone.conf` (root-only). Token scoped to that bucket.
+    Ubuntu's rclone 1.60 needs `no_head = true` there (R2 rejects its post-upload versioned HEAD).
+  - Encryption passphrase: `/root/.osc-backup-passphrase` (root-only) **and the password manager**
+    — without it the off-site copies are unreadable if the server is lost.
+  - Restore from R2 (anywhere with rclone + gpg + the passphrase):
+    ```bash
+    rclone copyto r2:osc-backups/osc_db/osc_db-YYYY-MM-DD.dump.gpg ./x.gpg
+    gpg --decrypt -o osc_db.dump x.gpg            # prompts for the passphrase
+    createdb osc_restore && pg_restore --no-owner -d osc_restore osc_db.dump
+    ```
+  - Verified 2026-10-10: copy downloaded from R2, decrypted byte-identical to the local dump,
+    restored into a temporary database with matching row counts.
 
 ### Verifying a deploy
 
