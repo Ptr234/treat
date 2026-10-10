@@ -520,22 +520,10 @@ public class TicketService : ITicketService
     public async Task<int> ProcessSlaBreachesAsync(CancellationToken ct = default)
     {
         var now = DateTimeOffset.UtcNow;
-        var overdue = await _db.Tickets
-            .Where(t => t.SlaBreachedAt == null && t.SlaDeadlineAt != null && t.SlaDeadlineAt < now
-                        && t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed)
-            .OrderBy(t => t.SlaDeadlineAt)
-            .Take(100)
-            .ToListAsync(ct);
+        var overdue = _db.Database.IsRelational()
+            ? await _db.Database.CreateExecutionStrategy().ExecuteAsync(() => FlagSlaBreachesAtomicallyAsync(now, ct))
+            : await FlagSlaBreachesAsync(now, ct);
         if (overdue.Count == 0) return 0;
-
-        var monitor = StaffActor.System with { Name = "SLA monitor" };
-        foreach (var ticket in overdue)
-        {
-            ticket.SlaBreachedAt = now;
-            AddEvent(ticket, TicketEventType.SlaBreached, null, ticket.SlaDeadlineAt!.Value.ToString("u"), monitor);
-            await EscalateAsync(ticket, monitor);
-        }
-        await _db.SaveChangesAsync(ct);
 
         // After commit: the escalation list, the owning agency's officers and the assignee.
         var escalationEmails = await _settings.GetEscalationEmailsAsync();
@@ -553,6 +541,65 @@ public class TicketService : ITicketService
                 ticket.SlaDeadlineAt!.Value, StatusLabel(ticket.Status), recipients.ToArray());
         }
         return overdue.Count;
+    }
+
+    private IQueryable<Ticket> OverdueTickets(DateTimeOffset now) => _db.Tickets
+        .Where(t => t.SlaBreachedAt == null && t.SlaDeadlineAt != null && t.SlaDeadlineAt < now
+                    && t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed)
+        .OrderBy(t => t.SlaDeadlineAt)
+        .Take(100);
+
+    private async Task FlagSlaBreachAsync(Ticket ticket, DateTimeOffset now)
+    {
+        var monitor = StaffActor.System with { Name = "SLA monitor" };
+        ticket.SlaBreachedAt = now;
+        AddEvent(ticket, TicketEventType.SlaBreached, null, ticket.SlaDeadlineAt!.Value.ToString("u"), monitor);
+        await EscalateAsync(ticket, monitor);
+    }
+
+    /// <summary>
+    /// Flags breached tickets so that, with several API instances running the
+    /// SLA worker, each breach is processed (and emailed about) exactly once.
+    /// Each ticket is claimed with a conditional UPDATE inside one transaction:
+    /// a second worker's UPDATE on the same row waits for this transaction,
+    /// then re-checks SlaBreachedAt under READ COMMITTED, matches nothing and
+    /// skips the ticket. The claim commits together with the breach event and
+    /// escalation, so a failure leaves the ticket unclaimed for the next run.
+    /// Runs inside the retrying execution strategy, so it starts from a clean
+    /// change tracker and is safe to repeat.
+    /// </summary>
+    private async Task<List<Ticket>> FlagSlaBreachesAtomicallyAsync(DateTimeOffset now, CancellationToken ct)
+    {
+        _db.ChangeTracker.Clear();
+        await using var tx = await _db.Database.BeginTransactionAsync(ct);
+
+        var claimed = new List<Ticket>();
+        foreach (var ticket in await OverdueTickets(now).ToListAsync(ct))
+        {
+            var won = await _db.Tickets
+                .Where(t => t.Id == ticket.Id && t.SlaBreachedAt == null)
+                .ExecuteUpdateAsync(set => set.SetProperty(t => t.SlaBreachedAt, now), ct) == 1;
+            if (won) claimed.Add(ticket);
+            else _db.Entry(ticket).State = EntityState.Detached;
+        }
+
+        foreach (var ticket in claimed)
+            await FlagSlaBreachAsync(ticket, now);
+        await _db.SaveChangesAsync(ct);
+        await tx.CommitAsync(ct);
+        return claimed;
+    }
+
+    /// <summary>Non-relational providers (the in-memory test database) have no
+    /// conditional UPDATE; they run in a single process, so a plain read-then-save
+    /// is enough there.</summary>
+    private async Task<List<Ticket>> FlagSlaBreachesAsync(DateTimeOffset now, CancellationToken ct)
+    {
+        var overdue = await OverdueTickets(now).ToListAsync(ct);
+        foreach (var ticket in overdue)
+            await FlagSlaBreachAsync(ticket, now);
+        await _db.SaveChangesAsync(ct);
+        return overdue;
     }
 
     /// <summary>

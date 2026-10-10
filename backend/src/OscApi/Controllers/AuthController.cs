@@ -378,6 +378,35 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>Get current authenticated user.</summary>
+    /// <summary>
+    /// The current session, or null when signed out. Always 200: every page
+    /// checks this for every visitor, and a 401 for a plain visitor showed up
+    /// as an error in each browser's console. Built from the principal the
+    /// authentication middleware already validated (including the
+    /// account_updated_at revocation check), so a revoked session reads as null.
+    /// </summary>
+    [HttpGet("session")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public IActionResult Session()
+    {
+        if (User.Identity?.IsAuthenticated != true)
+            return Ok(new ApiResponse<AuthResponse?>(true, null));
+
+        var claims = User.Claims.ToList();
+        var id = claims.FirstOrDefault(c => c.Type == "sub" || c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var email = claims.FirstOrDefault(c => c.Type == "email" || c.Type == System.Security.Claims.ClaimTypes.Email)?.Value;
+        if (id is null || email is null)
+            return Ok(new ApiResponse<AuthResponse?>(true, null));
+
+        return Ok(new ApiResponse<AuthResponse?>(true, new AuthResponse(
+            id,
+            email,
+            claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "",
+            claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role")?.Value ?? "user",
+            claims.FirstOrDefault(c => c.Type == "picture")?.Value,
+            claims.FirstOrDefault(c => c.Type == "agency_code")?.Value)));
+    }
+
     [HttpGet("me")]
     [Microsoft.AspNetCore.Authorization.Authorize]
     public IActionResult Me()
