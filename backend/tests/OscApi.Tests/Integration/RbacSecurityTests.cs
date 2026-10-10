@@ -1,8 +1,11 @@
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using OtpNet;
 using Xunit;
+
+using OscApi.Tests.Helpers;
 
 namespace OscApi.Tests.Integration;
 
@@ -44,12 +47,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var email = NewEmail("regular");
 
         // Create regular user
-        await client.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "Regular User",
-            email,
-            password = "ValidPassword123!",
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Regular User", email, "ValidPassword123!");
 
         // Try to access admin dashboard
         var res = await client.GetAsync("/api/v1/dashboard");
@@ -74,21 +72,11 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var email2 = NewEmail("user2");
 
         // Create first user
-        await client.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "User 1",
-            email = email1,
-            password = "ValidPassword123!",
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "User 1", email1, "ValidPassword123!");
 
         // Create second user
         var client2 = _factory.CreateClient();
-        await client2.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "User 2",
-            email = email2,
-            password = "ValidPassword123!",
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client2, "User 2", email2, "ValidPassword123!");
 
         // First user tries to access second user's submissions
         var res = await client.GetAsync("/api/v1/me/submissions");
@@ -104,12 +92,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("user");
 
-        await client.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "Test User",
-            email,
-            password = "ValidPassword123!",
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Test User", email, "ValidPassword123!");
 
         // Try to update with another user's email pattern
         var res = await client.PutAsJsonAsync("/api/v1/me/profile", new
@@ -135,12 +118,7 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("ticket");
 
-        await client.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "Test User",
-            email,
-            password = "ValidPassword123!",
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Test User", email, "ValidPassword123!");
 
         await client.PostAsJsonAsync("/api/v1/tickets", new
         {
@@ -239,16 +217,18 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var email = NewEmail("hash");
         var password = "TestPassword123!";
 
-        await client.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "Test",
-            email,
-            password,
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Test", email, password);
 
-        // If we could access the DB, we'd verify the password is hashed
-        // For now, verify login still works (password is correctly hashed/verified)
-        var login = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password });
+        // Stored as a hash, never the plaintext — and a fresh login still verifies it.
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<OscApi.Data.OscDbContext>();
+            var stored = db.Users.Single(u => u.Email == email).PasswordHash;
+            Assert.NotNull(stored);
+            Assert.NotEqual(password, stored);
+            Assert.DoesNotContain(password, stored!);
+        }
+        var login = await _factory.CreateClient().PostAsJsonAsync("/api/v1/auth/login", new { email, password });
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
     }
 
@@ -297,13 +277,8 @@ public class RbacSecurityTests : IClassFixture<ApiFactory>
         var userClient = _factory.CreateClient();
         var email = NewEmail("delete");
 
-        // Create user
-        await userClient.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "Test",
-            email,
-            password = "ValidPassword123!",
-        });
+        // Create a verified user (password sign-in requires a verified email)
+        await TestUsers.SignUpVerifiedAsync(_factory, userClient, "Test", email, "ValidPassword123!");
 
         // Admin login
         await adminClient.PostAsJsonAsync("/api/v1/auth/login", new

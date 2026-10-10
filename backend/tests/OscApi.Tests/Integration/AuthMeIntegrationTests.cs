@@ -1,7 +1,10 @@
+using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using OtpNet;
+
+using OscApi.Tests.Helpers;
 
 namespace OscApi.Tests.Integration;
 
@@ -36,7 +39,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     }
 
     [Fact]
-    public async Task Signup_SetsSession_And_MeReturnsSubmissions()
+    public async Task Signup_RequiresEmailVerification_ThenMeReturnsSubmissions()
     {
         var client = _factory.CreateClient();
         var email = NewEmail("user");
@@ -44,6 +47,21 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         var signup = await client.PostAsJsonAsync("/api/v1/auth/signup",
             new { name = "Test User", email, password = "Passw0rd1" });
         Assert.Equal(HttpStatusCode.OK, signup.StatusCode);
+
+        // No session until the address is verified, and password login is refused.
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/v1/me/submissions")).StatusCode);
+        var early = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "Passw0rd1" });
+        Assert.Equal(HttpStatusCode.Forbidden, early.StatusCode);
+
+        // After verification (what the emailed link does) sign-in works.
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<OscApi.Data.OscDbContext>();
+            db.Users.Single(u => u.Email == email).EmailVerified = true;
+            db.SaveChanges();
+        }
+        var login = await client.PostAsJsonAsync("/api/v1/auth/login", new { email, password = "Passw0rd1" });
+        Assert.Equal(HttpStatusCode.OK, login.StatusCode);
 
         var me = await client.GetAsync("/api/v1/me/submissions");
         Assert.Equal(HttpStatusCode.OK, me.StatusCode);
@@ -114,8 +132,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
     public async Task Draft_SaveThenGet_RoundTrips()
     {
         var client = _factory.CreateClient();
-        await client.PostAsJsonAsync("/api/v1/auth/signup",
-            new { name = "D", email = NewEmail("draft"), password = "Passw0rd1" });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "D", NewEmail("draft"), "Passw0rd1");
 
         var put = await client.PutAsJsonAsync("/api/v1/me/drafts/investor_onboarding",
             new { step = 2, investorType = "foreign" });
@@ -143,8 +160,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         });
         Assert.Equal(HttpStatusCode.Created, ticket.StatusCode);
 
-        await client.PostAsJsonAsync("/api/v1/auth/signup",
-            new { name = "Owner", email, password = "Passw0rd1" });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Owner", email, "Passw0rd1");
 
         var me = await client.GetAsync("/api/v1/me/submissions");
         Assert.Equal(HttpStatusCode.OK, me.StatusCode);
@@ -161,8 +177,7 @@ public class AuthMeIntegrationTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("chatuser");
 
-        await client.PostAsJsonAsync("/api/v1/auth/signup",
-            new { name = "Chat User", email, password = "Passw0rd1" });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Chat User", email, "Passw0rd1");
 
         var log = await client.PostAsJsonAsync("/api/v1/chatbot/log", new
         {

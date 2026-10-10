@@ -7,6 +7,8 @@ using OscApi.Data;
 using OscApi.Models;
 using Xunit;
 
+using OscApi.Tests.Helpers;
+
 namespace OscApi.Tests.Integration;
 
 public class ApiEndpointTests : IClassFixture<ApiFactory>
@@ -202,12 +204,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var email = NewEmail("profile");
 
         // Signup
-        await client.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "Test",
-            email,
-            password = "ValidPassword123!",
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Test", email, "ValidPassword123!");
 
         // Update profile
         var res = await client.PutAsJsonAsync("/api/v1/me/profile", new
@@ -225,12 +222,7 @@ public class ApiEndpointTests : IClassFixture<ApiFactory>
         var client = _factory.CreateClient();
         var email = NewEmail("delete");
 
-        await client.PostAsJsonAsync("/api/v1/auth/signup", new
-        {
-            name = "Test",
-            email,
-            password = "ValidPassword123!",
-        });
+        await TestUsers.SignUpVerifiedAsync(_factory, client, "Test", email, "ValidPassword123!");
 
         var res = await client.PostAsync("/api/v1/me/delete-account", null);
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
