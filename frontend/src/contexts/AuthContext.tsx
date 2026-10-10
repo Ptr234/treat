@@ -49,7 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ── Check existing session on mount ────────────────────────────────
   const checkSession = useCallback(async () => {
     try {
-      const json = await apiFetch('/api/auth/me');
+      // /auth/session answers 200 with no user for visitors, where /auth/me
+      // answered 401 and logged an error in every visitor's console.
+      const json = await apiFetch('/api/auth/session');
       if (json.success && json.data) {
         const user = extractUser(json.data);
         if (user) {

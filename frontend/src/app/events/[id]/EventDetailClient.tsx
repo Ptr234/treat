@@ -37,7 +37,6 @@ function toIsoDate(value: string): string {
 }
 
 export default function EventDetailClient({ event }: EventDetailClientProps) {
-  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, email })));
   const [registrationStatus, setRegistrationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
     name: '',
@@ -45,6 +44,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
     phone: '',
     organization: ''
   });
+  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, email })));
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

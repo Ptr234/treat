@@ -19,9 +19,12 @@ export default function LayoutShell({ children }: { children: React.ReactNode })
   const isStaffConsole = pathname.startsWith('/dashboard') || pathname.startsWith('/agency-chat');
   // Printable documents (registration certificates) carry no site chrome.
   const isCertificate = pathname.endsWith('/certificate');
+  // The Sanity Studio is a full-screen app with its own navigation, and its
+  // CSS reset collapsed the site header's spacing when the two were combined.
+  const isStudio = pathname.startsWith('/studio');
 
   // These pages own their entire viewport — no public site chrome.
-  if (isChatbot || isStaffConsole || isCertificate) {
+  if (isChatbot || isStaffConsole || isCertificate || isStudio) {
     return <>{children}</>;
   }
 
