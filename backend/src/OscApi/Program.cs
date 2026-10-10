@@ -52,11 +52,17 @@ dataSourceBuilder.ConnectionStringBuilder.ConnectionIdleLifetime = 300;
 var dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<OscDbContext>(options =>
+{
     options.UseNpgsql(dataSource, npgOpt => npgOpt.EnableRetryOnFailure(
         maxRetryCount: 3,
         maxRetryDelay: TimeSpan.FromSeconds(5),
-        errorCodesToAdd: null))
-    .LogTo(Console.WriteLine, LogLevel.Information));
+        errorCodesToAdd: null));
+    // SQL echo is a development aid only. In production it wrote every
+    // statement — twice (here and via Serilog) — including the email
+    // outbox's 15 s poll.
+    if (builder.Environment.IsDevelopment())
+        options.LogTo(Console.WriteLine, LogLevel.Information);
+});
 
 // Reverse proxy support: accept forwarded headers only from explicitly trusted
 // proxy addresses. Trusting headers from every peer lets direct callers spoof
