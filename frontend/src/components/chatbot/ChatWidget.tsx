@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -10,129 +10,15 @@ import {
   Mic,
   ExternalLink,
   AlertCircle,
-  User,
 } from 'lucide-react';
 import ChatMessage from './ChatMessage';
 import LanguageSelector from './LanguageSelector';
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import AssistantSignInGate from './AssistantSignInGate';
 import type { ChatLanguage } from '@/types';
 import type { ChatUserInfo } from '@/lib/chatbot-service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useChatEngine } from '@/hooks/useChatEngine';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
-
-const USER_INFO_KEY = 'uia-chat-user-info';
-
-function loadUserInfo(): ChatUserInfo | null {
-  try {
-    const raw = localStorage.getItem(USER_INFO_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
-function saveUserInfo(info: ChatUserInfo) {
-  try {
-    localStorage.setItem(USER_INFO_KEY, JSON.stringify(info));
-  } catch {
-    // silently ignore
-  }
-}
-
-// Pre-chat form labels translated for all supported languages
-const FORM_LABELS: Record<ChatLanguage, {
-  title: string;
-  subtitle: string;
-  googlePrompt: string;
-  orDivider: string;
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  submit: string;
-  namePlaceholder: string;
-  emailPlaceholder: string;
-  phonePlaceholder: string;
-  locationPlaceholder: string;
-}> = {
-  en: {
-    title: 'Welcome to UIA Assistant',
-    subtitle: 'Sign in to get personalised investment assistance',
-    googlePrompt: 'Quick & verified sign-in',
-    orDivider: 'or continue without an account',
-    name: 'Full Name',
-    email: 'Email Address',
-    phone: 'Phone Number',
-    location: 'City / Country',
-    submit: 'Start Chat',
-    namePlaceholder: 'e.g. John Doe',
-    emailPlaceholder: 'e.g. john@example.com',
-    phonePlaceholder: 'e.g. +256-700-123456',
-    locationPlaceholder: 'e.g. Kampala, Uganda',
-  },
-  fr: {
-    title: "Bienvenue a l'assistant UIA",
-    subtitle: "Connectez-vous pour une assistance personnalisee",
-    googlePrompt: 'Connexion rapide et verifiee',
-    orDivider: 'ou continuez sans compte',
-    name: 'Nom complet',
-    email: 'Adresse e-mail',
-    phone: 'Numero de telephone',
-    location: 'Ville / Pays',
-    submit: 'Demarrer le chat',
-    namePlaceholder: 'ex. Jean Dupont',
-    emailPlaceholder: 'ex. jean@example.com',
-    phonePlaceholder: 'ex. +256-700-123456',
-    locationPlaceholder: 'ex. Kampala, Ouganda',
-  },
-  ar: {
-    title: '\u0645\u0631\u062d\u0628\u0627\u064b \u0628\u0643\u0645 \u0641\u064a \u0645\u0633\u0627\u0639\u062f UIA',
-    subtitle: '\u0633\u062c\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0644\u0644\u062d\u0635\u0648\u0644 \u0639\u0644\u0649 \u0645\u0633\u0627\u0639\u062f\u0629 \u0627\u0633\u062a\u062b\u0645\u0627\u0631\u064a\u0629 \u0645\u062e\u0635\u0635\u0629',
-    googlePrompt: '\u062a\u0633\u062c\u064a\u0644 \u062f\u062e\u0648\u0644 \u0633\u0631\u064a\u0639 \u0648\u0645\u0648\u062b\u0642',
-    orDivider: '\u0623\u0648 \u0627\u0633\u062a\u0645\u0631 \u0628\u062f\u0648\u0646 \u062d\u0633\u0627\u0628',
-    name: '\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0643\u0627\u0645\u0644',
-    email: '\u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a',
-    phone: '\u0631\u0642\u0645 \u0627\u0644\u0647\u0627\u062a\u0641',
-    location: '\u0627\u0644\u0645\u062f\u064a\u0646\u0629 / \u0627\u0644\u062f\u0648\u0644\u0629',
-    submit: '\u0628\u062f\u0621 \u0627\u0644\u0645\u062d\u0627\u062f\u062b\u0629',
-    namePlaceholder: '\u0645\u062b\u0627\u0644: \u0623\u062d\u0645\u062f \u0645\u062d\u0645\u062f',
-    emailPlaceholder: 'ahmed@example.com',
-    phonePlaceholder: '+256-700-123456',
-    locationPlaceholder: '\u0643\u0645\u0628\u0627\u0644\u0627\u060c \u0623\u0648\u063a\u0646\u062f\u0627',
-  },
-  zh: {
-    title: '\u6b22\u8fce\u4f7f\u7528UIA\u52a9\u624b',
-    subtitle: '\u767b\u5f55\u4ee5\u83b7\u53d6\u4e2a\u6027\u5316\u6295\u8d44\u534f\u52a9',
-    googlePrompt: '\u5feb\u901f\u9a8c\u8bc1\u767b\u5f55',
-    orDivider: '\u6216\u4e0d\u4f7f\u7528\u8d26\u6237\u7ee7\u7eed',
-    name: '\u59d3\u540d',
-    email: '\u7535\u5b50\u90ae\u7bb1',
-    phone: '\u7535\u8bdd\u53f7\u7801',
-    location: '\u57ce\u5e02 / \u56fd\u5bb6',
-    submit: '\u5f00\u59cb\u804a\u5929',
-    namePlaceholder: '\u4f8b\u5982\uff1a\u5f20\u4e09',
-    emailPlaceholder: 'zhang@example.com',
-    phonePlaceholder: '+256-700-123456',
-    locationPlaceholder: '\u574e\u5e15\u62c9\uff0c\u4e4c\u5e72\u8fbe',
-  },
-  sw: {
-    title: 'Karibu kwa Msaidizi wa UIA',
-    subtitle: 'Ingia ili kupata msaada wa uwekezaji',
-    googlePrompt: 'Ingia kwa haraka na uthibitisho',
-    orDivider: 'au endelea bila akaunti',
-    name: 'Jina Kamili',
-    email: 'Barua Pepe',
-    phone: 'Nambari ya Simu',
-    location: 'Jiji / Nchi',
-    submit: 'Anza Mazungumzo',
-    namePlaceholder: 'mfano: Juma Ali',
-    emailPlaceholder: 'juma@example.com',
-    phonePlaceholder: '+256-700-123456',
-    locationPlaceholder: 'Kampala, Uganda',
-  },
-};
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -148,11 +34,12 @@ export default function ChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const isOpenRef = useRef(false);
 
-  // Pre-chat form state
-  const [userInfo, setUserInfo] = useState<ChatUserInfo | null>(null);
-  const [formData, setFormData] = useState({ name: '', email: '', phone: '', location: '' });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [showManualForm, setShowManualForm] = useState(false);
+  // The assistant is for signed-in users only: identity always comes from the
+  // live session, never from details saved in the browser.
+  const userInfo = useMemo<ChatUserInfo | null>(
+    () => (isAuthenticated && user ? { name: user.name, email: user.email } : null),
+    [isAuthenticated, user]
+  );
 
   const voice = useVoiceInput(language);
 
@@ -160,24 +47,16 @@ export default function ChatWidget() {
   // conversation is open, or the user would lose the close button.
   const hideLauncher = footerVisible && !isOpen;
 
-  // Auto-set userInfo from Google auth when user signs in
-  useEffect(() => {
-    if (isAuthenticated && user && !userInfo) {
-      const info: ChatUserInfo = {
-        name: user.name,
-        email: user.email,
-      };
-      setUserInfo(info);
-      saveUserInfo(info);
-    }
-  }, [isAuthenticated, user, userInfo]);
-
-  // Load saved user info and language on mount
+  // Load the saved language on mount. (Guest contact details from older
+  // versions of the widget are discarded.)
   useEffect(() => {
     const savedLanguage = localStorage.getItem('chatLanguage') as ChatLanguage;
     if (savedLanguage) setLanguage(savedLanguage);
-    const saved = loadUserInfo();
-    if (saved) setUserInfo(saved);
+    try {
+      localStorage.removeItem('uia-chat-user-info');
+    } catch {
+      // storage unavailable — nothing to clear
+    }
   }, []);
 
   useEffect(() => {
@@ -253,40 +132,6 @@ export default function ChatWidget() {
     return () => document.removeEventListener('openChatWidget', handleOpenChat);
   }, [handleOpenChat]);
 
-  // When Google sign-in completes, auto-set userInfo
-  const handleGoogleSuccess = () => {
-    // Auth context will update → the useEffect above handles setting userInfo
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const errors: Record<string, string> = {};
-
-    if (!formData.name.trim()) errors.name = 'Required';
-    if (!formData.email.trim()) {
-      errors.email = 'Required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errors.email = 'Invalid email';
-    }
-    if (!formData.phone.trim()) errors.phone = 'Required';
-
-    if (Object.keys(errors).length > 0) {
-      setFormErrors(errors);
-      return;
-    }
-
-    const info: ChatUserInfo = {
-      name: formData.name.trim(),
-      email: formData.email.trim(),
-      phone: formData.phone.trim(),
-      location: formData.location.trim() || undefined,
-    };
-    setUserInfo(info);
-    saveUserInfo(info);
-    setFormErrors({});
-    setTimeout(() => inputRef.current?.focus(), 100);
-  };
-
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isTyping || !userInfo) return;
     const content = inputValue.trim();
@@ -319,7 +164,6 @@ export default function ChatWidget() {
     }
   };
 
-  const labels = FORM_LABELS[language] || FORM_LABELS.en;
 
   return (
     <>
@@ -356,127 +200,9 @@ export default function ChatWidget() {
               </div>
             </div>
 
-            {/* Gate: require identification before chat */}
+            {/* Gate: signed-in users only */}
             {!userInfo ? (
-              <div className="flex-1 overflow-y-auto p-4 bg-white">
-                <div className="text-center mb-4">
-                  <div className="w-14 h-14 bg-black flex items-center justify-center mx-auto mb-3">
-                    <User className="w-7 h-7 text-[#ffd700]" />
-                  </div>
-                  <h4 className="text-lg font-semibold text-black">{labels.title}</h4>
-                  <p className="text-sm text-neutral-700 mt-1">{labels.subtitle}</p>
-                </div>
-
-                {/* Primary: Google Sign-In */}
-                {!showManualForm && (
-                  <div className="space-y-3">
-                    <p className="text-xs text-neutral-600 text-center">{labels.googlePrompt}</p>
-                    <GoogleSignInButton onSuccess={handleGoogleSuccess} />
-
-                    {/* Divider */}
-                    <div className="flex items-center gap-3 py-2">
-                      <div className="flex-1 h-px bg-neutral-700" />
-                      <span className="text-xs text-neutral-600">{labels.orDivider}</span>
-                      <div className="flex-1 h-px bg-neutral-700" />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowManualForm(true)}
-                      className="w-full py-2.5 bg-white text-neutral-700 font-medium rounded-lg hover:bg-neutral-100 transition-colors text-sm border border-neutral-200"
-                    >
-                      {labels.submit}
-                    </button>
-                  </div>
-                )}
-
-                {/* Fallback: Manual Form */}
-                {showManualForm && (
-                  <form onSubmit={handleFormSubmit} className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-medium text-neutral-700 mb-1">
-                        {labels.name} <span className="text-[#ce1126]">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-                        placeholder={labels.namePlaceholder}
-                        maxLength={100}
-                        className={`w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border ${
-                          formErrors.name ? 'border-red-500' : 'border-neutral-200'
-                        }    focus:border-transparent`}
-                      />
-                      {formErrors.name && <p className="text-[#9a0d1c] text-xs font-bold mt-1">{formErrors.name}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-neutral-700 mb-1">
-                        {labels.email} <span className="text-[#ce1126]">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
-                        placeholder={labels.emailPlaceholder}
-                        maxLength={200}
-                        className={`w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border ${
-                          formErrors.email ? 'border-red-500' : 'border-neutral-200'
-                        }    focus:border-transparent`}
-                      />
-                      {formErrors.email && <p className="text-[#9a0d1c] text-xs font-bold mt-1">{formErrors.email}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-neutral-700 mb-1">
-                        {labels.phone} <span className="text-[#ce1126]">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        value={formData.phone}
-                        onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
-                        placeholder={labels.phonePlaceholder}
-                        maxLength={30}
-                        className={`w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border ${
-                          formErrors.phone ? 'border-red-500' : 'border-neutral-200'
-                        }    focus:border-transparent`}
-                      />
-                      {formErrors.phone && <p className="text-[#9a0d1c] text-xs font-bold mt-1">{formErrors.phone}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-neutral-700 mb-1">
-                        {labels.location}
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.location}
-                        onChange={e => setFormData(p => ({ ...p, location: e.target.value }))}
-                        placeholder={labels.locationPlaceholder}
-                        maxLength={200}
-                        className="w-full px-3 py-2 rounded-lg bg-white text-black text-sm placeholder-neutral-500 border border-neutral-200 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => setShowManualForm(false)}
-                        className="flex-1 py-2.5 bg-white text-neutral-700 font-medium rounded-lg hover:bg-neutral-100 transition-colors text-sm border border-neutral-200"
-                      >
-                        Back
-                      </button>
-                      <button
-                        type="submit"
-                        className="gov-btn gov-btn--gold flex-1"
-                      >
-                        {labels.submit}
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-            ) : (
+              <AssistantSignInGate language={language} />            ) : (
               <>
                 {/* Chat messages area */}
                 <div className="flex-1 overflow-y-auto p-4 bg-white">

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using OscApi.Common;
@@ -9,8 +11,13 @@ using OscApi.Services;
 
 namespace OscApi.Controllers;
 
+/// <summary>
+/// The investor assistant. Signed-in accounts only: every call costs an LLM
+/// request, and each conversation is tied to the account that holds it.
+/// </summary>
 [ApiController]
 [Route("api/v1/chatbot")]
+[Authorize]
 public class ChatbotController : ControllerBase
 {
     private readonly OscDbContext _db;
@@ -40,7 +47,8 @@ public class ChatbotController : ControllerBase
         };
 
         // Get conversation history from Redis (server-side storage)
-        var sessionHistory = await _sessions.GetSessionHistoryAsync(request.SessionId);
+        var sessionKey = SessionKey(request.SessionId);
+        var sessionHistory = await _sessions.GetSessionHistoryAsync(sessionKey);
 
         // Add recent messages (limit to 10 to reduce token usage)
         foreach (var entry in sessionHistory.TakeLast(10))
@@ -73,8 +81,8 @@ public class ChatbotController : ControllerBase
             // Store messages in Redis session (non-blocking)
             _ = Task.Run(async () =>
             {
-                await _sessions.AddMessageAsync(request.SessionId, "user", request.Message);
-                await _sessions.AddMessageAsync(request.SessionId, "assistant", response);
+                await _sessions.AddMessageAsync(sessionKey, "user", request.Message);
+                await _sessions.AddMessageAsync(sessionKey, "assistant", response);
             });
 
             return Ok(new ApiResponse<ChatResponse>(true, new ChatResponse(
@@ -91,7 +99,13 @@ public class ChatbotController : ControllerBase
     [EnableRateLimiting("chatbot")]
     public async Task<IActionResult> LogChat([FromBody] ChatLogRequest request)
     {
-        if (User.VerifiedAccountEmail() is { } accountEmail) request = request with { UserEmail = accountEmail };
+        // The enquiry is filed under the signed-in account, never a name or
+        // address typed into the client.
+        request = request with
+        {
+            UserEmail = AccountEmail() ?? request.UserEmail,
+            UserName = User.FindFirst("name")?.Value ?? request.UserName,
+        };
 
         // Parse enums defensively: language/tier/sentiment arrive from the client
         // (and sentiment ultimately from the LLM), so an unexpected value must not
@@ -136,9 +150,23 @@ public class ChatbotController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.SessionId))
             return Problem(detail: "sessionId is required", statusCode: StatusCodes.Status400BadRequest);
 
-        await _sessions.ClearSessionAsync(request.SessionId);
+        await _sessions.ClearSessionAsync(SessionKey(request.SessionId));
         return Ok(new ApiResponse(true));
     }
+
+    /// <summary>
+    /// History is stored per account: the client's session id is scoped by the
+    /// signed-in user, so one account can never read or clear another's
+    /// conversation by presenting its session id.
+    /// </summary>
+    private string SessionKey(string sessionId)
+    {
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "unknown";
+        return $"{userId}:{sessionId}";
+    }
+
+    private string? AccountEmail() =>
+        (User.FindFirst(ClaimTypes.Email)?.Value ?? User.FindFirst("email")?.Value)?.Trim().ToLowerInvariant();
 
     private static string? Truncate(string? value, int max) =>
         value is null ? null : (value.Length <= max ? value : value[..max]);

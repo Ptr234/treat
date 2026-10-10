@@ -24,8 +24,6 @@ export const TICKET_PRIORITIES = ['low', 'medium', 'high', 'critical'] as const;
 
 export const AUTHOR_ROLES = ['investor', 'officer', 'system'] as const;
 
-export const CHAT_LANGUAGES = ['en', 'fr', 'ar', 'zh', 'sw'] as const;
-
 // ── SLA hours per category ──────────────────────────────────────────
 
 export const SLA_HOURS: Record<string, number> = {
@@ -149,32 +147,3 @@ export const publicCommentSchema = z.object({
   authorEmail: z.string().email('Email is required for verification'),
 });
 
-export const chatbotMessageSchema = z.object({
-  message: z.string().min(1, 'Message is required').max(2000),
-  history: z
-    .array(
-      z.object({
-        role: z.enum(['user', 'assistant']),
-        content: z.string(),
-      })
-    )
-    .default([]),
-  language: z.enum(CHAT_LANGUAGES).default('en'),
-  sessionId: z.string().optional(),
-});
-
-export const CHAT_TIERS = ['ai', 'kb', 'suggestions'] as const;
-export const CHAT_SENTIMENTS = ['positive', 'neutral', 'negative'] as const;
-
-export const chatLogSchema = z.object({
-  sessionId: z.string().min(1).max(100),
-  userName: z.string().max(100).optional(),
-  userEmail: z.string().email().optional().or(z.literal('')),
-  userPhone: z.string().max(30).optional(),
-  userLocation: z.string().max(200).optional(),
-  userMessage: z.string().min(1).max(2000),
-  botResponse: z.string().min(1).max(10000),
-  language: z.enum(CHAT_LANGUAGES),
-  sentiment: z.enum(CHAT_SENTIMENTS).optional(),
-  tier: z.enum(CHAT_TIERS),
-});

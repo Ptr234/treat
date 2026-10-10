@@ -184,7 +184,7 @@ public class SecurityReviewIntegrationTests : IClassFixture<ApiFactory>
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
     }
 
-    // ── 4. Chat sessions need unguessable ids ───────────────────────────────────
+    // ── 4. The assistant: signed-in only, with unguessable session ids ───────────────────────────────────
 
     [Theory]
     [InlineData("chat-k3j2h1-ab12cd")]          // the old timestamp + Math.random() shape
@@ -192,7 +192,7 @@ public class SecurityReviewIntegrationTests : IClassFixture<ApiFactory>
     [InlineData("guessable")]
     public async Task Chat_RejectsGuessableSessionIds(string sessionId)
     {
-        var client = _factory.CreateClient();
+        var client = await SignedInInvestor();
         Assert.Equal(HttpStatusCode.BadRequest,
             (await client.PostAsJsonAsync("/api/v1/chatbot/clear", new { sessionId })).StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest,
@@ -202,9 +202,35 @@ public class SecurityReviewIntegrationTests : IClassFixture<ApiFactory>
     [Fact]
     public async Task Chat_AcceptsRandomSessionIds()
     {
-        var res = await _factory.CreateClient().PostAsJsonAsync("/api/v1/chatbot/clear",
+        var res = await (await SignedInInvestor()).PostAsJsonAsync("/api/v1/chatbot/clear",
             new { sessionId = "chat-" + Guid.NewGuid() });
         Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+    }
+
+    [Fact]
+    public async Task Assistant_IsForSignedInUsersOnly()
+    {
+        var anon = _factory.CreateClient();
+        var sessionId = "chat-" + Guid.NewGuid();
+
+        Assert.Equal(HttpStatusCode.Unauthorized,
+            (await anon.PostAsJsonAsync("/api/v1/chatbot", new { sessionId, message = "Hello", language = "en" })).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await anon.PostAsJsonAsync("/api/v1/chatbot/log", new
+        {
+            sessionId, userMessage = "Hi", botResponse = "Hello", language = "en", tier = "kb",
+        })).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized,
+            (await anon.PostAsJsonAsync("/api/v1/chatbot/clear", new { sessionId })).StatusCode);
+    }
+
+    /// <summary>A regular (investor) account signed in through the test Google stub.</summary>
+    private async Task<HttpClient> SignedInInvestor()
+    {
+        var client = _factory.CreateClient();
+        var res = await client.PostAsJsonAsync("/api/v1/auth/google",
+            new { idToken = $"verified:chat-{Guid.NewGuid():N}@example.com" });
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        return client;
     }
 
     // ── 6. Stored document paths can't escape the uploads directory ────────────

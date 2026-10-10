@@ -5,10 +5,10 @@ function getChatbotBaseUrl(): string {
   return process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '';
 }
 
-// The ASP.NET backend's routes are versioned (/api/v1/...); the Next.js
-// fallback route it mirrors (used when no backend URL is configured) is not.
-function chatbotPath(suffix: '' | '/log', baseUrl: string): string {
-  return baseUrl ? `/api/v1/chatbot${suffix}` : `/api/chatbot${suffix}`;
+// The assistant is served only by the ASP.NET backend, which requires a
+// signed-in session (there is no anonymous Next.js fallback).
+function chatbotPath(suffix: '' | '/log'): string {
+  return `/api/v1/chatbot${suffix}`;
 }
 
 // ===================== MULTILINGUAL KEYWORD MAP =====================
@@ -330,7 +330,7 @@ function logEnquiry(
 ) {
   const baseUrl = getChatbotBaseUrl();
   // Fire-and-forget — don't block the chat response
-  fetch(`${baseUrl}${chatbotPath('/log', baseUrl)}`, {
+  fetch(`${baseUrl}${chatbotPath('/log')}`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -356,6 +356,14 @@ export interface ChatResponse {
   sentiment?: 'positive' | 'neutral' | 'negative';
 }
 
+const SESSION_EXPIRED: Record<ChatLanguage, string> = {
+  en: 'Your session has ended. Please sign in again to keep using the assistant.',
+  fr: "Votre session a expiré. Veuillez vous reconnecter pour continuer à utiliser l'assistant.",
+  ar: 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى لمتابعة استخدام المساعد.',
+  zh: '您的会话已过期。请重新登录以继续使用助手。',
+  sw: 'Kipindi chako kimeisha. Tafadhali ingia tena ili kuendelea kutumia msaidizi.',
+};
+
 export async function sendChatMessage(
   message: string,
   history: { role: 'user' | 'assistant'; content: string }[],
@@ -366,7 +374,7 @@ export async function sendChatMessage(
   // Tier 1: Call API route (Groq / Llama 3.3)
   try {
     const baseUrl = getChatbotBaseUrl();
-    const res = await fetch(`${baseUrl}${chatbotPath('', baseUrl)}`, {
+    const res = await fetch(`${baseUrl}${chatbotPath('')}`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -378,10 +386,15 @@ export async function sendChatMessage(
       }),
     });
 
+    // Signed-in users only: an expired session gets a prompt to sign in again,
+    // not an answer from the local knowledge base.
+    if (res.status === 401) {
+      return { response: SESSION_EXPIRED[language] || SESSION_EXPIRED.en };
+    }
+
     const data = await res.json();
 
     // ASP.NET returns { success, data: { response, sentiment } }
-    // Next.js returns  { success, response, sentiment }
     const chatData = data.data ?? data;
     if (res.ok && data.success && (chatData.response || data.response)) {
       const result: ChatResponse = {
@@ -397,7 +410,7 @@ export async function sendChatMessage(
       console.warn('[chatbot] AI service unavailable:', data.code);
       // Fall through to KB but note the issue
     } else if (data.error || data.detail) {
-      // data.error: Next.js fallback route. data.detail: ASP.NET's RFC 7807 problem+json.
+      // data.detail: ASP.NET's RFC 7807 problem+json.
       console.error('[chatbot] API error:', data.error ?? data.detail);
     }
   } catch (error) {

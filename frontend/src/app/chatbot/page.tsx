@@ -27,6 +27,8 @@ import type { ChatLanguage } from '@/types';
 import { useChatEngine } from '@/hooks/useChatEngine';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { apiFetch } from '@/lib/api-client';
+import { useAuth } from '@/contexts/AuthContext';
+import AssistantSignInGate from '@/components/chatbot/AssistantSignInGate';
 
 const quickTopics = [
   { label: 'Investment Procedures', desc: 'How to invest in Uganda', icon: '📋' },
@@ -40,9 +42,46 @@ const quickTopics = [
 export default function ChatbotPage() {
   return (
     <Suspense fallback={<div className="h-screen bg-white" />}>
-      <ChatbotPageInner />
+      <SignedInOnly />
     </Suspense>
   );
+}
+
+/** The assistant is for signed-in users only; everyone else gets the sign-in prompt. */
+function SignedInOnly() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [language, setLanguage] = useState<ChatLanguage>('en');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('chatLanguage') as ChatLanguage | null;
+    if (saved) setLanguage(saved);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-white" role="status">
+        <Loader2 className="h-6 w-6 animate-spin text-black" aria-hidden="true" />
+        <span className="sr-only">Checking your session…</span>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <main className="flex min-h-[70vh] flex-col bg-white">
+        <div className="gov-container flex items-center justify-between gap-4 py-4">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-sm font-semibold text-black underline underline-offset-4">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Back to home
+          </Link>
+          <LanguageSelector currentLanguage={language} onLanguageChange={setLanguage} />
+        </div>
+        <AssistantSignInGate language={language} />
+      </main>
+    );
+  }
+
+  return <ChatbotPageInner />;
 }
 
 function ChatbotPageInner() {
@@ -61,14 +100,12 @@ function ChatbotPageInner() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const searchParams = useSearchParams();
 
-  // Load user info from localStorage (set by ChatWidget pre-chat form or escalation form)
-  const getUserInfo = useCallback(() => {
-    try {
-      const raw = localStorage.getItem('uia-chat-user-info');
-      if (raw) return JSON.parse(raw);
-    } catch { /* ignore */ }
-    return {};
-  }, []);
+  // Conversations are logged under the signed-in account.
+  const { user } = useAuth();
+  const getUserInfo = useCallback(
+    () => (user ? { name: user.name, email: user.email } : {}),
+    [user]
+  );
 
   const voice = useVoiceInput(language);
 
@@ -193,21 +230,15 @@ function ChatbotPageInner() {
       }
       const refNumber = result.data.referenceNumber;
 
-      // Save escalation user info so future messages are logged with identity
       const escalationUserInfo = {
         name: escalationData.name,
         email: escalationData.email,
         phone: escalationData.phone,
       };
-      try {
-        localStorage.setItem('uia-chat-user-info', JSON.stringify(escalationUserInfo));
-      } catch { /* ignore */ }
 
       // Log escalation with distinct tier so admin can filter in dashboard
       const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '';
-      // ASP.NET's routes are versioned (/api/v1/...); the Next.js fallback this
-      // mirrors (used when no backend URL is configured) is not.
-      fetch(`${baseUrl}${baseUrl ? '/api/v1/chatbot/log' : '/api/chatbot/log'}`, {
+      fetch(`${baseUrl}/api/v1/chatbot/log`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

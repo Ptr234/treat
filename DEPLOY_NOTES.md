@@ -41,9 +41,11 @@ need it live immediately, trigger a build (push anything to `main`, including an
 Set `JWT_SECRET` and `SANITY_API_TOKEN` as type **Secret**, not **Variable** — a plain Variable's
 value sits in cleartext in the dashboard.
 
-`GOOGLE_CLIENT_SECRET` and `GROQ_API_KEY` exist here too but are **unused**: the routes that read
-them (`/api/chatbot`, old email-sending routes) are bypassed once `NEXT_PUBLIC_BACKEND_URL` is
-set, since the browser calls the real backend directly instead.
+`GOOGLE_CLIENT_SECRET` exists here too but is **unused**: the old email-sending routes that read it
+are bypassed once `NEXT_PUBLIC_BACKEND_URL` is set, since the browser calls the real backend directly.
+**`GROQ_API_KEY` should be deleted from this Worker.** The Next.js `/api/chatbot` route that read it
+was removed (2026-10-10), because it called Groq for anyone with no sign-in check. The assistant is
+now served only by the backend, which requires a signed-in session.
 
 ---
 

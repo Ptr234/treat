@@ -255,9 +255,15 @@ builder.Services.AddRateLimiter(options =>
             });
     };
 
+    // The assistant is signed-in only, so it's metered per account (an office
+    // behind one NAT'd IP doesn't share a budget); IP is the fallback key.
     options.AddPolicy("chatbot", httpContext =>
         RateLimitPartition.GetSlidingWindowLimiter(
-            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value is { } chatUserId
+                ? $"user:{chatUserId}"
+                : httpContext.User.FindFirst("sub")?.Value is { } chatSub
+                    ? $"user:{chatSub}"
+                    : $"ip:{httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"}",
             _ => new SlidingWindowRateLimiterOptions
             {
                 PermitLimit = 20,
