@@ -48,6 +48,7 @@ public class InvestorsController : ControllerBase
     [EnableRateLimiting("public-form")]
     public async Task<IActionResult> CreateInvestor([FromBody] CreateInvestorRequest request)
     {
+        if (User.VerifiedAccountEmail() is { } accountEmail) request = request with { Email = accountEmail };
         var (result, existing) = await _investors.CreateAsync(request);
         // A repeat submission isn't an error for the investor: the onboarding
         // wizard tells them their existing reference has been emailed to them.

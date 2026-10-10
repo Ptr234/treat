@@ -20,6 +20,8 @@ import { TicketCategory, TicketPriority } from '@/types';
 import { apiFetch, resolveApiUrl } from '@/lib/api-client';
 import PageHeader from '@/components/ui/PageHeader';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAccountEmail } from '@/hooks/useAccountEmail';
+import AccountEmailHint from '@/components/ui/AccountEmailHint';
 
 // Files are held locally and uploaded only after the ticket exists — the
 // upload endpoint attaches them to the ticket by reference number, gated by
@@ -127,6 +129,7 @@ export default function CreateTicketPage() {
   const visibleCategories = isStaff ? categories : categories.filter((c) => c.value !== 'vip');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
+  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, contactEmail: email })));
   const [formData, setFormData] = useState<TicketFormData>({
     category: '',
     title: '',
@@ -510,11 +513,14 @@ export default function CreateTicketPage() {
                       type="email"
                       value={formData.contactEmail}
                       onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                      readOnly={Boolean(accountEmail)}
+                      aria-describedby={accountEmail ? 'ticket-email-hint' : undefined}
                       placeholder="your.email@example.com"
-                      className={`gov-input ${
+                      className={`gov-input ${accountEmail ? 'bg-neutral-100' : ''} ${
                         errors.contactEmail ? '!border-[#ce1126]' : ''
                       }`}
                     />
+                    {accountEmail && <AccountEmailHint id="ticket-email-hint" />}
                     {errors.contactEmail && (
                       <p className="mt-1 text-sm font-bold text-[#9a0d1c]">{errors.contactEmail}</p>
                     )}

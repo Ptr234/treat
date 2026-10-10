@@ -2,6 +2,8 @@
 
 import PageHeader from '@/components/ui/PageHeader';
 import React, { useState } from 'react';
+import { useAccountEmail } from '@/hooks/useAccountEmail';
+import AccountEmailHint from '@/components/ui/AccountEmailHint';
 import {
   CalendarIcon,
   MapPinIcon,
@@ -35,6 +37,7 @@ function toIsoDate(value: string): string {
 }
 
 export default function EventDetailClient({ event }: EventDetailClientProps) {
+  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, email })));
   const [registrationStatus, setRegistrationStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [formData, setFormData] = useState({
     name: '',
@@ -265,7 +268,8 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 </div>
                 <div>
                   <label htmlFor="email" className={labelClass}>Email address <span className="text-red-600">*</span></label>
-                  <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required className={inputClass} />
+                  <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required readOnly={Boolean(accountEmail)} aria-describedby={accountEmail ? 'event-email-hint' : undefined} className={`${inputClass} ${accountEmail ? 'bg-neutral-100' : ''}`} />
+                  {accountEmail && <AccountEmailHint id="event-email-hint" />}
                 </div>
                 <div>
                   <label htmlFor="phone" className={labelClass}>Phone number <span className="text-red-600">*</span></label>

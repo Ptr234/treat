@@ -60,6 +60,8 @@ public class TicketsController : ControllerBase
     public async Task<IActionResult> CreateTicket([FromBody] CreateTicketRequest request)
     {
         var who = TicketRequester.From(User, null);
+        var accountEmail = User.VerifiedAccountEmail();
+        if (accountEmail is not null) request = request with { ContactEmail = accountEmail };
         var result = await _tickets.CreateAsync(request, who.IsStaff);
         return Created("", new ApiResponse<object>(true, result));
     }

@@ -2,6 +2,8 @@
 
 import PageHeader from '@/components/ui/PageHeader';
 import { useEffect, useState, FormEvent } from 'react';
+import { useAccountEmail } from '@/hooks/useAccountEmail';
+import AccountEmailHint from '@/components/ui/AccountEmailHint';
 import Link from 'next/link';
 import { MessageSquare, Phone, Mail, MapPin } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
@@ -23,6 +25,7 @@ const SUPPORT_CATEGORIES: Record<string, string> = {
 };
 
 export default function SupportPage() {
+  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, email })));
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -285,7 +288,8 @@ export default function SupportPage() {
                 <label htmlFor="email" className={labelClass}>Email address *</label>
                 <p className="gov-hint mb-2">We will only use this to reply to your message.</p>
                 {errors.email && <p className="mb-2 text-sm font-bold text-[#9a0d1c]">Enter your email address</p>}
-                <input id="email" type="email" autoComplete="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} aria-invalid={errors.email} className={`${inputClass} ${errors.email ? '!border-[#ce1126]' : ''}`} />
+                <input id="email" type="email" autoComplete="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} readOnly={Boolean(accountEmail)} aria-describedby={accountEmail ? 'support-email-hint' : undefined} aria-invalid={errors.email} className={`${inputClass} ${accountEmail ? 'bg-neutral-100' : ''} ${errors.email ? '!border-[#ce1126]' : ''}`} />
+                {accountEmail && <AccountEmailHint id="support-email-hint" />}
               </div>
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>

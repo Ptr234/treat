@@ -91,6 +91,8 @@ public class ChatbotController : ControllerBase
     [EnableRateLimiting("chatbot")]
     public async Task<IActionResult> LogChat([FromBody] ChatLogRequest request)
     {
+        if (User.VerifiedAccountEmail() is { } accountEmail) request = request with { UserEmail = accountEmail };
+
         // Parse enums defensively: language/tier/sentiment arrive from the client
         // (and sentiment ultimately from the LLM), so an unexpected value must not
         // 500 and silently drop the enquiry.

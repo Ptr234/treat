@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useAccountEmail } from '@/hooks/useAccountEmail';
+import AccountEmailHint from '@/components/ui/AccountEmailHint';
 import { motion, AnimatePresence } from 'framer-motion';
 import { InvestmentData } from '../../types';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -14,6 +16,7 @@ export default function InvestmentOnboardingWizard() {
   const { addNotification } = useNotification();
   const { loadedDraft, draftLoaded, saveDraft, clearDraft } = useFormDraft<InvestmentDraft>('investor_onboarding');
   const draftApplied = useRef(false);
+  const accountEmail = useAccountEmail((email) => setInvestmentData((prev) => ({ ...prev, email })));
   const [investmentData, setInvestmentData] = useState<InvestmentData>({
     // Step 1: Investment Profile
     investorType: '', 
@@ -408,9 +411,12 @@ export default function InvestmentOnboardingWizard() {
                   type="email"
                   value={investmentData.email}
                   onChange={(e) => updateData('email', e.target.value)}
-                  className="gov-input"
+                  readOnly={Boolean(accountEmail)}
+                  aria-describedby={accountEmail ? 'investor-email-hint' : undefined}
+                  className={`gov-input ${accountEmail ? 'bg-neutral-100' : ''}`}
                   placeholder="Enter your email"
                 />
+                {accountEmail && <AccountEmailHint id="investor-email-hint" />}
               </div>
 
               <div>

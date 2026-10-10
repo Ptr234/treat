@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
+import { useAccountEmail } from '@/hooks/useAccountEmail';
+import AccountEmailHint from '@/components/ui/AccountEmailHint';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send,
@@ -53,6 +55,7 @@ function ChatbotPageInner() {
   const [isEscalating, setIsEscalating] = useState(false);
   const [escalationError, setEscalationError] = useState<string | null>(null);
   const [escalationData, setEscalationData] = useState({ name: '', email: '', phone: '', issue: '' });
+  const accountEmail = useAccountEmail((email) => setEscalationData((prev) => ({ ...prev, email })));
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -515,10 +518,14 @@ function ChatbotPageInner() {
                 <input
                   type="email"
                   placeholder="Email address *"
+                  aria-label="Email address"
                   value={escalationData.email}
                   onChange={(e) => setEscalationData(prev => ({ ...prev, email: e.target.value }))}
-                  className="gov-input"
+                  readOnly={Boolean(accountEmail)}
+                  aria-describedby={accountEmail ? 'escalation-email-hint' : undefined}
+                  className={`gov-input ${accountEmail ? 'bg-neutral-100' : ''}`}
                 />
+                {accountEmail && <AccountEmailHint id="escalation-email-hint" />}
                 <input
                   type="tel"
                   placeholder="Phone number (optional)"

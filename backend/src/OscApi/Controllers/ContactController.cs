@@ -31,6 +31,7 @@ public class ContactController : ControllerBase
         if (!await _recaptcha.VerifyAsync(recaptchaToken))
             return Problem(detail: "reCAPTCHA verification failed", statusCode: StatusCodes.Status400BadRequest);
 
+        if (User.VerifiedAccountEmail() is { } accountEmail) request = request with { Email = accountEmail };
         var result = await _contactService.CreateInquiryAsync(request);
         return Created($"/api/v1/contact/inquiries/{result.ReferenceNumber}",
             new ApiResponse<ContactInquiryResponse>(true, result));
@@ -46,6 +47,7 @@ public class ContactController : ControllerBase
         if (!await _recaptcha.VerifyAsync(recaptchaToken))
             return Problem(detail: "reCAPTCHA verification failed", statusCode: StatusCodes.Status400BadRequest);
 
+        if (User.VerifiedAccountEmail() is { } accountEmail) request = request with { Email = accountEmail };
         var result = await _contactService.CreateAppointmentAsync(request);
         return Created($"/api/v1/contact/appointments/{result.ReferenceNumber}",
             new ApiResponse<AppointmentResponse>(true, result));

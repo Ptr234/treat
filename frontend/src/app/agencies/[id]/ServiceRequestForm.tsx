@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useAccountEmail } from '@/hooks/useAccountEmail';
+import AccountEmailHint from '@/components/ui/AccountEmailHint';
 import { apiFetch } from '@/lib/api-client';
 
 interface ServiceRequestFormProps {
@@ -11,6 +13,7 @@ interface ServiceRequestFormProps {
 }
 
 export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail, services }: ServiceRequestFormProps) {
+  const accountEmail = useAccountEmail();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string; ref?: string } | null>(null);
 
@@ -77,7 +80,19 @@ export default function ServiceRequestForm({ agencyName, agencyCode, agencyEmail
         </div>
         <div>
           <label htmlFor="email" className={labelClass}>Email address <span className="text-red-600">*</span></label>
-          <input type="email" id="email" name="email" required className={inputClass} placeholder="your.email@example.com" />
+          <input
+            key={accountEmail ?? 'visitor'}
+            type="email"
+            id="email"
+            name="email"
+            required
+            defaultValue={accountEmail ?? undefined}
+            readOnly={Boolean(accountEmail)}
+            aria-describedby={accountEmail ? 'service-email-hint' : undefined}
+            className={`${inputClass} ${accountEmail ? 'bg-neutral-100' : ''}`}
+            placeholder="your.email@example.com"
+          />
+          {accountEmail && <AccountEmailHint id="service-email-hint" />}
         </div>
       </div>
 

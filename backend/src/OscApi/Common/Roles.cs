@@ -65,6 +65,22 @@ public static class ClaimsPrincipalExtensions
     public static bool IsAdminSession(this ClaimsPrincipal user) =>
         user.IsAdminLevel() && user.HasCompletedMfa();
 
+    /// <summary>
+    /// The email of a signed-in <b>regular user</b> whose address is verified, or null
+    /// (anonymous visitors and staff). Self-service records are matched to accounts
+    /// by email, so anything such a user submits is filed under this address — not
+    /// whatever was typed into the form — or it would never appear under
+    /// "My submissions" (nor would staff replies to it).
+    /// </summary>
+    public static string? VerifiedAccountEmail(this ClaimsPrincipal user)
+    {
+        if (user.Identity?.IsAuthenticated != true) return null;
+        if (Roles.BackOfficeRoles.Contains(user.GetRole())) return null; // staff file on others' behalf
+        if (user.FindFirst("email_verified")?.Value != "true") return null;
+        var email = user.FindFirst(ClaimTypes.Email)?.Value ?? user.FindFirst("email")?.Value;
+        return string.IsNullOrWhiteSpace(email) ? null : email.Trim().ToLowerInvariant();
+    }
+
     /// <summary>Any back-office role <b>and</b> MFA-complete: the in-code equivalent of the Staff policy.</summary>
     public static bool IsStaffSession(this ClaimsPrincipal user) =>
         (user.IsAdminLevel() || user.IsAgencyOfficer()) && user.HasCompletedMfa();
