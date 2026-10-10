@@ -24,9 +24,12 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _config;
     private readonly ILogger<AuthController> _logger;
     private readonly IGoogleTokenValidator _google;
+    private readonly ILoginThrottle _throttle;
 
-    public AuthController(OscDbContext db, IJwtService jwt, IPasswordService password, IEmailService email, ITotpService totp, IWebHostEnvironment env, IConfiguration config, ILogger<AuthController> logger, IGoogleTokenValidator google)
+    public AuthController(OscDbContext db, IJwtService jwt, IPasswordService password, IEmailService email, ITotpService totp, IWebHostEnvironment env, IConfiguration config, ILogger<AuthController> logger, IGoogleTokenValidator google,
+        ILoginThrottle throttle)
     {
+        _throttle = throttle;
         _db = db;
         _jwt = jwt;
         _password = password;
@@ -71,12 +74,20 @@ public class AuthController : ControllerBase
 
         var email = request.Email.ToLowerInvariant();
 
+        if (_throttle.IsLocked(email))
+        {
+            await AuditAsync(email, "-", "auth.login.locked", "Too many failed attempts for this account", 429);
+            return Problem(detail: "Too many failed sign-in attempts for this account. Try again in 15 minutes, or reset your password.",
+                statusCode: StatusCodes.Status429TooManyRequests);
+        }
+
         // Admins first.
         var admin = await _db.AdminUsers.FirstOrDefaultAsync(a => a.Email == email && a.IsActive);
         if (admin is not null)
         {
             if (admin.PasswordHash is null || !_password.VerifyPassword(request.Password, admin.PasswordHash))
             {
+                _throttle.RecordFailure(email);
                 await AuditAsync(email, admin.Role, "auth.login.failed", "Invalid password", 401);
                 return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
             }
@@ -93,12 +104,14 @@ public class AuthController : ControllerBase
 
                 if (!_totp.Verify(admin.MfaSecret, request.MfaCode))
                 {
+                    _throttle.RecordFailure(email);
                     await AuditAsync(admin.Email, admin.Role, "auth.login.failed", "Invalid MFA code", 401);
                     return Problem(detail: "Invalid authentication code", statusCode: StatusCodes.Status401Unauthorized);
                 }
             }
 
             var adminToken = _jwt.CreateToken(admin.Id.ToString(), admin.Email, admin.Name, admin.Role, picture: null, agencyCode: admin.AgencyCode, mfaEnabled: admin.MfaEnabled, accountUpdatedAt: admin.UpdatedAt);
+            _throttle.Reset(email);
             Response.Cookies.Append("osc-session", adminToken, _jwt.GetCookieOptions(_env.IsProduction()));
             await AuditAsync(admin.Email, admin.Role, "auth.login", "Successful sign-in", 200);
             return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
@@ -109,6 +122,7 @@ public class AuthController : ControllerBase
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email && u.IsActive);
         if (user is null || user.PasswordHash is null || !_password.VerifyPassword(request.Password, user.PasswordHash))
         {
+            _throttle.RecordFailure(email);
             await AuditAsync(email, "user", "auth.login.failed", "Invalid credentials", 401);
             return Problem(detail: "Invalid credentials", statusCode: StatusCodes.Status401Unauthorized);
         }
@@ -118,6 +132,7 @@ public class AuthController : ControllerBase
 
         var token = _jwt.CreateToken(user.Id.ToString(), user.Email, user.Name, user.Role, user.Picture,
             emailVerified: user.EmailVerified, accountUpdatedAt: user.UpdatedAt);
+        _throttle.Reset(email);
         Response.Cookies.Append("osc-session", token, _jwt.GetCookieOptions(_env.IsProduction()));
         await AuditAsync(user.Email, user.Role, "auth.login", "Successful sign-in", 200);
         return Ok(new ApiResponse<AuthResponse>(true, new AuthResponse(
@@ -616,6 +631,21 @@ public class AuthController : ControllerBase
             // exists); still durable, the email is queued in the outbox.
             _ = _email.SendPasswordResetAsync(admin.Email, admin.Name, resetToken);
         }
+        else
+        {
+            // Investor accounts reset the same way. This also lets a Google-only
+            // account add a password, which is fine: the token proves the mailbox.
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == resetEmail && u.IsActive);
+            if (user is not null)
+            {
+                var resetToken = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+                user.PasswordResetToken = HashResetToken(resetToken);
+                user.PasswordResetExpiresAt = DateTimeOffset.UtcNow.AddHours(1);
+                user.UpdatedAt = DateTimeOffset.UtcNow;
+                await _db.SaveChangesAsync();
+                _ = _email.SendPasswordResetAsync(user.Email, user.Name, resetToken);
+            }
+        }
 
         return Ok(new ApiResponse(true, "If the email exists, a reset link has been sent"));
     }
@@ -638,13 +668,34 @@ public class AuthController : ControllerBase
         var admin = await _db.AdminUsers
             .FirstOrDefaultAsync(a => a.PasswordResetToken == tokenHash && a.IsActive);
 
-        if (admin is null || admin.PasswordResetExpiresAt is null || admin.PasswordResetExpiresAt < DateTimeOffset.UtcNow)
+        if (admin is not null)
+        {
+            if (admin.PasswordResetExpiresAt is null || admin.PasswordResetExpiresAt < DateTimeOffset.UtcNow)
+                return Problem(detail: "Invalid or expired reset token", statusCode: StatusCodes.Status400BadRequest);
+
+            admin.PasswordHash = _password.HashPassword(request.NewPassword);
+            admin.PasswordResetToken = null;
+            admin.PasswordResetExpiresAt = null;
+            admin.UpdatedAt = DateTimeOffset.UtcNow;
+            await _db.SaveChangesAsync();
+            return Ok(new ApiResponse(true, "Password has been reset successfully"));
+        }
+
+        var user = await _db.Users
+            .FirstOrDefaultAsync(u => u.PasswordResetToken == tokenHash && u.IsActive);
+        if (user is null || user.PasswordResetExpiresAt is null || user.PasswordResetExpiresAt < DateTimeOffset.UtcNow)
             return Problem(detail: "Invalid or expired reset token", statusCode: StatusCodes.Status400BadRequest);
 
-        admin.PasswordHash = _password.HashPassword(request.NewPassword);
-        admin.PasswordResetToken = null;
-        admin.PasswordResetExpiresAt = null;
-        admin.UpdatedAt = DateTimeOffset.UtcNow;
+        user.PasswordHash = _password.HashPassword(request.NewPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetExpiresAt = null;
+        // The emailed token proves the address, so an unverified account
+        // becomes verified rather than being locked out after the reset.
+        user.EmailVerified = true;
+        user.EmailVerificationToken = null;
+        user.EmailVerificationExpiresAt = null;
+        // Bumping UpdatedAt revokes sessions issued before the reset.
+        user.UpdatedAt = DateTimeOffset.UtcNow;
         await _db.SaveChangesAsync();
 
         return Ok(new ApiResponse(true, "Password has been reset successfully"));

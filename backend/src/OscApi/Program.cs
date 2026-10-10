@@ -86,6 +86,9 @@ builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>
 var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"]
     ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
     ?? ["http://localhost:3000"];
+// One year, the commonly recommended minimum (the default is 30 days).
+builder.Services.AddHsts(options => options.MaxAge = TimeSpan.FromDays(365));
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -160,6 +163,7 @@ else
 
 // In-memory cache for application-level caching (settings, etc.)
 builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<OscApi.Common.ILoginThrottle, OscApi.Common.LoginThrottle>();
 
 // Business services
 builder.Services.AddScoped<OscApi.Services.ITicketService, OscApi.Services.TicketService>();
@@ -363,7 +367,13 @@ if (!app.Environment.IsEnvironment("Testing"))
         var method = context.Request.Method;
         var changesState = method != HttpMethods.Get && method != HttpMethods.Head &&
             method != HttpMethods.Options && method != HttpMethods.Trace;
-        if (changesState && context.Request.Cookies.ContainsKey("osc-session"))
+        var hasSession = context.Request.Cookies.ContainsKey("osc-session");
+        // Sign-in and sign-up also issue a session, so a foreign page must not be
+        // able to post them either (login CSRF: silently signing a visitor into
+        // an attacker's account). Without a cookie, a request that carries no
+        // Origin/Referer at all is a non-browser client and is let through.
+        var issuesSession = context.Request.Path.StartsWithSegments("/api/v1/auth");
+        if (changesState && (hasSession || issuesSession))
         {
             var source = context.Request.Headers["Origin"].FirstOrDefault();
             if (string.IsNullOrWhiteSpace(source) && context.Request.Headers["Referer"].Count > 0 &&
@@ -371,8 +381,9 @@ if (!app.Environment.IsEnvironment("Testing"))
                 source = referer.GetLeftPart(UriPartial.Authority);
 
             var requestOrigin = $"{context.Request.Scheme}://{context.Request.Host}";
-            if (string.IsNullOrWhiteSpace(source) ||
-                (!string.Equals(source, requestOrigin, StringComparison.OrdinalIgnoreCase) &&
+            if ((string.IsNullOrWhiteSpace(source) && hasSession) ||
+                (!string.IsNullOrWhiteSpace(source) &&
+                 !string.Equals(source, requestOrigin, StringComparison.OrdinalIgnoreCase) &&
                  !allowedBrowserOrigins.Contains(source)))
             {
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -386,12 +397,11 @@ if (!app.Environment.IsEnvironment("Testing"))
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ValidationExceptionMiddleware>();
 
-// HSTS only — no UseHttpsRedirection(). Kestrel only ever listens on plain
-// HTTP here (ASPNETCORE_URLS=http://+:8080 in both render.yaml and
-// docker-compose.test.yml); Render's edge terminates TLS and forwards
+// HSTS only — no UseHttpsRedirection(). Kestrel only listens on plain HTTP
+// (127.0.0.1:3003 on the VPS); nginx terminates TLS and forwards
 // X-Forwarded-Proto, which is already trusted above. An app-level HTTPS
 // redirect would have no HTTPS port to redirect to and would break the
-// plain-HTTP container healthcheck.
+// plain-HTTP healthcheck.
 if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
 {
     app.UseHsts();

@@ -132,6 +132,9 @@ public class UploadController : ControllerBase
         }
 
         var results = new List<object>();
+        // Files written so far, removed again if a later one (or the database
+        // save) fails, so a half-finished batch leaves nothing behind on disk.
+        var stored = new List<string>();
 
         foreach (var file in files)
         {
@@ -141,6 +144,7 @@ public class UploadController : ControllerBase
                 await using var stream = file.OpenReadStream();
                 var safeFileName = $"{Guid.NewGuid()}{MimeToExtension[file.ContentType]}";
                 var storageUrl = await _s3Upload.UploadFileAsync(stream, safeFileName, file.ContentType);
+                stored.Add(storageUrl);
 
                 var displayName = SanitizeHelper.StripHtml(Path.GetFileName(file.FileName));
                 if (displayName.Length > 255) displayName = displayName[^255..];
@@ -159,14 +163,32 @@ public class UploadController : ControllerBase
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to upload file {FileName}", file.FileName);
+                await DiscardAsync(stored);
                 return Problem(detail: $"Failed to upload {file.FileName}", statusCode: 500);
             }
         }
 
-        await _db.SaveChangesAsync();
+        try
+        {
+            await _db.SaveChangesAsync();
+        }
+        catch
+        {
+            await DiscardAsync(stored);
+            throw;
+        }
 
         _logger.LogInformation("Uploaded {Count} file(s) for ticket {Ref}", files.Count, ticketRefNumber);
 
         return Ok(new ApiResponse<object>(true, new { files = results }));
+    }
+
+    private async Task DiscardAsync(IEnumerable<string> storageUrls)
+    {
+        foreach (var url in storageUrls)
+        {
+            try { await _s3Upload.DeleteFileAsync(url); }
+            catch (Exception ex) { _logger.LogWarning(ex, "Could not remove orphaned upload {Url}", url); }
+        }
     }
 }

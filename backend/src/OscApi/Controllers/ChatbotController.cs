@@ -84,12 +84,10 @@ public class ChatbotController : ControllerBase
                 response = response.Replace(sentimentMatch.Value, "").Trim();
             }
 
-            // Store messages in Redis session (non-blocking)
-            _ = Task.Run(async () =>
-            {
-                await _sessions.AddMessageAsync(sessionKey, "user", request.Message);
-                await _sessions.AddMessageAsync(sessionKey, "assistant", response);
-            });
+            // Save the exchange before replying, so a quick follow-up question
+            // always sees this turn in the history.
+            await _sessions.AddMessageAsync(sessionKey, "user", request.Message);
+            await _sessions.AddMessageAsync(sessionKey, "assistant", response);
 
             return Ok(new ApiResponse<ChatResponse>(true, new ChatResponse(
                 response, request.Language, sentiment, "ai")));
