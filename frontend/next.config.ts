@@ -20,7 +20,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  // Cloudflare Workers via OpenNext (see wrangler.jsonc and DEPLOY_NOTES.md).
+  // Self-contained server bundle (.next/standalone) that the VPS runs with
+  // `node server.js` (see DEPLOY_NOTES.md). The OpenNext/Cloudflare build
+  // also builds standalone, so this changes nothing there.
+  output: 'standalone',
   trailingSlash: true,
   poweredByHeader: false,
   images: {

@@ -1,0 +1,34 @@
+[Unit]
+Description=Uganda OSC website (Next.js standalone)
+After=network.target osc-api.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/osc/web
+Environment=PORT=3010
+Environment=HOSTNAME=127.0.0.1
+Environment=NODE_ENV=production
+# JWT_SECRET (same value as the API's Jwt:Secret) and, when set, SANITY_API_TOKEN.
+# Root-only file, written by deploy/vps-install.sh; never in git.
+EnvironmentFile=/etc/osc-web/env
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+SyslogIdentifier=osc-web
+StandardOutput=journal
+StandardError=journal
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+# Shares the box with the API, Women in Design and the ERP.
+MemoryMax=768M
+MemoryHigh=512M
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
