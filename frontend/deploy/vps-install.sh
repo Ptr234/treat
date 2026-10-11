@@ -25,12 +25,12 @@ os.close(fd)
 PY
   echo "created /etc/osc-web/env (JWT_SECRET from the API config)"
 fi
-sudo install -m 644 "$UP/osc-web.service" /etc/systemd/system/osc-web.service
+tr -d '\r' < "$UP/osc-web.service" | sudo tee /etc/systemd/system/osc-web.service >/dev/null
 sudo systemctl daemon-reload
 sudo systemctl enable osc-web >/dev/null 2>&1 || true
 if ! sudo test -f /etc/nginx/sites-available/osc-web; then
   # Only installed once: certbot edits it afterwards to add HTTPS.
-  sudo install -m 644 "$UP/nginx-osc-web.conf" /etc/nginx/sites-available/osc-web
+  tr -d '\r' < "$UP/nginx-osc-web.conf" | sudo tee /etc/nginx/sites-available/osc-web >/dev/null
   sudo ln -sfn /etc/nginx/sites-available/osc-web /etc/nginx/sites-enabled/osc-web
   sudo nginx -t
   sudo systemctl reload nginx

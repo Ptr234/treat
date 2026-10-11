@@ -1,0 +1,5 @@
+# Installed on Linux (bash, systemd, nginx): keep Unix line endings.
+*.sh text eol=lf
+*.service text eol=lf
+*.conf text eol=lf
+*.env text eol=lf
