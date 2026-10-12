@@ -73,7 +73,9 @@ sudo systemctl start osc-web
 
 if healthy; then
   echo "NEW WEBSITE RELEASE HEALTHY"
-  sudo test -d "$BAK" && echo "rollback copy: $BAK"
+  # (an `if`, not `test && echo`: on a first install there is no copy, and a
+  # false `test` as the branch's last command would trip `set -e`)
+  if sudo test -d "$BAK"; then echo "rollback copy: $BAK"; fi
 else
   echo "!! new website release NOT healthy"
   sudo journalctl -u osc-web -n 30 --no-pager | tail -15
