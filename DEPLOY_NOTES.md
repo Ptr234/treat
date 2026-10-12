@@ -1,79 +1,83 @@
 # Deploying OSC Digital Tool
 
-Two independent deployments: the **frontend** (Cloudflare Workers) deploys itself; the
-**backend** (a VPS) does not — it's a manual publish-and-swap, documented below.
+Both halves run on the same VPS and are deployed by hand: the **website** with one PowerShell
+command (§1), the **backend** with a publish-and-swap (§2). Cloudflare sits in front of both
+for DNS, TLS and edge caching.
 
 > ⚠️ Never commit real secret values to this file or to `appsettings.json`/`appsettings.Development.json`.
-> Production secrets live only in `appsettings.Production.json` on the server (see §3) and in
-> Cloudflare's dashboard (see §2) — neither is in git.
+> Production secrets live only on the server: `appsettings.Production.json` for the backend (§3)
+> and `/etc/osc-web/env` for the website (§1). Neither is in git.
 
 ---
 
-## 1. Frontend — Cloudflare Workers (automatic)
+## 1. Frontend (website) — the VPS (manual, one command)
 
-- **Trigger:** every push to `main` on `github.com/Ptr234/treat`. Cloudflare's own Git
-  integration builds and deploys automatically — there is no GitHub Actions workflow for this
-  and there should not be one; a duplicate was removed for exactly that reason.
-- **Build:** `npm ci --legacy-peer-deps && npm run cf:build` (OpenNext for Cloudflare), from
-  `frontend/`, defined in `frontend/wrangler.jsonc`. The deployed Worker is named `treat` — not
-  `osc-frontend` or anything else; `wrangler.jsonc`'s `name` field must keep matching the
-  Worker that actually owns the `oscdigitaltool.com` / `www.oscdigitaltool.com` custom domains,
-  or new deploys silently stop reaching the live site.
-- **How long:** builds have taken anywhere from under a minute to several minutes in practice.
-  Check the Cloudflare dashboard → the `treat` Worker → **Deployments** tab for real status;
-  don't assume a push has landed just because it was pushed.
-- **Confirming from a terminal:** poll the live HTML for something the change introduced, e.g.
-  `curl -s https://oscdigitaltool.com/ | grep -c osc-logo` (the 2026-10-10 logo change went live
-  ~5 minutes after the push). A hard refresh (Ctrl+F5) clears a browser's cached copy.
-- **Prerendered pages are served from a cache, not re-rendered.** Almost every page is
-  prerendered at build time. Until 2026-10-10 the Worker had no incremental cache and rendered
-  each page on every request, which exceeded the Workers CPU limit: about half of all page loads
-  failed (Cloudflare error 1102, or a hang). `frontend/open-next.config.ts` now uses OpenNext's
-  static-assets cache with cache interception, and `npm run cf:build` copies the prerendered
-  pages into the Worker's assets (`opennextjs-cloudflare populateCache local`). Check with
-  `curl -sI https://oscdigitaltool.com/about/ | grep -i x-opennext-cache` → `HIT`.
-  This cache is read-only: a page that adds time-based `revalidate` (ISR) needs an R2 or KV
-  incremental cache instead.
-- **Next.js 16 upgrade: tried and rolled back (2026-10-11).** Findings for the next attempt:
-  - Next.js 16.4.0 writes a `preview-props.json` manifest that OpenNext 1.20.10 can't load, so
-    every server-rendered route returned 500. 16.3.8 (the lowest version OpenNext supports)
-    builds and passed every check under local `wrangler dev`.
-  - Deployed, the 16.3.8 build served prerendered pages and API routes fine, but every route
-    the middleware handles (`/dashboard`, `/agency-chat`, the closed `/api/...` routes) and
-    `/studio` failed with error 1102 or hung. Local `wrangler dev` has no CPU limit, so it
-    can't catch this. Reverted (commit `3d19e97`); the Next.js 15 build handles them in ~0.25 s.
-  - Before trying again: check the Workers plan's CPU limit (Workers Paid allows far more than
-    the free plan), and test the *deployed* Worker, e.g. with a preview deployment, on
-    `/dashboard/`, `/studio/` and an `/api/...` route.
+Moved off Cloudflare Workers on 2026-10-12 (see "Why not Cloudflare Workers" below).
+
+| | |
+|---|---|
+| Service | `osc-web.service` (systemd, user `www-data`), `node server.js` on `127.0.0.1:3010`. Unit file: `frontend/deploy/osc-web.service` |
+| Code | `/var/www/osc/web/` — the Next.js standalone build (`output: 'standalone'`) plus `.next/static` and `public`. `BUILD` holds the deployed commit |
+| Secrets | `/etc/osc-web/env` (root-only): `JWT_SECRET` (copied from the API's `Jwt:Secret` on first install; the middleware verifies the session cookie itself, so they must match) and `SANITY_API_TOKEN` (Editor token; staff create/edit events, downloads and agencies through it) |
+| nginx | `/etc/nginx/sites-available/osc-web` — `oscdigitaltool.com` and `www`, TLS by certbot (renews automatically), `/_next/static/` served from disk with a one-year cache |
+| DNS | Cloudflare: `@` and `www` A records → `57.129.67.69`, proxied. SSL mode must stay Full (strict) |
+| Memory | ~140 MB; the unit caps it at 768 MB (the box also runs the API, Women in Design and the ERP) |
+
+### Deploying a website change
+
+Commit first; the script refuses uncommitted frontend changes so the live site always matches a
+commit. Then, on Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File frontend\deploy\deploy-vps.ps1
+```
+
+It builds with the public settings in `frontend/deploy/build.env`, packages the standalone
+server, uploads it, and runs `frontend/deploy/vps-install.sh` on the server. That script stages
+the release beside the live one, swaps in Linux builds of `sharp` (image processing; the bundle
+is built on Windows), restarts `osc-web`, and checks `/` and `/about/`. If the new release
+doesn't answer within 60 s it puts the previous one back. The three newest releases are kept as
+`/var/www/osc/web.bak-<timestamp>`. A build takes ~5 minutes; `-SkipBuild` re-sends the last one
+(useful when only the upload failed).
+
+`NEXT_PUBLIC_*` values are compiled into the browser bundle, so changing one in `build.env`
+means redeploying. Server-only secrets: edit `/etc/osc-web/env`, then
+`sudo systemctl restart osc-web`.
+
+Rollback by hand:
+```bash
+ssh ubuntu@57.129.67.69 'sudo systemctl stop osc-web && sudo mv /var/www/osc/web /var/www/osc/web.failed &&
+  sudo mv /var/www/osc/web.bak-<TS> /var/www/osc/web && sudo systemctl start osc-web'
+```
+
+### Notes
+
 - **Security headers** for the site are set in `frontend/next.config.ts` (the API sets its own).
 - **The Next.js routes the backend replaced** (`/api/auth`, `/api/tickets`, `/api/investors`,
   `/api/upload`, `/api/messages`, `/api/dashboard`, `/api/health`) return 404 whenever
   `NEXT_PUBLIC_BACKEND_URL` is set (`frontend/src/middleware.ts`). They're kept only for local
   development without a backend.
+- **The `treat` Worker on Cloudflare still exists** and still builds on every push to `main`,
+  but it no longer serves the domain. Disconnect its Git integration (or delete the Worker) in
+  the dashboard to stop the wasted builds. Its variables (`GROQ_API_KEY`, `GOOGLE_CLIENT_SECRET`,
+  the old `SANITY_API_TOKEN`) can go with it; revoke that old Sanity token at sanity.io/manage.
 
-### Frontend environment variables (Cloudflare dashboard → `treat` Worker → Settings → Variables and Secrets)
+### Why not Cloudflare Workers
 
-`NEXT_PUBLIC_*` variables are **build-time** — Next.js inlines them into the browser bundle.
-Changing one does nothing until the next build runs. If you've just added or changed one and
-need it live immediately, trigger a build (push anything to `main`, including an empty commit:
-`git commit --allow-empty -m "chore: trigger rebuild"`).
+The site ran on a Cloudflare Worker (OpenNext) until 2026-10-12. The free Workers plan allows
+~10 ms of CPU per request, and rendering a Next.js page takes more:
+- Until 2026-10-10 every page was rendered per request and about half of all loads failed
+  (error 1102 or a hang). An OpenNext static-assets cache fixed prerendered pages
+  (`frontend/open-next.config.ts`, `npm run cf:build`).
+- Pages rendered on demand (ticket tracking, registration and event pages, the Studio, the
+  content APIs) still failed intermittently, worst under bursts of traffic.
+- A Next.js 16 / Sanity 6 upgrade (2026-10-11) made every middleware route and the Studio fail
+  outright, and was reverted (commit `3d19e97`). Also found: Next.js 16.4.0 writes a
+  `preview-props.json` manifest that OpenNext 1.20.10 can't load.
+A paid Workers plan wasn't an option. On the VPS none of these limits apply, so Next.js 16 can
+be retried there; test it with the deploy script, which rolls back on failure.
 
-| Variable | Purpose |
-|---|---|
-| `NEXT_PUBLIC_BACKEND_URL` | Points the frontend at the VPS backend (`https://api.oscdigitaltool.com`) |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google Sign-In client ID (public, not secret) |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` / `_DATASET` / `_API_VERSION` | Sanity CMS connection |
-| `JWT_SECRET` | **Must be byte-for-byte identical** to the backend's `Jwt:Secret` — the frontend's own middleware verifies the session cookie independently |
-| `SANITY_API_TOKEN` | Server-side Sanity write access, used by the (mostly superseded) Next.js API routes |
-
-Set `JWT_SECRET` and `SANITY_API_TOKEN` as type **Secret**, not **Variable** — a plain Variable's
-value sits in cleartext in the dashboard.
-
-`GOOGLE_CLIENT_SECRET` exists here too but is **unused**: the old email-sending routes that read it
-are bypassed once `NEXT_PUBLIC_BACKEND_URL` is set, since the browser calls the real backend directly.
-**`GROQ_API_KEY` should be deleted from this Worker.** The Next.js `/api/chatbot` route that read it
-was removed (2026-10-10), because it called Groq for anyone with no sign-in check. The assistant is
-now served only by the backend, which requires a signed-in session.
+`npm run cf:build` and `frontend/wrangler.jsonc` still work if the site ever goes back.
 
 ---
 
@@ -84,7 +88,7 @@ now served only by the backend, which requires a signed-in session.
 | | |
 |---|---|
 | Host | `ubuntu@57.129.67.69` (OVH, Frankfurt) — key-only SSH, passwordless sudo |
-| Shared with | This box also runs **Women in Design** (`wid-api`, port 3001) and the **Ngyero ERP** — it is not dedicated to this project. Be mindful of resources and don't assume you're the only thing running. |
+| Shared with | This box also runs **this project's website** (`osc-web`, port 3010, §1), **Women in Design** (`wid-api`, port 3001) and the **Ngyero ERP** — it is not dedicated to this project. Be mindful of resources and don't assume you're the only thing running. |
 | Backend service | `osc-api.service` (systemd), bound to `127.0.0.1:3003`, not exposed directly |
 | Reverse proxy | nginx, `/etc/nginx/sites-available/osc` → `https://api.oscdigitaltool.com`, TLS via certbot (auto-renews) |
 | Database | PostgreSQL 16, local, database `osc_db`, role `osc_user` |

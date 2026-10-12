@@ -5,7 +5,7 @@ This document outlines the core principles and guidelines for developing the Uga
 ## Repository Structure
 ```
 /
-├── frontend/    ← Next.js 15 on Cloudflare Workers via OpenNext (production app)
+├── frontend/    ← Next.js 15, served from the VPS (osc-web.service) behind Cloudflare
 ├── backend/     ← ASP.NET Web API + PostgreSQL
 ├── shared/      ← Shared types/contracts
 ├── CLAUDE.md
@@ -16,7 +16,7 @@ This document outlines the core principles and guidelines for developing the Uga
 ## Core Philosophy
 - **Systematic Implementation**: Build the application "Brick by Brick." Each component and feature must be fully implemented, tested, and verified before moving to the next. Do not make assumptions; validate every step.
 - **Cultural Relevance**: All design, content, and functionality must be tailored to the Ugandan context. Conduct thorough research to ensure cultural sensitivity and appropriateness.
-- **Hybrid Architecture**: Frontend runs on Cloudflare Workers (Next.js via OpenNext; see DEPLOY_NOTES.md). Backend migrates incrementally to ASP.NET Web API for features requiring a real database (auth, tickets, messaging, analytics). Sanity CMS remains for content (agencies, events, investment descriptions, downloadable resources).
+- **Hybrid Architecture**: Frontend runs as a Next.js standalone server on the VPS, next to the backend (see DEPLOY_NOTES.md §1). Backend migrates incrementally to ASP.NET Web API for features requiring a real database (auth, tickets, messaging, analytics). Sanity CMS remains for content (agencies, events, investment descriptions, downloadable resources).
 
 ## Agent & Tooling
 - **Chatbot LLM**: Groq API for the investor chatbot. The model is the `Groq:Model` setting: production uses `openai/gpt-oss-120b`; the committed default is `llama-3.3-70b-versatile`.
@@ -30,7 +30,7 @@ This document outlines the core principles and guidelines for developing the Uga
 4.  **Documentation**: Maintain a factual and up-to-date log of all development activities in `PROGRESS.md`.
 
 ## Code Quality & Conventions
-- **Frontend**: Next.js 15 with TypeScript, Tailwind CSS, App Router. A Next.js 16 upgrade was rolled back (see DEPLOY_NOTES.md); test any Next.js upgrade on the deployed Worker, not only locally.
+- **Frontend**: Next.js 15 with TypeScript, Tailwind CSS, App Router. A Next.js 16 upgrade failed on Cloudflare Workers and was rolled back; on the VPS it can be retried (see DEPLOY_NOTES.md §1).
 - **Backend**: ASP.NET Web API with C#, PostgreSQL, EF Core.
 - **Modules**: Use ES modules (`import`/`export`) in frontend.
 - **Branding**: Strictly adhere to the Uganda flag color palette: black, yellow (gold #FFD700), red (#CE1126), and white.
