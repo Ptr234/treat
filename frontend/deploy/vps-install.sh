@@ -51,6 +51,15 @@ sudo cp -r "$TMP/node_modules/sharp" "$NEW/node_modules/sharp"
 sudo cp -r "$TMP/node_modules/@img" "$NEW/node_modules/@img"
 sudo cp -rn "$TMP/node_modules/." "$NEW/node_modules/" 2>/dev/null || true
 rm -rf "$TMP"
+# Carry over the previous release's hashed assets (never overwriting new
+# ones): browser tabs opened before the deploy still request the old script
+# names, and would otherwise get 404s until they reload.
+# Timestamps are kept (-p) so files carried over again and again age out
+# after 30 days; the new build's own files are fresh.
+if sudo test -d "$LIVE/.next/static"; then
+  sudo cp -rnp "$LIVE/.next/static/." "$NEW/.next/static/"
+  sudo find "$NEW/.next/static" -type f -mtime +30 -delete
+fi
 sudo chown -R www-data:www-data "$NEW"
 echo "staged $(sudo du -sh "$NEW" | cut -f1) in $NEW"
 
