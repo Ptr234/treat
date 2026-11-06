@@ -3,6 +3,7 @@ import { jwtVerify } from 'jose';
 
 const COOKIE_NAME = 'osc-session';
 const UIA_URL = 'https://ugandainvest.go.ug/';
+const APPLICATION_TRACKING_URL = 'https://ebiz.go.ug/';
 
 // Public submission pages are retained in the source tree for later use, but
 // are currently isolated from visitors. Keep this check in middleware so a
@@ -103,6 +104,10 @@ async function needsMfaSetup(request: NextRequest): Promise<boolean> {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === '/track' || pathname.startsWith('/track/')) {
+    return NextResponse.redirect(APPLICATION_TRACKING_URL, 307);
+  }
 
   if (isIsolatedFormRoute(pathname)) {
     return NextResponse.redirect(UIA_URL, 307);
