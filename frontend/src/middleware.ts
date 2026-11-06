@@ -10,7 +10,7 @@ const UIA_URL = 'https://ugandainvest.go.ug/';
 function isIsolatedFormRoute(pathname: string): boolean {
   return pathname === '/support' || pathname.startsWith('/support/') ||
     pathname === '/tickets/create' || pathname.startsWith('/tickets/create/') ||
-    pathname === '/business/registration' || pathname === '/business/registration/' ||
+    pathname === '/business/registration' || pathname.startsWith('/business/registration/') ||
     pathname === '/investments/onboarding' || pathname.startsWith('/investments/onboarding/') ||
     pathname === '/auth/verify-email' || pathname.startsWith('/auth/verify-email/') ||
     pathname === '/login' || pathname.startsWith('/login/') ||
@@ -156,7 +156,7 @@ export const config = {
   matcher: [
     '/support/:path*',
     '/tickets/create/:path*',
-    '/business/registration',
+    '/business/registration/:path*',
     '/investments/onboarding/:path*',
     '/auth/verify-email/:path*',
     '/login/:path*',
