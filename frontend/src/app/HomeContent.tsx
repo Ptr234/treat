@@ -54,9 +54,9 @@ const AGENCIES = [
 ];
 
 const TOP_TASKS = [
-  { icon: IdentificationIcon, title: 'Register a business', detail: 'Reserve a name and incorporate a company with URSB.', href: '/business/registration' },
+  { icon: IdentificationIcon, title: 'Register a business', detail: 'Reserve a name and incorporate a company with URSB.', href: 'https://ugandainvest.go.ug/' },
   { icon: DocumentMagnifyingGlassIcon, title: 'Find licences and permits', detail: 'See which agency issues the approval you need.', href: '/services' },
-  { icon: ClipboardDocumentCheckIcon, title: 'Track an application', detail: 'Check progress using your reference number.', href: '/track' },
+  { icon: ClipboardDocumentCheckIcon, title: 'Track an application', detail: 'Check progress using your reference number.', href: 'https://ebiz.go.ug/' },
   { icon: MapIcon, title: 'Browse investment projects', detail: 'Compare published projects by sector and value.', href: '/investments' },
   { icon: CalculatorIcon, title: 'Estimate your tax', detail: 'Work out income tax, corporation tax and VAT.', href: '/tools/tax-calculator' },
   { icon: BuildingLibraryIcon, title: 'Contact a government agency', detail: 'Addresses, phone numbers and office hours.', href: '/agencies' },

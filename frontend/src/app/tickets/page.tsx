@@ -72,7 +72,7 @@ export default function TicketsPage() {
           actions={
             <>
               <Link href="/tickets/create/" className="gov-btn gov-btn--start">Submit a support ticket</Link>
-              <Link href="/track" className="gov-link">Track an existing ticket</Link>
+              <a href="https://ugandainvest.go.ug/" className="gov-link">Contact UIA about an existing ticket</a>
             </>
           }
         />
