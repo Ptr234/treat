@@ -223,7 +223,7 @@ function ChatbotPageInner() {
       // created, keep the form open (with what they typed) and say so.
       if (!result.success || !result.data?.referenceNumber) {
         setEscalationError(
-          `${result.error || 'We could not submit your request.'} Please try again, or call us on +256 414 301 000.`,
+          `${result.error || 'We could not submit your request.'} Please try again, or call us on +256 800 100 038.`,
         );
         return;
       }

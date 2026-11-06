@@ -28,7 +28,7 @@ const agencies = [
     code: 'UIA',
     description: 'The lead agency for promoting and facilitating investment in Uganda. Provides investment licenses, facilitation services, and aftercare support to both local and foreign investors.',
     contactEmail: 'info@ugandainvest.go.ug',
-    contactPhone: '+256-414-301000',
+    contactPhone: '+256-800-100038',
     website: 'https://www.ugandainvest.go.ug',
     services: ['Investment License Issuance', 'Investor Facilitation', 'Aftercare Services', 'Industrial Park Management', 'Investment Promotion', 'Policy Advocacy'],
     slaResponseHours: 4,

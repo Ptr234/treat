@@ -120,7 +120,7 @@ This document outlines various government-backed investment opportunities in Uga
     "keyRisks": "Raw material supply consistency, market competition",
     "contact": {
       "email": "info@ugandainvestment.go.ug",
-      "phone": "+256414301000",
+      "phone": "+256800100038",
       "website": "https://ugandainvest.go.ug",
       "address": "Plot 28 Kampala Road, UIA House, P.O. Box 7418, Kampala"
     },
@@ -669,7 +669,7 @@ This document outlines various government-backed investment opportunities in Uga
     "keyRisks": "Infrastructure costs, tenant attraction, regulatory approvals",
     "contact": {
       "email": "info@ugandainvestment.go.ug",
-      "phone": "+256414301000",
+      "phone": "+256800100038",
       "website": "https://ugandainvest.go.ug",
       "address": "Plot 28 Kampala Road, UIA House, P.O. Box 7418, Kampala"
     },

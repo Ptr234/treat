@@ -225,7 +225,7 @@ const TOPIC_SUGGESTIONS: Record<ChatLanguage, string> = {
     "- **Financing** \u2014 Banking and funding options\n" +
     "- **Regional market access** \u2014 EAC, COMESA, AfCFTA\n\n" +
     "Try asking about any of these topics, or contact UIA directly:\n" +
-    "Phone: +256-414-301000 | Email: info@ugandainvest.go.ug",
+    "Phone: +256 800 100 038 | Email: info@ugandainvest.go.ug",
 
   fr:
     "Je peux vous aider \u00e0 investir en Ouganda ! Voici les sujets que je ma\u00eetrise :\n\n" +
@@ -239,7 +239,7 @@ const TOPIC_SUGGESTIONS: Record<ChatLanguage, string> = {
     "- **Financement** \u2014 Options bancaires et de financement\n" +
     "- **Acc\u00e8s aux march\u00e9s r\u00e9gionaux** \u2014 EAC, COMESA, ZLECAf\n\n" +
     "Posez-moi vos questions, ou contactez directement l\u2019UIA :\n" +
-    "T\u00e9l : +256-414-301000 | Email : info@ugandainvest.go.ug",
+    "T\u00e9l : +256 800 100 038 | Email : info@ugandainvest.go.ug",
 
   ar:
     "\u064a\u0645\u0643\u0646\u0646\u064a \u0645\u0633\u0627\u0639\u062f\u062a\u0643 \u0641\u064a \u0627\u0644\u0627\u0633\u062a\u062b\u0645\u0627\u0631 \u0641\u064a \u0623\u0648\u063a\u0646\u062f\u0627! \u0625\u0644\u064a\u0643 \u0627\u0644\u0645\u0648\u0627\u0636\u064a\u0639 \u0627\u0644\u062a\u064a \u064a\u0645\u0643\u0646\u0646\u064a \u0627\u0644\u0645\u0633\u0627\u0639\u062f\u0629 \u0641\u064a\u0647\u0627:\n\n" +
@@ -253,7 +253,7 @@ const TOPIC_SUGGESTIONS: Record<ChatLanguage, string> = {
     "- **\u0627\u0644\u062a\u0645\u0648\u064a\u0644** \u2014 \u0627\u0644\u062e\u064a\u0627\u0631\u0627\u062a \u0627\u0644\u0645\u0635\u0631\u0641\u064a\u0629 \u0648\u0627\u0644\u062a\u0645\u0648\u064a\u0644\u064a\u0629\n" +
     "- **\u0627\u0644\u0648\u0635\u0648\u0644 \u0644\u0644\u0623\u0633\u0648\u0627\u0642 \u0627\u0644\u0625\u0642\u0644\u064a\u0645\u064a\u0629** \u2014 EAC\u060c COMESA\u060c AfCFTA\n\n" +
     "\u0627\u0637\u0631\u062d \u0633\u0624\u0627\u0644\u0643 \u062d\u0648\u0644 \u0623\u064a \u0645\u0646 \u0647\u0630\u0647 \u0627\u0644\u0645\u0648\u0627\u0636\u064a\u0639\u060c \u0623\u0648 \u062a\u0648\u0627\u0635\u0644 \u0645\u0639 UIA \u0645\u0628\u0627\u0634\u0631\u0629:\n" +
-    "\u0647\u0627\u062a\u0641: +256-414-301000 | \u0628\u0631\u064a\u062f: info@ugandainvest.go.ug",
+    "\u0647\u0627\u062a\u0641: +256 800 100 038 | \u0628\u0631\u064a\u062f: info@ugandainvest.go.ug",
 
   zh:
     "\u6211\u53ef\u4ee5\u5e2e\u52a9\u60a8\u4e86\u89e3\u5728\u4e4c\u5e72\u8fbe\u7684\u6295\u8d44\u4fe1\u606f\uff01\u4ee5\u4e0b\u662f\u6211\u53ef\u4ee5\u89e3\u7b54\u7684\u4e3b\u9898\uff1a\n\n" +
@@ -267,7 +267,7 @@ const TOPIC_SUGGESTIONS: Record<ChatLanguage, string> = {
     "- **\u878d\u8d44** \u2014 \u94f6\u884c\u548c\u8d44\u91d1\u9009\u62e9\n" +
     "- **\u533a\u57df\u5e02\u573a\u51c6\u5165** \u2014 EAC\u3001COMESA\u3001AfCFTA\n\n" +
     "\u8bf7\u5c31\u4ee5\u4e0a\u4efb\u4f55\u4e3b\u9898\u63d0\u95ee\uff0c\u6216\u76f4\u63a5\u8054\u7cfbUIA\uff1a\n" +
-    "\u7535\u8bdd: +256-414-301000 | \u90ae\u7bb1: info@ugandainvest.go.ug",
+    "\u7535\u8bdd: +256 800 100 038 | \u90ae\u7bb1: info@ugandainvest.go.ug",
 
   sw:
     "Ninaweza kukusaidia kuhusu uwekezaji nchini Uganda! Hizi ni mada ninazojua:\n\n" +
@@ -281,7 +281,7 @@ const TOPIC_SUGGESTIONS: Record<ChatLanguage, string> = {
     "- **Ufadhili** \u2014 Chaguzi za benki na ufadhili\n" +
     "- **Upatikanaji wa masoko ya kikanda** \u2014 EAC, COMESA, AfCFTA\n\n" +
     "Uliza kuhusu mada yoyote kati ya hizi, au wasiliana na UIA moja kwa moja:\n" +
-    "Simu: +256-414-301000 | Barua pepe: info@ugandainvest.go.ug",
+    "Simu: +256 800 100 038 | Barua pepe: info@ugandainvest.go.ug",
 };
 
 // ===================== LOCAL SENTIMENT ANALYSIS =====================

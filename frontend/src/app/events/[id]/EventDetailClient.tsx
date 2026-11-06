@@ -300,9 +300,9 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
                 </a>
               </li>
               <li>
-                <a href="tel:+256414301000" className={`${linkClass} inline-flex items-center gap-2`}>
+                <a href="tel:+256800100038" className={`${linkClass} inline-flex items-center gap-2`}>
                   <PhoneIcon className="h-4 w-4" aria-hidden="true" />
-                  +256 414 301 000
+                  +256 800 100 038
                 </a>
               </li>
             </ul>

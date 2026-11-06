@@ -196,7 +196,7 @@ export function useChatEngine(): ChatEngineResult {
         id: `msg-${Date.now()}-error`,
         role: 'assistant',
         content:
-          'I apologize, but I encountered an error processing your request. Please try again, or contact UIA directly at +256-414-301000.',
+          'I apologize, but I encountered an error processing your request. Please try again, or contact UIA directly at +256 800 100 038.',
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => prev.filter(m => m.role !== 'system').concat(errorMessage));

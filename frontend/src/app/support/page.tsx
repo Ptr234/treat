@@ -135,9 +135,9 @@ export default function SupportPage() {
       title: 'Phone support',
       description: 'Speak directly with our experts',
       icon: Phone,
-      availability: '+256 414 301 000',
+      availability: '+256 800 100 038',
       action: 'Call now',
-      href: 'tel:+256414301000'
+      href: 'tel:+256800100038'
     },
     {
       title: 'Email support',
@@ -228,7 +228,7 @@ export default function SupportPage() {
         aside={
           <div className="gov-panel">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#ffd700]">Investor helpline</p>
-            <a href="tel:+256414301000" className="mt-2 block font-display text-3xl font-semibold text-white no-underline hover:underline">+256 414 301 000</a>
+            <a href="tel:+256800100038" className="mt-2 block font-display text-3xl font-semibold text-white no-underline hover:underline">+256 800 100 038</a>
             <p className="mt-3 text-sm text-white/80">Monday to Friday, 8:00am to 5:00pm EAT</p>
             <a href="mailto:support@onestopcentre.go.ug" className="mt-4 inline-block break-all text-sm font-semibold text-white underline underline-offset-4 hover:text-[#ffd700]">support@onestopcentre.go.ug</a>
           </div>

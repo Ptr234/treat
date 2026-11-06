@@ -223,9 +223,9 @@ export default function Navigation() {
 
           <div className="hidden w-full max-w-[22rem] flex-col items-end gap-2.5 lg:flex">
             <div className="flex items-center gap-5 text-sm">
-              <a href="tel:+256414301000" className="inline-flex items-center gap-1.5 font-semibold text-black no-underline hover:underline">
+              <a href="tel:+256800100038" className="inline-flex items-center gap-1.5 font-semibold text-black no-underline hover:underline">
                 <PhoneIcon className="h-4 w-4 text-[#ce1126]" aria-hidden="true" />
-                +256 414 301 000
+                +256 800 100 038
               </a>
               {isAuthenticated && user ? (
                 <div className="relative" ref={accountMenuRef}>
@@ -459,9 +459,9 @@ export default function Navigation() {
                 ) : (
                   <div className="flex flex-col gap-3 sm:flex-row">
                     <button type="button" onClick={() => { closeAll(); setShowAuthModal(true); }} className="gov-btn">Sign in</button>
-                    <a href="tel:+256414301000" className="gov-btn gov-btn--secondary">
+                    <a href="tel:+256800100038" className="gov-btn gov-btn--secondary">
                       <PhoneIcon className="h-5 w-5" aria-hidden="true" />
-                      +256 414 301 000
+                      +256 800 100 038
                     </a>
                   </div>
                 )}

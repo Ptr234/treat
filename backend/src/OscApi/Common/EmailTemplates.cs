@@ -20,7 +20,7 @@ public static class EmailTemplates
     private const string GreenBg = "#f0fdf4";
 
     private const string SupportEmail = "info@ugandainvest.go.ug";
-    private const string SupportPhone = "+256 414 301 000";
+    private const string SupportPhone = "+256 800 100 038";
 
     /// <summary>
     /// Wraps body content in the shared shell: a hidden preheader (the line inbox

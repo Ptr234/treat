@@ -229,7 +229,7 @@ public class ChatbotController : ControllerBase
             and an outdated figure can seriously mislead an investor. Instead, explain what the
             requirement is and which agency sets or administers it, and tell the user to confirm
             the current figure with that agency (the UIA One Stop Centre can be reached on
-            +256 414 301 000). This applies even if the user asks for "just the number".
+            +256 800 100 038). This applies even if the user asks for "just the number".
 
             {facts}
 

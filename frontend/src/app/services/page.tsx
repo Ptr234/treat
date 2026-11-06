@@ -186,7 +186,7 @@ export default function ServicesPage() {
               <div>
                 <h3 className="text-lg font-bold">Phone</h3>
                 <p className="mt-1 text-[15px] text-[#3b3934]">Speak to the OneStop Centre team.</p>
-                <a href="tel:+256414301000" className="gov-link mt-2 inline-block">+256 414 301 000</a>
+                <a href="tel:+256800100038" className="gov-link mt-2 inline-block">+256 800 100 038</a>
               </div>
               <div>
                 <h3 className="text-lg font-bold">Forms and guidance</h3>

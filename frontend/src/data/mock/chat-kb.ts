@@ -13,7 +13,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-002',
     keywords: ['investment license', 'UIA license', 'apply', 'license requirements'],
     question: 'What is a UIA investment license and how do I apply?',
-    answer: 'A UIA investment license is required for foreign investors and Ugandans investing over USD 200,000. Apply at Uganda Investment Authority (UIA) One-Stop Centre at Twed Plaza, Plot 22B Lumumba Avenue, Kampala. Requirements: (1) Completed application form, (2) Business plan, (3) Bank statement/proof of funds, (4) Passport/National ID copies, (5) Project implementation schedule. Processing: 2-7 days. Fee: USD 100. Contact: +256-414-301000 or info@ugandainvest.go.ug',
+    answer: 'A UIA investment license is required for foreign investors and Ugandans investing over USD 200,000. Apply at Uganda Investment Authority (UIA) One-Stop Centre at Twed Plaza, Plot 22B Lumumba Avenue, Kampala. Requirements: (1) Completed application form, (2) Business plan, (3) Bank statement/proof of funds, (4) Passport/National ID copies, (5) Project implementation schedule. Processing: 2-7 days. Fee: USD 100. Contact: +256 800 100 038 or info@ugandainvest.go.ug',
     category: 'licensing',
     language: 'en'
   },
@@ -37,7 +37,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-004',
     keywords: ['agriculture', 'farming', 'agro', 'agribusiness', 'crops'],
     question: 'What are the investment opportunities in Uganda\'s agriculture sector?',
-    answer: 'Agriculture is Uganda\'s largest investment sector. Uganda is the 2nd largest producer of fresh fruits and vegetables in Africa (~5.3M tonnes annually). Current bankable projects include: (1) Luwero Fruit Factory — USD 9.7M, processing pineapple/mango (canning, drying, RTD juice at 8.5MT/hr capacity), contact Alice Ndagire at andagire@ugandainvest.go.ug; (2) Acholibur Cassava Processing Factory — USD 16.5M in Pader District, producing starch, ethanol, CO2, DDGS (100-400 tons/day capacity), contact Sarah Nassimbwa at snassimbwa@ugandainvest.go.ug; (3) Cocoa Processing Factory in Bundibugyo — USD 24.3M; (4) Lira Cotton Spinning Mill — USD 44.34M; (5) Soluble Coffee Processing Factory — USD 48.1M capex + USD 33.89M annual opex. Incentives: 10-year tax holiday for agro-processors in industrial parks, 0% import duty on machinery. Contact UIA: +256-414-301000.',
+    answer: 'Agriculture is Uganda\'s largest investment sector. Uganda is the 2nd largest producer of fresh fruits and vegetables in Africa (~5.3M tonnes annually). Current bankable projects include: (1) Luwero Fruit Factory — USD 9.7M, processing pineapple/mango (canning, drying, RTD juice at 8.5MT/hr capacity), contact Alice Ndagire at andagire@ugandainvest.go.ug; (2) Acholibur Cassava Processing Factory — USD 16.5M in Pader District, producing starch, ethanol, CO2, DDGS (100-400 tons/day capacity), contact Sarah Nassimbwa at snassimbwa@ugandainvest.go.ug; (3) Cocoa Processing Factory in Bundibugyo — USD 24.3M; (4) Lira Cotton Spinning Mill — USD 44.34M; (5) Soluble Coffee Processing Factory — USD 48.1M capex + USD 33.89M annual opex. Incentives: 10-year tax holiday for agro-processors in industrial parks, 0% import duty on machinery. Contact UIA: +256 800 100 038.',
     category: 'sectors',
     language: 'en'
   },
@@ -61,7 +61,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-007',
     keywords: ['manufacturing', 'factory', 'production', 'industry', 'industrial'],
     question: 'What manufacturing opportunities are available in Uganda?',
-    answer: 'Manufacturing offers regional market access (EAC, COMESA): (1) Pharmaceutical production, (2) Textiles & garments, (3) Food processing & packaging, (4) Plastics & packaging materials, (5) Construction materials (steel, cement, tiles), (6) Furniture & wood products. Labor cost: USD 80-150/month. Industrial parks: Namanve (Kampala), Luzira, Mbale, Soroti. Incentives: 5-year tax holiday. Min investment: USD 500,000. Contact +256-414-301000',
+    answer: 'Manufacturing offers regional market access (EAC, COMESA): (1) Pharmaceutical production, (2) Textiles & garments, (3) Food processing & packaging, (4) Plastics & packaging materials, (5) Construction materials (steel, cement, tiles), (6) Furniture & wood products. Labor cost: USD 80-150/month. Industrial parks: Namanve (Kampala), Luzira, Mbale, Soroti. Incentives: 5-year tax holiday. Min investment: USD 500,000. Contact +256 800 100 038',
     category: 'sectors',
     language: 'en'
   },
@@ -85,7 +85,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-010',
     keywords: ['work permit', 'visa', 'foreign worker', 'expatriate', 'permit', 'work visa', 'immigration'],
     question: 'How do I obtain a work permit in Uganda?',
-    answer: 'Foreign investors and employees need work permits. Apply through UIA One-Stop Centre: (1) Class A: Investors with USD 100,000+ capital (2 years), (2) Class B: Self-employed professionals (2 years), (3) Class C: Employees with special skills/qualifications (2 years). Requirements: Valid passport, UIA license, employment contract, academic qualifications, police clearance. Fee: USD 2,000. Processing: 2-4 weeks. Contact +256-414-301000',
+    answer: 'Foreign investors and employees need work permits. Apply through UIA One-Stop Centre: (1) Class A: Investors with USD 100,000+ capital (2 years), (2) Class B: Self-employed professionals (2 years), (3) Class C: Employees with special skills/qualifications (2 years). Requirements: Valid passport, UIA license, employment contract, academic qualifications, police clearance. Fee: USD 2,000. Processing: 2-4 weeks. Contact +256 800 100 038',
     category: 'investment_procedures',
     language: 'en'
   },
@@ -93,7 +93,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-011',
     keywords: ['industrial park', 'free zone', 'special economic zone', 'Namanve'],
     question: 'What industrial parks and free zones are available in Uganda?',
-    answer: 'Uganda has 11 operational industrial parks with more under development. Key parks include: (1) Namanve Industrial & Business Park (Kampala area), (2) Kampala Industrial Park (Luzira), (3) Mbale Industrial Park, (4) Soroti Industrial Park, (5) Jinja Industrial Park, (6) Kasese Industrial Park, (7) Liao Shen Industrial Park, (8) Kapeeka Industrial Park, (9) Bweyogerere Industrial Zone, (10) Iganga Industrial Park, (11) Mbarara Industrial Park. Benefits: Ready infrastructure (power, water, roads), 10-year tax holiday on income from letting facilities, streamlined approvals, competitive land lease rates. Government secures land for industrial development and provides policy advocacy. Contact UIA: +256-414-301000.',
+    answer: 'Uganda has 11 operational industrial parks with more under development. Key parks include: (1) Namanve Industrial & Business Park (Kampala area), (2) Kampala Industrial Park (Luzira), (3) Mbale Industrial Park, (4) Soroti Industrial Park, (5) Jinja Industrial Park, (6) Kasese Industrial Park, (7) Liao Shen Industrial Park, (8) Kapeeka Industrial Park, (9) Bweyogerere Industrial Zone, (10) Iganga Industrial Park, (11) Mbarara Industrial Park. Benefits: Ready infrastructure (power, water, roads), 10-year tax holiday on income from letting facilities, streamlined approvals, competitive land lease rates. Government secures land for industrial development and provides policy advocacy. Contact UIA: +256 800 100 038.',
     category: 'investment_procedures',
     language: 'en'
   },
@@ -101,7 +101,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-012',
     keywords: ['contact', 'UIA', 'address', 'location', 'telephone', 'email', 'phone', 'call', 'reach', 'hours', 'office'],
     question: 'How can I contact Uganda Investment Authority?',
-    answer: 'Uganda Investment Authority (UIA) One-Stop Centre: Address - Twed Plaza, Plot 22B Lumumba Avenue, Nakasero, Kampala. Tel: +256-414-301000, +256-417-118000. Email: info@ugandainvest.go.ug. Website: www.ugandainvest.go.ug. Working Hours: Monday-Friday 8:00AM-5:00PM, Saturday 9:00AM-1:00PM. Director General: Mr. Robert Mukiza. Tel: +256-414-301000.',
+    answer: 'Uganda Investment Authority (UIA) One-Stop Centre: Address - Twed Plaza, Plot 22B Lumumba Avenue, Nakasero, Kampala. Tel: +256 800 100 038, +256 800 100 038. Email: info@ugandainvest.go.ug. Website: www.ugandainvest.go.ug. Working Hours: Monday-Friday 8:00AM-5:00PM, Saturday 9:00AM-1:00PM. Director General: Mr. Robert Mukiza. Tel: +256 800 100 038.',
     category: 'general',
     language: 'en'
   },
@@ -125,7 +125,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-015',
     keywords: ['bank', 'finance', 'loan', 'funding', 'capital'],
     question: 'What financing options are available for investors in Uganda?',
-    answer: 'Multiple financing sources in Uganda: (1) Commercial banks (Stanbic, DFCU, Standard Chartered) - loans at 16-20%, (2) Development Bank of Uganda (DBU) - project finance at 12-14%, (3) Uganda Development Corporation (UDC) - equity participation, (4) Africa Development Bank (AfDB) - large projects USD 10M+, (5) Private equity funds (Norfund, Actis). Collateral typically required: 120-150% of loan value. Contact UIA Investment Advisory: +256-414-301000',
+    answer: 'Multiple financing sources in Uganda: (1) Commercial banks (Stanbic, DFCU, Standard Chartered) - loans at 16-20%, (2) Development Bank of Uganda (DBU) - project finance at 12-14%, (3) Uganda Development Corporation (UDC) - equity participation, (4) Africa Development Bank (AfDB) - large projects USD 10M+, (5) Private equity funds (Norfund, Actis). Collateral typically required: 120-150% of loan value. Contact UIA Investment Advisory: +256 800 100 038',
     category: 'investment_procedures',
     language: 'en'
   },
@@ -157,7 +157,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-019',
     keywords: ['dispute', 'arbitration', 'investment protection', 'treaty', 'BIT'],
     question: 'How are investment disputes resolved in Uganda?',
-    answer: 'Uganda has strong investor protection mechanisms: (1) Centre for Arbitration & Dispute Resolution (CADER) for local disputes, (2) International Centre for Settlement of Investment Disputes (ICSID) - Uganda is signatory, (3) Bilateral Investment Treaties (BITs) with 30+ countries, (4) Commercial Court for business disputes. Investment Act guarantees against expropriation. Average dispute resolution: 6-18 months. Contact CADER: +256-414-348827 or UIA Legal: +256-414-301000',
+    answer: 'Uganda has strong investor protection mechanisms: (1) Centre for Arbitration & Dispute Resolution (CADER) for local disputes, (2) International Centre for Settlement of Investment Disputes (ICSID) - Uganda is signatory, (3) Bilateral Investment Treaties (BITs) with 30+ countries, (4) Commercial Court for business disputes. Investment Act guarantees against expropriation. Average dispute resolution: 6-18 months. Contact CADER: +256-414-348827 or UIA Legal: +256 800 100 038',
     category: 'general',
     language: 'en'
   },
@@ -165,7 +165,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-020',
     keywords: ['cost', 'investment', 'minimum', 'capital', 'requirement', 'how much'],
     question: 'What is the minimum investment required in Uganda?',
-    answer: 'Minimum investment requirements: (1) Foreign investors: USD 100,000 (USD 50,000 for joint ventures with Ugandans), (2) Ugandan citizens: No minimum, (3) Priority sectors (agriculture, tourism): USD 500,000 for full incentive package, (4) Manufacturing in industrial parks: USD 1M+ for maximum benefits. No minimum for small businesses registered with URSB only. Cost of doing business is competitive: land USD 2,000-10,000/acre, labor USD 80-200/month. Contact UIA: +256-414-301000',
+    answer: 'Minimum investment requirements: (1) Foreign investors: USD 100,000 (USD 50,000 for joint ventures with Ugandans), (2) Ugandan citizens: No minimum, (3) Priority sectors (agriculture, tourism): USD 500,000 for full incentive package, (4) Manufacturing in industrial parks: USD 1M+ for maximum benefits. No minimum for small businesses registered with URSB only. Cost of doing business is competitive: land USD 2,000-10,000/acre, labor USD 80-200/month. Contact UIA: +256 800 100 038',
     category: 'general',
     language: 'en'
   },
@@ -173,7 +173,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-021',
     keywords: ['economy', 'GDP', 'growth', 'population', 'Uganda overview', 'why Uganda', 'invest Uganda'],
     question: 'Why should I invest in Uganda? What is the economic overview?',
-    answer: 'Uganda\'s economy reached USD 61 billion GDP by end of 2024, with 6.3% GDP growth rate and 3.3% inflation. Population: 45.9 million (UBOS 2024), youngest in the world (average age 16.7 years, 75% under 30). Strategic location in East Africa with access to: EAC (300M people), COMESA (600M people), AfCFTA (1.3 billion people in 54 countries, combined GDP $3.4 trillion). Key advantages: 100% foreign ownership allowed, full profit repatriation, 2nd most biodiverse country in Africa, highest adult literacy in EAC (90% for ages 15-24). FDI inflow: USD 3.3 billion over last 5 FYs. Top FDI sources: France (37%), India (17%), China (17%). Medium-term GDP growth projected at 8-9%, reaching double-digit with oil & gas sector. Global recognitions: Best Investment Destination in Africa (AIM Abu Dhabi 2024), Greatest Investment Catalyst (Go Global Awards USA), 3rd most rewarding economy in Africa (Oxford Economics 2023). Contact UIA: +256-414-301000.',
+    answer: 'Uganda\'s economy reached USD 61 billion GDP by end of 2024, with 6.3% GDP growth rate and 3.3% inflation. Population: 45.9 million (UBOS 2024), youngest in the world (average age 16.7 years, 75% under 30). Strategic location in East Africa with access to: EAC (300M people), COMESA (600M people), AfCFTA (1.3 billion people in 54 countries, combined GDP $3.4 trillion). Key advantages: 100% foreign ownership allowed, full profit repatriation, 2nd most biodiverse country in Africa, highest adult literacy in EAC (90% for ages 15-24). FDI inflow: USD 3.3 billion over last 5 FYs. Top FDI sources: France (37%), India (17%), China (17%). Medium-term GDP growth projected at 8-9%, reaching double-digit with oil & gas sector. Global recognitions: Best Investment Destination in Africa (AIM Abu Dhabi 2024), Greatest Investment Catalyst (Go Global Awards USA), 3rd most rewarding economy in Africa (Oxford Economics 2023). Contact UIA: +256 800 100 038.',
     category: 'general',
     language: 'en'
   },
@@ -181,7 +181,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-022a',
     keywords: ['bankable', 'projects', 'opportunities', 'invest', 'PPP', 'UDC', 'greenfield', 'agriculture projects', 'tourism projects'],
     question: 'What are the bankable agriculture and tourism projects in Uganda?',
-    answer: 'The UIA Bankable Projects Booklet 2025/2026 (7th Edition) features key projects: AGRICULTURE (5 projects): Luwero Fruit Factory $9.7M, Acholibur Cassava Processing $16.5M, Cocoa Processing Factory $24.3M, Lira Cotton Spinning Mill $44.34M, Soluble Coffee Processing $48.1M+$33.89M opex. TOURISM (5 projects): Mt Elgon Park Infrastructure $79M, Equator Points $8.7M, Geothermal Spas $23.9M, Nzururu Heights Hotel $40M, UWEC Infrastructure $15.6M. Most projects are PPP (Public-Private Partnership) type. Contact UIA: +256-414-301000 or info@ugandainvest.go.ug.',
+    answer: 'The UIA Bankable Projects Booklet 2025/2026 (7th Edition) features key projects: AGRICULTURE (5 projects): Luwero Fruit Factory $9.7M, Acholibur Cassava Processing $16.5M, Cocoa Processing Factory $24.3M, Lira Cotton Spinning Mill $44.34M, Soluble Coffee Processing $48.1M+$33.89M opex. TOURISM (5 projects): Mt Elgon Park Infrastructure $79M, Equator Points $8.7M, Geothermal Spas $23.9M, Nzururu Heights Hotel $40M, UWEC Infrastructure $15.6M. Most projects are PPP (Public-Private Partnership) type. Contact UIA: +256 800 100 038 or info@ugandainvest.go.ug.',
     category: 'sectors',
     language: 'en'
   },
@@ -189,7 +189,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-022b',
     keywords: ['bankable', 'projects', 'minerals projects', 'energy projects', 'health projects', 'real estate', 'ICT projects'],
     question: 'What are the bankable minerals, energy, and other projects in Uganda?',
-    answer: 'The UIA Bankable Projects Booklet 2025/2026 also features: MINERALS (3 projects): Moroto Cement/Lime/Marble $105.5M, Sheet Glass Factory $44.6M, Iron & Steel Factory $53M. ENERGY (3 projects): Floating Solar 10MWp $15M, Okulacere Hydro 7.26MW $36M, Maziba Mini Hydro 1MW $10M. HEALTH: East African Medical Vitals $18M. REAL ESTATE: Pearl Marina Estates $10-45M. ICT: IT/BPO Park $200M. Total: 22 high-impact projects across all sectors. Most are PPP type. Contact UIA: +256-414-301000 or info@ugandainvest.go.ug.',
+    answer: 'The UIA Bankable Projects Booklet 2025/2026 also features: MINERALS (3 projects): Moroto Cement/Lime/Marble $105.5M, Sheet Glass Factory $44.6M, Iron & Steel Factory $53M. ENERGY (3 projects): Floating Solar 10MWp $15M, Okulacere Hydro 7.26MW $36M, Maziba Mini Hydro 1MW $10M. HEALTH: East African Medical Vitals $18M. REAL ESTATE: Pearl Marina Estates $10-45M. ICT: IT/BPO Park $200M. Total: 22 high-impact projects across all sectors. Most are PPP type. Contact UIA: +256 800 100 038 or info@ugandainvest.go.ug.',
     category: 'sectors',
     language: 'en'
   },
@@ -197,7 +197,7 @@ export const chatKnowledgeBase: ChatKBEntry[] = [
     id: 'kb-023',
     keywords: ['awards', 'recognition', 'UIA awards', 'WAIPA', 'best investment', 'ranking'],
     question: 'What international awards and recognitions has Uganda received?',
-    answer: 'Uganda and UIA have received numerous global recognitions: (1) Best Investment Destination in Africa — Annual Investment Meeting Awards, Abu Dhabi 2024; (2) 2nd Best Investment Promotion Agency in Africa — AIM Awards, Abu Dhabi 2025; (3) Best Investment Destination in East Africa — AIM Awards, Abu Dhabi 2023; (4) Award for Sustainability Investment Promotion — WAIPA Excellence Awards, Saudi Arabia 2024; (5) Greatest Investment Catalyst in the World — Go Global Awards, Rhode Island USA; (6) Prestigious Greenfield FDI Award — Go Global Awards 2025, London UK; (7) 3rd Most Rewarding Economy to Invest in Africa — Africa Risk Reward Index 2023, Oxford Economics; (8) Number 1 Happiest Country in East Africa — Happiness Index 2022; (9) Best Tourist Destination in the World — CNN 2023; (10) Number 1 Regional Leader in Capital Markets Growth — Absa Africa Financial Markets Index 2022. Contact UIA: +256-414-301000.',
+    answer: 'Uganda and UIA have received numerous global recognitions: (1) Best Investment Destination in Africa — Annual Investment Meeting Awards, Abu Dhabi 2024; (2) 2nd Best Investment Promotion Agency in Africa — AIM Awards, Abu Dhabi 2025; (3) Best Investment Destination in East Africa — AIM Awards, Abu Dhabi 2023; (4) Award for Sustainability Investment Promotion — WAIPA Excellence Awards, Saudi Arabia 2024; (5) Greatest Investment Catalyst in the World — Go Global Awards, Rhode Island USA; (6) Prestigious Greenfield FDI Award — Go Global Awards 2025, London UK; (7) 3rd Most Rewarding Economy to Invest in Africa — Africa Risk Reward Index 2023, Oxford Economics; (8) Number 1 Happiest Country in East Africa — Happiness Index 2022; (9) Best Tourist Destination in the World — CNN 2023; (10) Number 1 Regional Leader in Capital Markets Growth — Absa Africa Financial Markets Index 2022. Contact UIA: +256 800 100 038.',
     category: 'general',
     language: 'en'
   }

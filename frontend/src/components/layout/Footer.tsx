@@ -65,7 +65,7 @@ export default function Footer() {
           <ul className="grid gap-x-8 gap-y-4 text-[15px] sm:grid-cols-2 lg:grid-cols-4">
             <li className="flex gap-3">
               <PhoneIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#ffd700]" aria-hidden="true" />
-              <span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-white/60">Telephone</span><a href="tel:+256414301000" className="font-semibold text-white underline-offset-4 hover:text-[#ffd700]">+256 414 301 000</a></span>
+              <span><span className="block text-xs font-bold uppercase tracking-[0.12em] text-white/60">Telephone</span><a href="tel:+256800100038" className="font-semibold text-white underline-offset-4 hover:text-[#ffd700]">+256 800 100 038</a></span>
             </li>
             <li className="flex gap-3">
               <EnvelopeIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#ffd700]" aria-hidden="true" />

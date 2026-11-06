@@ -82,7 +82,7 @@ export async function sendTicketConfirmationEmail(opts: {
         </div>
         <div style="background: #f5f5f5; padding: 16px; text-align: center; font-size: 12px; color: #999;">
           Uganda Investment Authority &bull; Plot 22 Jinja Road, Kampala<br/>
-          +256-414-301000 &bull; info@ugandainvest.go.ug
+          +256 800 100 038 &bull; info@ugandainvest.go.ug
         </div>
       </div>
     `,
@@ -134,7 +134,7 @@ export async function sendTicketStatusEmail(opts: {
         </div>
         <div style="background: #f5f5f5; padding: 16px; text-align: center; font-size: 12px; color: #999;">
           Uganda Investment Authority &bull; Plot 22 Jinja Road, Kampala<br/>
-          +256-414-301000 &bull; info@ugandainvest.go.ug
+          +256 800 100 038 &bull; info@ugandainvest.go.ug
         </div>
       </div>
     `,
@@ -216,7 +216,7 @@ export async function sendEscalationNotificationEmail(opts: {
         </div>
         <div style="background: #f5f5f5; padding: 16px; text-align: center; font-size: 12px; color: #999;">
           Uganda Investment Authority &bull; Plot 22 Jinja Road, Kampala<br/>
-          +256-414-301000 &bull; info@ugandainvest.go.ug
+          +256 800 100 038 &bull; info@ugandainvest.go.ug
         </div>
       </div>
     `,
@@ -280,7 +280,7 @@ export async function sendInvestorWelcomeEmail(opts: {
         </div>
         <div style="background: #f5f5f5; padding: 16px; text-align: center; font-size: 12px; color: #999;">
           Uganda Investment Authority &bull; Plot 22 Jinja Road, Kampala<br/>
-          +256-414-301000 &bull; info@ugandainvest.go.ug
+          +256 800 100 038 &bull; info@ugandainvest.go.ug
         </div>
       </div>
     `,

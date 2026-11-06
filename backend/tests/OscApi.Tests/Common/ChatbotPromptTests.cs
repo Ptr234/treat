@@ -16,7 +16,7 @@ public class ChatbotPromptTests
 
         Assert.Contains("do NOT state specific amounts", prompt);
         Assert.Contains("minimum investment or capital requirements", prompt);
-        Assert.Contains("+256 414 301 000", prompt);
+        Assert.Contains("+256 800 100 038", prompt);
         Assert.Contains("none are configured", prompt);
     }
 

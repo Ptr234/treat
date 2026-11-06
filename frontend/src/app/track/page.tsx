@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import PageHeader from '@/components/ui/PageHeader';
 
 export default function TrackApplicationPage() {
@@ -61,12 +60,12 @@ export default function TrackApplicationPage() {
           <div className="gov-related">
             <h2>Not applied yet?</h2>
             <p className="text-[15px] text-[#3b3934]">Reserve a name and register your company with URSB.</p>
-            <Link href="/business/registration" className="gov-link mt-2 inline-block">Start business registration</Link>
+            <a href="https://ugandainvest.go.ug/" className="gov-link mt-2 inline-block">Start business registration</a>
           </div>
           <div className="gov-related !border-black">
             <h2>Tracking a support ticket?</h2>
-            <p className="text-[15px] text-[#3b3934]">Use the private link in your ticket confirmation email to see replies and progress.</p>
-            <Link href="/tickets/create/" className="gov-link mt-2 inline-block">Submit a new support ticket</Link>
+            <p className="text-[15px] text-[#3b3934]">For help with an existing ticket or to submit a new request, contact UIA through its official website.</p>
+            <a href="https://ugandainvest.go.ug/" className="gov-link mt-2 inline-block">Contact UIA</a>
           </div>
         </aside>
       </div>

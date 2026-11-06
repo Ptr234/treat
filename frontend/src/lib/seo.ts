@@ -9,8 +9,8 @@ export const SOCIAL_IMAGE = { path: '/images/og-default.png', width: 1200, heigh
 
 export const CONTACT = {
   email: 'info@ugandainvest.go.ug',
-  phone: '+256414301000',
-  phoneDisplay: '+256 414 301 000',
+  phone: '+256800100038',
+  phoneDisplay: '+256 800 100 038',
   street: 'Plot 1, Baskerville Ave, Kololo',
   locality: 'Kampala',
   country: 'UG',

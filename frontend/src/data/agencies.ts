@@ -32,7 +32,7 @@ export const ugandaAgencies: AgencyContact[] = [
     ],
     contact: {
       email: 'info@ugandainvestment.go.ug',
-      phone: '+256414301000',
+      phone: '+256800100038',
       website: 'https://www.ugandainvestment.go.ug',
       address: 'Plot 28 Kampala Road, UIA House, P.O. Box 7418, Kampala'
     },

@@ -25,7 +25,7 @@ export default function GlobalError({
             <p className="gov-lead mt-6">Try again now. If it keeps happening, try again later — anything you entered may not have been saved.</p>
             <p className="gov-body mt-3 text-[17px]">
               You can also <Link href="/support" className="gov-link">contact the OneStop Centre</Link> or call{' '}
-              <a href="tel:+256414301000" className="gov-link">+256 414 301 000</a>.
+              <a href="tel:+256800100038" className="gov-link">+256 800 100 038</a>.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
               <button type="button" onClick={reset} className="gov-btn">Try again</button>
