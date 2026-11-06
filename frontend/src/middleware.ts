@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const COOKIE_NAME = 'osc-session';
+const UIA_URL = 'https://ugandainvest.go.ug/';
+
+// Public submission pages are retained in the source tree for later use, but
+// are currently isolated from visitors. Keep this check in middleware so a
+// direct URL, refresh, or client-side navigation cannot reach the forms.
+function isIsolatedFormRoute(pathname: string): boolean {
+  return pathname === '/support' || pathname.startsWith('/support/') ||
+    pathname === '/tickets/create' || pathname.startsWith('/tickets/create/') ||
+    pathname === '/business/registration' || pathname === '/business/registration/' ||
+    pathname === '/investments/onboarding' || pathname.startsWith('/investments/onboarding/') ||
+    pathname === '/auth/verify-email' || pathname.startsWith('/auth/verify-email/') ||
+    pathname === '/login' || pathname.startsWith('/login/') ||
+    pathname === '/account' || pathname.startsWith('/account/') ||
+    pathname === '/profile' || pathname.startsWith('/profile/') ||
+    pathname === '/agency-chat' || pathname.startsWith('/agency-chat/') ||
+    pathname === '/chatbot' || pathname.startsWith('/chatbot/') ||
+    pathname.startsWith('/agencies/') || pathname.startsWith('/events/') ||
+    pathname.startsWith('/tools/') || pathname === '/track' || pathname.startsWith('/track/') ||
+    pathname === '/tickets' || pathname.startsWith('/tickets/');
+}
 
 // Routes that require an admin-level session (system admin / Director General).
 const PROTECTED_ROUTES = ['/dashboard', '/admin'];
@@ -85,6 +105,10 @@ async function needsMfaSetup(request: NextRequest): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (isIsolatedFormRoute(pathname)) {
+    return NextResponse.redirect(UIA_URL, 307);
+  }
+
   if (process.env.NEXT_PUBLIC_BACKEND_URL &&
       SUPERSEDED_API_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
     return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
@@ -130,6 +154,21 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/support/:path*',
+    '/tickets/create/:path*',
+    '/business/registration',
+    '/investments/onboarding/:path*',
+    '/auth/verify-email/:path*',
+    '/login/:path*',
+    '/account/:path*',
+    '/profile/:path*',
+    '/agency-chat/:path*',
+    '/chatbot/:path*',
+    '/agencies/:path*',
+    '/events/:path*',
+    '/tools/:path*',
+    '/track/:path*',
+    '/tickets/:path*',
     '/dashboard/:path*',
     '/agency-chat/:path*',
     '/admin/:path*',
