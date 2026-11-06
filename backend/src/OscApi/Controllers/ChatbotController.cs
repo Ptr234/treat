@@ -213,6 +213,16 @@ public class ChatbotController : ControllerBase
             Always be helpful, professional, and accurate. If unsure, recommend contacting
             the relevant agency directly.
 
+            Applications and enquiries: The One Stop Centre's online application,
+            registration, support, service-request and event-registration forms are
+            unavailable here. If a user asks how to apply, submit a request, register,
+            contact an agency, or fill in one of these forms, briefly explain that they
+            should continue through the official Uganda Investment Authority website:
+            https://ugandainvest.go.ug/ . Include that URL in your answer. Do not direct
+            users to forms or form routes on this One Stop Centre site. This does not
+            apply to informational tools such as calculators, checklists, or guides;
+            those remain available on this site.
+
             Figures and legal thresholds: do NOT state specific amounts or numbers from memory —
             minimum investment or capital requirements, fees and charges, tax rates and
             percentages, penalties, processing times, deadlines or validity periods. They change,

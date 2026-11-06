@@ -17,9 +17,8 @@ function isIsolatedFormRoute(pathname: string): boolean {
     pathname === '/account' || pathname.startsWith('/account/') ||
     pathname === '/profile' || pathname.startsWith('/profile/') ||
     pathname === '/agency-chat' || pathname.startsWith('/agency-chat/') ||
-    pathname === '/chatbot' || pathname.startsWith('/chatbot/') ||
     pathname.startsWith('/agencies/') || pathname.startsWith('/events/') ||
-    pathname.startsWith('/tools/') || pathname === '/track' || pathname.startsWith('/track/') ||
+    pathname === '/track' || pathname.startsWith('/track/') ||
     pathname === '/tickets' || pathname.startsWith('/tickets/');
 }
 
@@ -163,10 +162,8 @@ export const config = {
     '/account/:path*',
     '/profile/:path*',
     '/agency-chat/:path*',
-    '/chatbot/:path*',
     '/agencies/:path*',
     '/events/:path*',
-    '/tools/:path*',
     '/track/:path*',
     '/tickets/:path*',
     '/dashboard/:path*',
