@@ -11,16 +11,8 @@ const APPLICATION_TRACKING_URL = 'https://ebiz.go.ug/';
 function isIsolatedFormRoute(pathname: string): boolean {
   return pathname === '/support' || pathname.startsWith('/support/') ||
     pathname === '/tickets/create' || pathname.startsWith('/tickets/create/') ||
-    pathname === '/business/registration' || pathname.startsWith('/business/registration/') ||
-    pathname === '/investments/onboarding' || pathname.startsWith('/investments/onboarding/') ||
-    pathname === '/auth/verify-email' || pathname.startsWith('/auth/verify-email/') ||
-    pathname === '/login' || pathname.startsWith('/login/') ||
-    pathname === '/account' || pathname.startsWith('/account/') ||
-    pathname === '/profile' || pathname.startsWith('/profile/') ||
-    pathname === '/agency-chat' || pathname.startsWith('/agency-chat/') ||
-    pathname.startsWith('/agencies/') || pathname.startsWith('/events/') ||
-    pathname === '/track' || pathname.startsWith('/track/') ||
-    pathname === '/tickets' || pathname.startsWith('/tickets/');
+    pathname === '/business/registration' || pathname === '/business/registration/' ||
+    pathname === '/investments/onboarding' || pathname.startsWith('/investments/onboarding/');
 }
 
 // Routes that require an admin-level session (system admin / Director General).
@@ -109,6 +101,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(APPLICATION_TRACKING_URL, 307);
   }
 
+  if (pathname.startsWith('/business/registration/')) {
+    return NextResponse.redirect(APPLICATION_TRACKING_URL, 307);
+  }
+
   if (isIsolatedFormRoute(pathname)) {
     return NextResponse.redirect(UIA_URL, 307);
   }
@@ -162,15 +158,8 @@ export const config = {
     '/tickets/create/:path*',
     '/business/registration/:path*',
     '/investments/onboarding/:path*',
-    '/auth/verify-email/:path*',
-    '/login/:path*',
-    '/account/:path*',
-    '/profile/:path*',
     '/agency-chat/:path*',
-    '/agencies/:path*',
-    '/events/:path*',
     '/track/:path*',
-    '/tickets/:path*',
     '/dashboard/:path*',
     '/agency-chat/:path*',
     '/admin/:path*',

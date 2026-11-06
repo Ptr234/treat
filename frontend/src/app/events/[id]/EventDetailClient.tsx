@@ -1,17 +1,12 @@
 'use client';
 
 import PageHeader from '@/components/ui/PageHeader';
-import React, { useState } from 'react';
-import { useAccountEmail } from '@/hooks/useAccountEmail';
-import AccountEmailHint from '@/components/ui/AccountEmailHint';
 import {
   CalendarIcon,
   MapPinIcon,
   UserGroupIcon,
   ArrowLeftIcon,
   DocumentArrowDownIcon,
-  CheckCircleIcon,
-  XCircleIcon,
   GlobeAltIcon,
   EnvelopeIcon,
   PhoneIcon
@@ -25,27 +20,7 @@ interface EventDetailClientProps {
 
 const linkClass = 'gov-link';
 
-const inputClass = 'gov-input';
-
-const labelClass = 'gov-label';
-
-/** "2026-11-12" or "2026-11-12T07:00:00Z" → "2026-11-12" (the backend parses a DateOnly). */
-function toIsoDate(value: string): string {
-  if (/^\d{4}-\d{2}-\d{2}/.test(value)) return value.slice(0, 10);
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toISOString().slice(0, 10);
-}
-
 export default function EventDetailClient({ event }: EventDetailClientProps) {
-  const [registrationStatus, setRegistrationStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    organization: ''
-  });
-  const accountEmail = useAccountEmail((email) => setFormData((prev) => ({ ...prev, email })));
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -54,53 +29,6 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
       day: 'numeric',
       year: 'numeric'
     });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleRegistration = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const { apiFetch } = await import('@/lib/api-client');
-      const res = await apiFetch('/api/contact/appointments', {
-        method: 'POST',
-        body: JSON.stringify({
-          agencyCode: 'UIA',
-          agencyName: 'Uganda Investment Authority',
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone.trim(),
-          company: formData.organization.trim() || null,
-          serviceType: 'Event Registration',
-          purpose: `Event registration: ${event.title}\nOrganization: ${formData.organization}\nDate: ${formatDate(event.date)}`,
-          duration: 60,
-          meetingType: event.isVirtual ? 'virtual' : 'in-person',
-          preferredDate: toIsoDate(event.date),
-          // Sanity doesn't track start times; mock events do ("09:00").
-          preferredTime: /^\d{2}:\d{2}$/.test(event.time) ? event.time : '09:00',
-        }),
-      });
-
-      if (!res.success) throw new Error(res.error || 'Registration failed');
-
-      setRegistrationStatus('success');
-      setFormData({ name: '', email: '', phone: '', organization: '' });
-      setTimeout(() => setRegistrationStatus('idle'), 5000);
-    } catch {
-      setRegistrationStatus('error');
-      setTimeout(() => setRegistrationStatus('idle'), 5000);
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   const hasCapacity = event.capacity > 0;
@@ -114,7 +42,7 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
         caption={<>{event.category} · {event.status}</>}
         title={event.title}
         lead={<p>Organised by {event.organizer}</p>}
-        actions={isUpcoming ? <a href="#register-heading" className="gov-btn gov-btn--start">Register for this event</a> : undefined}
+        actions={isUpcoming ? <a href="https://ugandainvest.go.ug/" className="gov-btn gov-btn--start">Event registration guidance</a> : undefined}
       />
 
       <div className="gov-container grid grid-cols-1 gap-12 py-12 lg:grid-cols-3 lg:py-16">
@@ -241,52 +169,8 @@ export default function EventDetailClient({ event }: EventDetailClientProps) {
             <section aria-labelledby="register-heading" className="scroll-mt-6 bg-[#f5f3ee] p-5">
               <h2 id="register-heading" className="text-lg font-bold">Register for this event</h2>
 
-              {registrationStatus === 'success' && (
-                <div role="status" className="gov-panel mt-4 flex items-start gap-3 !p-4">
-                  <CheckCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#ffd700]" aria-hidden="true" />
-                  <div>
-                    <p className="text-sm font-bold">Registration successful</p>
-                    <p className="mt-1 text-xs text-white/80">You will receive a confirmation email shortly.</p>
-                  </div>
-                </div>
-              )}
-
-              {registrationStatus === 'error' && (
-                <div role="alert" className="gov-inset gov-inset--red mt-4 flex items-start gap-3">
-                  <XCircleIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" aria-hidden="true" />
-                  <div>
-                    <p className="text-sm font-bold text-red-700">Registration failed</p>
-                    <p className="mt-1 text-xs text-neutral-700">Please try again or contact support.</p>
-                  </div>
-                </div>
-              )}
-
-              <form onSubmit={handleRegistration} className="mt-6 space-y-4">
-                <div>
-                  <label htmlFor="name" className={labelClass}>Full name <span className="text-red-600">*</span></label>
-                  <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} required className={inputClass} />
-                </div>
-                <div>
-                  <label htmlFor="email" className={labelClass}>Email address <span className="text-red-600">*</span></label>
-                  <input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required readOnly={Boolean(accountEmail)} aria-describedby={accountEmail ? 'event-email-hint' : undefined} className={`${inputClass} ${accountEmail ? 'bg-neutral-100' : ''}`} />
-                  {accountEmail && <AccountEmailHint id="event-email-hint" />}
-                </div>
-                <div>
-                  <label htmlFor="phone" className={labelClass}>Phone number <span className="text-red-600">*</span></label>
-                  <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleInputChange} required className={inputClass} />
-                </div>
-                <div>
-                  <label htmlFor="organization" className={labelClass}>Organization <span className="text-red-600">*</span></label>
-                  <input type="text" id="organization" name="organization" value={formData.organization} onChange={handleInputChange} required className={inputClass} />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="gov-btn w-full"
-                >
-                  {isSubmitting ? 'Registering…' : 'Register now'}
-                </button>
-              </form>
+              <p className="mt-3 text-sm leading-6 text-neutral-700">For event registration information, visit the official Uganda Investment Authority website.</p>
+              <a href="https://ugandainvest.go.ug/" className="gov-btn mt-6 w-full">Visit UIA</a>
             </section>
           )}
 

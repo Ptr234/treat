@@ -3,7 +3,6 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ugandaAgencies, getAgencyById } from '@/data/agencies';
-import ServiceRequestForm from './ServiceRequestForm';
 import { SITE_URL, absoluteUrl, breadcrumbLd, buildMetadata } from '@/lib/seo';
 import { JsonLd } from '@/components/seo/JsonLd';
 
@@ -144,10 +143,10 @@ export default async function AgencyDetailPage({ params }: AgencyPageProps) {
           <section id="request" aria-labelledby="request-heading" className="mt-16 scroll-mt-6 bg-[#f5f3ee] p-6 sm:p-8">
             <h2 id="request-heading" className="gov-title-l">Request a service</h2>
             <p className="gov-body mt-3 max-w-2xl">
-              Send a request to {agency.name}. Keep the reference number for follow-up; the agency will confirm the next steps and processing time.
+              For service requests and application guidance, contact the Uganda Investment Authority through its official website.
             </p>
             <div className="mt-8">
-              <ServiceRequestForm agencyName={agency.name} agencyCode={agency.acronym} agencyEmail={agency.contact.email} services={agency.services} />
+              <a href="https://ugandainvest.go.ug/" className="gov-btn">Contact UIA</a>
             </div>
           </section>
         </div>

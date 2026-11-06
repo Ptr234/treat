@@ -68,11 +68,10 @@ export default function TicketsPage() {
           crumbs={[{ label: 'Support tickets' }]}
           caption="Help and contact"
           title="Support tickets"
-          lead="The ticket management board is restricted to authorised OneStop Centre staff. If you need help, submit a support ticket and you will get a reference number to track it."
+          lead="The ticket management board is restricted to authorised OneStop Centre staff. For a new request, contact UIA. If you already have a ticket, use the private link in your confirmation email to view updates."
           actions={
             <>
-              <Link href="/tickets/create/" className="gov-btn gov-btn--start">Submit a support ticket</Link>
-              <a href="https://ugandainvest.go.ug/" className="gov-link">Contact UIA about an existing ticket</a>
+              <a href="https://ugandainvest.go.ug/" className="gov-btn gov-btn--start">Contact UIA</a>
             </>
           }
         />
